@@ -1,0 +1,48 @@
+ModuleNotFoundError. CatBoostModel are skipped. (optional: maybe installing CatBoostModel can fix it.)
+ModuleNotFoundError. XGBModel is skipped(optional: maybe installing xgboost can fix it).
+Training until validation scores don't improve for 80 rounds
+[20]	train's l2: 0.991307	valid's l2: 0.996408
+[40]	train's l2: 0.9876	valid's l2: 0.996495
+[60]	train's l2: 0.984561	valid's l2: 0.996699
+[80]	train's l2: 0.982074	valid's l2: 0.996951
+[100]	train's l2: 0.979478	valid's l2: 0.99722
+Early stopping, best iteration is:
+[24]	train's l2: 0.990499	valid's l2: 0.996396
+'The following are prediction results of the TreeCnLstmRLModel model.'
+                          score
+datetime   instrument          
+2024-01-02 SH600000    0.399970
+           SH600009    0.874175
+           SH600010    0.475295
+           SH600011    0.773582
+           SH600015    0.738070
+{'IC': np.float64(0.021066502445159913),
+ 'ICIR': np.float64(0.13664748370866187),
+ 'Rank IC': np.float64(0.022129813632723903),
+ 'Rank ICIR': np.float64(0.13087701734504156)}
+'The following are analysis results of benchmark return(1day).'
+                       risk
+mean               0.000666
+std                0.011468
+annualized_return  0.158446
+information_ratio  0.895557
+max_drawdown      -0.157869
+'The following are analysis results of the excess return without cost(1day).'
+                       risk
+mean               0.000475
+std                0.005117
+annualized_return  0.113010
+information_ratio  1.431600
+max_drawdown      -0.062893
+'The following are analysis results of the excess return with cost(1day).'
+                       risk
+mean               0.000276
+std                0.005117
+annualized_return  0.065752
+information_ratio  0.832954
+max_drawdown      -0.067286
+'The following are analysis results of indicators(1day).'
+     value
+ffr    1.0
+pa     0.0
+pos    0.0

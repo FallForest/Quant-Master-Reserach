@@ -1,0 +1,239 @@
+[12320:MainThread](2026-05-06 21:33:25,231) INFO - qlib.qrun - [run.py:78] - Render the template with the context: {}
+[12320:MainThread](2026-05-06 21:33:25,237) INFO - qlib.Initialization - [config.py:453] - default_conf: client.
+[12320:MainThread](2026-05-06 21:33:25,244) INFO - qlib.Initialization - [__init__.py:82] - qlib successfully initialized based on client settings.
+[12320:MainThread](2026-05-06 21:33:25,244) INFO - qlib.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': WindowsPath('C:/Users/15728/.qlib/qlib_data/cn_data')}
+C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\mlflow\tracking\_tracking_service\utils.py:184: FutureWarning: The filesystem tracking backend (e.g., './mlruns') is deprecated as of February 2026. Consider transitioning to a database backend (e.g., 'sqlite:///mlflow.db') to take advantage of the latest MLflow features. See https://mlflow.org/docs/latest/self-hosting/migrate-from-file-store for migration guidance.
+  return FileStore(store_uri, store_uri)
+[12320:MainThread](2026-05-06 21:33:25,255) INFO - qlib.workflow - [exp.py:258] - Experiment 880271508895147360 starts running ...
+[12320:MainThread](2026-05-06 21:33:25,775) INFO - qlib.workflow - [recorder.py:345] - Recorder d24ddf134b0d4211bb18cd0113b66e43 starts running under Experiment 880271508895147360 ...
+warning: in the working copy of 'qlib/contrib/model/__init__.py', LF will be replaced by CRLF the next time Git touches it
+[12320:MainThread](2026-05-06 21:33:28,205) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:53] - CnLSTM pytorch version...
+[12320:MainThread](2026-05-06 21:33:28,294) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:76] - CnLSTM parameters setting:
+d_feat : 158
+conv_channels : 256
+kernel_size : 3
+hidden_size : 256
+num_layers : 3
+dropout : 0.1
+n_epochs : 120
+lr : 0.001
+metric : loss
+batch_size : 2048
+early_stop : 20
+optimizer : adam
+loss_type : mse
+device : cuda:0
+n_jobs : 4
+prefetch_factor : 2
+persistent_workers : False
+use_GPU : True
+seed : 42
+[12320:MainThread](2026-05-06 21:33:28,485) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:136] - model:
+CnLSTMModel(
+  (conv): Sequential(
+    (0): Conv1d(158, 256, kernel_size=(3,), stride=(1,), padding=(1,))
+    (1): ReLU()
+    (2): Dropout(p=0.1, inplace=False)
+    (3): Conv1d(256, 256, kernel_size=(3,), stride=(1,), padding=(1,))
+    (4): ReLU()
+  )
+  (rnn): LSTM(256, 256, num_layers=3, batch_first=True, dropout=0.1)
+  (fc_out): Linear(in_features=256, out_features=1, bias=True)
+)
+[12320:MainThread](2026-05-06 21:33:28,486) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:137] - model size: 1.8098 MB
+[12320:MainThread](2026-05-06 21:35:43,440) INFO - qlib.timer - [log.py:127] - Time cost: 133.694s | Loading data Done
+[12320:MainThread](2026-05-06 21:35:44,015) INFO - qlib.timer - [log.py:127] - Time cost: 0.231s | DropnaLabel Done
+[12320:MainThread](2026-05-06 21:35:45,719) INFO - qlib.timer - [log.py:127] - Time cost: 1.703s | CSZScoreNorm Done
+[12320:MainThread](2026-05-06 21:35:45,768) INFO - qlib.timer - [log.py:127] - Time cost: 2.328s | fit & process data Done
+[12320:MainThread](2026-05-06 21:35:45,769) INFO - qlib.timer - [log.py:127] - Time cost: 136.024s | Init data Done
+[12320:MainThread](2026-05-06 21:35:49,462) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:258] - training...
+[12320:MainThread](2026-05-06 21:35:49,463) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch0:
+[12320:MainThread](2026-05-06 21:35:49,464) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:36:25,579) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:36:44,061) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998248
+[12320:MainThread](2026-05-06 21:36:44,063) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch1:
+[12320:MainThread](2026-05-06 21:36:44,063) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:37:18,477) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:37:36,923) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997103
+[12320:MainThread](2026-05-06 21:37:36,925) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch2:
+[12320:MainThread](2026-05-06 21:37:36,925) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:38:11,627) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:38:30,527) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998772
+[12320:MainThread](2026-05-06 21:38:30,528) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch3:
+[12320:MainThread](2026-05-06 21:38:30,529) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:39:05,509) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:39:24,248) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.996757
+[12320:MainThread](2026-05-06 21:39:24,250) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch4:
+[12320:MainThread](2026-05-06 21:39:24,251) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:39:58,987) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:40:17,660) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998900
+[12320:MainThread](2026-05-06 21:40:17,661) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch5:
+[12320:MainThread](2026-05-06 21:40:17,661) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:40:52,345) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:41:10,786) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997551
+[12320:MainThread](2026-05-06 21:41:10,786) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch6:
+[12320:MainThread](2026-05-06 21:41:10,786) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:41:45,331) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:42:03,790) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999101
+[12320:MainThread](2026-05-06 21:42:03,791) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch7:
+[12320:MainThread](2026-05-06 21:42:03,791) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:42:38,303) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:42:56,566) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997277
+[12320:MainThread](2026-05-06 21:42:56,571) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch8:
+[12320:MainThread](2026-05-06 21:42:56,572) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:43:31,463) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:43:50,417) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997501
+[12320:MainThread](2026-05-06 21:43:50,418) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch9:
+[12320:MainThread](2026-05-06 21:43:50,419) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:44:25,974) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:44:45,427) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997889
+[12320:MainThread](2026-05-06 21:44:45,429) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch10:
+[12320:MainThread](2026-05-06 21:44:45,429) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:45:21,348) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:45:39,907) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998748
+[12320:MainThread](2026-05-06 21:45:39,907) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch11:
+[12320:MainThread](2026-05-06 21:45:39,908) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:46:14,769) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:46:34,216) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999728
+[12320:MainThread](2026-05-06 21:46:34,217) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch12:
+[12320:MainThread](2026-05-06 21:46:34,217) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:47:10,921) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:47:30,463) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -1.001258
+[12320:MainThread](2026-05-06 21:47:30,464) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch13:
+[12320:MainThread](2026-05-06 21:47:30,464) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:48:07,343) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:48:26,464) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998367
+[12320:MainThread](2026-05-06 21:48:26,464) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch14:
+[12320:MainThread](2026-05-06 21:48:26,464) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:49:01,933) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:49:21,652) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997848
+[12320:MainThread](2026-05-06 21:49:21,657) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch15:
+[12320:MainThread](2026-05-06 21:49:21,658) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:49:58,443) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:50:17,928) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998842
+[12320:MainThread](2026-05-06 21:50:17,929) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch16:
+[12320:MainThread](2026-05-06 21:50:17,929) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:50:54,019) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:51:13,634) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998551
+[12320:MainThread](2026-05-06 21:51:13,635) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch17:
+[12320:MainThread](2026-05-06 21:51:13,635) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:51:49,862) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:52:09,323) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998426
+[12320:MainThread](2026-05-06 21:52:09,324) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch18:
+[12320:MainThread](2026-05-06 21:52:09,324) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:52:45,550) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:53:05,176) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999832
+[12320:MainThread](2026-05-06 21:53:05,177) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch19:
+[12320:MainThread](2026-05-06 21:53:05,177) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:53:40,357) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:53:59,698) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999616
+[12320:MainThread](2026-05-06 21:53:59,699) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch20:
+[12320:MainThread](2026-05-06 21:53:59,699) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:54:36,252) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:54:55,925) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999015
+[12320:MainThread](2026-05-06 21:54:55,926) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch21:
+[12320:MainThread](2026-05-06 21:54:55,926) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:55:30,933) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:55:50,632) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999243
+[12320:MainThread](2026-05-06 21:55:50,639) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch22:
+[12320:MainThread](2026-05-06 21:55:50,639) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:56:25,602) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:56:44,589) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998122
+[12320:MainThread](2026-05-06 21:56:44,590) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch23:
+[12320:MainThread](2026-05-06 21:56:44,591) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[12320:MainThread](2026-05-06 21:57:19,900) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[12320:MainThread](2026-05-06 21:57:38,825) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999340
+[12320:MainThread](2026-05-06 21:57:38,825) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:278] - early stop
+[12320:MainThread](2026-05-06 21:57:38,825) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:281] - best score: -0.996757 @ 3
+[12320:MainThread](2026-05-06 21:57:39,024) INFO - qlib.fill_placeholder - [__init__.py:798] - <PRED> lookes like a placeholder, but it can't match to any given values
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[12320:MainThread](2026-05-06 21:57:58,121) INFO - qlib.workflow - [record_temp.py:197] - Signal record 'pred.pkl' has been saved as the artifact of the Experiment 880271508895147360
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 500.57it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 500.57it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 453.29it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 453.29it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<?, ?it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 1003.42it/s]
+[12320:MainThread](2026-05-06 21:57:58,767) INFO - qlib.backtest caller - [__init__.py:93] - Create new exchange
+[12320:MainThread](2026-05-06 22:00:17,468) INFO - qlib.timer - [log.py:127] - Time cost: 0.000s | waiting `async_log` Done
+[12320:MainThread](2026-05-06 22:00:17,472) ERROR - qlib.workflow - [utils.py:41] - An exception has been raised[ValueError: feature: {'__DEFAULT_FREQ': 'C:\\Users\\15728\\.qlib\\qlib_data\\cn_data'} does not contain data for day].
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\cli\run.py", line 157, in <module>
+    run()
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\cli\run.py", line 153, in run
+    fire.Fire(workflow)
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\fire\core.py", line 135, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\fire\core.py", line 468, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\fire\core.py", line 684, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\cli\run.py", line 147, in workflow
+    recorder = task_train(config.get("task"), experiment_name=experiment_name)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\model\trainer.py", line 127, in task_train
+    _exe_task(task_config)
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\model\trainer.py", line 71, in _exe_task
+    r.generate()
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\workflow\record_temp.py", line 235, in generate
+    artifact_dict = self._generate(*args, **kwargs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\workflow\record_temp.py", line 488, in _generate
+    portfolio_metric_dict, indicator_dict = normal_backtest(
+                                            ^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\backtest\__init__.py", line 266, in backtest
+    trade_strategy, trade_executor = get_strategy_executor(
+                                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\backtest\__init__.py", line 206, in get_strategy_executor
+    trade_exchange = get_exchange(**exchange_kwargs)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\backtest\__init__.py", line 95, in get_exchange
+    exchange = Exchange(
+               ^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\backtest\exchange.py", line 195, in __init__
+    self.get_quote_from_qlib()
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\backtest\exchange.py", line 205, in get_quote_from_qlib
+    self.quote_df = D.features(
+                    ^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\data.py", line 1190, in features
+    return DatasetD.dataset(instruments, fields, start_time, end_time, freq, inst_processors=inst_processors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\data.py", line 923, in dataset
+    data = self.dataset_processor(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\data.py", line 577, in dataset_processor
+    ParallelExt(n_jobs=workers, backend=C.joblib_backend, maxtasksperchild=C.maxtasksperchild)(task_l),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\joblib\parallel.py", line 1986, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\joblib\parallel.py", line 1914, in _get_sequential_output
+    res = func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\data.py", line 615, in inst_calculator
+    obj[field] = ExpressionD.expression(inst, field, start_time, end_time, freq)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\data.py", line 859, in expression
+    series = expression.load(instrument, query_start, query_end, freq)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\base.py", line 193, in load
+    series = self._load_internal(instrument, start_index, end_index, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\base.py", line 257, in _load_internal
+    return FeatureD.feature(instrument, str(self), start_index, end_index, freq)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\data.py", line 741, in feature
+    return self.backend_obj(instrument=instrument, field=field, freq=freq)[start_index : end_index + 1]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\storage\file_storage.py", line 347, in __getitem__
+    if not self.uri.exists():
+           ^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\storage\file_storage.py", line 62, in uri
+    raise ValueError(f"{self.storage_name}: {self.provider_uri} does not contain data for {self.freq}")
