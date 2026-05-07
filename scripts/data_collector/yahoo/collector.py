@@ -837,99 +837,6 @@ class Run(BaseRun):
             date_field_name, symbol_field_name, end_date=end_date, qlib_data_1d_dir=qlib_data_1d_dir
         )
 
-    def normalize_data_1d_extend(
-        self, old_qlib_data_dir, date_field_name: str = "date", symbol_field_name: str = "symbol"
-    ):
-        """normalize data extend; extending yahoo qlib data(from: https://github.com/microsoft/qlib/tree/main/scripts#download-cn-data)
-
-        Notes
-        -----
-            Steps to extend yahoo qlib data:
-
-                1. download qlib data: https://github.com/microsoft/qlib/tree/main/scripts#download-cn-data; save to <dir1>
-
-                2. collector source data: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#collector-data; save to <dir2>
-
-                3. normalize new source data(from step 2): python scripts/data_collector/yahoo/collector.py normalize_data_1d_extend --old_qlib_dir <dir1> --source_dir <dir2> --normalize_dir <dir3> --region CN --interval 1d
-
-                4. dump data: python scripts/dump_bin.py dump_update --data_path <dir3> --qlib_dir <dir1> --freq day --date_field_name date --symbol_field_name symbol --exclude_fields symbol,date
-
-                5. update instrument(eg. csi300): python python scripts/data_collector/cn_index/collector.py --index_name CSI300 --qlib_dir <dir1> --method parse_instruments
-
-        Parameters
-        ----------
-        old_qlib_data_dir: str
-            the qlib data to be updated for yahoo, usually from: https://github.com/microsoft/qlib/tree/main/scripts#download-cn-data
-        date_field_name: str
-            date field name, default date
-        symbol_field_name: str
-            symbol field name, default symbol
-
-        Examples
-        ---------
-            $ python collector.py normalize_data_1d_extend --old_qlib_dir ~/.qlib/qlib_data/cn_data --source_dir ~/.qlib/stock_data/source --normalize_dir ~/.qlib/stock_data/normalize --region CN --interval 1d
-        """
-        _class = getattr(self._cur_module, f"{self.normalize_class_name}Extend")
-        yc = Normalize(
-            source_dir=self.source_dir,
-            target_dir=self.normalize_dir,
-            normalize_class=_class,
-            max_workers=self.max_workers,
-            date_field_name=date_field_name,
-            symbol_field_name=symbol_field_name,
-            old_qlib_data_dir=old_qlib_data_dir,
-        )
-        yc.normalize()
-
-    def download_today_data(
-        self,
-        max_collector_count=2,
-        delay=0.5,
-        check_data_length=None,
-        limit_nums=None,
-    ):
-        """download today data from Internet
-
-        Parameters
-        ----------
-        max_collector_count: int
-            default 2
-        delay: float
-            time.sleep(delay), default 0.5
-        check_data_length: int
-            check data length, if not None and greater than 0, each symbol will be considered complete if its data length is greater than or equal to this value, otherwise it will be fetched again, the maximum number of fetches being (max_collector_count). By default None.
-        limit_nums: int
-            using for debug, by default None
-
-        Notes
-        -----
-            Download today's data:
-                start_time = datetime.datetime.now().date(); closed interval(including start)
-                end_time = pd.Timestamp(start_time + pd.Timedelta(days=1)).date(); open interval(excluding end)
-
-            check_data_length, example:
-                daily, one year: 252 // 4
-                us 1min, a week: 6.5 * 60 * 5
-                cn 1min, a week: 4 * 60 * 5
-
-        Examples
-        ---------
-            # get daily data
-            $ python collector.py download_today_data --source_dir ~/.qlib/stock_data/source --region CN --delay 0.1 --interval 1d
-            # get 1m data
-            $ python collector.py download_today_data --source_dir ~/.qlib/stock_data/source --region CN --delay 0.1 --interval 1m
-        """
-        start = datetime.datetime.now().date()
-        end = pd.Timestamp(start + pd.Timedelta(days=1)).date()
-        self.download_data(
-            max_collector_count,
-            delay,
-            start.strftime("%Y-%m-%d"),
-            end.strftime("%Y-%m-%d"),
-            check_data_length,
-            limit_nums,
-        )
-
     def update_data_to_bin(
         self,
         qlib_data_1d_dir: str,
@@ -956,10 +863,13 @@ class Run(BaseRun):
         Notes
         -----
             If the data in qlib_data_dir is incomplete, np.nan will be populated to trading_date for the previous trading day
+            This is the recommended Yahoo 1d entrypoint. It handles download, normalize and dump internally.
+            For incremental updates, the downloaded source data must include the last trading day already stored in
+            qlib_data_1d_dir as the overlap date.
 
         Examples
         -------
-            $ python collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --trading_date <start date> --end_date <end date>
+            $ python collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --end_date <end date>
         """
 
         if self.interval.lower() != "1d":
@@ -988,8 +898,18 @@ class Run(BaseRun):
             if self.max_workers is None or self.max_workers <= 1
             else self.max_workers
         )
-        # normalize data
-        self.normalize_data_1d_extend(qlib_data_1d_dir)
+        # normalize data against the existing qlib dataset so the overlap trading day can be removed safely
+        _class = getattr(self._cur_module, f"{self.normalize_class_name}Extend")
+        yc = Normalize(
+            source_dir=self.source_dir,
+            target_dir=self.normalize_dir,
+            normalize_class=_class,
+            max_workers=self.max_workers,
+            date_field_name="date",
+            symbol_field_name="symbol",
+            old_qlib_data_dir=qlib_data_1d_dir,
+        )
+        yc.normalize()
 
         # dump bin
         _dump = DumpDataUpdate(

@@ -256,9 +256,11 @@ We recommend users to prepare their own data if they have a high-quality dataset
 ### Automatic update of daily frequency data (from yahoo finance)
   > This step is *Optional* if users only want to try their models and strategies on history data.
   > 
-  > It is recommended that users update the data manually once (--trading_date 2021-05-25) and then set it to update automatically.
+  > For Yahoo 1d data, `update_data_to_bin` is the recommended entrypoint. It runs download, normalize, and dump internally.
   >
   > **NOTE**: Users can't incrementally  update data based on the offline data provided by Qlib(some fields are removed to reduce the data size). Users should use [yahoo collector](https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance) to download Yahoo data from scratch and then incrementally update it.
+  >
+  > **NOTE**: Incremental updates require an overlap day. The source data used for the update must include the last trading day already stored in the target qlib directory.
   > 
   > For more information, please refer to: [yahoo collector](https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance)
 
@@ -273,9 +275,8 @@ We recommend users to prepare their own data if they have a high-quality dataset
 
   * Manual update of data
       ```
-      python scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --trading_date <start date> --end_date <end date>
+      python scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --end_date <end date>
       ```
-      * *trading_date*: start of trading day
       * *end_date*: end of trading day(not included)
 
 ### Checking the health of the data

@@ -53,8 +53,10 @@ pip install -r requirements.txt
     ```
 
 ### Collector *YahooFinance* data to qlib
-> collector *YahooFinance* data and *dump* into `qlib` format.
-> If the above ready-made data can't meet users' requirements,  users can follow this section to crawl the latest data and convert it to qlib-data.
+> For Yahoo 1d data, `python scripts/data_collector/yahoo/collector.py update_data_to_bin` is the recommended public entrypoint.
+> It runs download, normalize, and dump internally.
+>
+> The manual `download -> normalize -> dump` sequence below is retained as a low-level reference for debugging and custom workflows.
   1. download data to csv: `python scripts/data_collector/yahoo/collector.py download_data`
      
      This will download the raw data such as high, low, open, close, adjclose price from yahoo to a local directory. One file per symbol.
@@ -159,9 +161,11 @@ pip install -r requirements.txt
        ```
 
 ### Automatic update of daily frequency data(from yahoo finance)
-  > It is recommended that users update the data manually once (--trading_date 2021-05-25) and then set it to update automatically.
+  > `update_data_to_bin` is the recommended Yahoo 1d entrypoint.
   >
   > **NOTE**: Users can't incrementally  update data based on the offline data provided by Qlib(some fields are removed to reduce the data size). Users should use [yahoo collector](https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance) to download Yahoo data from scratch and then incrementally update it.
+  >
+  > **NOTE**: Incremental updates require an overlap trading day. The downloaded source data must include the last trading day already stored in `qlib_data_1d_dir`.
   > 
 
   * Automatic update of data to the "qlib" directory each trading day(Linux)
@@ -222,4 +226,3 @@ pip install -r requirements.txt
   # get all symbol data
   # df = D.features(D.instruments("all"), ["$close"], freq="1min")
   ```
-

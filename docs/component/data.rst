@@ -83,9 +83,11 @@ When ``Qlib`` is initialized with this dataset, users could build and evaluate t
 Automatic update of daily frequency data
 ----------------------------------------
 
-  **It is recommended that users update the data manually once (\-\-trading_date 2021-05-25) and then set it to update automatically.**
+  **For Yahoo 1d data,** ``scripts/data_collector/yahoo/collector.py update_data_to_bin`` **is the recommended entrypoint. It runs download, normalize, and dump internally.**
 
   For more information refer to: `yahoo collector <https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#Automatic-update-of-daily-frequency-data>`_
+
+  **Incremental updates require an overlap day.** The downloaded source data used for the update must include the last trading day already stored in the target qlib directory.
 
   - Automatic update of data to the "qlib" directory each trading day(Linux)
       - use *crontab*: `crontab -e`
@@ -101,9 +103,8 @@ Automatic update of daily frequency data
 
       .. code-block:: bash
 
-        python scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --trading_date <start date> --end_date <end date>
+        python scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --end_date <end date>
 
-      - *trading_date*: start of trading day
       - *end_date*: end of trading day(not included)
 
 
