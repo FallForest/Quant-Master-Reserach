@@ -1,0 +1,69 @@
+[21444:MainThread](2026-05-05 16:52:37,516) INFO - qlib.qrun - [run.py:78] - Render the template with the context: {}
+[21444:MainThread](2026-05-05 16:52:37,527) INFO - qlib.Initialization - [config.py:453] - default_conf: client.
+[21444:MainThread](2026-05-05 16:52:37,531) INFO - qlib.Initialization - [__init__.py:82] - qlib successfully initialized based on client settings.
+[21444:MainThread](2026-05-05 16:52:37,532) INFO - qlib.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': WindowsPath('C:/Users/15728/.qlib/qlib_data/cn_data')}
+C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\mlflow\tracking\_tracking_service\utils.py:184: FutureWarning: The filesystem tracking backend (e.g., './mlruns') is deprecated as of February 2026. Consider transitioning to a database backend (e.g., 'sqlite:///mlflow.db') to take advantage of the latest MLflow features. See https://mlflow.org/docs/latest/self-hosting/migrate-from-file-store for migration guidance.
+  return FileStore(store_uri, store_uri)
+[21444:MainThread](2026-05-05 16:52:37,542) INFO - qlib.workflow - [exp.py:258] - Experiment 880271508895147360 starts running ...
+[21444:MainThread](2026-05-05 16:52:37,943) INFO - qlib.workflow - [recorder.py:345] - Recorder d5d56fb7a49948aeab009884ebc45ea5 starts running under Experiment 880271508895147360 ...
+warning: in the working copy of 'qlib/contrib/model/__init__.py', LF will be replaced by CRLF the next time Git touches it
+[21444:MainThread](2026-05-05 16:52:40,007) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:49] - CnLSTM pytorch version...
+[21444:MainThread](2026-05-05 16:52:40,017) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:68] - CnLSTM parameters setting:
+d_feat : 158
+conv_channels : 128
+kernel_size : 3
+hidden_size : 128
+num_layers : 2
+dropout : 0.2
+n_epochs : 120
+lr : 0.001
+metric : loss
+batch_size : 2048
+early_stop : 20
+optimizer : adam
+loss_type : mse
+device : cuda:0
+n_jobs : 20
+use_GPU : True
+seed : 42
+[21444:MainThread](2026-05-05 16:52:40,101) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:124] - model:
+CnLSTMModel(
+  (conv): Sequential(
+    (0): Conv1d(158, 128, kernel_size=(3,), stride=(1,), padding=(1,))
+    (1): ReLU()
+    (2): Dropout(p=0.2, inplace=False)
+    (3): Conv1d(128, 128, kernel_size=(3,), stride=(1,), padding=(1,))
+    (4): ReLU()
+  )
+  (rnn): LSTM(128, 128, num_layers=2, batch_first=True, dropout=0.2)
+  (fc_out): Linear(in_features=128, out_features=1, bias=True)
+)
+[21444:MainThread](2026-05-05 16:52:40,102) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:125] - model size: 0.3571 MB
+[21444:MainThread](2026-05-05 16:54:53,549) INFO - qlib.timer - [log.py:127] - Time cost: 132.598s | Loading data Done
+[21444:MainThread](2026-05-05 16:54:54,158) INFO - qlib.timer - [log.py:127] - Time cost: 0.215s | DropnaLabel Done
+[21444:MainThread](2026-05-05 16:54:55,857) INFO - qlib.timer - [log.py:127] - Time cost: 1.697s | CSZScoreNorm Done
+[21444:MainThread](2026-05-05 16:54:55,904) INFO - qlib.timer - [log.py:127] - Time cost: 2.354s | fit & process data Done
+[21444:MainThread](2026-05-05 16:54:55,905) INFO - qlib.timer - [log.py:127] - Time cost: 134.954s | Init data Done
+[21444:MainThread](2026-05-05 16:54:55,928) WARNING - qlib.utils - [__init__.py:849] - The parameter `reweighter` with value `None` is ignored.
+[21444:MainThread](2026-05-05 16:54:55,929) INFO - qlib.TreeCnLstmRLModel - [tree_cn_lstm_rl.py:60] - Training tree sub-model.
+[21444:MainThread](2026-05-05 16:55:04,379) INFO - qlib.TreeCnLstmRLModel - [tree_cn_lstm_rl.py:63] - Training CnLSTM sub-model.
+C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\torch\utils\data\dataloader.py:424: UserWarning: This DataLoader will create 20 worker processes in total. Our suggested max number of worker in current system is 16 (`cpuset` is not taken into account), which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  self.check_worker_number_rationality()
+[21444:MainThread](2026-05-05 16:55:08,136) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:237] - training...
+[21444:MainThread](2026-05-05 16:55:08,136) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:241] - Epoch0:
+[21444:MainThread](2026-05-05 16:55:08,137) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:242] - training...
+C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\torch\utils\data\dataloader.py:432: UserWarning: This DataLoader will create 20 worker processes in total. Our suggested max number of worker in current system is 16 (`cpuset` is not taken into account), which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  self.check_worker_number_rationality()
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "C:\Users\15728\AppData\Local\Programs\Python\Python312\Lib\multiprocessing\spawn.py", line 122, in spawn_main
+    exitcode = _main(fd, parent_sentinel)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\AppData\Local\Programs\Python\Python312\Lib\multiprocessing\spawn.py", line 132, in _main
+    self = reduction.pickle.load(from_parent)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\torch\__init__.py", line 285, in <module>
+    _load_dll_libraries()
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\torch\__init__.py", line 268, in _load_dll_libraries
+    raise err
+OSError: [WinError 1455] 页面文件太小，无法完成操作。 Error loading "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\torch\lib\cublas64_13.dll" or one of its dependencies.

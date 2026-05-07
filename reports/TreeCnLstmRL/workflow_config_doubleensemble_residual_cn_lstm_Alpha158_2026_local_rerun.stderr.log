@@ -1,0 +1,193 @@
+[15068:MainThread](2026-05-06 22:22:40,457) INFO - qlib.qrun - [run.py:78] - Render the template with the context: {}
+[15068:MainThread](2026-05-06 22:22:40,470) INFO - qlib.Initialization - [config.py:453] - default_conf: client.
+[15068:MainThread](2026-05-06 22:22:40,472) INFO - qlib.Initialization - [__init__.py:82] - qlib successfully initialized based on client settings.
+[15068:MainThread](2026-05-06 22:22:40,473) INFO - qlib.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': WindowsPath('C:/Users/15728/.qlib/qlib_data/cn_data')}
+C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\mlflow\tracking\_tracking_service\utils.py:184: FutureWarning: The filesystem tracking backend (e.g., './mlruns') is deprecated as of February 2026. Consider transitioning to a database backend (e.g., 'sqlite:///mlflow.db') to take advantage of the latest MLflow features. See https://mlflow.org/docs/latest/self-hosting/migrate-from-file-store for migration guidance.
+  return FileStore(store_uri, store_uri)
+[15068:MainThread](2026-05-06 22:22:40,483) INFO - qlib.workflow - [exp.py:258] - Experiment 880271508895147360 starts running ...
+[15068:MainThread](2026-05-06 22:22:40,900) INFO - qlib.workflow - [recorder.py:345] - Recorder 554710ddba7b4bd587647a7c914112c4 starts running under Experiment 880271508895147360 ...
+warning: in the working copy of 'qlib/contrib/model/__init__.py', LF will be replaced by CRLF the next time Git touches it
+[15068:MainThread](2026-05-06 22:22:43,142) INFO - qlib.DEnsembleModel - [double_ensemble.py:58] - Double Ensemble Model...
+[15068:MainThread](2026-05-06 22:22:43,143) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:53] - CnLSTM pytorch version...
+[15068:MainThread](2026-05-06 22:22:43,154) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:76] - CnLSTM parameters setting:
+d_feat : 158
+conv_channels : 256
+kernel_size : 3
+hidden_size : 256
+num_layers : 3
+dropout : 0.1
+n_epochs : 120
+lr : 0.001
+metric : loss
+batch_size : 2048
+early_stop : 20
+optimizer : adam
+loss_type : mse
+device : cuda:0
+n_jobs : 4
+prefetch_factor : 2
+persistent_workers : False
+use_GPU : True
+seed : 42
+[15068:MainThread](2026-05-06 22:22:43,269) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:136] - model:
+CnLSTMModel(
+  (conv): Sequential(
+    (0): Conv1d(158, 256, kernel_size=(3,), stride=(1,), padding=(1,))
+    (1): ReLU()
+    (2): Dropout(p=0.1, inplace=False)
+    (3): Conv1d(256, 256, kernel_size=(3,), stride=(1,), padding=(1,))
+    (4): ReLU()
+  )
+  (rnn): LSTM(256, 256, num_layers=3, batch_first=True, dropout=0.1)
+  (fc_out): Linear(in_features=256, out_features=1, bias=True)
+)
+[15068:MainThread](2026-05-06 22:22:43,270) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:137] - model size: 1.8098 MB
+[15068:MainThread](2026-05-06 22:24:57,855) INFO - qlib.timer - [log.py:127] - Time cost: 133.726s | Loading data Done
+[15068:MainThread](2026-05-06 22:24:58,492) INFO - qlib.timer - [log.py:127] - Time cost: 0.226s | DropnaLabel Done
+[15068:MainThread](2026-05-06 22:25:00,431) INFO - qlib.timer - [log.py:127] - Time cost: 1.938s | CSZScoreNorm Done
+[15068:MainThread](2026-05-06 22:25:00,478) INFO - qlib.timer - [log.py:127] - Time cost: 2.623s | fit & process data Done
+[15068:MainThread](2026-05-06 22:25:00,478) INFO - qlib.timer - [log.py:127] - Time cost: 136.350s | Init data Done
+[15068:MainThread](2026-05-06 22:25:00,516) WARNING - qlib.utils - [__init__.py:849] - The parameter `reweighter` with value `None` is ignored.
+[15068:MainThread](2026-05-06 22:25:00,517) INFO - qlib.DoubleEnsembleResidualCnLstmModel - [double_ensemble_residual_cn_lstm.py:60] - Training DoubleEnsemble base model.
+[15068:MainThread](2026-05-06 22:25:01,086) INFO - qlib.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (1/3)
+[15068:MainThread](2026-05-06 22:25:01,308) INFO - qlib.DEnsembleModel - [double_ensemble.py:115] - Training with early_stopping...
+[15068:MainThread](2026-05-06 22:25:09,126) INFO - qlib.DEnsembleModel - [double_ensemble.py:91] - Retrieving loss curve and loss values...
+[15068:MainThread](2026-05-06 22:25:10,864) INFO - qlib.DEnsembleModel - [double_ensemble.py:101] - Sample re-weighting...
+[15068:MainThread](2026-05-06 22:25:12,725) INFO - qlib.DEnsembleModel - [double_ensemble.py:105] - Feature selection...
+C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\contrib\model\double_ensemble.py:210: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
+
+For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
+
+
+  g["g_value"].replace(np.nan, 0, inplace=True)
+[15068:MainThread](2026-05-06 22:26:17,791) INFO - qlib.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (2/3)
+[15068:MainThread](2026-05-06 22:26:17,969) INFO - qlib.DEnsembleModel - [double_ensemble.py:115] - Training with early_stopping...
+[15068:MainThread](2026-05-06 22:26:22,604) INFO - qlib.DEnsembleModel - [double_ensemble.py:91] - Retrieving loss curve and loss values...
+[15068:MainThread](2026-05-06 22:26:23,124) INFO - qlib.DEnsembleModel - [double_ensemble.py:101] - Sample re-weighting...
+[15068:MainThread](2026-05-06 22:26:23,578) INFO - qlib.DEnsembleModel - [double_ensemble.py:105] - Feature selection...
+C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\contrib\model\double_ensemble.py:210: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
+
+For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
+
+
+  g["g_value"].replace(np.nan, 0, inplace=True)
+[15068:MainThread](2026-05-06 22:27:47,337) INFO - qlib.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (3/3)
+[15068:MainThread](2026-05-06 22:27:47,489) INFO - qlib.DEnsembleModel - [double_ensemble.py:115] - Training with early_stopping...
+[15068:MainThread](2026-05-06 22:27:53,972) INFO - qlib.DoubleEnsembleResidualCnLstmModel - [double_ensemble_residual_cn_lstm.py:78] - Training CnLSTM residual model.
+[15068:MainThread](2026-05-06 22:28:06,473) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:258] - training...
+[15068:MainThread](2026-05-06 22:28:06,475) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch0:
+[15068:MainThread](2026-05-06 22:28:06,475) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:28:42,903) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:29:01,955) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997126
+[15068:MainThread](2026-05-06 22:29:01,956) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch1:
+[15068:MainThread](2026-05-06 22:29:01,957) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:29:37,418) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:29:56,207) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997000
+[15068:MainThread](2026-05-06 22:29:56,209) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch2:
+[15068:MainThread](2026-05-06 22:29:56,209) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:30:31,343) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:30:50,040) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997279
+[15068:MainThread](2026-05-06 22:30:50,041) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch3:
+[15068:MainThread](2026-05-06 22:30:50,041) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:31:25,742) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:31:44,952) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997409
+[15068:MainThread](2026-05-06 22:31:44,953) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch4:
+[15068:MainThread](2026-05-06 22:31:44,953) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:32:20,132) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:32:38,889) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999653
+[15068:MainThread](2026-05-06 22:32:38,889) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch5:
+[15068:MainThread](2026-05-06 22:32:38,889) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:33:13,323) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:33:32,249) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997214
+[15068:MainThread](2026-05-06 22:33:32,250) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch6:
+[15068:MainThread](2026-05-06 22:33:32,251) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:34:12,790) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:34:33,354) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998264
+[15068:MainThread](2026-05-06 22:34:33,355) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch7:
+[15068:MainThread](2026-05-06 22:34:33,356) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:35:09,529) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:35:30,003) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997023
+[15068:MainThread](2026-05-06 22:35:30,004) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch8:
+[15068:MainThread](2026-05-06 22:35:30,005) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:36:08,335) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:36:29,597) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997286
+[15068:MainThread](2026-05-06 22:36:29,598) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch9:
+[15068:MainThread](2026-05-06 22:36:29,599) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:37:06,511) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:37:26,458) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997858
+[15068:MainThread](2026-05-06 22:37:26,459) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch10:
+[15068:MainThread](2026-05-06 22:37:26,459) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:38:03,006) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:38:22,922) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999833
+[15068:MainThread](2026-05-06 22:38:22,922) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch11:
+[15068:MainThread](2026-05-06 22:38:22,923) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:38:59,021) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:39:18,255) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997914
+[15068:MainThread](2026-05-06 22:39:18,256) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch12:
+[15068:MainThread](2026-05-06 22:39:18,256) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:39:54,824) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:40:15,527) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999421
+[15068:MainThread](2026-05-06 22:40:15,528) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch13:
+[15068:MainThread](2026-05-06 22:40:15,528) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:40:52,206) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:41:12,782) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997545
+[15068:MainThread](2026-05-06 22:41:12,783) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch14:
+[15068:MainThread](2026-05-06 22:41:12,784) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:41:49,204) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:42:09,524) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998317
+[15068:MainThread](2026-05-06 22:42:09,526) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch15:
+[15068:MainThread](2026-05-06 22:42:09,526) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:42:46,611) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:43:06,790) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999156
+[15068:MainThread](2026-05-06 22:43:06,790) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch16:
+[15068:MainThread](2026-05-06 22:43:06,791) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:43:43,471) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:44:03,365) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998015
+[15068:MainThread](2026-05-06 22:44:03,365) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch17:
+[15068:MainThread](2026-05-06 22:44:03,366) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:44:39,679) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:44:59,672) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998435
+[15068:MainThread](2026-05-06 22:44:59,673) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch18:
+[15068:MainThread](2026-05-06 22:44:59,674) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:45:37,648) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:46:08,716) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.997878
+[15068:MainThread](2026-05-06 22:46:08,717) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch19:
+[15068:MainThread](2026-05-06 22:46:08,718) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:46:53,163) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:47:20,200) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999422
+[15068:MainThread](2026-05-06 22:47:20,201) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch20:
+[15068:MainThread](2026-05-06 22:47:20,202) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:48:04,540) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:48:30,222) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.999358
+[15068:MainThread](2026-05-06 22:48:30,223) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:262] - Epoch21:
+[15068:MainThread](2026-05-06 22:48:30,224) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:263] - training...
+[15068:MainThread](2026-05-06 22:49:17,640) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:265] - evaluating...
+[15068:MainThread](2026-05-06 22:49:45,966) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:267] - valid -0.998472
+[15068:MainThread](2026-05-06 22:49:45,969) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:278] - early stop
+[15068:MainThread](2026-05-06 22:49:45,970) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:281] - best score: -0.997000 @ 1
+[15068:MainThread](2026-05-06 22:50:35,955) INFO - qlib.DoubleEnsembleResidualCnLstmModel - [double_ensemble_residual_cn_lstm.py:121] - Best validation stack reward: 0.02339917
+[15068:MainThread](2026-05-06 22:50:35,957) INFO - qlib.DoubleEnsembleResidualCnLstmModel - [double_ensemble_residual_cn_lstm.py:93] - Selected residual weight: 1.800000
+[15068:MainThread](2026-05-06 22:50:36,125) INFO - qlib.fill_placeholder - [__init__.py:798] - <PRED> lookes like a placeholder, but it can't match to any given values
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[15068:MainThread](2026-05-06 22:50:57,517) INFO - qlib.workflow - [record_temp.py:197] - Signal record 'pred.pkl' has been saved as the artifact of the Experiment 880271508895147360
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 1002.22it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 1002.22it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 1004.14it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 501.89it/s] 
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 1003.42it/s]Downloading artifacts: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 1/1 [00:00<00:00, 1003.42it/s]
+[15068:MainThread](2026-05-06 22:50:58,183) INFO - qlib.backtest caller - [__init__.py:93] - Create new exchange
+[15068:MainThread](2026-05-06 22:53:40,502) WARNING - qlib.online operator - [exchange.py:219] - $close field data contains nan.
+[15068:MainThread](2026-05-06 22:53:40,505) WARNING - qlib.online operator - [exchange.py:219] - $close field data contains nan.
+[15068:MainThread](2026-05-06 22:53:56,508) WARNING - qlib.BaseExecutor - [executor.py:121] - `common_infra` is not set for <qlib.backtest.executor.SimulatorExecutor object at 0x000001ED81247C80>
+backtest loop:   0%|          | 0/562 [00:00<?, ?it/s]C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\utils\index_data.py:492: RuntimeWarning: Mean of empty slice
+  return np.nanmean(self.data)
+backtest loop:   2%|¨‡         | 9/562 [00:00<00:06, 85.56it/s]backtest loop:   3%|¨†         | 19/562 [00:00<00:05, 93.65it/s]backtest loop:   5%|¨„         | 30/562 [00:00<00:05, 100.76it/s]backtest loop:   7%|¨ƒ         | 41/562 [00:00<00:05, 99.72it/s] backtest loop:   9%|¨         | 51/562 [00:00<00:05, 99.45it/s]backtest loop:  11%|¨€         | 61/562 [00:00<00:05, 94.81it/s]backtest loop:  13%|¨€¨†        | 71/562 [00:00<00:05, 96.03it/s]backtest loop:  15%|¨€¨…        | 82/562 [00:00<00:04, 99.00it/s]backtest loop:  17%|¨€¨ƒ        | 93/562 [00:00<00:04, 98.15it/s]backtest loop:  19%|¨€¨‚        | 105/562 [00:01<00:04, 102.72it/s]backtest loop:  21%|¨€¨€        | 117/562 [00:01<00:04, 101.77it/s]backtest loop:  23%|¨€¨€¨†       | 128/562 [00:01<00:04, 99.33it/s] backtest loop:  25%|¨€¨€¨…       | 138/562 [00:01<00:04, 96.79it/s]backtest loop:  26%|¨€¨€¨ƒ       | 148/562 [00:01<00:04, 94.08it/s]backtest loop:  28%|¨€¨€¨‚       | 158/562 [00:01<00:04, 92.67it/s]backtest loop:  30%|¨€¨€¨       | 168/562 [00:01<00:04, 92.88it/s]backtest loop:  32%|¨€¨€¨€¨‡      | 178/562 [00:01<00:04, 93.62it/s]backtest loop:  33%|¨€¨€¨€¨†      | 188/562 [00:01<00:03, 94.62it/s]backtest loop:  35%|¨€¨€¨€¨„      | 199/562 [00:02<00:03, 98.76it/s]backtest loop:  37%|¨€¨€¨€¨ƒ      | 210/562 [00:02<00:03, 98.11it/s]backtest loop:  39%|¨€¨€¨€¨      | 221/562 [00:02<00:03, 101.43it/s]backtest loop:  41%|¨€¨€¨€¨€¨‡     | 232/562 [00:02<00:03, 103.59it/s]backtest loop:  43%|¨€¨€¨€¨€¨†     | 243/562 [00:02<00:03, 101.74it/s]backtest loop:  45%|¨€¨€¨€¨€¨„     | 254/562 [00:02<00:03, 100.43it/s]backtest loop:  47%|¨€¨€¨€¨€¨ƒ     | 265/562 [00:02<00:03, 94.04it/s] backtest loop:  49%|¨€¨€¨€¨€¨     | 276/562 [00:02<00:02, 96.45it/s]backtest loop:  51%|¨€¨€¨€¨€¨€     | 286/562 [00:02<00:03, 91.34it/s]backtest loop:  53%|¨€¨€¨€¨€¨€¨†    | 296/562 [00:03<00:02, 91.39it/s]backtest loop:  54%|¨€¨€¨€¨€¨€¨…    | 306/562 [00:03<00:02, 93.62it/s]backtest loop:  56%|¨€¨€¨€¨€¨€¨ƒ    | 317/562 [00:03<00:02, 94.31it/s]backtest loop:  58%|¨€¨€¨€¨€¨€¨‚    | 328/562 [00:03<00:02, 98.28it/s]backtest loop:  60%|¨€¨€¨€¨€¨€¨€    | 339/562 [00:03<00:02, 97.64it/s]backtest loop:  62%|¨€¨€¨€¨€¨€¨€¨‡   | 350/562 [00:03<00:02, 100.38it/s]backtest loop:  64%|¨€¨€¨€¨€¨€¨€¨…   | 361/562 [00:03<00:01, 102.94it/s]backtest loop:  66%|¨€¨€¨€¨€¨€¨€¨ƒ   | 373/562 [00:03<00:01, 102.35it/s]backtest loop:  68%|¨€¨€¨€¨€¨€¨€¨‚   | 384/562 [00:03<00:01, 100.57it/s]backtest loop:  70%|¨€¨€¨€¨€¨€¨€¨€   | 395/562 [00:04<00:01, 98.00it/s] backtest loop:  72%|¨€¨€¨€¨€¨€¨€¨€¨‡  | 405/562 [00:04<00:01, 92.86it/s]backtest loop:  74%|¨€¨€¨€¨€¨€¨€¨€¨…  | 415/562 [00:04<00:01, 90.18it/s]backtest loop:  76%|¨€¨€¨€¨€¨€¨€¨€¨„  | 425/562 [00:04<00:01, 84.95it/s]backtest loop:  77%|¨€¨€¨€¨€¨€¨€¨€¨ƒ  | 435/562 [00:04<00:01, 88.33it/s]backtest loop:  79%|¨€¨€¨€¨€¨€¨€¨€¨  | 446/562 [00:04<00:01, 93.84it/s]backtest loop:  81%|¨€¨€¨€¨€¨€¨€¨€¨€¨‡ | 457/562 [00:04<00:01, 95.00it/s]backtest loop:  83%|¨€¨€¨€¨€¨€¨€¨€¨€¨† | 469/562 [00:04<00:00, 100.25it/s]backtest loop:  86%|¨€¨€¨€¨€¨€¨€¨€¨€¨„ | 481/562 [00:04<00:00, 103.98it/s]backtest loop:  88%|¨€¨€¨€¨€¨€¨€¨€¨€¨‚ | 492/562 [00:05<00:00, 101.86it/s]backtest loop:  90%|¨€¨€¨€¨€¨€¨€¨€¨€¨ | 503/562 [00:05<00:00, 102.47it/s]backtest loop:  92%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨‡| 515/562 [00:05<00:00, 102.50it/s]backtest loop:  94%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨†| 526/562 [00:05<00:00, 98.56it/s] backtest loop:  96%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨„| 537/562 [00:05<00:00, 101.17it/s]backtest loop:  98%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨‚| 548/562 [00:05<00:00, 99.96it/s] backtest loop: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨| 560/562 [00:05<00:00, 103.90it/s]backtest loop: 100%|¨€¨€¨€¨€¨€¨€¨€¨€¨€¨€| 562/562 [00:05<00:00, 97.43it/s] 
+[15068:MainThread](2026-05-06 22:54:02,307) INFO - qlib.workflow - [record_temp.py:520] - Portfolio analysis record 'port_analysis_1day.pkl' has been saved as the artifact of the Experiment 880271508895147360
+[15068:MainThread](2026-05-06 22:54:02,315) INFO - qlib.workflow - [record_temp.py:545] - Indicator analysis record 'indicator_analysis_1day.pkl' has been saved as the artifact of the Experiment 880271508895147360
+[15068:MainThread](2026-05-06 22:54:02,917) INFO - qlib.timer - [log.py:127] - Time cost: 0.000s | waiting `async_log` Done

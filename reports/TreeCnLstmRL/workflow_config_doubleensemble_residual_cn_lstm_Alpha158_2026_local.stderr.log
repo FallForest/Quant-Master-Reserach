@@ -1,0 +1,135 @@
+[17540:MainThread](2026-05-06 22:17:37,378) INFO - qlib.qrun - [run.py:78] - Render the template with the context: {}
+[17540:MainThread](2026-05-06 22:17:37,390) INFO - qlib.Initialization - [config.py:453] - default_conf: client.
+[17540:MainThread](2026-05-06 22:17:37,392) INFO - qlib.Initialization - [__init__.py:82] - qlib successfully initialized based on client settings.
+[17540:MainThread](2026-05-06 22:17:37,393) INFO - qlib.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': WindowsPath('C:/Users/15728/.qlib/qlib_data/cn_data')}
+C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\mlflow\tracking\_tracking_service\utils.py:184: FutureWarning: The filesystem tracking backend (e.g., './mlruns') is deprecated as of February 2026. Consider transitioning to a database backend (e.g., 'sqlite:///mlflow.db') to take advantage of the latest MLflow features. See https://mlflow.org/docs/latest/self-hosting/migrate-from-file-store for migration guidance.
+  return FileStore(store_uri, store_uri)
+[17540:MainThread](2026-05-06 22:17:37,403) INFO - qlib.workflow - [exp.py:258] - Experiment 880271508895147360 starts running ...
+[17540:MainThread](2026-05-06 22:17:37,818) INFO - qlib.workflow - [recorder.py:345] - Recorder e780e8cb9e78483fa61fe4f80b3993fd starts running under Experiment 880271508895147360 ...
+warning: in the working copy of 'qlib/contrib/model/__init__.py', LF will be replaced by CRLF the next time Git touches it
+[17540:MainThread](2026-05-06 22:17:39,965) INFO - qlib.DEnsembleModel - [double_ensemble.py:58] - Double Ensemble Model...
+[17540:MainThread](2026-05-06 22:17:39,965) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:53] - CnLSTM pytorch version...
+[17540:MainThread](2026-05-06 22:17:39,977) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:76] - CnLSTM parameters setting:
+d_feat : 158
+conv_channels : 256
+kernel_size : 3
+hidden_size : 256
+num_layers : 3
+dropout : 0.1
+n_epochs : 120
+lr : 0.001
+metric : loss
+batch_size : 2048
+early_stop : 20
+optimizer : adam
+loss_type : mse
+device : cuda:0
+n_jobs : 4
+prefetch_factor : 2
+persistent_workers : False
+use_GPU : True
+seed : 42
+[17540:MainThread](2026-05-06 22:17:40,098) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:136] - model:
+CnLSTMModel(
+  (conv): Sequential(
+    (0): Conv1d(158, 256, kernel_size=(3,), stride=(1,), padding=(1,))
+    (1): ReLU()
+    (2): Dropout(p=0.1, inplace=False)
+    (3): Conv1d(256, 256, kernel_size=(3,), stride=(1,), padding=(1,))
+    (4): ReLU()
+  )
+  (rnn): LSTM(256, 256, num_layers=3, batch_first=True, dropout=0.1)
+  (fc_out): Linear(in_features=256, out_features=1, bias=True)
+)
+[17540:MainThread](2026-05-06 22:17:40,098) INFO - qlib.CnLSTM - [pytorch_cn_lstm_ts.py:137] - model size: 1.8098 MB
+[17540:MainThread](2026-05-06 22:20:26,950) INFO - qlib.timer - [log.py:127] - Time cost: 165.983s | Loading data Done
+[17540:MainThread](2026-05-06 22:20:27,620) INFO - qlib.timer - [log.py:127] - Time cost: 0.227s | DropnaLabel Done
+[17540:MainThread](2026-05-06 22:20:29,516) INFO - qlib.timer - [log.py:127] - Time cost: 1.895s | CSZScoreNorm Done
+[17540:MainThread](2026-05-06 22:20:29,568) INFO - qlib.timer - [log.py:127] - Time cost: 2.617s | fit & process data Done
+[17540:MainThread](2026-05-06 22:20:29,569) INFO - qlib.timer - [log.py:127] - Time cost: 168.603s | Init data Done
+[17540:MainThread](2026-05-06 22:20:29,597) WARNING - qlib.utils - [__init__.py:849] - The parameter `reweighter` with value `None` is ignored.
+[17540:MainThread](2026-05-06 22:20:29,598) INFO - qlib.DoubleEnsembleResidualCnLstmModel - [double_ensemble_residual_cn_lstm.py:60] - Training DoubleEnsemble base model.
+[17540:MainThread](2026-05-06 22:20:29,700) INFO - qlib.timer - [log.py:127] - Time cost: 0.000s | waiting `async_log` Done
+[17540:MainThread](2026-05-06 22:20:29,700) ERROR - qlib.workflow - [utils.py:41] - An exception has been raised[TypeError: cannot do slice indexing on DatetimeIndex with these indexers [train] of type str].
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\cli\run.py", line 157, in <module>
+    run()
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\cli\run.py", line 153, in run
+    fire.Fire(workflow)
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\fire\core.py", line 135, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\fire\core.py", line 468, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\fire\core.py", line 684, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\cli\run.py", line 147, in workflow
+    recorder = task_train(config.get("task"), experiment_name=experiment_name)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\model\trainer.py", line 127, in task_train
+    _exe_task(task_config)
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\model\trainer.py", line 49, in _exe_task
+    auto_filter_kwargs(model.fit)(dataset, reweighter=reweighter)
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\utils\__init__.py", line 852, in _func
+    return func(*args, **new_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\contrib\model\double_ensemble_residual_cn_lstm.py", line 61, in fit
+    self.base_model.fit(tab_dataset)
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\contrib\model\double_ensemble.py", line 69, in fit
+    df_train, df_valid = dataset.prepare(
+                         ^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\contrib\model\double_ensemble_residual_cn_lstm.py", line 233, in prepare
+    return self.dataset.handler.fetch(segments, col_set=col_set, data_key=data_key, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\dataset\handler.py", line 703, in fetch
+    return self._fetch_data(
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\dataset\handler.py", line 312, in _fetch_data
+    data_df = fetch_df_by_index(data_df, selector, level, fetch_orig=self.fetch_orig)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\.codex\worktrees\a7bc\Quant-Master-Research\qlib\data\dataset\utils.py", line 74, in fetch_df_by_index
+    return df.loc[pd.IndexSlice[idx_slc],]  # noqa: E231
+           ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexing.py", line 1185, in __getitem__
+    return self._getitem_tuple(key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexing.py", line 1369, in _getitem_tuple
+    return self._getitem_lowerdim(tup)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexing.py", line 1042, in _getitem_lowerdim
+    return self._getitem_nested_tuple(tup)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexing.py", line 1154, in _getitem_nested_tuple
+    obj = getattr(obj, self.name)._getitem_axis(key, axis=axis)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexing.py", line 1425, in _getitem_axis
+    locs = labels.get_locs(key)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\multi.py", line 3555, in get_locs
+    lvl_indexer = self._get_level_indexer(k, level=i, indexer=indexer)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\multi.py", line 3385, in _get_level_indexer
+    start = stop = level_index.slice_indexer(key.start, key.stop, key.step)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\datetimes.py", line 682, in slice_indexer
+    return Index.slice_indexer(self, start, end, step)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\base.py", line 6708, in slice_indexer
+    start_slice, end_slice = self.slice_locs(start, end, step=step)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\base.py", line 6934, in slice_locs
+    start_slice = self.get_slice_bound(start, "left")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\base.py", line 6849, in get_slice_bound
+    label = self._maybe_cast_slice_bound(label, side)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\datetimes.py", line 642, in _maybe_cast_slice_bound
+    label = super()._maybe_cast_slice_bound(label, side)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\datetimelike.py", line 373, in _maybe_cast_slice_bound
+    self._raise_invalid_indexer("slice", label, err)
+  File "C:\Users\15728\Desktop\Quant-Master-Research\.venv\Lib\site-packages\pandas\core\indexes\base.py", line 4307, in _raise_invalid_indexer
+    raise TypeError(msg) from reraise

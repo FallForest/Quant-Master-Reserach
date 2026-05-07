@@ -28,6 +28,43 @@ except ModuleNotFoundError:
         "ModuleNotFoundError. MetaEnsembleModel is skipped. (optional: maybe installing sklearn can fix it.)"
     )
 try:
+    from .dynamic_meta_ensemble import DynamicMetaEnsembleModel
+except ModuleNotFoundError:
+    DynamicMetaEnsembleModel = None
+    print(
+        "ModuleNotFoundError. DynamicMetaEnsembleModel is skipped. "
+        "(optional: maybe installing lightgbm and sklearn can fix it.)"
+    )
+try:
+    from .low_turnover_double_ensemble import LowTurnoverDEnsembleModel
+except ModuleNotFoundError:
+    LowTurnoverDEnsembleModel = None
+    print("ModuleNotFoundError. LowTurnoverDEnsembleModel is skipped. (optional: maybe installing lightgbm can fix it.)")
+try:
+    from .residual_double_ensemble_lgb import ResidualDEnsembleLGBModel
+except ModuleNotFoundError:
+    ResidualDEnsembleLGBModel = None
+    print("ModuleNotFoundError. ResidualDEnsembleLGBModel is skipped. (optional: maybe installing lightgbm can fix it.)")
+try:
+    from .multiseed_double_ensemble import MultiSeedDEnsembleModel
+except ModuleNotFoundError:
+    MultiSeedDEnsembleModel = None
+    print("ModuleNotFoundError. MultiSeedDEnsembleModel is skipped. (optional: maybe installing lightgbm can fix it.)")
+try:
+    from .cost_aware_double_ensemble import CostAwareDEnsembleModel
+except ModuleNotFoundError:
+    CostAwareDEnsembleModel = None
+    print("ModuleNotFoundError. CostAwareDEnsembleModel is skipped. (optional: maybe installing lightgbm can fix it.)")
+try:
+    from .tree_cn_lstm_rl import TreeCnLstmRLModel
+    from .double_ensemble_residual_cn_lstm import DoubleEnsembleResidualCnLstmModel
+except ModuleNotFoundError:
+    TreeCnLstmRLModel, DoubleEnsembleResidualCnLstmModel = None, None
+    print(
+        "ModuleNotFoundError. TreeCnLstmRLModel and DoubleEnsembleResidualCnLstmModel are skipped. "
+        "(optional: maybe installing lightgbm and pytorch can fix it.)"
+    )
+try:
     from .pretrained_signal import PretrainedSignalModel
 except ModuleNotFoundError:
     PretrainedSignalModel = None
@@ -65,6 +102,13 @@ all_model_classes = (
     LGBModel,
     AdaptiveEnsembleModel,
     MetaEnsembleModel,
+    DynamicMetaEnsembleModel,
+    LowTurnoverDEnsembleModel,
+    ResidualDEnsembleLGBModel,
+    MultiSeedDEnsembleModel,
+    CostAwareDEnsembleModel,
+    TreeCnLstmRLModel,
+    DoubleEnsembleResidualCnLstmModel,
     PretrainedSignalModel,
     XGBModel,
     LinearModel,
