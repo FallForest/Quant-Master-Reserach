@@ -854,6 +854,37 @@ class QuantAgentCliTests(unittest.TestCase):
         self.assertFalse(feedback["decision"])
         self.assertEqual(feedback["reason"], "metric_not_improved")
 
+    def test_fin_model_generated_model_py_is_compilable(self) -> None:
+        from quant_agent.workspace import _patch_model_code_for_quant_master
+
+        raw_code = (
+            "import torch\n"
+            "import torch.nn as nn\n"
+            "\n"
+            "class Tiny(nn.Module):\n"
+            "    def __init__(self, input_dim):\n"
+            "        super().__init__()\n"
+            "        self.linear = nn.Linear(input_dim, 1)\n"
+            "\n"
+            "    def forward(self, x):\n"
+            "        if x.dim() == 3:\n"
+            "            x = x[:, -1, :]\n"
+            "        return self.linear(x).squeeze(-1)\n"
+            "\n"
+            "model_cls = Tiny\n"
+        )
+        patched = _patch_model_code_for_quant_master(raw_code)
+        # The patched source must be valid Python
+        compile(patched, "model.py", "exec")
+
+        # Idempotent: patching again should return the same code
+        patched_again = _patch_model_code_for_quant_master(patched)
+        self.assertEqual(patched, patched_again)
+
+        # Wrapper class name must be a valid identifier
+        self.assertIn("class QuantMasterModelWrapper", patched)
+        self.assertNotIn("Quant-Master", patched)
+
     def test_improved_and_meets_target_reason_label(self) -> None:
         baseline_feedback = build_feedback(
             action="factor",

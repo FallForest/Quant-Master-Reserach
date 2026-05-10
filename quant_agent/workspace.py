@@ -170,7 +170,7 @@ def _write_model_runtime_files(
 
 
 def _patch_model_code_for_quant_master(code: str) -> str:
-    if "class Quant-MasterModelWrapper" in code:
+    if "_quant_agent_base_model_cls" in code and "model_cls = QuantMasterModelWrapper" in code:
         return code
     if "model_cls =" not in code:
         return code
@@ -178,7 +178,7 @@ def _patch_model_code_for_quant_master(code: str) -> str:
     wrapper = """
 
 
-class Quant-MasterModelWrapper(_quant_agent_base_model_cls):
+class QuantMasterModelWrapper(_quant_agent_base_model_cls):
     def __init__(self, num_features=None, num_timesteps=None, input_dim=None, **kwargs):
         if input_dim is None:
             input_dim = num_features
@@ -187,7 +187,7 @@ class Quant-MasterModelWrapper(_quant_agent_base_model_cls):
         super().__init__(input_dim=input_dim, **kwargs)
 
 
-model_cls = Quant-MasterModelWrapper
+model_cls = QuantMasterModelWrapper
 """
     return code.rstrip() + wrapper
 
