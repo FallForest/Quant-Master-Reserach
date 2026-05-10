@@ -82,6 +82,14 @@ def build_parser() -> argparse.ArgumentParser:
                 default=None,
                 help="Max drawdown floor target gate (default: -0.12, i.e. must be >= -0.12).",
             )
+            sub.add_argument("--topk", type=int, default=None, help="Override portfolio topk in generated workflow.")
+            sub.add_argument("--n-drop", type=int, default=None, help="Override n_drop in generated workflow.")
+            sub.add_argument("--open-cost", type=float, default=None, help="Override open_cost in generated workflow.")
+            sub.add_argument("--close-cost", type=float, default=None, help="Override close_cost in generated workflow.")
+            sub.add_argument("--min-cost", type=float, default=None, help="Override min_cost in generated workflow.")
+            sub.add_argument(
+                "--limit-threshold", type=float, default=None, help="Override limit_threshold in generated workflow."
+            )
 
     return parser
 
@@ -124,6 +132,19 @@ def _run_generation(args: argparse.Namespace) -> int:
             target_profile = FIN_QUANT_DEFAULT_TARGETS
         loop_runner = QuantRDLoop(agent=agent, trace=trace, target_profile=target_profile)
         feedback_sequence = QuantRDLoop.load_feedback_sequence(Path(args.feedback_file) if args.feedback_file else None)
+        workflow_overrides: dict[str, Any] = {}
+        _OVERRIDE_MAP = {
+            "topk": "topk",
+            "n_drop": "n_drop",
+            "open_cost": "open_cost",
+            "close_cost": "close_cost",
+            "min_cost": "min_cost",
+            "limit_threshold": "limit_threshold",
+        }
+        for attr, key in _OVERRIDE_MAP.items():
+            val = getattr(args, attr, None)
+            if val is not None:
+                workflow_overrides[key] = val
         loop_result = loop_runner.run(
             workspace_root=Path(args.workspace_dir),
             instruction=args.instruction,
@@ -137,6 +158,7 @@ def _run_generation(args: argparse.Namespace) -> int:
             mock_hypothesis=Path(args.mock_hypothesis) if args.mock_hypothesis else None,
             mock_experiment=Path(args.mock_experiment) if args.mock_experiment else None,
             mock_code=Path(args.mock_code) if args.mock_code else None,
+            workflow_overrides=workflow_overrides or None,
         )
         output = {
             "command": args.command,

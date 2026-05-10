@@ -66,6 +66,7 @@ class QuantRDLoop:
         mock_hypothesis: Path | None = None,
         mock_experiment: Path | None = None,
         mock_code: Path | None = None,
+        workflow_overrides: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         workspace_root = workspace_root.expanduser().resolve()
         feedback_sequence = feedback_sequence or []
@@ -104,6 +105,7 @@ class QuantRDLoop:
                 prompt_dump=round_result["prompts"],
                 model_code_payload=model_code_payload,
                 quick_smoke=quick_smoke,
+                workflow_overrides=workflow_overrides,
             )
 
             feedback = feedback_sequence[loop_id] if loop_id < len(feedback_sequence) else None

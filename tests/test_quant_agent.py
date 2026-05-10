@@ -914,6 +914,151 @@ class QuantAgentCliTests(unittest.TestCase):
         self.assertTrue(feedback["decision"])
         self.assertEqual(feedback["reason"], "metric_improved")
 
+    def test_fin_quant_parser_accepts_portfolio_override_args(self) -> None:
+        parser = __import__("quant_agent.cli", fromlist=["build_parser"]).build_parser()
+        args = parser.parse_args(
+            [
+                "fin_quant",
+                "--workspace-dir", "/tmp/test",
+                "--topk", "30",
+                "--n-drop", "3",
+                "--open-cost", "0.001",
+                "--close-cost", "0.002",
+                "--min-cost", "10",
+                "--limit-threshold", "0.09",
+            ]
+        )
+        self.assertEqual(args.topk, 30)
+        self.assertEqual(args.n_drop, 3)
+        self.assertAlmostEqual(args.open_cost, 0.001)
+        self.assertAlmostEqual(args.close_cost, 0.002)
+        self.assertAlmostEqual(args.min_cost, 10.0)
+        self.assertAlmostEqual(args.limit_threshold, 0.09)
+
+    def test_fin_quant_workflow_overrides_applied_to_factor_workflow(self) -> None:
+        hypothesis = self.tmpdir / "override_hypothesis.json"
+        experiment = self.tmpdir / "override_experiment.json"
+        hypothesis.write_text(
+            json.dumps({"hypothesis": "h", "reason": "r", "action": "factor"}),
+            encoding="utf-8",
+        )
+        experiment.write_text(
+            json.dumps(
+                {
+                    "Momentum_5D": {
+                        "description": "d",
+                        "formulation": "f",
+                        "variables": {"x": "v"},
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        workspace = self.tmpdir / "override_rounds"
+        result = main(
+            [
+                "fin_quant",
+                "--workspace-dir",
+                str(workspace),
+                "--max-rounds", "1",
+                "--action", "factor",
+                "--mock-hypothesis", str(hypothesis),
+                "--mock-experiment", str(experiment),
+                "--topk", "30",
+                "--n-drop", "3",
+                "--open-cost", "0.001",
+                "--close-cost", "0.002",
+                "--min-cost", "10",
+                "--limit-threshold", "0.09",
+            ]
+        )
+        self.assertEqual(result, 0)
+        workflow = (workspace / "round_001" / "rendered_factor_workflow.yaml").read_text(encoding="utf-8")
+        self.assertIn("topk: 30", workflow)
+        self.assertIn("n_drop: 3", workflow)
+        self.assertIn("open_cost: 0.001", workflow)
+        self.assertIn("close_cost: 0.002", workflow)
+        self.assertIn("min_cost: 10", workflow)
+        self.assertIn("limit_threshold: 0.09", workflow)
+
+    def test_quick_smoke_sets_topk_and_n_drop_when_no_override(self) -> None:
+        hypothesis = self.tmpdir / "qs_hypothesis.json"
+        experiment = self.tmpdir / "qs_experiment.json"
+        hypothesis.write_text(
+            json.dumps({"hypothesis": "h", "reason": "r", "action": "factor"}),
+            encoding="utf-8",
+        )
+        experiment.write_text(
+            json.dumps(
+                {
+                    "Momentum_5D": {
+                        "description": "d",
+                        "formulation": "f",
+                        "variables": {"x": "v"},
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        workspace = self.tmpdir / "qs_rounds"
+        result = main(
+            [
+                "fin_quant",
+                "--workspace-dir",
+                str(workspace),
+                "--max-rounds", "1",
+                "--action", "factor",
+                "--quick-smoke",
+                "--mock-hypothesis", str(hypothesis),
+                "--mock-experiment", str(experiment),
+            ]
+        )
+        self.assertEqual(result, 0)
+        workflow = (workspace / "round_001" / "rendered_factor_workflow.yaml").read_text(encoding="utf-8")
+        self.assertIn("topk: 10", workflow)
+        self.assertIn("n_drop: 1", workflow)
+
+    def test_explicit_override_beats_quick_smoke_for_topk_n_drop(self) -> None:
+        hypothesis = self.tmpdir / "prec_hypothesis.json"
+        experiment = self.tmpdir / "prec_experiment.json"
+        hypothesis.write_text(
+            json.dumps({"hypothesis": "h", "reason": "r", "action": "factor"}),
+            encoding="utf-8",
+        )
+        experiment.write_text(
+            json.dumps(
+                {
+                    "Momentum_5D": {
+                        "description": "d",
+                        "formulation": "f",
+                        "variables": {"x": "v"},
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        workspace = self.tmpdir / "prec_rounds"
+        result = main(
+            [
+                "fin_quant",
+                "--workspace-dir",
+                str(workspace),
+                "--max-rounds", "1",
+                "--action", "factor",
+                "--quick-smoke",
+                "--mock-hypothesis", str(hypothesis),
+                "--mock-experiment", str(experiment),
+                "--topk", "25",
+                "--n-drop", "4",
+            ]
+        )
+        self.assertEqual(result, 0)
+        workflow = (workspace / "round_001" / "rendered_factor_workflow.yaml").read_text(encoding="utf-8")
+        self.assertIn("topk: 25", workflow)
+        self.assertIn("n_drop: 4", workflow)
+        self.assertNotIn("topk: 10", workflow)
+        self.assertNotIn("n_drop: 1", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -48,6 +48,7 @@ def create_workspace(
     prompt_dump: dict[str, str],
     model_code_payload: dict[str, Any] | None = None,
     quick_smoke: bool = False,
+    workflow_overrides: dict[str, Any] | None = None,
 ) -> Path:
     root.mkdir(parents=True, exist_ok=True)
 
@@ -64,9 +65,9 @@ def create_workspace(
         encoding="utf-8",
     )
     if action == "factor":
-        _write_factor_runtime_files(root, experiment_payload, quick_smoke=quick_smoke)
+        _write_factor_runtime_files(root, experiment_payload, quick_smoke=quick_smoke, workflow_overrides=workflow_overrides)
     elif action == "model":
-        _write_model_runtime_files(root, experiment_payload, model_code_payload, quick_smoke=quick_smoke)
+        _write_model_runtime_files(root, experiment_payload, model_code_payload, quick_smoke=quick_smoke, workflow_overrides=workflow_overrides)
     (root / "run_experiment.bat").write_text(_build_batch_file(action), encoding="utf-8")
     return root
 
@@ -97,7 +98,7 @@ def _build_batch_file(action: str) -> str:
     )
 
 
-def _write_factor_runtime_files(root: Path, experiment_payload: dict[str, Any], quick_smoke: bool = False) -> None:
+def _write_factor_runtime_files(root: Path, experiment_payload: dict[str, Any], quick_smoke: bool = False, workflow_overrides: dict[str, Any] | None = None) -> None:
     if experiment_payload:
         feature_names = list(experiment_payload.keys())
         feature_expressions = [_formula_to_expression(str(spec.get("formulation", ""))) for spec in experiment_payload.values()]
@@ -114,6 +115,8 @@ def _write_factor_runtime_files(root: Path, experiment_payload: dict[str, Any], 
     rendered = _inject_provider_uri(rendered)
     if quick_smoke:
         rendered = _apply_quick_smoke_workflow_tuning(rendered)
+    if workflow_overrides:
+        rendered = _apply_workflow_overrides(rendered, workflow_overrides)
     (root / "rendered_factor_workflow.yaml").write_text(rendered, encoding="utf-8")
 
 
@@ -122,6 +125,7 @@ def _write_model_runtime_files(
     experiment_payload: dict[str, Any],
     model_code_payload: dict[str, Any] | None,
     quick_smoke: bool = False,
+    workflow_overrides: dict[str, Any] | None = None,
 ) -> None:
     if model_code_payload is None:
         raise RuntimeError("Model workspace requires generated model code.")
@@ -161,6 +165,8 @@ def _write_model_runtime_files(
     rendered = _normalize_timeseries_model_workflow(rendered)
     if quick_smoke:
         rendered = _apply_quick_smoke_workflow_tuning(rendered)
+    if workflow_overrides:
+        rendered = _apply_workflow_overrides(rendered, workflow_overrides)
 
     (root / "model_spec.json").write_text(
         json.dumps({model_name: spec}, ensure_ascii=False, indent=2),
@@ -258,6 +264,24 @@ def _apply_quick_smoke_workflow_tuning(workflow_text: str) -> str:
     workflow_text = re.sub(r"(?m)^(\s*)n_jobs:\s*\d+\s*$", r"\1n_jobs: 1", workflow_text)
     workflow_text = re.sub(r"(?m)^(\s*)topk:\s*\d+\s*$", r"\1topk: 10", workflow_text)
     workflow_text = re.sub(r"(?m)^(\s*)n_drop:\s*\d+\s*$", r"\1n_drop: 1", workflow_text)
+    return workflow_text if workflow_text.endswith("\n") else workflow_text + "\n"
+
+
+def _apply_workflow_overrides(workflow_text: str, overrides: dict[str, Any]) -> str:
+    _YAML_FIELD_MAP = {
+        "topk": (r"(?m)^(\s*)topk:\s*[\d.]+\s*$", r"\1topk: {val}"),
+        "n_drop": (r"(?m)^(\s*)n_drop:\s*[\d.]+\s*$", r"\1n_drop: {val}"),
+        "open_cost": (r"(?m)^(\s*)open_cost:\s*[\d.]+\s*$", r"\1open_cost: {val}"),
+        "close_cost": (r"(?m)^(\s*)close_cost:\s*[\d.]+\s*$", r"\1close_cost: {val}"),
+        "min_cost": (r"(?m)^(\s*)min_cost:\s*[\d.]+\s*$", r"\1min_cost: {val}"),
+        "limit_threshold": (r"(?m)^(\s*)limit_threshold:\s*[\d.]+\s*$", r"\1limit_threshold: {val}"),
+    }
+    for key, value in overrides.items():
+        if key not in _YAML_FIELD_MAP:
+            continue
+        pattern, replacement_tpl = _YAML_FIELD_MAP[key]
+        replacement = replacement_tpl.format(val=value)
+        workflow_text = re.sub(pattern, replacement, workflow_text)
     return workflow_text if workflow_text.endswith("\n") else workflow_text + "\n"
 
 
