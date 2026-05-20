@@ -1,0 +1,2 @@
+round_id,run_id,model_name,workflow_config,ic,rank_ic,costed_annret,costed_ir,max_drawdown,turnover,runtime_sec,leakage_check,command,status,notes,created_at_utc
+R000,placeholder_run,placeholder_model,examples/benchmarks/<track>/workflow_config_xxx.yaml,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0,unknown,"python -m quant_master.cli.run examples/benchmarks/<track>/workflow_config_xxx.yaml",smoke_passed,template row replace before use,1970-01-01T00:00:00Z

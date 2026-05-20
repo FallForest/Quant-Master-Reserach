@@ -1,0 +1,85 @@
+{
+  "audit_id": "deep_audit_20260520T050053Z",
+  "audit_time_utc": "2026-05-20T05:00:53Z",
+  "workspace": "C:\\Users\\15728\\Desktop\\Quant-Master-Research",
+  "goal": "Evaluate whether a deep/sequence model can beat current Transcendence portfolio SOTA (IR=3.023001940185944, AnnRet=0.38785441547152355).",
+  "reference_sota": {
+    "source_file": "examples/benchmarks/Transcendence/portfolio_innov_singlepoint_verify_7406e470_buffered_tk55_hk85_equal_weekly_20260519T132631Z.json",
+    "run_id_signal": "7406e47063e9479cb34d300b9ed03bad",
+    "test_window": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "costed_ir": 3.023001940185944,
+    "costed_annret": 0.38785441547152355
+  },
+  "environment_audit": {
+    "python_executable": "C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+    "python_version": "3.12.3",
+    "cn_data_exists": true,
+    "cn_data_calendar_exists": true,
+    "gpu_probe": {
+      "nvidia_smi_header": "NVIDIA-SMI 595.97 / CUDA Version 13.2",
+      "gpu_name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "driver_version": "595.97",
+      "gpu_memory_total": "8192 MiB"
+    },
+    "torch_probe": {
+      "import_torch": "failed",
+      "error": "ModuleNotFoundError: No module named 'torch'",
+      "venv_torch_init_exists": false,
+      "note": ".venv/Lib/site-packages/torch exists but __init__.py is missing; current interpreter cannot load PyTorch."
+    },
+    "deep_model_import_probe": {
+      "quant_master.contrib.model.pytorch_gru_ts": "ModuleNotFoundError: No module named 'torch'",
+      "quant_master.contrib.model.pytorch_transformer_ts": "ModuleNotFoundError: No module named 'torch'"
+    }
+  },
+  "deep_candidate": {
+    "config_path": "examples/benchmarks/Transcendence/workflow_config_gru_deep_candidate_Alpha158_2026_csi300.yaml",
+    "model": "GRU (quant_master.contrib.model.pytorch_gru_ts)",
+    "dataset": ".qmData/cn_data / Alpha158 / csi300",
+    "segments": {
+      "train": [
+        "2012-01-01",
+        "2020-12-31"
+      ],
+      "valid": [
+        "2021-01-01",
+        "2023-12-31"
+      ],
+      "test": [
+        "2024-01-01",
+        "2026-04-30"
+      ]
+    },
+    "runtime_budget_target_minutes": 45
+  },
+  "run_attempt": {
+    "command": "py -m quant_master.cli.run examples/benchmarks/Transcendence/workflow_config_gru_deep_candidate_Alpha158_2026_csi300.yaml",
+    "run_id": "e3f8e220da2745f6be045b5efe35a088",
+    "mlflow_experiment_id": "984329077332834218",
+    "status": "failed",
+    "status_code": 4,
+    "failure_stage": "model import",
+    "error": "ModuleNotFoundError: No module named 'torch'",
+    "runtime_seconds_before_fail": 0.527,
+    "artifact_uri": "mlruns/984329077332834218/e3f8e220da2745f6be045b5efe35a088/artifacts"
+  },
+  "existing_artifact_evidence": {
+    "sota_signal_artifact": "mlruns/984329077332834218/7406e47063e9479cb34d300b9ed03bad/artifacts/pred.pkl",
+    "sota_portfolio_scan_summary": "examples/benchmarks/Transcendence/portfolio_innov_ext_i10_summary_7406e470_20260519T122816Z.json",
+    "sota_portfolio_recheck": "examples/benchmarks/Transcendence/portfolio_innov_singlepoint_verify_7406e470_buffered_tk55_hk85_equal_weekly_20260519T132631Z.json"
+  },
+  "result": {
+    "deep_vs_sota": "blocked_by_environment",
+    "can_claim_outperformance": false,
+    "reason": "No runnable PyTorch in current Python runtime; deep candidate cannot be trained/evaluated."
+  },
+  "repro_next_commands": [
+    "py -m pip install --upgrade pip",
+    "py -m pip install --index-url https://download.pytorch.org/whl/cu130 torch torchvision",
+    "py -c \"import torch; print(torch.__version__); print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'no_gpu')\"",
+    "py -m quant_master.cli.run examples/benchmarks/Transcendence/workflow_config_gru_deep_candidate_Alpha158_2026_csi300.yaml"
+  ]
+}

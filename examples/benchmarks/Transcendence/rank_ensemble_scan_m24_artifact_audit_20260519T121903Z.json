@@ -1,0 +1,114 @@
+{
+  "timestamp_utc": "2026-05-19T12:19:03Z",
+  "tracking_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns",
+  "run_ids_requested": [
+    "e2300230e0994a1a9ccbbd3bc4606d97",
+    "7406e47063e9479cb34d300b9ed03bad",
+    "773bd6d8413b4bb0b388a63a6b5b6a86",
+    "0ed35c572e104ddab555a8af6a7fe981",
+    "2ac6ebc249bf42e5a9f83c6ca0725941",
+    "bc641cef654441d2bf0c7008e6c90458",
+    "94a52e5949104218ab2a3b4cd84dce08",
+    "6feaa8c5b0fc437784592bb7b534d710"
+  ],
+  "start_date": "2024-01-01",
+  "end_date": "2026-04-30",
+  "rows": [
+    {
+      "key": "e2300230",
+      "run_id": "e2300230e0994a1a9ccbbd3bc4606d97",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/e2300230e0994a1a9ccbbd3bc4606d97/artifacts/pred.pkl",
+      "source_ir": 2.3513635235089705,
+      "source_annret": 0.20450735785200955,
+      "rows_in_period": 168600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2026-04-30 00:00:00",
+      "coverage_ratio_vs_longest": 1.0
+    },
+    {
+      "key": "7406e470",
+      "run_id": "7406e47063e9479cb34d300b9ed03bad",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/7406e47063e9479cb34d300b9ed03bad/artifacts/pred.pkl",
+      "source_ir": 2.799983676714277,
+      "source_annret": 0.24466463608994535,
+      "rows_in_period": 168600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2026-04-30 00:00:00",
+      "coverage_ratio_vs_longest": 1.0
+    },
+    {
+      "key": "773bd6d",
+      "run_id": "773bd6d8413b4bb0b388a63a6b5b6a86",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/773bd6d8413b4bb0b388a63a6b5b6a86/artifacts/pred.pkl",
+      "source_ir": 2.515274464950814,
+      "source_annret": 0.21137562893943362,
+      "rows_in_period": 168600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2026-04-30 00:00:00",
+      "coverage_ratio_vs_longest": 1.0
+    },
+    {
+      "key": "0ed35c",
+      "run_id": "0ed35c572e104ddab555a8af6a7fe981",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/0ed35c572e104ddab555a8af6a7fe981/artifacts/pred.pkl",
+      "source_ir": 2.0134982602127955,
+      "source_annret": 0.17331693673326037,
+      "rows_in_period": 168600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2026-04-30 00:00:00",
+      "coverage_ratio_vs_longest": 1.0
+    },
+    {
+      "key": "2ac6",
+      "run_id": "2ac6ebc249bf42e5a9f83c6ca0725941",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/2ac6ebc249bf42e5a9f83c6ca0725941/artifacts/pred.pkl",
+      "source_ir": 2.2393597112626655,
+      "source_annret": 0.21223821928246292,
+      "rows_in_period": 168600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2026-04-30 00:00:00",
+      "coverage_ratio_vs_longest": 1.0
+    },
+    {
+      "key": "bc641",
+      "run_id": "bc641cef654441d2bf0c7008e6c90458",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/bc641cef654441d2bf0c7008e6c90458/artifacts/pred.pkl",
+      "source_ir": 2.1935711606786836,
+      "source_annret": 0.195278599730088,
+      "rows_in_period": 168600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2026-04-30 00:00:00",
+      "coverage_ratio_vs_longest": 1.0
+    },
+    {
+      "key": "94a52",
+      "run_id": "94a52e5949104218ab2a3b4cd84dce08",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/94a52e5949104218ab2a3b4cd84dce08/artifacts/pred.pkl",
+      "source_ir": 0.881522907515768,
+      "source_annret": 0.0815763612964841,
+      "rows_in_period": 72600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2024-12-31 00:00:00",
+      "coverage_ratio_vs_longest": 0.4306049822064057
+    },
+    {
+      "key": "6feaa",
+      "run_id": "6feaa8c5b0fc437784592bb7b534d710",
+      "pred_pkl": true,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/6feaa8c5b0fc437784592bb7b534d710/artifacts/pred.pkl",
+      "source_ir": -0.31673813945643187,
+      "source_annret": -0.029495282987574718,
+      "rows_in_period": 168600,
+      "date_min": "2024-01-02 00:00:00",
+      "date_max": "2026-04-30 00:00:00",
+      "coverage_ratio_vs_longest": 1.0
+    }
+  ]
+}

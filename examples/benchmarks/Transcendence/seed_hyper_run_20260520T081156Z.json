@@ -1,0 +1,91 @@
+﻿{
+    "timestamp_utc":  "20260520T081156Z",
+    "goal":  "Beat trained-model 7406 by nearby same-architecture searches",
+    "baseline":  {
+                     "run_id":  "7406e47063e9479cb34d300b9ed03bad",
+                     "costed_ir":  2.7999836767142772,
+                     "costed_annret":  0.24466463608994535,
+                     "config":  "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml"
+                 },
+    "provider_uri":  ".qmData/cn_data",
+    "test_period":  "2024-01-01 to 2026-04-30",
+    "reproduced_key_model_kwargs":  {
+                                        "model_class":  "RegimeHorizonCostEnsembleModel",
+                                        "horizon_model":  "de_h1(double_ensemble, horizon=1)",
+                                        "base_model":  "gbm",
+                                        "num_models":  3,
+                                        "epochs":  28,
+                                        "random_state":  42,
+                                        "topk":  45,
+                                        "n_drop":  4,
+                                        "turnover_penalty":  5E-05,
+                                        "risk_penalty":  0,
+                                        "memory_boost_grid":  [
+                                                                  0,
+                                                                  0.005
+                                                              ],
+                                        "zscore_clip":  100
+                                    },
+    "runs":  [
+                 {
+                     "candidate":  "A_seed_variant",
+                     "run_id":  "c40b19971c114b4987e7fc1fccfe361c",
+                     "config":  "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_seed57_Alpha158_2026_csi300.yaml",
+                     "change_type":  "seed_only",
+                     "IC":  0.023607271604021065,
+                     "RankIC":  0.021408337553077396,
+                     "costed_annret":  0.214902987907335,
+                     "costed_ir":  2.4078572378782206,
+                     "max_drawdown":  -0.049738533480502112,
+                     "runtime_min":  6.67,
+                     "beats_7406_gate":  false,
+                     "classification":  "no_breakthrough"
+                 },
+                 {
+                     "candidate":  "B_hyper_variant",
+                     "run_id":  "5ae326c0bc8d4f8da2f01349d42ae5ec",
+                     "config":  "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_hyper_num_models4_epochs32_Alpha158_2026_csi300.yaml",
+                     "change_type":  "model_capacity_hyper",
+                     "IC":  0.024230955886228485,
+                     "RankIC":  0.022383851243209296,
+                     "costed_annret":  0.20316541747742078,
+                     "costed_ir":  2.3365711309236956,
+                     "max_drawdown":  -0.053790408524144906,
+                     "runtime_min":  11.98,
+                     "beats_7406_gate":  false,
+                     "classification":  "no_breakthrough"
+                 },
+                 {
+                     "candidate":  "C_exec_variant",
+                     "run_id":  "8df189f43b164530872574fb5cc6337b",
+                     "config":  "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_hyper_topk40_drop2_Alpha158_2026_csi300.yaml",
+                     "change_type":  "execution_topk_ndrop",
+                     "IC":  0.024053120618515288,
+                     "RankIC":  0.021730740328191243,
+                     "costed_annret":  0.20439459630594156,
+                     "costed_ir":  2.2844423685774524,
+                     "max_drawdown":  -0.066674469980361362,
+                     "runtime_min":  6.78,
+                     "beats_7406_gate":  false,
+                     "classification":  "no_breakthrough"
+                 }
+             ],
+    "verdict":  {
+                    "trained_model_breakthrough":  false,
+                    "execution_tweak_only_hit":  false,
+                    "best_candidate_by_ir":  {
+                                                 "candidate":  "A_seed_variant",
+                                                 "run_id":  "c40b19971c114b4987e7fc1fccfe361c",
+                                                 "config":  "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_seed57_Alpha158_2026_csi300.yaml",
+                                                 "change_type":  "seed_only",
+                                                 "IC":  0.023607271604021065,
+                                                 "RankIC":  0.021408337553077396,
+                                                 "costed_annret":  0.214902987907335,
+                                                 "costed_ir":  2.4078572378782206,
+                                                 "max_drawdown":  -0.049738533480502112,
+                                                 "runtime_min":  6.67,
+                                                 "beats_7406_gate":  false,
+                                                 "classification":  "no_breakthrough"
+                                             }
+                }
+}

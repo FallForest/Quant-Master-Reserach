@@ -1,0 +1,270 @@
+{
+  "run_id": "7406e47063e9479cb34d300b9ed03bad",
+  "tracking_uri": "file:./mlruns",
+  "artifact_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts",
+  "config_path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\config",
+  "scan_time_utc": "2026-05-20T05:08:54Z",
+  "signal_coverage": {
+    "start": "2024-01-02",
+    "end": "2026-04-30",
+    "rows": 168600,
+    "unique_trade_days": 562
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "combo_count": 8,
+  "failed_eval_count": 4,
+  "protocols": {
+    "rolling_yearly": {
+      "fold_count": 2,
+      "folds": [
+        {
+          "fold_id": "2024_to_2025",
+          "train_start": "2024-01-02",
+          "train_end": "2024-12-31",
+          "test_start": "2025-01-01",
+          "test_end": "2025-12-31",
+          "train_days": 242,
+          "test_days": 243,
+          "selected_combo": {
+            "family": "buffered_weight",
+            "tag": "buffered_tk45_hk65_equal_weekly_ri5_sp1.00",
+            "topk": 45,
+            "hold_topk": 65,
+            "weight_mode": "equal",
+            "score_power": 1.0,
+            "rebalance_mode": "weekly",
+            "rebalance_interval": 5
+          },
+          "selected_train": {
+            "costed_annret": 0.3755006443731916,
+            "costed_ir": 2.597525358303101,
+            "max_drawdown": -0.06521242101715786,
+            "turnover": 0.2797108178020083
+          },
+          "selected_test": {
+            "costed_annret": 0.1484010382063259,
+            "costed_ir": 1.523926788247012,
+            "max_drawdown": -0.04104933682878413,
+            "turnover": 0.2583467745681913
+          },
+          "baseline_test": {
+            "costed_annret": 0.3351924083473372,
+            "costed_ir": 4.105866416738406,
+            "max_drawdown": -0.043737266993710666,
+            "turnover": 0.17755693336987782
+          },
+          "sota_fixed_test": {
+            "costed_annret": 0.11638792704410691,
+            "costed_ir": 1.2783128256255207,
+            "max_drawdown": -0.04552668691832639,
+            "turnover": 0.23247242141041422
+          }
+        },
+        {
+          "fold_id": "2025_to_2026",
+          "train_start": "2025-01-01",
+          "train_end": "2025-12-31",
+          "test_start": "2026-01-01",
+          "test_end": "2026-04-30",
+          "train_days": 243,
+          "test_days": 77,
+          "selected_combo": {
+            "family": "buffered_weight",
+            "tag": "buffered_tk45_hk55_equal_weekly_ri5_sp1.00",
+            "topk": 45,
+            "hold_topk": 55,
+            "weight_mode": "equal",
+            "score_power": 1.0,
+            "rebalance_mode": "weekly",
+            "rebalance_interval": 5
+          },
+          "selected_train": {
+            "costed_annret": 0.2066758242654647,
+            "costed_ir": 2.06667058902646,
+            "max_drawdown": -0.038225724155065796,
+            "turnover": 0.2749678586428305
+          },
+          "selected_test": {
+            "costed_annret": 0.04795627870590117,
+            "costed_ir": 0.4785508975523467,
+            "max_drawdown": -0.045093222528601755,
+            "turnover": 0.2512486894997221
+          },
+          "baseline_test": {
+            "costed_annret": 0.09782847141729019,
+            "costed_ir": 0.9170323912246221,
+            "max_drawdown": -0.05319625615859119,
+            "turnover": 0.18285856661198052
+          },
+          "sota_fixed_test": {
+            "costed_annret": 0.04137145570146005,
+            "costed_ir": 0.4356481755499088,
+            "max_drawdown": -0.04288364935854302,
+            "turnover": 0.20658347727715595
+          }
+        }
+      ],
+      "aggregate_selected_oos": {
+        "costed_annret": 0.10263626612625072,
+        "costed_ir": 1.0426422731712075,
+        "max_drawdown": -0.07382594270782428,
+        "turnover": 0.2551317595665905,
+        "trade_days": 320,
+        "start_time": "2025-01-02",
+        "end_time": "2026-04-30"
+      },
+      "aggregate_baseline_7406_oos": {
+        "costed_annret": 0.2780767110235447,
+        "costed_ir": 3.1464433665907023,
+        "max_drawdown": -0.05319625615859119,
+        "turnover": 0.1788326388687588,
+        "trade_days": 320,
+        "start_time": "2025-01-02",
+        "end_time": "2026-04-30"
+      },
+      "aggregate_sota_fixed_oos": {
+        "costed_annret": 0.08220882471639207,
+        "costed_ir": 0.8877233315670806,
+        "max_drawdown": -0.07917743836533336,
+        "turnover": 0.22074625259711486,
+        "trade_days": 320,
+        "start_time": "2025-01-02",
+        "end_time": "2026-04-30"
+      },
+      "beats_7406_oos": false,
+      "beats_sota_fixed_oos": true,
+      "beats_legacy_7406_threshold": false,
+      "beats_3p023_threshold": false
+    },
+    "anchored_holdout": {
+      "fold_count": 1,
+      "folds": [
+        {
+          "fold_id": "2024_fixed_to_2026",
+          "train_start": "2024-01-02",
+          "train_end": "2024-12-31",
+          "test_start": "2025-01-01",
+          "test_end": "2026-04-30",
+          "train_days": 242,
+          "test_days": 320,
+          "selected_combo": {
+            "family": "buffered_weight",
+            "tag": "buffered_tk45_hk65_equal_weekly_ri5_sp1.00",
+            "topk": 45,
+            "hold_topk": 65,
+            "weight_mode": "equal",
+            "score_power": 1.0,
+            "rebalance_mode": "weekly",
+            "rebalance_interval": 5
+          },
+          "selected_train": {
+            "costed_annret": 0.3755006443731916,
+            "costed_ir": 2.597525358303101,
+            "max_drawdown": -0.06521242101715786,
+            "turnover": 0.2797108178020083
+          },
+          "selected_test": {
+            "costed_annret": 0.1484010382063259,
+            "costed_ir": 1.523926788247012,
+            "max_drawdown": -0.04104933682878413,
+            "turnover": 0.2583467745681913
+          },
+          "baseline_test": {
+            "costed_annret": 0.3102643556141888,
+            "costed_ir": 3.6718264691331544,
+            "max_drawdown": -0.043737266993710666,
+            "turnover": 0.1768160178073505
+          },
+          "sota_fixed_test": {
+            "costed_annret": 0.11638792704410691,
+            "costed_ir": 1.2783128256255205,
+            "max_drawdown": -0.04552668691832639,
+            "turnover": 0.2324724214104142
+          }
+        }
+      ],
+      "aggregate_selected_oos": {
+        "costed_annret": 0.1484010382063259,
+        "costed_ir": 1.523926788247012,
+        "max_drawdown": -0.04104933682878413,
+        "turnover": 0.2583467745681913,
+        "trade_days": 320,
+        "start_time": "2025-01-02",
+        "end_time": "2026-04-30"
+      },
+      "aggregate_baseline_7406_oos": {
+        "costed_annret": 0.3102643556141888,
+        "costed_ir": 3.6718264691331544,
+        "max_drawdown": -0.043737266993710666,
+        "turnover": 0.1768160178073505,
+        "trade_days": 320,
+        "start_time": "2025-01-02",
+        "end_time": "2026-04-30"
+      },
+      "aggregate_sota_fixed_oos": {
+        "costed_annret": 0.11638792704410691,
+        "costed_ir": 1.2783128256255205,
+        "max_drawdown": -0.04552668691832639,
+        "turnover": 0.2324724214104142,
+        "trade_days": 320,
+        "start_time": "2025-01-02",
+        "end_time": "2026-04-30"
+      },
+      "beats_7406_oos": false,
+      "beats_sota_fixed_oos": true,
+      "beats_legacy_7406_threshold": false,
+      "beats_3p023_threshold": false
+    }
+  },
+  "global_full_period_reference": {},
+  "thresholds": {
+    "legacy_7406_costed_ir": 2.799983676714277,
+    "strategy_sota_costed_ir": 3.0230019401859436
+  },
+  "artifacts": {
+    "train_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_wf_smoke_train_7406e470_20260520T050854Z.csv",
+    "selected_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_wf_smoke_selected_7406e470_20260520T050854Z.csv",
+    "failed_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_wf_smoke_failed_7406e470_20260520T050854Z.csv"
+  },
+  "failed_examples": [
+    {
+      "protocol": "rolling_yearly",
+      "fold_id": "2025_to_2026",
+      "split": "train",
+      "tag": "buffered_tk45_hk55_equal_interval_ri5_sp1.00",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "protocol": "rolling_yearly",
+      "fold_id": "2025_to_2026",
+      "split": "train",
+      "tag": "buffered_tk45_hk55_score_interval_ri5_sp1.00",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "protocol": "rolling_yearly",
+      "fold_id": "2025_to_2026",
+      "split": "train",
+      "tag": "buffered_tk45_hk55_equal_interval_ri10_sp1.00",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "protocol": "rolling_yearly",
+      "fold_id": "2025_to_2026",
+      "split": "train",
+      "tag": "buffered_tk45_hk55_score_interval_ri10_sp1.00",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    }
+  ]
+}

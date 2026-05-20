@@ -1,0 +1,43 @@
+{
+  "config_path": "examples\\benchmarks\\Transcendence\\workflow_config_transcendence_factor_smoke_AlphaExt_2024_csi300.yaml",
+  "handler_class": "TranscendenceAlpha",
+  "handler_module": "quant_master.contrib.data.transcendence_handler",
+  "segments": {
+    "train": {
+      "rows": 225773,
+      "feature_count": 368,
+      "non_null_ratio": 1.0,
+      "date_min": "2020-01-02",
+      "date_max": "2022-12-30"
+    },
+    "valid": {
+      "rows": 72600,
+      "feature_count": 368,
+      "non_null_ratio": 1.0,
+      "date_min": "2023-01-03",
+      "date_max": "2023-12-29"
+    },
+    "test": {
+      "rows": 72600,
+      "feature_count": 368,
+      "non_null_ratio": 1.0,
+      "date_min": "2024-01-02",
+      "date_max": "2024-12-31"
+    }
+  },
+  "overall": {
+    "segments": [
+      "train",
+      "valid",
+      "test"
+    ],
+    "feature_count_unique": 368,
+    "segment_mean_non_null_ratio": {
+      "train": 1.0,
+      "valid": 1.0,
+      "test": 1.0
+    },
+    "global_date_min": "2020-01-02",
+    "global_date_max": "2024-12-31"
+  }
+}

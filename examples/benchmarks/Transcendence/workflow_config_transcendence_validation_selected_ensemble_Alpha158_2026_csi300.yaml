@@ -1,0 +1,81 @@
+quant_master_init:
+    provider_uri: ".qmData/cn_data"
+    region: cn
+    kernels: 1
+    joblib_backend: threading
+market: &market csi300
+benchmark: &benchmark SH000300
+data_handler_config: &data_handler_config
+    start_time: 2012-01-01
+    end_time: 2026-04-30
+    fit_start_time: 2012-01-01
+    fit_end_time: 2020-12-31
+    instruments: *market
+port_analysis_config: &port_analysis_config
+    strategy:
+        class: TopkDropoutStrategy
+        module_path: quant_master.contrib.strategy
+        kwargs:
+            signal: <PRED>
+            topk: 45
+            n_drop: 4
+    backtest:
+        start_time: 2024-01-01
+        end_time: 2026-04-30
+        account: 100000000
+        benchmark: *benchmark
+        exchange_kwargs:
+            limit_threshold: 0.095
+            deal_price: close
+            open_cost: 0.0005
+            close_cost: 0.0015
+            min_cost: 5
+task:
+    model:
+        class: TranscendenceSignalEnsembleModel
+        module_path: quant_master.contrib.model.transcendence_signal_ensemble
+        kwargs:
+            use_rank_score: true
+            search_step: 0.1
+            max_random_weight_candidates: 192
+            refine_top_weight_candidates: 20
+            topk_grid: [45]
+            n_drop_grid: [4]
+            memory_boost_grid: [0.0, 0.005, 0.01]
+            turnover_penalty_grid: [0.0, 0.00005, 0.0001]
+            volatility_penalty_grid: [0.0]
+            open_cost: 0.0005
+            close_cost: 0.0015
+            ir_weight: 1.0
+            annret_weight: 3.0
+            hit_ratio_weight: 0.15
+            max_drawdown_penalty: 0.25
+            ann_scaler: 252
+            random_state: 42
+    dataset:
+        class: DatasetH
+        module_path: quant_master.data.dataset
+        kwargs:
+            handler:
+                class: Alpha158
+                module_path: quant_master.contrib.data.handler
+                kwargs: *data_handler_config
+            segments:
+                train: [2012-01-01, 2020-12-31]
+                valid: [2021-01-01, 2023-12-31]
+                test: [2024-01-01, 2026-04-30]
+    record:
+        - class: SignalRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            model: <MODEL>
+            dataset: <DATASET>
+        - class: SigAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            ana_long_short: false
+            ann_scaler: 252
+        - class: PortAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            config: *port_analysis_config

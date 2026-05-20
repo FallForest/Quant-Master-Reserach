@@ -1,0 +1,348 @@
+{
+  "run_id": "7406e47063e9479cb34d300b9ed03bad",
+  "tracking_uri": "file:./mlruns",
+  "artifact_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts",
+  "config_path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\config",
+  "scan_time_utc": "2026-05-19T12:28:16Z",
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "benchmark": "SH000300",
+  "combo_count": 105,
+  "success_count": 78,
+  "failed_count": 27,
+  "baseline_7406": {
+    "costed_annret": 0.24466463608994535,
+    "costed_ir": 2.799983676714277,
+    "max_drawdown": -0.04812598495553819,
+    "turnover": 0.17499578770011953
+  },
+  "target_costed_ir": 2.80638,
+  "best": {
+    "family": "buffered_weight",
+    "tag": "buffered_tk55_hk85_equal_weekly",
+    "topk": 55,
+    "hold_topk": 85,
+    "n_drop": 0,
+    "rebalance_mode": "weekly",
+    "rebalance_interval": 10,
+    "n_drop_schedule": "",
+    "weight_mode": "equal",
+    "score_power": 1.0,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "costed_annret": 0.3878544154715252,
+    "costed_ir": 3.0230019401859436,
+    "max_drawdown": -0.047723124283069907,
+    "turnover": 0.25471396243602523,
+    "elapsed_sec": 3.403700900000331
+  },
+  "best_by_family": {
+    "buffered_weight": {
+      "family": "buffered_weight",
+      "tag": "buffered_tk55_hk85_equal_weekly",
+      "topk": 55,
+      "hold_topk": 85,
+      "n_drop": 0,
+      "rebalance_mode": "weekly",
+      "rebalance_interval": 10,
+      "n_drop_schedule": "",
+      "weight_mode": "equal",
+      "score_power": 1.0,
+      "open_cost": 0.0005,
+      "close_cost": 0.0015,
+      "costed_annret": 0.3878544154715252,
+      "costed_ir": 3.0230019401859436,
+      "max_drawdown": -0.047723124283069907,
+      "turnover": 0.25471396243602523,
+      "elapsed_sec": 3.403700900000331
+    },
+    "topk_dropout_sched": {
+      "family": "topk_dropout_sched",
+      "tag": "topkdrop_tk40_nd2_monthly_schnone",
+      "topk": 40,
+      "hold_topk": 40,
+      "n_drop": 2,
+      "rebalance_mode": "monthly",
+      "rebalance_interval": 10,
+      "n_drop_schedule": "",
+      "weight_mode": "",
+      "score_power": 1.0,
+      "open_cost": 0.0005,
+      "close_cost": 0.0015,
+      "costed_annret": 0.21471525795397753,
+      "costed_ir": 1.670884544506294,
+      "max_drawdown": -0.09991279679334031,
+      "turnover": 0.006493336022156575,
+      "elapsed_sec": 1.5374374000002717
+    }
+  },
+  "better_than_7406": true,
+  "better_than_3": true,
+  "scan_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_innov_ext_i10_7406e470_20260519T122816Z.csv",
+  "failed_examples": [
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk35_hk55_equal_monthly",
+        "topk": 35,
+        "hold_topk": 55,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk35_hk55_score_monthly",
+        "topk": 35,
+        "hold_topk": 55,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk35_hk65_equal_monthly",
+        "topk": 35,
+        "hold_topk": 65,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk35_hk65_score_monthly",
+        "topk": 35,
+        "hold_topk": 65,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk40_hk50_equal_monthly",
+        "topk": 40,
+        "hold_topk": 50,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk40_hk60_equal_monthly",
+        "topk": 40,
+        "hold_topk": 60,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk40_hk60_score_monthly",
+        "topk": 40,
+        "hold_topk": 60,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk40_hk70_equal_monthly",
+        "topk": 40,
+        "hold_topk": 70,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk40_hk70_score_monthly",
+        "topk": 40,
+        "hold_topk": 70,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk45_hk55_equal_monthly",
+        "topk": 45,
+        "hold_topk": 55,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk45_hk55_score_monthly",
+        "topk": 45,
+        "hold_topk": 55,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk45_hk65_equal_monthly",
+        "topk": 45,
+        "hold_topk": 65,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk45_hk65_score_monthly",
+        "topk": 45,
+        "hold_topk": 65,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk45_hk75_equal_monthly",
+        "topk": 45,
+        "hold_topk": 75,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk45_hk75_score_monthly",
+        "topk": 45,
+        "hold_topk": 75,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk50_hk60_equal_monthly",
+        "topk": 50,
+        "hold_topk": 60,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk50_hk60_score_monthly",
+        "topk": 50,
+        "hold_topk": 60,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk50_hk70_equal_monthly",
+        "topk": 50,
+        "hold_topk": 70,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk50_hk70_score_monthly",
+        "topk": 50,
+        "hold_topk": 70,
+        "weight_mode": "score",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    },
+    {
+      "combo": {
+        "family": "buffered_weight",
+        "tag": "buffered_tk50_hk80_equal_monthly",
+        "topk": 50,
+        "hold_topk": 80,
+        "weight_mode": "equal",
+        "score_power": 1.0,
+        "rebalance_mode": "monthly",
+        "rebalance_interval": 10
+      },
+      "error": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    }
+  ],
+  "ic": 0.023921221367623043,
+  "rank_ic": 0.021225039288402008
+}

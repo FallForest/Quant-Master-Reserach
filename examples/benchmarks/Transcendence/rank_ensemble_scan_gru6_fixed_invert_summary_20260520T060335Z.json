@@ -1,0 +1,129 @@
+{
+  "timestamp_utc": "2026-05-20T06:23:03Z",
+  "tracking_uri": "file:./mlruns",
+  "run_ids_requested": [
+    "7406e47063e9479cb34d300b9ed03bad",
+    "bcbecf55a3924357ba93fc55b1140e99",
+    "d4526da7854245af954fc99cf02963f0",
+    "1a085ff9b5a34f408a44ad74055fc5da",
+    "e2300230e0994a1a9ccbbd3bc4606d97",
+    "773bd6d8413b4bb0b388a63a6b5b6a86"
+  ],
+  "invert_run_ids": [
+    "bcbecf55a3924357ba93fc55b1140e99"
+  ],
+  "usable_signals": [
+    {
+      "key": "7406e470",
+      "base_key": "7406e470",
+      "run_id": "7406e47063e9479cb34d300b9ed03bad",
+      "inverted": false,
+      "coverage_ratio": 1.0,
+      "source_ir": 2.799983676714277,
+      "source_annret": 0.24466463608994535,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/7406e47063e9479cb34d300b9ed03bad/artifacts/pred.pkl"
+    },
+    {
+      "key": "bcbecf55_inv",
+      "base_key": "bcbecf55",
+      "run_id": "bcbecf55a3924357ba93fc55b1140e99",
+      "inverted": true,
+      "coverage_ratio": 1.0,
+      "source_ir": -0.07976613922902091,
+      "source_annret": -0.007653629711696119,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/bcbecf55a3924357ba93fc55b1140e99/artifacts/pred.pkl"
+    },
+    {
+      "key": "d4526da",
+      "base_key": "d4526da",
+      "run_id": "d4526da7854245af954fc99cf02963f0",
+      "inverted": false,
+      "coverage_ratio": 1.0,
+      "source_ir": 1.3136214008528764,
+      "source_annret": 0.13550268110111338,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/663421623398938249/d4526da7854245af954fc99cf02963f0/artifacts/pred.pkl"
+    },
+    {
+      "key": "1a085ff",
+      "base_key": "1a085ff",
+      "run_id": "1a085ff9b5a34f408a44ad74055fc5da",
+      "inverted": false,
+      "coverage_ratio": 1.0,
+      "source_ir": 1.494812311411898,
+      "source_annret": 0.12716585229106175,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/1a085ff9b5a34f408a44ad74055fc5da/artifacts/pred.pkl"
+    },
+    {
+      "key": "e2300230",
+      "base_key": "e2300230",
+      "run_id": "e2300230e0994a1a9ccbbd3bc4606d97",
+      "inverted": false,
+      "coverage_ratio": 1.0,
+      "source_ir": 2.3513635235089705,
+      "source_annret": 0.20450735785200955,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/e2300230e0994a1a9ccbbd3bc4606d97/artifacts/pred.pkl"
+    },
+    {
+      "key": "773bd6d",
+      "base_key": "773bd6d",
+      "run_id": "773bd6d8413b4bb0b388a63a6b5b6a86",
+      "inverted": false,
+      "coverage_ratio": 1.0,
+      "source_ir": 2.515274464950814,
+      "source_annret": 0.21137562893943362,
+      "pred_path": "C:/Users/15728/Desktop/Quant-Master-Research/mlruns/984329077332834218/773bd6d8413b4bb0b388a63a6b5b6a86/artifacts/pred.pkl"
+    }
+  ],
+  "blend_space": {
+    "combo_sizes": [
+      2,
+      3,
+      4
+    ],
+    "weight_step": 0.2,
+    "blend_offset": 0,
+    "total_candidates": 240,
+    "selected_blends": 240,
+    "topk_grid": [
+      50
+    ],
+    "n_drop_grid": [
+      5
+    ],
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "start_date": "2024-01-01",
+    "end_date": "2026-04-30"
+  },
+  "best": {
+    "blend_id": "B071",
+    "members": "1a085ff|e2300230|773bd6d",
+    "weights": "0.40|0.20|0.40",
+    "topk": 50,
+    "n_drop": 5,
+    "annret": 0.2099593131591059,
+    "ir": 2.695042579788758,
+    "max_drawdown": -0.04884811292242763,
+    "turnover": 0.19783703937779554
+  },
+  "best_candidate_threshold_hit": null,
+  "threshold_hit": false,
+  "artifacts": {
+    "audit_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\rank_ensemble_scan_gru6_fixed_invert_artifact_audit_20260520T060335Z.json",
+    "results_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\rank_ensemble_scan_gru6_fixed_invert_results_20260520T060335Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\rank_ensemble_scan_gru6_fixed_invert_summary_20260520T060335Z.json",
+    "candidate_json": null
+  },
+  "benchmarks": {
+    "portfolio_sota_ir": 2.799984,
+    "portfolio_sota_annret": 0.244665,
+    "topk_scan_best_ir": 2.80638,
+    "topk_scan_best_annret": 0.27042
+  },
+  "comparison": {
+    "beat_portfolio_sota_ir": false,
+    "beat_topk_scan_ir": false,
+    "beat_portfolio_sota_annret": false,
+    "beat_topk_scan_annret": false
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "timestamp_utc": "2026-05-20T07:04:00Z",
+  "candidate": {
+    "run_id": "ae0980136de44dc58a0b9d3f7d947363",
+    "workflow_config": "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_objective_rankdecile_vadj_Alpha158_2026_csi300.yaml",
+    "model_class": "RegimeHorizonCostEnsembleModel",
+    "objective_label": {
+      "mode": "rank_decile_spread",
+      "horizons": [1, 5, 10],
+      "horizon_weights": [0.6, 0.3, 0.1],
+      "market_relative": true,
+      "vol_adjust": true,
+      "vol_window": 20,
+      "vol_floor": 0.0001,
+      "decile": 0.1,
+      "decile_scale": 0.45,
+      "clip": 6.0
+    },
+    "label_scope": {
+      "train": "objective label enabled",
+      "valid": "objective label enabled",
+      "test": "no label build (predict only)"
+    },
+    "fit_log_selected_state": {
+      "turnover_penalty": 0.00005,
+      "risk_penalty": 0.0,
+      "memory_boost": 0.0
+    },
+    "metrics": {
+      "ic": 0.02017021428387073,
+      "rank_ic": 0.015728081550430508,
+      "costed_annret": 0.13866665629749725,
+      "costed_ir": 1.5713130469238665,
+      "max_drawdown": -0.0574967621132277,
+      "turnover": 0.17506983420422315,
+      "runtime_sec": 435.113
+    }
+  },
+  "baseline_7406": {
+    "run_id": "7406e47063e9479cb34d300b9ed03bad",
+    "workflow_config": "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml",
+    "metrics": {
+      "ic": 0.023921221367623043,
+      "rank_ic": 0.021225039288402008,
+      "costed_annret": 0.24466463608994535,
+      "costed_ir": 2.799983676714277,
+      "max_drawdown": -0.04812598495553819,
+      "turnover": 0.17499578770011953,
+      "runtime_sec": 412.693
+    }
+  },
+  "deltas_vs_7406": {
+    "ic": -0.0037510070837523113,
+    "rank_ic": -0.0054969577379715,
+    "costed_annret": -0.1059979797924481,
+    "costed_ir": -1.2286706297904106,
+    "max_drawdown": -0.009370777157689508,
+    "turnover": 0.00007404650410361424,
+    "runtime_sec": 22.42
+  },
+  "settings_audit": {
+    "7406_strong_point": {
+      "run_id": "7406e47063e9479cb34d300b9ed03bad",
+      "topk": 45,
+      "turnover_penalty": 0.00005,
+      "risk_penalty": 0.0,
+      "memory_boost_grid": [0.0, 0.005],
+      "zscore_clip": 100.0,
+      "use_rank_score": false,
+      "single_model_h1_de_only": true
+    },
+    "weaker_candidates": [
+      {
+        "run_id": "773bd6d8413b4bb0b388a63a6b5b6a86",
+        "tag": "de_only_baseline",
+        "costed_annret": 0.21137562893943362,
+        "costed_ir": 2.515274464950814,
+        "key_diff": "topk=50, turnover_penalty=0, zscore_clip=2.8"
+      },
+      {
+        "run_id": "0ed35c572e104ddab555a8af6a7fe981",
+        "tag": "de_only_raw_rank_exec",
+        "costed_annret": 0.17331693673326037,
+        "costed_ir": 2.0134982602127955,
+        "key_diff": "topk=50, turnover_penalty=0"
+      },
+      {
+        "run_id": "2ac6ebc249bf42e5a9f83c6ca0725941",
+        "tag": "de_only_rank_preserving_topk40_drop3",
+        "costed_annret": 0.21223821928246292,
+        "costed_ir": 2.2393597112626655,
+        "key_diff": "topk=40, turnover_penalty=6e-05, memory_boost_grid wider"
+      },
+      {
+        "run_id": "bc641cef654441d2bf0c7008e6c90458",
+        "tag": "de_lgb_rank_preserving_topk45_drop4",
+        "costed_annret": 0.195278599730088,
+        "costed_ir": 2.1935711606786836,
+        "key_diff": "add lgb_h5 member; mixed model blend weaker"
+      },
+      {
+        "run_id": "6feaa8c5b0fc437784592bb7b534d710",
+        "tag": "cost_ensemble_moderate",
+        "costed_annret": -0.029495282987574718,
+        "costed_ir": -0.31673813945643187,
+        "key_diff": "use_rank_score=true + strong risk/turnover grid + monotonic regime settings"
+      }
+    ]
+  },
+  "breakthrough_over_7406": false
+}
