@@ -126,7 +126,8 @@ class DumpDataBase:
         self.freq = freq
         self.calendar_format = self.DAILY_FORMAT if self.freq == "day" else self.HIGH_FREQ_FORMAT
 
-        self.works = max_workers
+        resolved_workers = 8 if max_workers is None else max(int(max_workers), 8)
+        self.works = resolved_workers
         self.date_field_name = date_field_name
 
         self._calendars_dir = self.quant_master_dir.joinpath(self.CALENDARS_DIR_NAME)

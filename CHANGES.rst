@@ -1,10 +1,10 @@
 Changelog
 =========
-Here you can see the full list of changes between each QLib release.
+Here you can see the full list of changes between each QuantMaster release.
 
 Version 0.1.0
 -------------
-This is the initial release of QLib library.
+This is the initial release of QuantMaster library.
 
 Version 0.1.1
 -------------

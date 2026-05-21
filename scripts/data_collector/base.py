@@ -35,7 +35,7 @@ class BaseCollector(abc.ABC):
         start=None,
         end=None,
         interval="1d",
-        max_workers=1,
+        max_workers=8,
         max_collector_count=2,
         delay=0,
         check_data_length: int = None,
@@ -68,7 +68,8 @@ class BaseCollector(abc.ABC):
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
         self.delay = delay
-        self.max_workers = max_workers
+        resolved_workers = 1 if max_workers is None else max(int(max_workers), 1)
+        self.max_workers = resolved_workers
         self.max_collector_count = max_collector_count
         self.mini_symbol_map = {}
         self.interval = interval
@@ -279,7 +280,8 @@ class Normalize:
         self._date_field_name = date_field_name
         self._symbol_field_name = symbol_field_name
         self._end_date = kwargs.get("end_date", None)
-        self._max_workers = max_workers
+        resolved_workers = 8 if max_workers is None else max(int(max_workers), 8)
+        self._max_workers = resolved_workers
         self.interval = kwargs.get("interval", "1d")
 
         self._normalize_obj = normalize_class(
@@ -333,7 +335,7 @@ class Normalize:
 
 
 class BaseRun(abc.ABC):
-    def __init__(self, source_dir=None, normalize_dir=None, max_workers=1, interval="1d"):
+    def __init__(self, source_dir=None, normalize_dir=None, max_workers=8, interval="1d"):
         """
 
         Parameters
@@ -358,7 +360,8 @@ class BaseRun(abc.ABC):
         self.normalize_dir.mkdir(parents=True, exist_ok=True)
 
         self._cur_module = importlib.import_module("collector")
-        self.max_workers = max_workers
+        resolved_workers = 1 if max_workers is None else max(int(max_workers), 1)
+        self.max_workers = resolved_workers
         self.interval = interval
 
     @property

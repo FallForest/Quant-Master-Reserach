@@ -17,7 +17,7 @@ import requests
 import numpy as np
 import pandas as pd
 from loguru import logger
-from yahooquery import Ticker
+import urllib.error
 from dateutil.tz import tzlocal
 
 import quant_master
@@ -40,6 +40,8 @@ from data_collector.utils import (
     get_br_stock_symbols,
     generate_minutes_calendar_from_daily,
     calc_adjusted_price,
+    yahoo_fetch,
+    symbol_suffix_to_prefix,
 )
 
 INDEX_BENCH_URL = "http://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.{index_code}&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58&klt=101&fqt=0&beg={begin}&end={end}"
@@ -54,7 +56,7 @@ class YahooCollector(BaseCollector):
         start=None,
         end=None,
         interval="1d",
-        max_workers=4,
+        max_workers=8,
         max_collector_count=2,
         delay=0,
         check_data_length: int = None,
@@ -124,30 +126,67 @@ class YahooCollector(BaseCollector):
 
     @staticmethod
     def get_data_from_remote(symbol, interval, start, end, show_1min_logging: bool = False):
-        error_msg = f"{symbol}-{interval}-{start}-{end}"
+        yf_interval = "1m" if interval in ("1m", "1min") else "1d"
 
-        def _show_logging_func():
-            if interval == YahooCollector.INTERVAL_1min and show_1min_logging:
-                logger.warning(f"{error_msg}:{_resp}")
+        def _to_epoch(val):
+            if isinstance(val, (int, float)):
+                return int(val)
+            return int(pd.Timestamp(val).timestamp())
 
-        interval = "1m" if interval in ["1m", "1min"] else interval
         try:
-            _resp = Ticker(symbol, asynchronous=False).history(interval=interval, start=start, end=end)
-            if isinstance(_resp, pd.DataFrame):
-                return _resp.reset_index()
-            elif isinstance(_resp, dict):
-                _temp_data = _resp.get(symbol, {})
-                if isinstance(_temp_data, str) or (
-                    isinstance(_resp, dict) and _temp_data.get("indicators", {}).get("quote", None) is None
-                ):
-                    _show_logging_func()
+            start_ts = _to_epoch(start)
+            end_ts = _to_epoch(end)
+        except Exception:
+            logger.warning(f"get data error: epoch conversion failed for {symbol}--{start}--{end}")
+            return None
+
+        url = (
+            f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+            f"?period1={start_ts}&period2={end_ts}&interval={yf_interval}"
+        )
+        try:
+            data = yahoo_fetch(url)
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                logger.warning(f"symbol not found (404): {symbol}")
             else:
-                _show_logging_func()
+                logger.warning(f"get data error: {symbol}--{start}--{end}: HTTP {e.code}")
+            return None
         except Exception as e:
             logger.warning(
-                f"get data error: {symbol}--{start}--{end}"
-                + "Your data request fails. This may be caused by your firewall (e.g. GFW). Please switch your network if you want to access Yahoo! data"
+                f"get data error: {symbol}--{start}--{end}: {e}"
+                + " Your data request fails. This may be caused by your firewall (e.g. GFW)."
+                + " Please switch your network if you want to access Yahoo! data"
             )
+            return None
+
+        chart = data.get("chart", {})
+        result_list = chart.get("result")
+        if not result_list:
+            return None
+
+        result = result_list[0]
+        timestamps = result.get("timestamp")
+        if not timestamps:
+            return None
+
+        quote = result["indicators"]["quote"][0]
+        adjclose_list = result["indicators"].get("adjclose", [{}])
+        adjclose = adjclose_list[0].get("adjclose") if adjclose_list else None
+
+        dates = [pd.Timestamp(ts, unit="s").strftime("%Y-%m-%d") for ts in timestamps]
+
+        df = pd.DataFrame({
+            "date": dates,
+            "open": quote["open"],
+            "high": quote["high"],
+            "low": quote["low"],
+            "close": quote["close"],
+            "volume": quote["volume"],
+            "adjclose": adjclose if adjclose else quote["close"],
+            "symbol": symbol,
+        })
+        return df
 
     def get_data(
         self, symbol: str, interval: str, start_datetime: pd.Timestamp, end_datetime: pd.Timestamp
@@ -210,9 +249,7 @@ class YahooCollectorCN(YahooCollector, ABC):
         return symbols
 
     def normalize_symbol(self, symbol):
-        symbol_s = symbol.split(".")
-        symbol = f"sh{symbol_s[0]}" if symbol_s[-1] == "ss" else f"sz{symbol_s[0]}"
-        return symbol
+        return symbol_suffix_to_prefix(symbol, capital=False)
 
     @property
     def _timezone(self):
@@ -221,7 +258,6 @@ class YahooCollectorCN(YahooCollector, ABC):
 
 class YahooCollectorCN1d(YahooCollectorCN):
     def download_index_data(self):
-        # TODO: from MSN
         _format = "%Y%m%d"
         _begin = self.start_datetime.strftime(_format)
         _end = self.end_datetime.strftime(_format)
@@ -243,12 +279,8 @@ class YahooCollectorCN1d(YahooCollectorCN):
             df["date"] = pd.to_datetime(df["date"])
             df = df.astype(float, errors="ignore")
             df["adjclose"] = df["close"]
-            df["symbol"] = f"sh{_index_code}"
-            _path = self.save_dir.joinpath(f"sh{_index_code}.csv")
-            if _path.exists():
-                _old_df = pd.read_csv(_path)
-                df = pd.concat([_old_df, df], sort=False)
-            df.to_csv(_path, index=False)
+            df["symbol"] = f"{_index_code}.SS"
+            self.save_instrument(f"{_index_code}.SS", df)
             time.sleep(5)
 
 
@@ -721,7 +753,7 @@ class YahooNormalizeBR1min(YahooNormalizeBR, YahooNormalize1min):
 
 
 class Run(BaseRun):
-    def __init__(self, source_dir=None, normalize_dir=None, max_workers=1, interval="1d", region=REGION_CN):
+    def __init__(self, source_dir=None, normalize_dir=None, max_workers=8, interval="1d", region=REGION_CN):
         """
 
         Parameters
@@ -755,7 +787,7 @@ class Run(BaseRun):
     def download_data(
         self,
         max_collector_count=2,
-        delay=0.5,
+        delay=0.1,
         start=None,
         end=None,
         check_data_length=None,
@@ -792,8 +824,15 @@ class Run(BaseRun):
             # get 1m data
             $ python collector.py download_data --source_dir ~/.quant_master/stock_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1m
         """
-        if self.interval == "1d" and pd.Timestamp(end) > pd.Timestamp(datetime.datetime.now().strftime("%Y-%m-%d")):
-            raise ValueError(f"end_date: {end} is greater than the current date.")
+        if self.interval == "1d":
+            today = pd.Timestamp(datetime.datetime.now().strftime("%Y-%m-%d"))
+            # `end` is treated as an open upper bound for daily data, so allowing
+            # `today + 1 day` is required to include the current trading day.
+            max_end = today + pd.Timedelta(days=1)
+            if pd.Timestamp(end) > max_end:
+                raise ValueError(
+                    f"end_date: {end} is greater than the maximum supported open upper bound {max_end.strftime('%Y-%m-%d')}."
+                )
 
         super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
 
@@ -842,7 +881,7 @@ class Run(BaseRun):
         quant_master_data_1d_dir: str,
         end_date: str = None,
         check_data_length: int = None,
-        delay: float = 1,
+        delay: float = 0.1,
         exists_skip: bool = False,
     ):
         """update yahoo data to bin
@@ -873,7 +912,7 @@ class Run(BaseRun):
         """
 
         if self.interval.lower() != "1d":
-            logger.warning(f"currently supports 1d data updates: --interval 1d")
+            raise ValueError(f"update_data_to_bin only supports 1d data, got interval={self.interval}")
 
         # download quant_master 1d data
         quant_master_data_1d_dir = str(Path(quant_master_data_1d_dir).expanduser().resolve())
@@ -890,13 +929,13 @@ class Run(BaseRun):
             end_date = (pd.Timestamp(trading_date) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
 
         # download data from yahoo
-        # NOTE: when downloading data from YahooFinance, max_workers is recommended to be 1
+        self.max_workers = 4
         self.download_data(delay=delay, start=trading_date, end=end_date, check_data_length=check_data_length)
-        # NOTE: a larger max_workers setting here would be faster
+        # Keep the whole incremental update path at a minimum concurrency of 8 workers.
         self.max_workers = (
-            max(multiprocessing.cpu_count() - 2, 1)
-            if self.max_workers is None or self.max_workers <= 1
-            else self.max_workers
+            max(multiprocessing.cpu_count() - 2, 8)
+            if self.max_workers is None or self.max_workers <= 0
+            else max(self.max_workers, 8)
         )
         # normalize data against the existing quant_master dataset so the overlap trading day can be removed safely
         _class = getattr(self._cur_module, f"{self.normalize_class_name}Extend")

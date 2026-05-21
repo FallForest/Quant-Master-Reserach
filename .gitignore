@@ -20,10 +20,10 @@ dist/
 .vscode
 .venv/
 
-qlib/VERSION.txt
-qlib/data/_libs/expanding.cpp
-qlib/data/_libs/rolling.cpp
-qlib/_version.py
+quant_master/VERSION.txt
+quant_master/data/_libs/expanding.cpp
+quant_master/data/_libs/rolling.cpp
+quant_master/_version.py
 examples/estimator/estimator_example/
 examples/rl/data/
 examples/rl/checkpoints/
@@ -52,3 +52,15 @@ tags
 ./pretrain
 .idea/
 .aider*
+
+# Data directories
+.qmData/
+mlruns_tmp/
+
+# Experiment outputs
+examples/benchmarks/Transcendence/*.json
+examples/benchmarks/Transcendence/*.csv
+examples/benchmarks/Transcendence/*.md
+
+# Reports
+reports/

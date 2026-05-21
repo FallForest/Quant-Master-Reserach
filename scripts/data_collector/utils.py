@@ -15,7 +15,9 @@ from typing import Iterable, Tuple, List
 import numpy as np
 import pandas as pd
 from loguru import logger
-from yahooquery import Ticker
+import json
+import urllib.request
+import urllib.error
 from tqdm import tqdm
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor
@@ -54,6 +56,44 @@ _CALENDAR_MAP = {}
 MINIMUM_SYMBOLS_NUM = 3900
 
 
+_YAHOO_HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+
+
+def yahoo_fetch(url: str, timeout: int = 30) -> dict:
+    """Shared HTTP client for Yahoo Finance v8 API.
+
+    Parameters
+    ----------
+    url : str
+        Full Yahoo Finance API URL.
+    timeout : int
+        Request timeout in seconds.
+
+    Returns
+    -------
+    dict
+        Parsed JSON response.
+    """
+    req = urllib.request.Request(url, headers=_YAHOO_HEADERS)
+    resp = urllib.request.urlopen(req, timeout=timeout)
+    return json.loads(resp.read())
+
+
+def _fetch_yahoo_calendar(symbol: str) -> List[pd.Timestamp]:
+    """Fetch trading calendar from Yahoo Finance v8 API."""
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range=max"
+    try:
+        data = yahoo_fetch(url)
+    except Exception as e:
+        logger.error(f"Failed to fetch calendar for {symbol}: {e}")
+        raise
+
+    result = data["chart"]["result"][0]
+    timestamps = result.get("timestamp", [])
+    dates = sorted(set(pd.Timestamp(ts, unit="s").date() for ts in timestamps))
+    return [pd.Timestamp(d) for d in dates]
+
+
 def get_calendar_list(bench_code="CSI300") -> List[pd.Timestamp]:
     """get SH/SZ history calendar list
 
@@ -83,10 +123,8 @@ def get_calendar_list(bench_code="CSI300") -> List[pd.Timestamp]:
     calendar = _CALENDAR_MAP.get(bench_code, None)
     if calendar is None:
         if bench_code.startswith("US_") or bench_code.startswith("IN_") or bench_code.startswith("BR_"):
-            print(Ticker(CALENDAR_BENCH_URL_MAP[bench_code]))
-            print(Ticker(CALENDAR_BENCH_URL_MAP[bench_code]).history(interval="1d", period="max"))
-            df = Ticker(CALENDAR_BENCH_URL_MAP[bench_code]).history(interval="1d", period="max")
-            calendar = df.index.get_level_values(level="date").map(pd.Timestamp).unique().tolist()
+            symbol = CALENDAR_BENCH_URL_MAP[bench_code]
+            calendar = _fetch_yahoo_calendar(symbol)
         else:
             if bench_code.upper() == "ALL":
                 import akshare as ak  # pylint: disable=C0415
@@ -216,9 +254,19 @@ def get_hs_stock_symbols() -> list:
         while True:
             params["pn"] = page
             try:
-                resp = requests.get(base_url, params=params, timeout=None)
-                resp.raise_for_status()
-                data = resp.json()
+                for attempt in range(1, 6):
+                    try:
+                        resp = requests.get(base_url, params=params, timeout=None)
+                        resp.raise_for_status()
+                        data = resp.json()
+                        break
+                    except requests.exceptions.HTTPError as e:
+                        if attempt == 5:
+                            raise requests.exceptions.HTTPError(
+                                f"Request to {base_url} failed with status code {resp.status_code}"
+                            ) from e
+                        logger.warning(f"Retry page {page} after HTTP error on attempt {attempt}: {e}")
+                        time.sleep(3)
 
                 # Check if response contains valid data
                 if not data or "data" not in data or not data["data"] or "diff" not in data["data"]:
@@ -242,12 +290,8 @@ def get_hs_stock_symbols() -> list:
                 page += 1
 
                 # sleep time to avoid overloading the server
-                time.sleep(0.5)
+                time.sleep(0.1)
 
-            except requests.exceptions.HTTPError as e:
-                raise requests.exceptions.HTTPError(
-                    f"Request to {base_url} failed with status code {resp.status_code}"
-                ) from e
             except Exception as e:
                 logger.warning("An error occurred while extracting data from the response.")
                 raise
@@ -266,18 +310,26 @@ def get_hs_stock_symbols() -> list:
 
     if _HS_SYMBOLS is None:
         symbols = set()
-        _retry = 60
-        # It may take multiple times to get the complete
-        while len(symbols) < MINIMUM_SYMBOLS_NUM:
-            symbols |= _get_symbol()
-            time.sleep(3)
-
+        cache_symbols = set()
         symbol_cache_path = Path("~/.cache/hs_symbols_cache.pkl").expanduser().resolve()
-        symbol_cache_path.parent.mkdir(parents=True, exist_ok=True)
         if symbol_cache_path.exists():
             with symbol_cache_path.open("rb") as fp:
-                cache_symbols = restricted_pickle_load(fp)
-                symbols |= cache_symbols
+                cache_symbols = set(restricted_pickle_load(fp))
+        # It may take multiple times to get the complete
+        while len(symbols) < MINIMUM_SYMBOLS_NUM:
+            try:
+                symbols |= _get_symbol()
+            except Exception as e:
+                if cache_symbols:
+                    logger.warning(f"Falling back to cached HS symbols after fetch failure: {e}")
+                    symbols |= cache_symbols
+                    break
+                raise
+            time.sleep(3)
+
+        symbol_cache_path.parent.mkdir(parents=True, exist_ok=True)
+        if cache_symbols:
+            symbols |= cache_symbols
         with symbol_cache_path.open("wb") as fp:
             pickle.dump(symbols, fp)
 
