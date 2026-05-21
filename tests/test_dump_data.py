@@ -7,10 +7,10 @@ import shutil
 import unittest
 from pathlib import Path
 
-import qlib
+import quant_master
 import numpy as np
 import pandas as pd
-from qlib.data import D
+from quant_master.data import D
 
 sys.path.append(str(Path(__file__).resolve().parent.parent.joinpath("scripts")))
 from get_data import GetData
@@ -19,7 +19,7 @@ from dump_bin import DumpDataAll, DumpDataFix
 DATA_DIR = Path(__file__).parent.joinpath("test_dump_data")
 SOURCE_DIR = DATA_DIR.joinpath("source")
 SOURCE_DIR.mkdir(exist_ok=True, parents=True)
-QLIB_DIR = DATA_DIR.joinpath("qlib")
+QLIB_DIR = DATA_DIR.joinpath("quant_master")
 QLIB_DIR.mkdir(exist_ok=True, parents=True)
 
 
@@ -35,10 +35,10 @@ class TestDumpData(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         GetData().download_data(file_name="csv_data_cn.zip", target_dir=SOURCE_DIR)
-        TestDumpData.DUMP_DATA = DumpDataAll(data_path=SOURCE_DIR, qlib_dir=QLIB_DIR, include_fields=cls.FIELDS)
+        TestDumpData.DUMP_DATA = DumpDataAll(data_path=SOURCE_DIR, quant_master_dir=QLIB_DIR, include_fields=cls.FIELDS)
         TestDumpData.STOCK_NAMES = list(map(lambda x: x.name[:-4].upper(), SOURCE_DIR.glob("*.csv")))
         provider_uri = str(QLIB_DIR.resolve())
-        qlib.init(
+        quant_master.init(
             provider_uri=provider_uri,
             expression_cache=None,
             dataset_cache=None,
@@ -75,7 +75,7 @@ class TestDumpData(unittest.TestCase):
     def test_4_dump_features_simple(self):
         stock = self.STOCK_NAMES[0]
         dump_data = DumpDataFix(
-            data_path=SOURCE_DIR.joinpath(f"{stock.lower()}.csv"), qlib_dir=QLIB_DIR, include_fields=self.FIELDS
+            data_path=SOURCE_DIR.joinpath(f"{stock.lower()}.csv"), quant_master_dir=QLIB_DIR, include_fields=self.FIELDS
         )
         dump_data.dump()
 

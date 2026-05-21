@@ -81,7 +81,7 @@ class Tuner:
         pass
 
 
-class QuantMasterTuner(Tuner):
+class QLibTuner(Tuner):
     ESTIMATOR_CONFIG_NAME = "estimator_config.yaml"
     EXP_INFO_NAME = "exp_info.json"
     EXP_RESULT_DIR = "sacred/{}"
@@ -117,7 +117,7 @@ class QuantMasterTuner(Tuner):
 
     def fetch_result(self):
         # 1. Get experiment information
-        exp_info_path = os.path.join(self.ex_dir, QuantMasterTuner.EXP_INFO_NAME)
+        exp_info_path = os.path.join(self.ex_dir, QLibTuner.EXP_INFO_NAME)
         with open(exp_info_path) as fp:
             exp_info = json.load(fp)
         estimator_ex_id = exp_info["id"]
@@ -133,8 +133,8 @@ class QuantMasterTuner(Tuner):
                 return np.abs(exp_info["performance"]["model_pearsonr"] - 1)
 
         # 3. Get backtest results
-        exp_result_dir = os.path.join(self.ex_dir, QuantMasterTuner.EXP_RESULT_DIR.format(estimator_ex_id))
-        exp_result_path = os.path.join(exp_result_dir, QuantMasterTuner.EXP_RESULT_NAME)
+        exp_result_dir = os.path.join(self.ex_dir, QLibTuner.EXP_RESULT_DIR.format(estimator_ex_id))
+        exp_result_path = os.path.join(exp_result_dir, QLibTuner.EXP_RESULT_NAME)
         with open(exp_result_path, "rb") as fp:
             analysis_df = restricted_pickle_load(fp)
 
@@ -158,7 +158,7 @@ class QuantMasterTuner(Tuner):
 
         estimator_path = os.path.join(
             self.tuner_config["experiment"].get("dir", "../"),
-            QuantMasterTuner.ESTIMATOR_CONFIG_NAME,
+            QLibTuner.ESTIMATOR_CONFIG_NAME,
         )
 
         with open(estimator_path, "w") as fp:
@@ -207,7 +207,7 @@ class QuantMasterTuner(Tuner):
 
     def save_local_best_params(self):
         TimeInspector.set_time_mark()
-        local_best_params_path = os.path.join(self.ex_dir, QuantMasterTuner.LOCAL_BEST_PARAMS_NAME)
+        local_best_params_path = os.path.join(self.ex_dir, QLibTuner.LOCAL_BEST_PARAMS_NAME)
         with open(local_best_params_path, "w") as fp:
             json.dump(self.best_params, fp)
         TimeInspector.log_cost_time(

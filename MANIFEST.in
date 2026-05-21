@@ -1,6 +1,6 @@
 exclude tests/*
-include qlib/*
-include qlib/*/*
-include qlib/*/*/*
-include qlib/*/*/*/*
-include qlib/*/*/*/*/*
+include quant_master/*
+include quant_master/*/*
+include quant_master/*/*/*
+include quant_master/*/*/*/*
+include quant_master/*/*/*/*/*

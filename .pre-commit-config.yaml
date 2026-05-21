@@ -3,7 +3,7 @@ repos:
     rev: 23.7.0
     hooks:
     -   id: black
-        args: ["qlib", "-l 120"]
+        args: ["quant_master", "-l 120"]
 
 -   repo: https://github.com/PyCQA/flake8
     rev: 4.0.1

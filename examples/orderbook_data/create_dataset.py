@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 """
 NOTE:
-- This scripts is a demo to import example data import Qlib
+- This scripts is a demo to import example data import QuantMaster
 - !!!!!!!!!!!!!!!TODO!!!!!!!!!!!!!!!!!!!:
     - Its structure is not well designed and very ugly, your contribution is welcome to make importing dataset easier
 """

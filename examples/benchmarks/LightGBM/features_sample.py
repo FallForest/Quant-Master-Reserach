@@ -1,7 +1,7 @@
 import datetime
 import pandas as pd
 
-from qlib.data.inst_processor import InstProcessor
+from quant_master.data.inst_processor import InstProcessor
 
 
 class Resample1minProcessor(InstProcessor):

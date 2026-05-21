@@ -1,9 +1,9 @@
 from typing import List, Tuple, Union
-from qlib.backtest.position import Position
-from qlib.backtest import collect_data, format_decisions
-from qlib.backtest.decision import BaseTradeDecision, TradeRangeByTime
-import qlib
-from qlib.tests import TestAutoData
+from quant_master.backtest.position import Position
+from quant_master.backtest import collect_data, format_decisions
+from quant_master.backtest.decision import BaseTradeDecision, TradeRangeByTime
+import quant_master
+from quant_master.tests import TestAutoData
 import unittest
 import pandas as pd
 
@@ -44,7 +44,7 @@ class TestHFBacktest(TestAutoData):
 
         strategy_config = {
             "class": "FileOrderStrategy",
-            "module_path": "qlib.contrib.strategy.rule_strategy",
+            "module_path": "quant_master.contrib.strategy.rule_strategy",
             "kwargs": {
                 "trade_range": TradeRangeByTime("10:45", "14:44"),
                 "file": orders,
@@ -72,17 +72,17 @@ class TestHFBacktest(TestAutoData):
         }
         executor_config = {
             "class": "NestedExecutor",  # Level 1 Order execution
-            "module_path": "qlib.backtest.executor",
+            "module_path": "quant_master.backtest.executor",
             "kwargs": {
                 "time_per_step": freq_l0,
                 "inner_executor": {
                     "class": "NestedExecutor",  # Leve 2 Order Execution
-                    "module_path": "qlib.backtest.executor",
+                    "module_path": "quant_master.backtest.executor",
                     "kwargs": {
                         "time_per_step": freq_l1,
                         "inner_executor": {
                             "class": "SimulatorExecutor",
-                            "module_path": "qlib.backtest.executor",
+                            "module_path": "quant_master.backtest.executor",
                             "kwargs": {
                                 "time_per_step": freq_l2,
                                 "generate_portfolio_metrics": False,
@@ -95,7 +95,7 @@ class TestHFBacktest(TestAutoData):
                         },
                         "inner_strategy": {
                             "class": "TWAPStrategy",
-                            "module_path": "qlib.contrib.strategy.rule_strategy",
+                            "module_path": "quant_master.contrib.strategy.rule_strategy",
                         },
                         "generate_portfolio_metrics": False,
                         "indicator_config": {
@@ -106,7 +106,7 @@ class TestHFBacktest(TestAutoData):
                 },
                 "inner_strategy": {
                     "class": "TWAPStrategy",
-                    "module_path": "qlib.contrib.strategy.rule_strategy",
+                    "module_path": "quant_master.contrib.strategy.rule_strategy",
                 },
                 "generate_portfolio_metrics": False,
                 "indicator_config": {

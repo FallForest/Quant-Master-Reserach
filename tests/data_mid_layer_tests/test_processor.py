@@ -3,9 +3,9 @@
 
 import unittest
 import numpy as np
-from qlib.data import D
-from qlib.tests import TestAutoData
-from qlib.data.dataset.processor import MinMaxNorm, ZScoreNorm, CSZScoreNorm, CSZFillna
+from quant_master.data import D
+from quant_master.tests import TestAutoData
+from quant_master.data.dataset.processor import MinMaxNorm, ZScoreNorm, CSZScoreNorm, CSZFillna
 
 
 class TestProcessor(TestAutoData):

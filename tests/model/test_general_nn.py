@@ -1,13 +1,13 @@
 import unittest
-from qlib.tests import TestAutoData
+from quant_master.tests import TestAutoData
 
 
 class TestNN(TestAutoData):
     def test_both_dataset(self):
         try:
-            from qlib.contrib.model.pytorch_general_nn import GeneralPTNN
-            from qlib.data.dataset import DatasetH, TSDatasetH
-            from qlib.data.dataset.handler import DataHandlerLP
+            from quant_master.contrib.model.pytorch_general_nn import GeneralPTNN
+            from quant_master.data.dataset import DatasetH, TSDatasetH
+            from quant_master.data.dataset.handler import DataHandlerLP
         except ImportError:
             print("Import error.")
             return
@@ -17,7 +17,7 @@ class TestNN(TestAutoData):
             "end_time": "2020-08-01",
             "instruments": "csi300",
             "data_loader": {
-                "class": "QlibDataLoader",  # Assuming QlibDataLoader is a string reference to the class
+                "class": "QuantMasterDataLoader",  # Assuming QuantMasterDataLoader is a string reference to the class
                 "kwargs": {
                     "config": {
                         "feature": [["$high", "$close", "$low"], ["H", "C", "L"]],
@@ -52,7 +52,7 @@ class TestNN(TestAutoData):
                 n_epochs=2,
                 batch_size=32,
                 n_jobs=0,
-                pt_model_uri="qlib.contrib.model.pytorch_gru_ts.GRUModel",
+                pt_model_uri="quant_master.contrib.model.pytorch_gru_ts.GRUModel",
                 pt_model_kwargs={
                     "d_feat": 3,
                     "hidden_size": 8,
@@ -64,7 +64,7 @@ class TestNN(TestAutoData):
                 n_epochs=2,
                 batch_size=32,
                 n_jobs=0,
-                pt_model_uri="qlib.contrib.model.pytorch_nn.Net",  # it is a MLP
+                pt_model_uri="quant_master.contrib.model.pytorch_nn.Net",  # it is a MLP
                 pt_model_kwargs={
                     "input_dim": 3,
                 },

@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 """
 The motivation of this demo
-- To show the data modules of Qlib is Serializable, users can dump processed data to disk to avoid duplicated data preprocessing
+- To show the data modules of QuantMaster is Serializable, users can dump processed data to disk to avoid duplicated data preprocessing
 """
 
 from copy import deepcopy
@@ -12,11 +12,11 @@ from pprint import pprint
 from ruamel.yaml import YAML
 import subprocess
 
-from qlib import init
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.log import TimeInspector
-from qlib.model.trainer import task_train
-from qlib.utils import init_instance_by_config
+from quant_master import init
+from quant_master.data.dataset.handler import DataHandlerLP
+from quant_master.log import TimeInspector
+from quant_master.model.trainer import task_train
+from quant_master.utils import init_instance_by_config
 
 # For general purpose, we use relative path
 DIRNAME = Path(__file__).absolute().resolve().parent

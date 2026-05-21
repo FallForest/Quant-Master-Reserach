@@ -1,5 +1,5 @@
-qlib_init:
-    provider_uri: "~/.qlib/qlib_data/cn_data"
+quant_master_init:
+    provider_uri: "~/.quant_master/quant_master_data/cn_data"
     region: cn
 market: &market csi300
 benchmark: &benchmark SH000300
@@ -26,7 +26,7 @@ data_handler_config: &data_handler_config
 port_analysis_config: &port_analysis_config
     strategy:
         class: TopkDropoutStrategy
-        module_path: qlib.contrib.strategy
+        module_path: quant_master.contrib.strategy
         kwargs:
             signal: <PRED>
             topk: 50
@@ -45,18 +45,18 @@ port_analysis_config: &port_analysis_config
 task:
     model:
         class: TabnetModel
-        module_path: qlib.contrib.model.pytorch_tabnet
+        module_path: quant_master.contrib.model.pytorch_tabnet
         kwargs:
             d_feat: 360
             pretrain: True
             seed: 993
     dataset:
         class: DatasetH
-        module_path: qlib.data.dataset
+        module_path: quant_master.data.dataset
         kwargs:
             handler:
                 class: Alpha360
-                module_path: qlib.contrib.data.handler
+                module_path: quant_master.contrib.data.handler
                 kwargs: *data_handler_config
             segments:
                 pretrain: [2008-01-01, 2014-12-31]
@@ -66,16 +66,16 @@ task:
                 test: [2017-01-01, 2020-08-01]
     record: 
         - class: SignalRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs: 
             model: <MODEL>
             dataset: <DATASET>
         - class: SigAnaRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs: 
             ana_long_short: False
             ann_scaler: 252
         - class: PortAnaRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs: 
             config: *port_analysis_config

@@ -6,9 +6,9 @@ from pathlib import Path
 from collections.abc import Iterable
 
 import numpy as np
-from qlib.tests import TestAutoData
+from quant_master.tests import TestAutoData
 
-from qlib.data.storage.file_storage import (
+from quant_master.data.storage.file_storage import (
     FileCalendarStorage as CalendarStorage,
     FileInstrumentStorage as InstrumentStorage,
     FileFeatureStorage as FeatureStorage,
@@ -16,7 +16,7 @@ from qlib.data.storage.file_storage import (
 
 _file_name = Path(__file__).name.split(".")[0]
 DATA_DIR = Path(__file__).parent.joinpath(f"{_file_name}_data")
-QLIB_DIR = DATA_DIR.joinpath("qlib")
+QLIB_DIR = DATA_DIR.joinpath("quant_master")
 QLIB_DIR.mkdir(exist_ok=True, parents=True)
 
 

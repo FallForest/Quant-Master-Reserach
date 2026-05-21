@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from qlib.constant import EPS
-from qlib.data.dataset.processor import Processor
-from qlib.data.dataset.utils import fetch_df_by_index
+from quant_master.constant import EPS
+from quant_master.data.dataset.processor import Processor
+from quant_master.data.dataset.utils import fetch_df_by_index
 
 
 class HighFreqNorm(Processor):

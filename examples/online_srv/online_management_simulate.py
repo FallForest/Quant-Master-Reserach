@@ -7,24 +7,24 @@ This example is about how can simulate the OnlineManager based on rolling tasks.
 
 from pprint import pprint
 import fire
-import qlib
-from qlib.model.trainer import DelayTrainerR, DelayTrainerRM, TrainerR, TrainerRM
-from qlib.workflow import R
-from qlib.workflow.online.manager import OnlineManager
-from qlib.workflow.online.strategy import RollingStrategy
-from qlib.workflow.task.gen import RollingGen
-from qlib.workflow.task.manage import TaskManager
-from qlib.tests.config import CSI100_RECORD_LGB_TASK_CONFIG_ONLINE, CSI100_RECORD_XGBOOST_TASK_CONFIG_ONLINE
+import quant_master
+from quant_master.model.trainer import DelayTrainerR, DelayTrainerRM, TrainerR, TrainerRM
+from quant_master.workflow import R
+from quant_master.workflow.online.manager import OnlineManager
+from quant_master.workflow.online.strategy import RollingStrategy
+from quant_master.workflow.task.gen import RollingGen
+from quant_master.workflow.task.manage import TaskManager
+from quant_master.tests.config import CSI100_RECORD_LGB_TASK_CONFIG_ONLINE, CSI100_RECORD_XGBOOST_TASK_CONFIG_ONLINE
 import pandas as pd
-from qlib.contrib.evaluate import backtest_daily
-from qlib.contrib.evaluate import risk_analysis
-from qlib.contrib.strategy import TopkDropoutStrategy
+from quant_master.contrib.evaluate import backtest_daily
+from quant_master.contrib.evaluate import risk_analysis
+from quant_master.contrib.strategy import TopkDropoutStrategy
 
 
 class OnlineSimulationExample:
     def __init__(
         self,
-        provider_uri="~/.qlib/qlib_data/cn_data",
+        provider_uri="~/.quant_master/quant_master_data/cn_data",
         region="cn",
         exp_name="rolling_exp",
         task_url="mongodb://10.0.0.4:27017/",  # not necessary when using TrainerR or DelayTrainerR
@@ -40,7 +40,7 @@ class OnlineSimulationExample:
         Init OnlineManagerExample.
 
         Args:
-            provider_uri (str, optional): the provider uri. Defaults to "~/.qlib/qlib_data/cn_data".
+            provider_uri (str, optional): the provider uri. Defaults to "~/.quant_master/quant_master_data/cn_data".
             region (str, optional): the stock region. Defaults to "cn".
             exp_name (str, optional): the experiment name. Defaults to "rolling_exp".
             task_url (str, optional): your MongoDB url. Defaults to "mongodb://10.0.0.4:27017/".
@@ -61,7 +61,7 @@ class OnlineSimulationExample:
             "task_url": task_url,
             "task_db_name": task_db_name,
         }
-        qlib.init(provider_uri=provider_uri, region=region, mongo=mongo_conf)
+        quant_master.init(provider_uri=provider_uri, region=region, mongo=mongo_conf)
         self.rolling_gen = RollingGen(
             step=rolling_step, rtype=RollingGen.ROLL_SD, ds_extra_mod_func=None
         )  # The rolling tasks generator, ds_extra_mod_func is None because we just need to simulate to 2018-10-31 and needn't change the handler end time.
@@ -99,7 +99,7 @@ class OnlineSimulationExample:
         signals = self.rolling_online_manager.get_signals()
         print(signals)
         # Backtesting
-        # - the code is based on this example https://qlib.readthedocs.io/en/latest/component/strategy.html
+        # - the code is based on this example https://quant_master.readthedocs.io/en/latest/component/strategy.html
         CSI300_BENCH = "SH000903"
         STRATEGY_CONFIG = {
             "topk": 30,

@@ -1,6 +1,6 @@
 import sys
 import platform
-import qlib
+import quant_master
 import fire
 import pkg_resources
 from pathlib import Path
@@ -12,7 +12,7 @@ class InfoCollector:
     """
     User could collect system info by following commands
     `cd scripts && python collect_info.py all`
-    - NOTE: please avoid running this script in the project folder which contains `qlib`
+    - NOTE: please avoid running this script in the project folder which contains `quant_master`
     """
 
     def sys(self):
@@ -24,9 +24,9 @@ class InfoCollector:
         """collect Python related info"""
         print("Python version: {}".format(sys.version.replace("\n", " ")))
 
-    def qlib(self):
-        """collect qlib related info"""
-        print("Qlib version: {}".format(qlib.__version__))
+    def quant_master(self):
+        """collect quant_master related info"""
+        print("QuantMaster version: {}".format(quant_master.__version__))
         REQUIRED = [
             "setuptools",
             "wheel",
@@ -62,7 +62,7 @@ class InfoCollector:
 
     def all(self):
         """collect all info"""
-        for method in ["sys", "py", "qlib"]:
+        for method in ["sys", "py", "quant_master"]:
             getattr(self, method)()
             print()
 

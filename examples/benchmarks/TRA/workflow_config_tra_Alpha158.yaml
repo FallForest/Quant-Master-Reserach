@@ -1,5 +1,5 @@
-qlib_init:
-  provider_uri: "~/.qlib/qlib_data/cn_data"
+quant_master_init:
+  provider_uri: "~/.quant_master/quant_master_data/cn_data"
   region: cn
 
 market: &market csi300
@@ -55,7 +55,7 @@ model_config: &model_config
 port_analysis_config: &port_analysis_config
     strategy:
         class: TopkDropoutStrategy
-        module_path: qlib.contrib.strategy
+        module_path: quant_master.contrib.strategy
         kwargs:
             signal: <PRED>
             topk: 50
@@ -75,7 +75,7 @@ port_analysis_config: &port_analysis_config
 task:
   model:
     class: TRAModel
-    module_path: qlib.contrib.model.pytorch_tra
+    module_path: quant_master.contrib.model.pytorch_tra
     kwargs:
       tra_config: *tra_config
       model_config: *model_config
@@ -99,11 +99,11 @@ task:
       freeze_predictors: False
   dataset:
     class: MTSDatasetH
-    module_path: qlib.contrib.data.dataset
+    module_path: quant_master.contrib.data.dataset
     kwargs:
       handler:
         class: Alpha158
-        module_path: qlib.contrib.data.handler
+        module_path: quant_master.contrib.data.handler
         kwargs: *data_handler_config
       segments:
         train: [2008-01-01, 2014-12-31]
@@ -118,16 +118,16 @@ task:
       drop_last: True
   record:
     - class: SignalRecord
-      module_path: qlib.workflow.record_temp
+      module_path: quant_master.workflow.record_temp
       kwargs: 
         model: <MODEL>
         dataset: <DATASET>
     - class: SigAnaRecord
-      module_path: qlib.workflow.record_temp
+      module_path: quant_master.workflow.record_temp
       kwargs: 
         ana_long_short: False
         ann_scaler: 252
     - class: PortAnaRecord
-      module_path: qlib.workflow.record_temp
+      module_path: quant_master.workflow.record_temp
       kwargs: 
         config: *port_analysis_config

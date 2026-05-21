@@ -1,5 +1,5 @@
 ===============================
-``Qlib``: Quantitative Platform
+``QuantMaster``: Quantitative Platform
 ===============================
 
 Introduction
@@ -8,9 +8,9 @@ Introduction
 .. image:: ../_static/img/logo/white_bg_rec+word.png
     :align: center
 
-``Qlib`` is an AI-oriented quantitative investment platform, which aims to realize the potential, empower the research, and create the value of AI technologies in quantitative investment.
+``QuantMaster`` is an AI-oriented quantitative investment platform, which aims to realize the potential, empower the research, and create the value of AI technologies in quantitative investment.
 
-With ``Qlib``, users can easily try their ideas to create better Quant investment strategies.
+With ``QuantMaster``, users can easily try their ideas to create better Quant investment strategies.
 
 Framework
 =========
@@ -20,10 +20,10 @@ Framework
     :align: center
 
 
-At the module level, Qlib is a platform that consists of above components. The components are designed as loose-coupled modules and each component could be used stand-alone.
+At the module level, QuantMaster is a platform that consists of above components. The components are designed as loose-coupled modules and each component could be used stand-alone.
 
-This framework may be intimidating for new users to Qlib. It tries to accurately include a lot of details of Qlib's design.
-For users new to Qlib, you can skip it first and read it later.
+This framework may be intimidating for new users to QuantMaster. It tries to accurately include a lot of details of QuantMaster's design.
+For users new to QuantMaster, you can skip it first and read it later.
 
 
 

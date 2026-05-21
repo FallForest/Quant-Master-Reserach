@@ -20,7 +20,7 @@ Introduction
     - model_performance_graph
 
 
-All of the accumulated profit metrics(e.g. return, max drawdown) in Qlib are calculated by summation.
+All of the accumulated profit metrics(e.g. return, max drawdown) in QuantMaster are calculated by summation.
 This avoids the metrics or the plots being skewed exponentially over time.
 
 Graphical Reports
@@ -30,7 +30,7 @@ Users can run the following code to get all supported reports.
 
 .. code-block:: python
 
-    >> import qlib.contrib.report as qcr
+    >> import quant_master.contrib.report as qcr
     >> print(qcr.GRAPH_NAME_LIST)
     ['analysis_position.report_graph', 'analysis_position.score_ic_graph', 'analysis_position.cumulative_return_graph', 'analysis_position.risk_analysis_graph', 'analysis_position.rank_label_graph', 'analysis_model.model_performance_graph']
 
@@ -49,7 +49,7 @@ Usage of `analysis_position.report`
 API
 ~~~
 
-.. automodule:: qlib.contrib.report.analysis_position.report
+.. automodule:: quant_master.contrib.report.analysis_position.report
     :members:
     :noindex:
 
@@ -92,7 +92,7 @@ Usage of `analysis_position.score_ic`
 API
 ~~~
 
-.. automodule:: qlib.contrib.report.analysis_position.score_ic
+.. automodule:: quant_master.contrib.report.analysis_position.score_ic
     :members:
     :noindex:
 
@@ -120,7 +120,7 @@ Graphical Result
 .. API
 .. ~~~~~~~~~~~~~~~~
 ..
-.. .. automodule:: qlib.contrib.report.analysis_position.cumulative_return
+.. .. automodule:: quant_master.contrib.report.analysis_position.cumulative_return
 ..     :members:
 ..
 .. Graphical Result
@@ -151,7 +151,7 @@ Usage of `analysis_position.risk_analysis`
 API
 ~~~
 
-.. automodule:: qlib.contrib.report.analysis_position.risk_analysis
+.. automodule:: quant_master.contrib.report.analysis_position.risk_analysis
     :members:
     :noindex:
 
@@ -235,7 +235,7 @@ Graphical Result
 .. API
 .. ~~~
 ..
-.. .. automodule:: qlib.contrib.report.analysis_position.rank_label
+.. .. automodule:: quant_master.contrib.report.analysis_position.rank_label
 ..     :members:
 ..
 ..
@@ -271,7 +271,7 @@ Usage of `analysis_model.analysis_model_performance`
 API
 ~~~
 
-.. automodule:: qlib.contrib.report.analysis_model.analysis_model_performance
+.. automodule:: quant_master.contrib.report.analysis_model.analysis_model_performance
     :members:
     :noindex:
 

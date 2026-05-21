@@ -1,48 +1,48 @@
 
-- [Download Qlib Data](#Download-Qlib-Data)
+- [Download QuantMaster Data](#Download-QuantMaster-Data)
   - [Download CN Data](#Download-CN-Data)
   - [Download US Data](#Download-US-Data)
   - [Download CN Simple Data](#Download-CN-Simple-Data)
   - [Help](#Help)
-- [Using in Qlib](#Using-in-Qlib)
+- [Using in QuantMaster](#Using-in-QuantMaster)
   - [US data](#US-data)
   - [CN data](#CN-data)
 
 
-## Download Qlib Data
+## Download QuantMaster Data
 
 
 ### Download CN Data
 
 ```bash
 # daily data
-python get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data --region cn
+python get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
 
 # 1min  data (Optional for running non-high-frequency strategies)
-python get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data_1min --region cn --interval 1min
+python get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data_1min --region cn --interval 1min
 ```
 
 ### Download US Data
 
 
 ```bash
-python get_data.py qlib_data --target_dir ~/.qlib/qlib_data/us_data --region us
+python get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/us_data --region us
 ```
 
 ### Download CN Simple Data
 
 ```bash
-python get_data.py qlib_data --name qlib_data_simple --target_dir ~/.qlib/qlib_data/cn_data --region cn
+python get_data.py quant_master_data --name quant_master_data_simple --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
 ```
 
 ### Help
 
 ```bash
-python get_data.py qlib_data --help
+python get_data.py quant_master_data --help
 ```
 
-## Using in Qlib
-> For more information: https://qlib.readthedocs.io/en/latest/start/initialization.html
+## Using in QuantMaster
+> For more information: https://quant_master.readthedocs.io/en/latest/start/initialization.html
 
 
 ### US data
@@ -50,10 +50,10 @@ python get_data.py qlib_data --help
 > Need to download data first: [Download US Data](#Download-US-Data)
 
 ```python
-import qlib
-from qlib.config import REG_US
-provider_uri = "~/.qlib/qlib_data/us_data"  # target_dir
-qlib.init(provider_uri=provider_uri, region=REG_US)
+import quant_master
+from quant_master.config import REG_US
+provider_uri = "~/.quant_master/quant_master_data/us_data"  # target_dir
+quant_master.init(provider_uri=provider_uri, region=REG_US)
 ```
 
 ### CN data
@@ -61,16 +61,16 @@ qlib.init(provider_uri=provider_uri, region=REG_US)
 > Need to download data first: [Download CN Data](#Download-CN-Data)
 
 ```python
-import qlib
-from qlib.constant import REG_CN
+import quant_master
+from quant_master.constant import REG_CN
 
-provider_uri = "~/.qlib/qlib_data/cn_data"  # target_dir
-qlib.init(provider_uri=provider_uri, region=REG_CN)
+provider_uri = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+quant_master.init(provider_uri=provider_uri, region=REG_CN)
 ```
 
 ## Use Crowd Sourced Data
-The is also a [crowd sourced version of qlib data](data_collector/crowd_source/README.md): https://github.com/chenditc/investment_data/releases
+The is also a [crowd sourced version of quant_master data](data_collector/crowd_source/README.md): https://github.com/chenditc/investment_data/releases
 ```bash
-wget https://github.com/chenditc/investment_data/releases/latest/download/qlib_bin.tar.gz
-tar -zxvf qlib_bin.tar.gz -C ~/.qlib/qlib_data/cn_data --strip-components=2
+wget https://github.com/chenditc/investment_data/releases/latest/download/quant_master_bin.tar.gz
+tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/cn_data --strip-components=2
 ```

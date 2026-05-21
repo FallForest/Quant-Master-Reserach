@@ -1,9 +1,9 @@
 import unittest
 
-from qlib.data import D
-from qlib.data.dataset.loader import QlibDataLoader
-from qlib.data.ops import ChangeInstrument, Cov, Feature, Ref, Var
-from qlib.tests import TestOperatorData
+from quant_master.data import D
+from quant_master.data.dataset.loader import QuantMasterDataLoader
+from quant_master.data.ops import ChangeInstrument, Cov, Feature, Ref, Var
+from quant_master.tests import TestOperatorData
 
 
 class TestOperatorDataSetting(TestOperatorData):
@@ -80,7 +80,7 @@ class TestOperatorDataSetting(TestOperatorData):
         ]
         names = ["close", "marketClose", "ret", "marketRet", f"beta_{n_period}", "excess_return"]
         data_loader_config = {"feature": (fields, names)}
-        data_loader = QlibDataLoader(config=data_loader_config)
+        data_loader = QuantMasterDataLoader(config=data_loader_config)
         df = data_loader.load(instruments=[instrument])  # , start_time=start_time)
         print(df)
 

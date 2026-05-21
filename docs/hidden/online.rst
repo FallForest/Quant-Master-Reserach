@@ -2,14 +2,14 @@
 
 Online
 ======
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 Introduction
 ------------
 
 Welcome to use Online, this module simulates what will be like if we do the real trading use our model and strategy.
 
-Just like Estimator and other modules in Qlib, you need to determine parameters through the configuration file,
+Just like Estimator and other modules in QuantMaster, you need to determine parameters through the configuration file,
 and in this module, you need to add an account in a folder to do the simulation. Then in each coming day,
 this module will use the newest information to do the trade for your account,
 the performance can be viewed at any time using the API we defined.
@@ -35,9 +35,9 @@ Example
 
 Let's take an example,
 
-.. note:: Make sure you have the latest version of `qlib` installed.
+.. note:: Make sure you have the latest version of `quant_master` installed.
 
-If you want to use the models and data provided by `qlib`, you only need to do as follows.
+If you want to use the models and data provided by `quant_master`, you only need to do as follows.
 
 Firstly, write a simple configuration file as following,
 
@@ -45,14 +45,14 @@ Firstly, write a simple configuration file as following,
 
     strategy:
         class: TopkAmountStrategy
-        module_path: qlib.contrib.strategy
+        module_path: quant_master.contrib.strategy
         args:
             market: csi500
             trade_freq: 5
 
     model:
         class: ScoreFileModel
-        module_path: qlib.contrib.online.online_model
+        module_path: quant_master.contrib.online.online_model
         args:
             loss: mse
             model_path: ./model.bin
@@ -121,7 +121,7 @@ defined to manage your accounts.
         >> online show -id v-test -path ./user_data/ -bench SH000905
 
 The default value of all the parameter 'date' below is trade date
-(will be today if today is trading date and information has been updated in `qlib`).
+(will be today if today is trading date and information has been updated in `quant_master`).
 
 The 'generate' and 'update' will check whether input date is valid, the following 3 processes should
 be called at each trading date.
@@ -163,9 +163,9 @@ be called at each trading date.
 API
 ---
 
-All those operations are based on defined in `qlib.contrib.online.operator`
+All those operations are based on defined in `quant_master.contrib.online.operator`
 
-.. automodule:: qlib.contrib.online.operator
+.. automodule:: quant_master.contrib.online.operator
 
 .. _fileStruct:
 
@@ -225,7 +225,7 @@ Followings are two examples for ScoreFileModel and a model that read a score fil
 
      model:
         class: ScoreFileModel
-        module_path: qlib.contrib.online.OnlineModel
+        module_path: quant_master.contrib.online.OnlineModel
         args:
             loss: mse
 
@@ -233,12 +233,12 @@ Followings are two examples for ScoreFileModel and a model that read a score fil
 
      model:
         class: ScoreFileModel
-        module_path: qlib.contrib.online.OnlineModel
+        module_path: quant_master.contrib.online.OnlineModel
         args:
             score_path: <your score path>
 
 If your model doesn't belong to above models, you need to coding your model manually.
-Your model should be a subclass of models defined in 'qlib.contfib.model'. And it must
+Your model should be a subclass of models defined in 'quant_master.contfib.model'. And it must
 contains 2 methods used in `online` module.
 
 
@@ -253,7 +253,7 @@ Followings are two examples for a TopkAmountStrategy
 
     strategy:
         class: TopkDropoutStrategy
-        module_path: qlib.contrib.strategy.strategy
+        module_path: quant_master.contrib.strategy.strategy
         args:
             topk: 100
             n_drop: 10

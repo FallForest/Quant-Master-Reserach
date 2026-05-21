@@ -1,9 +1,9 @@
 .. _client:
 
-Qlib Client-Server Framework
+QuantMaster Client-Server Framework
 ============================
 
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 Introduction
 ------------
@@ -16,31 +16,31 @@ Client-Server is designed to solve following  problems
 Therefore, we designed the client-server framework to solve these problems.
 We will maintain a server and provide the data.
 
-You have to initialize you qlib with specific config for using the client-server framework.
+You have to initialize you quant_master with specific config for using the client-server framework.
 Here is a typical initialization process.
 
-qlib ``init`` commonly used parameters; ``nfs-common`` must be installed on the server where the client is located, execute: ``sudo apt install nfs-common``:
-    - ``provider_uri``: nfs-server path; the format is ``host: data_dir``, for example: ``172.23.233.89:/data2/gaochao/sync_qlib/qlib``. If using offline, it can be a local data directory
+quant_master ``init`` commonly used parameters; ``nfs-common`` must be installed on the server where the client is located, execute: ``sudo apt install nfs-common``:
+    - ``provider_uri``: nfs-server path; the format is ``host: data_dir``, for example: ``172.23.233.89:/data2/gaochao/sync_quant_master/quant_master``. If using offline, it can be a local data directory
     - ``mount_path``: local data directory, ``provider_uri`` will be mounted to this directory
-    - ``auto_mount``: whether to automatically mount ``provider_uri`` to ``mount_path`` during qlib ``init``; You can also mount it manually: sudo mount.nfs ``provider_uri`` ``mount_path``. If on PAI, it is recommended to set ``auto_mount=True``
+    - ``auto_mount``: whether to automatically mount ``provider_uri`` to ``mount_path`` during quant_master ``init``; You can also mount it manually: sudo mount.nfs ``provider_uri`` ``mount_path``. If on PAI, it is recommended to set ``auto_mount=True``
     - ``flask_server``: data service host; if you are on the intranet, you can use the default host: 172.23.233.89
     - ``flask_port``: data service port
 
 
-If running on 10.150.144.153 or 10.150.144.154 server, it's recommended to use the following code to ``init`` qlib:
+If running on 10.150.144.153 or 10.150.144.154 server, it's recommended to use the following code to ``init`` quant_master:
 
 .. code-block:: python
 
-   >>> import qlib
-   >>> qlib.init(auto_mount=False, mount_path='/data/csdesign/qlib')
-   >>> from qlib.data import D
+   >>> import quant_master
+   >>> quant_master.init(auto_mount=False, mount_path='/data/csdesign/quant_master')
+   >>> from quant_master.data import D
    >>> D.features(['SH600000'], ['$close'], start_time='20080101', end_time='20090101').head()
     [39336:MainThread](2019-05-28 21:35:42,800) INFO - Initialization - [__init__.py:16] - default_conf: client.
-    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:54] - qlib successfully initialized based on client settings.
-    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:56] - provider_uri=172.23.233.89:/data2/gaochao/sync_qlib/qlib
+    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:54] - quant_master successfully initialized based on client settings.
+    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:56] - provider_uri=172.23.233.89:/data2/gaochao/sync_quant_master/quant_master
     [39336:Thread-68](2019-05-28 21:35:42,809) INFO - Client - [client.py:28] - Connect to server ws://172.23.233.89:9710
     [39336:Thread-72](2019-05-28 21:35:43,489) INFO - Client - [client.py:31] - Disconnect from server!
-    Opening /data/csdesign/qlib/cache/d239a3b191daa9a5b1b19a59beb47b33 in read-only mode
+    Opening /data/csdesign/quant_master/cache/d239a3b191daa9a5b1b19a59beb47b33 in read-only mode
     Out[5]:
                                $close
     instrument datetime
@@ -51,20 +51,20 @@ If running on 10.150.144.153 or 10.150.144.154 server, it's recommended to use t
                2008-01-08  125.395004
 
 
-If running on PAI, it's recommended to use the following code to ``init`` qlib:
+If running on PAI, it's recommended to use the following code to ``init`` quant_master:
 
 .. code-block:: python
 
-   >>> import qlib
-   >>> qlib.init(auto_mount=True, mount_path='/data/csdesign/qlib', provider_uri='172.23.233.89:/data2/gaochao/sync_qlib/qlib')
-   >>> from qlib.data import D
+   >>> import quant_master
+   >>> quant_master.init(auto_mount=True, mount_path='/data/csdesign/quant_master', provider_uri='172.23.233.89:/data2/gaochao/sync_quant_master/quant_master')
+   >>> from quant_master.data import D
    >>> D.features(['SH600000'], ['$close'], start_time='20080101', end_time='20090101').head()
     [39336:MainThread](2019-05-28 21:35:42,800) INFO - Initialization - [__init__.py:16] - default_conf: client.
-    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:54] - qlib successfully initialized based on client settings.
-    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:56] - provider_uri=172.23.233.89:/data2/gaochao/sync_qlib/qlib
+    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:54] - quant_master successfully initialized based on client settings.
+    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:56] - provider_uri=172.23.233.89:/data2/gaochao/sync_quant_master/quant_master
     [39336:Thread-68](2019-05-28 21:35:42,809) INFO - Client - [client.py:28] - Connect to server ws://172.23.233.89:9710
     [39336:Thread-72](2019-05-28 21:35:43,489) INFO - Client - [client.py:31] - Disconnect from server!
-    Opening /data/csdesign/qlib/cache/d239a3b191daa9a5b1b19a59beb47b33 in read-only mode
+    Opening /data/csdesign/quant_master/cache/d239a3b191daa9a5b1b19a59beb47b33 in read-only mode
     Out[5]:
                                $close
     instrument datetime
@@ -75,7 +75,7 @@ If running on PAI, it's recommended to use the following code to ``init`` qlib:
                2008-01-08  125.395004
 
 
-If running on Windows, open **NFS** features and write correct **mount_path**, it's recommended to use the following code to ``init`` qlib:
+If running on Windows, open **NFS** features and write correct **mount_path**, it's recommended to use the following code to ``init`` quant_master:
 
 1.windows System open NFS Features
     * Open ``Programs and Features``.
@@ -86,20 +86,20 @@ If running on Windows, open **NFS** features and write correct **mount_path**, i
 2.config correct mount_path
     * In windows, mount path must be not exist path and root path,
         * correct format path eg: `H`, `i`...
-        * error format path eg: `C`, `C:/user/name`, `qlib_data`...
+        * error format path eg: `C`, `C:/user/name`, `quant_master_data`...
 
 .. code-block:: python
 
-   >>> import qlib
-   >>> qlib.init(auto_mount=True, mount_path='H', provider_uri='172.23.233.89:/data2/gaochao/sync_qlib/qlib')
-   >>> from qlib.data import D
+   >>> import quant_master
+   >>> quant_master.init(auto_mount=True, mount_path='H', provider_uri='172.23.233.89:/data2/gaochao/sync_quant_master/quant_master')
+   >>> from quant_master.data import D
    >>> D.features(['SH600000'], ['$close'], start_time='20080101', end_time='20090101').head()
     [39336:MainThread](2019-05-28 21:35:42,800) INFO - Initialization - [__init__.py:16] - default_conf: client.
-    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:54] - qlib successfully initialized based on client settings.
-    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:56] - provider_uri=172.23.233.89:/data2/gaochao/sync_qlib/qlib
+    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:54] - quant_master successfully initialized based on client settings.
+    [39336:MainThread](2019-05-28 21:35:42,801) INFO - Initialization - [__init__.py:56] - provider_uri=172.23.233.89:/data2/gaochao/sync_quant_master/quant_master
     [39336:Thread-68](2019-05-28 21:35:42,809) INFO - Client - [client.py:28] - Connect to server ws://172.23.233.89:9710
     [39336:Thread-72](2019-05-28 21:35:43,489) INFO - Client - [client.py:31] - Disconnect from server!
-    Opening /data/csdesign/qlib/cache/d239a3b191daa9a5b1b19a59beb47b33 in read-only mode
+    Opening /data/csdesign/quant_master/cache/d239a3b191daa9a5b1b19a59beb47b33 in read-only mode
     Out[5]:
                                $close
     instrument datetime
@@ -116,13 +116,13 @@ If running on Windows, open **NFS** features and write correct **mount_path**, i
 The client will mount the data in `provider_uri` on `mount_path`. Then the server and client will communicate with flask and transporting data with this NFS.
 
 
-If you have a local qlib data files and want to use the qlib data offline instead of online with client server framework.
+If you have a local quant_master data files and want to use the quant_master data offline instead of online with client server framework.
 It is also possible with  specific config.
 You can created such a config. `client_config_local.yml`
 
 .. code-block:: YAML
 
-    provider_uri: /data/csdesign/qlib
+    provider_uri: /data/csdesign/quant_master
     calendar_provider: 'LocalCalendarProvider'
     instrument_provider: 'LocalInstrumentProvider'
     feature_provider: 'LocalFeatureProvider'
@@ -130,19 +130,19 @@ You can created such a config. `client_config_local.yml`
     dataset_provider: 'LocalDatasetProvider'
     provider: 'LocalProvider'
     dataset_cache: 'SimpleDatasetCache'
-    local_cache_path: '~/.cache/qlib/'
+    local_cache_path: '~/.cache/quant_master/'
 
 `provider_uri` is the directory of your local data.
 
 .. code-block:: python
 
-   >>> import qlib
-   >>> qlib.init_from_yaml_conf('client_config_local.yml')
-   >>> from qlib.data import D
+   >>> import quant_master
+   >>> quant_master.init_from_yaml_conf('client_config_local.yml')
+   >>> from quant_master.data import D
    >>> D.features(['SH600001'], ['$close'], start_time='20180101', end_time='20190101').head()
     21232:MainThread](2019-05-29 10:16:05,066) INFO - Initialization - [__init__.py:16] - default_conf: client.
-    [21232:MainThread](2019-05-29 10:16:05,066) INFO - Initialization - [__init__.py:54] - qlib successfully initialized based on client settings.
-    [21232:MainThread](2019-05-29 10:16:05,067) INFO - Initialization - [__init__.py:56] - provider_uri=/data/csdesign/qlib
+    [21232:MainThread](2019-05-29 10:16:05,066) INFO - Initialization - [__init__.py:54] - quant_master successfully initialized based on client settings.
+    [21232:MainThread](2019-05-29 10:16:05,067) INFO - Initialization - [__init__.py:56] - provider_uri=/data/csdesign/quant_master
     Out[9]:
                               $close
     instrument datetime
@@ -167,4 +167,4 @@ The client is based on `python-socketio <https://python-socketio.readthedocs.io>
 Class
 -----
 
-.. automodule:: qlib.data.client
+.. automodule:: quant_master.data.client

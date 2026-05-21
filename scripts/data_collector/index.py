@@ -29,7 +29,7 @@ class IndexBase:
     def __init__(
         self,
         index_name: str,
-        qlib_dir: [str, Path] = None,
+        quant_master_dir: [str, Path] = None,
         freq: str = "day",
         request_retry: int = 5,
         retry_sleep: int = 3,
@@ -40,8 +40,8 @@ class IndexBase:
         ----------
         index_name: str
             index name
-        qlib_dir: str
-            qlib directory, by default Path(__file__).resolve().parent.joinpath("qlib_data")
+        quant_master_dir: str
+            quant_master directory, by default Path(__file__).resolve().parent.joinpath("quant_master_data")
         freq: str
             freq, value from ["day", "1min"]
         request_retry: int
@@ -50,11 +50,11 @@ class IndexBase:
             request sleep, by default 3
         """
         self.index_name = index_name
-        if qlib_dir is None:
-            qlib_dir = Path(__file__).resolve().parent.joinpath("qlib_data")
-        self.instruments_dir = Path(qlib_dir).expanduser().resolve().joinpath("instruments")
+        if quant_master_dir is None:
+            quant_master_dir = Path(__file__).resolve().parent.joinpath("quant_master_data")
+        self.instruments_dir = Path(quant_master_dir).expanduser().resolve().joinpath("instruments")
         self.instruments_dir.mkdir(exist_ok=True, parents=True)
-        self.cache_dir = Path(f"~/.cache/qlib/index/{self.index_name}").expanduser().resolve()
+        self.cache_dir = Path(f"~/.cache/quant_master/index/{self.index_name}").expanduser().resolve()
         self.cache_dir.mkdir(exist_ok=True, parents=True)
         self._request_retry = request_retry
         self._retry_sleep = retry_sleep
@@ -136,7 +136,7 @@ class IndexBase:
 
         Examples
         -------
-            $ python collector.py save_new_companies --index_name CSI300 --qlib_dir ~/.qlib/qlib_data/cn_data
+            $ python collector.py save_new_companies --index_name CSI300 --quant_master_dir ~/.quant_master/quant_master_data/cn_data
         """
         df = self.get_new_companies()
         if df is None or df.empty:
@@ -206,7 +206,7 @@ class IndexBase:
 
         Examples
         -------
-            $ python collector.py parse_instruments --index_name CSI300 --qlib_dir ~/.qlib/qlib_data/cn_data
+            $ python collector.py parse_instruments --index_name CSI300 --quant_master_dir ~/.quant_master/quant_master_data/cn_data
         """
         logger.info(f"start parse {self.index_name.lower()} companies.....")
         instruments_columns = [self.SYMBOL_FIELD_NAME, self.START_DATE_FIELD, self.END_DATE_FIELD]

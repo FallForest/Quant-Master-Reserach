@@ -14,18 +14,18 @@ The processing script and sql is hosted on github repo: https://github.com/chend
 
 The packaged docker runtime is hosted on dockerhub: https://hub.docker.com/repository/docker/chenditc/investment_data
 
-## How to use it in qlib
+## How to use it in quant_master
 ### Option 1: Download release bin data
-User can download data in qlib bin format and use it directly: https://github.com/chenditc/investment_data/releases/latest
+User can download data in quant_master bin format and use it directly: https://github.com/chenditc/investment_data/releases/latest
 ```bash
-wget https://github.com/chenditc/investment_data/releases/latest/download/qlib_bin.tar.gz
-tar -zxvf qlib_bin.tar.gz -C ~/.qlib/qlib_data/cn_data --strip-components=2
+wget https://github.com/chenditc/investment_data/releases/latest/download/quant_master_bin.tar.gz
+tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/cn_data --strip-components=2
 ```
 
-### Option 2: Generate qlib data from dolthub
-Dolthub data will be update daily, so that if user wants to get up to date data, they can dump qlib bin using docker:
+### Option 2: Generate quant_master data from dolthub
+Dolthub data will be update daily, so that if user wants to get up to date data, they can dump quant_master bin using docker:
 ```
-docker run -v /<some output directory>:/output -it --rm chenditc/investment_data bash dump_qlib_bin.sh && cp ./qlib_bin.tar.gz /output/
+docker run -v /<some output directory>:/output -it --rm chenditc/investment_data bash dump_quant_master_bin.sh && cp ./quant_master_bin.tar.gz /output/
 ```
 
 ## FAQ and other info

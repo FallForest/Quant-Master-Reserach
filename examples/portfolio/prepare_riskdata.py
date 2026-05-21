@@ -4,8 +4,8 @@ import os
 import numpy as np
 import pandas as pd
 
-from qlib.data import D
-from qlib.model.riskmodel import StructuredCovEstimator
+from quant_master.data import D
+from quant_master.model.riskmodel import StructuredCovEstimator
 
 
 def prepare_data(riskdata_root="./riskdata", T=240, start_time="2016-01-01"):
@@ -45,8 +45,8 @@ def prepare_data(riskdata_root="./riskdata", T=240, start_time="2016-01-01"):
 
 
 if __name__ == "__main__":
-    import qlib
+    import quant_master
 
-    qlib.init(provider_uri="~/.qlib/qlib_data/cn_data")
+    quant_master.init(provider_uri="~/.quant_master/quant_master_data/cn_data")
 
     prepare_data()

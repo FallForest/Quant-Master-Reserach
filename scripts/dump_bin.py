@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from loguru import logger
-from qlib.utils import fname_to_code, code_to_fname
+from quant_master.utils import fname_to_code, code_to_fname
 
 
 def read_as_df(file_path: Union[str, Path], **kwargs) -> pd.DataFrame:
@@ -68,7 +68,7 @@ class DumpDataBase:
     def __init__(
         self,
         data_path: str,
-        qlib_dir: str,
+        quant_master_dir: str,
         backup_dir: str = None,
         freq: str = "day",
         max_workers: int = 16,
@@ -85,10 +85,10 @@ class DumpDataBase:
         ----------
         data_path: str
             stock data path or directory
-        qlib_dir: str
-            qlib(dump) data director
+        quant_master_dir: str
+            quant_master(dump) data director
         backup_dir: str, default None
-            if backup_dir is not None, backup qlib_dir to backup_dir
+            if backup_dir is not None, backup quant_master_dir to backup_dir
         freq: str, default "day"
             transaction frequency
         max_workers: int, default None
@@ -118,10 +118,10 @@ class DumpDataBase:
         self.df_files = sorted(data_path.glob(f"*{self.file_suffix}") if data_path.is_dir() else [data_path])
         if limit_nums is not None:
             self.df_files = self.df_files[: int(limit_nums)]
-        self.qlib_dir = Path(qlib_dir).expanduser()
+        self.quant_master_dir = Path(quant_master_dir).expanduser()
         self.backup_dir = backup_dir if backup_dir is None else Path(backup_dir).expanduser()
         if backup_dir is not None:
-            self._backup_qlib_dir(Path(backup_dir).expanduser())
+            self._backup_quant_master_dir(Path(backup_dir).expanduser())
 
         self.freq = freq
         self.calendar_format = self.DAILY_FORMAT if self.freq == "day" else self.HIGH_FREQ_FORMAT
@@ -129,17 +129,17 @@ class DumpDataBase:
         self.works = max_workers
         self.date_field_name = date_field_name
 
-        self._calendars_dir = self.qlib_dir.joinpath(self.CALENDARS_DIR_NAME)
-        self._features_dir = self.qlib_dir.joinpath(self.FEATURES_DIR_NAME)
-        self._instruments_dir = self.qlib_dir.joinpath(self.INSTRUMENTS_DIR_NAME)
+        self._calendars_dir = self.quant_master_dir.joinpath(self.CALENDARS_DIR_NAME)
+        self._features_dir = self.quant_master_dir.joinpath(self.FEATURES_DIR_NAME)
+        self._instruments_dir = self.quant_master_dir.joinpath(self.INSTRUMENTS_DIR_NAME)
 
         self._calendars_list = []
 
         self._mode = self.ALL_MODE
         self._kwargs = {}
 
-    def _backup_qlib_dir(self, target_dir: Path):
-        shutil.copytree(str(self.qlib_dir.resolve()), str(target_dir.resolve()))
+    def _backup_quant_master_dir(self, target_dir: Path):
+        shutil.copytree(str(self.quant_master_dir.resolve()), str(target_dir.resolve()))
 
     def _format_datetime(self, datetime_d: [str, pd.Timestamp]):
         datetime_d = pd.Timestamp(datetime_d)
@@ -393,7 +393,7 @@ class DumpDataUpdate(DumpDataBase):
     def __init__(
         self,
         data_path: str,
-        qlib_dir: str,
+        quant_master_dir: str,
         backup_dir: str = None,
         freq: str = "day",
         max_workers: int = 16,
@@ -410,10 +410,10 @@ class DumpDataUpdate(DumpDataBase):
         ----------
         data_path: str
             stock data path or directory
-        qlib_dir: str
-            qlib(dump) data director
+        quant_master_dir: str
+            quant_master(dump) data director
         backup_dir: str, default None
-            if backup_dir is not None, backup qlib_dir to backup_dir
+            if backup_dir is not None, backup quant_master_dir to backup_dir
         freq: str, default "day"
             transaction frequency
         max_workers: int, default None
@@ -433,7 +433,7 @@ class DumpDataUpdate(DumpDataBase):
         """
         super().__init__(
             data_path,
-            qlib_dir,
+            quant_master_dir,
             backup_dir,
             freq,
             max_workers,

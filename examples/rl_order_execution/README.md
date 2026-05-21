@@ -7,14 +7,14 @@ This folder comprises an example of Reinforcement Learning (RL) workflows for or
 ### Get Data
 
 ```
-python -m qlib.cli.data qlib_data --target_dir ./data/bin --region hs300 --interval 5min
+python -m quant_master.cli.data quant_master_data --target_dir ./data/bin --region hs300 --interval 5min
 ```
 
 ### Generate Pickle-Style Data
 
 To run codes in this example, we need data in pickle format. To achieve this, run following commands (might need a few minutes to finish):
 
-[//]: # (TODO: Instead of dumping dataframe with different format &#40;like `_gen_dataset` and `_gen_day_dataset` in `qlib/contrib/data/highfreq_provider.py`&#41;, we encourage to implement different subclass of `Dataset` and `DataHandler`. This will keep the workflow cleaner and interfaces more consistent, and move all the complexity to the subclass.)
+[//]: # (TODO: Instead of dumping dataframe with different format &#40;like `_gen_dataset` and `_gen_day_dataset` in `quant_master/contrib/data/highfreq_provider.py`&#41;, we encourage to implement different subclass of `Dataset` and `DataHandler`. This will keep the workflow cleaner and interfaces more consistent, and move all the complexity to the subclass.)
 
 ```
 python scripts/gen_pickle_data.py -c scripts/pickle_data_config.yml
@@ -43,7 +43,7 @@ The main differece between these two methods is their reward functions. Please s
 Take OPDS as an example, to run the training workflow, run:
 
 ```
-python -m qlib.rl.contrib.train_onpolicy --config_path exp_configs/train_opds.yml --run_backtest
+python -m quant_master.rl.contrib.train_onpolicy --config_path exp_configs/train_opds.yml --run_backtest
 ```
 
 Metrics, logs, and checkpoints will be stored under `outputs/opds` (configured by `exp_configs/train_opds.yml`). 
@@ -53,7 +53,7 @@ Metrics, logs, and checkpoints will be stored under `outputs/opds` (configured b
 Once the training workflow has completed, the trained model can be used for the backtesting workflow. Still taking OPDS as an example, once training is finished, the latest checkpoint of the model can be found at `outputs/opds/checkpoints/latest.pth`. To run backtest workflow:
 
 1. Uncomment the `weight_file` parameter in `exp_configs/train_opds.yml` (it is commented by default). While it is possible to run the backtesting workflow without setting a checkpoint, this will lead to randomly initialized model results, thus making them meaningless.
-2. Run `python -m qlib.rl.contrib.backtest --config_path exp_configs/backtest_opds.yml`.
+2. Run `python -m quant_master.rl.contrib.backtest --config_path exp_configs/backtest_opds.yml`.
 
 The backtest result is stored in `outputs/checkpoints/backtest_result.csv`.
 
@@ -73,7 +73,7 @@ As a result, the amount of an order that is actually executed during backtesting
 If you would like to obtain results that are exactly the same as those obtained during testing in the training pipeline, you could run training pipeline with only backtest phrase.
 In order to do this:
 - Modify the training config. Add the path of the checkpoint you want to use (see following for an example).
-- Run `python -m qlib.rl.contrib.train_onpolicy --config_path PATH/TO/CONFIG --run_backtest --no_training`
+- Run `python -m quant_master.rl.contrib.train_onpolicy --config_path PATH/TO/CONFIG --run_backtest --no_training`
 
 ```yaml
 ...
@@ -82,7 +82,7 @@ policy:
   kwargs:
     lr: 0.0001
     weight_file: PATH/TO/CHECKPOINT
-  module_path: qlib.rl.order_execution.policy
+  module_path: quant_master.rl.order_execution.policy
 ...
 ```
 

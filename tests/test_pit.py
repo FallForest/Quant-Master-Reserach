@@ -3,15 +3,15 @@
 
 
 import sys
-import qlib
+import quant_master
 import shutil
 import unittest
 import pytest
 import pandas as pd
 from pathlib import Path
 
-from qlib.data import D
-from qlib.tests.data import GetData
+from quant_master.data import D
+from quant_master.tests.data import GetData
 
 sys.path.append(str(Path(__file__).resolve().parent.parent.joinpath("scripts")))
 from dump_pit import DumpPitData
@@ -25,7 +25,7 @@ pd.set_option("display.max_columns", None)
 DATA_DIR = Path(__file__).parent.joinpath("test_pit_data")
 SOURCE_DIR = DATA_DIR.joinpath("stock_data/source")
 SOURCE_DIR.mkdir(exist_ok=True, parents=True)
-QLIB_DIR = DATA_DIR.joinpath("qlib_data")
+QLIB_DIR = DATA_DIR.joinpath("quant_master_data")
 QLIB_DIR.mkdir(exist_ok=True, parents=True)
 
 
@@ -39,10 +39,10 @@ class TestPIT(unittest.TestCase):
         cn_data_dir = str(QLIB_DIR.joinpath("cn_data").resolve())
         pit_dir = str(SOURCE_DIR.joinpath("pit").resolve())
         pit_normalized_dir = str(SOURCE_DIR.joinpath("pit_normalized").resolve())
-        GetData().qlib_data(
-            name="qlib_data_simple", target_dir=cn_data_dir, region="cn", delete_old=False, exists_skip=True
+        GetData().quant_master_data(
+            name="quant_master_data_simple", target_dir=cn_data_dir, region="cn", delete_old=False, exists_skip=True
         )
-        GetData().qlib_data(name="qlib_data", target_dir=pit_dir, region="pit", delete_old=False, exists_skip=True)
+        GetData().quant_master_data(name="quant_master_data", target_dir=pit_dir, region="pit", delete_old=False, exists_skip=True)
 
         # NOTE: This code does the same thing as line 43, but since baostock is not stable in downloading data, we have chosen to download offline data.
         # bs.login()
@@ -59,13 +59,13 @@ class TestPIT(unittest.TestCase):
         ).normalize_data()
         DumpPitData(
             csv_path=pit_normalized_dir,
-            qlib_dir=cn_data_dir,
+            quant_master_dir=cn_data_dir,
         ).dump(interval="quarterly")
 
     def setUp(self):
-        # qlib.init(kernels=1)  # NOTE: set kernel to 1 to make it debug easier
+        # quant_master.init(kernels=1)  # NOTE: set kernel to 1 to make it debug easier
         provider_uri = str(QLIB_DIR.joinpath("cn_data").resolve())
-        qlib.init(provider_uri=provider_uri)
+        quant_master.init(provider_uri=provider_uri)
 
     def to_str(self, obj):
         return "".join(str(obj).split())

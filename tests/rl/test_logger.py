@@ -14,15 +14,15 @@ from gym import spaces
 from tianshou.data import Collector, Batch
 from tianshou.policy import BasePolicy
 
-from qlib.log import set_log_with_config
-from qlib.config import C
-from qlib.constant import INF
-from qlib.rl.interpreter import StateInterpreter, ActionInterpreter
-from qlib.rl.simulator import Simulator
-from qlib.rl.utils.data_queue import DataQueue
-from qlib.rl.utils.env_wrapper import InfoDict, EnvWrapper
-from qlib.rl.utils.log import LogLevel, LogCollector, CsvWriter, ConsoleWriter
-from qlib.rl.utils.finite_env import vectorize_env
+from quant_master.log import set_log_with_config
+from quant_master.config import C
+from quant_master.constant import INF
+from quant_master.rl.interpreter import StateInterpreter, ActionInterpreter
+from quant_master.rl.simulator import Simulator
+from quant_master.rl.utils.data_queue import DataQueue
+from quant_master.rl.utils.env_wrapper import InfoDict, EnvWrapper
+from quant_master.rl.utils.log import LogLevel, LogCollector, CsvWriter, ConsoleWriter
+from quant_master.rl.utils.finite_env import vectorize_env
 
 
 class SimpleEnv(gym.Env[int, int]):
@@ -70,8 +70,8 @@ class AnyPolicy(BasePolicy):
 def test_simple_env_logger(caplog):
     set_log_with_config(C.logging_config)
     # In order for caplog to capture log messages, we configure it here:
-    # allow logs from the qlib logger to be passed to the parent logger.
-    C.logging_config["loggers"]["qlib"]["propagate"] = True
+    # allow logs from the quant_master logger to be passed to the parent logger.
+    C.logging_config["loggers"]["quant_master"]["propagate"] = True
     logging.config.dictConfig(C.logging_config)
     for venv_cls_name in ["dummy", "shmem", "subproc"]:
         writer = ConsoleWriter()

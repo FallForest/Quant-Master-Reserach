@@ -6,7 +6,7 @@ import torch
 import numpy as np
 import pandas as pd
 
-from qlib.data.dataset import DatasetH
+from quant_master.data.dataset import DatasetH
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 

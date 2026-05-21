@@ -2,4 +2,4 @@ fire
 pandas
 loguru
 tqdm
-pyqlib
+pyquant_master

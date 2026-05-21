@@ -1,12 +1,12 @@
 # Introduction
 
-This example tries to demonstrate how Qlib supports data without fixed shared frequency.
+This example tries to demonstrate how QuantMaster supports data without fixed shared frequency.
 
 For example,
 - Daily prices volume data are fixed-frequency data. The data comes in a fixed frequency (i.e. daily)
 - Orders are not fixed data and they may come at any time point
 
-To support such non-fixed-frequency, Qlib implements an Arctic-based backend.
+To support such non-fixed-frequency, QuantMaster implements an Arctic-based backend.
 Here is an example to import and query data based on this backend.
 
 # Installation
@@ -23,7 +23,7 @@ pip install arctic  # NOTE: pip may fail to resolve the right package dependency
 # Importing example data
 
 
-1. (Optional) Please follow the first part of [this section](https://github.com/microsoft/qlib#data-preparation) to **get 1min data** of Qlib.
+1. (Optional) Please follow the first part of [this section](https://github.com/microsoft/quant_master#data-preparation) to **get 1min data** of QuantMaster.
 2. Please follow following steps to download example data
 ```bash
 cd examples/orderbook_data/

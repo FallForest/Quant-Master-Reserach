@@ -1,6 +1,6 @@
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.data.dataset.loader import DataLoaderDH
-from qlib.contrib.data.handler import check_transform_proc
+from quant_master.data.dataset.handler import DataHandlerLP
+from quant_master.data.dataset.loader import DataLoaderDH
+from quant_master.contrib.data.handler import check_transform_proc
 
 
 class RollingDataHandler(DataHandlerLP):

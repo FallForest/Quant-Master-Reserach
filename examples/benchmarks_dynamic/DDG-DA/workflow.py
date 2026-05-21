@@ -6,9 +6,9 @@ from typing import Union
 
 import fire
 
-from qlib import auto_init
-from qlib.contrib.rolling.ddgda import DDGDA
-from qlib.tests.data import GetData
+from quant_master import auto_init
+from quant_master.contrib.rolling.ddgda import DDGDA
+from quant_master.tests.data import GetData
 
 DIRNAME = Path(__file__).absolute().resolve().parent
 BENCH_DIR = DIRNAME.parent / "baseline"
@@ -38,7 +38,7 @@ class DDGDABench(DDGDA):
 if __name__ == "__main__":
     kwargs = {}
     if os.environ.get("PROVIDER_URI", "") == "":
-        GetData().qlib_data(exists_skip=True)
+        GetData().quant_master_data(exists_skip=True)
     else:
         kwargs["provider_uri"] = os.environ["PROVIDER_URI"]
     auto_init(**kwargs)

@@ -4,9 +4,9 @@
 import unittest
 import numpy as np
 
-from qlib.data import D
-from qlib.data.ops import ElemOperator, PairOperator
-from qlib.tests import TestAutoData
+from quant_master.data import D
+from quant_master.data.ops import ElemOperator, PairOperator
+from quant_master.tests import TestAutoData
 
 
 class Diff(ElemOperator):

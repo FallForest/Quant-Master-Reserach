@@ -17,7 +17,7 @@ class MLflowTest(unittest.TestCase):
 
     def test_creating_client(self):
         """
-        Please refer to qlib/workflow/expm.py:MLflowExpManager._client
+        Please refer to quant_master/workflow/expm.py:MLflowExpManager._client
         we don't cache _client (this is helpful to reduce maintainance work when MLflowExpManager's uri is chagned)
 
         This implementation is based on the assumption creating a client is fast

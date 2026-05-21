@@ -22,7 +22,7 @@ from concurrent.futures import ProcessPoolExecutor
 from bs4 import BeautifulSoup
 import baostock as bs
 
-from qlib.utils.pickle_utils import restricted_pickle_load
+from quant_master.utils.pickle_utils import restricted_pickle_load
 
 HS_SYMBOLS_URL = "http://app.finance.ifeng.com/hq/list.php?type=stock_a&class={s_type}"
 
@@ -286,7 +286,7 @@ def get_hs_stock_symbols() -> list:
     return _HS_SYMBOLS
 
 
-def get_us_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
+def get_us_stock_symbols(quant_master_data_path: [str, Path] = None) -> list:
     """get US stock symbols
 
     Returns
@@ -347,10 +347,10 @@ def get_us_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
 
     if _US_SYMBOLS is None:
         _all_symbols = _get_eastmoney() + _get_nasdaq() + _get_nyse()
-        if qlib_data_path is not None:
+        if quant_master_data_path is not None:
             for _index in ["nasdaq100", "sp500"]:
                 ins_df = pd.read_csv(
-                    Path(qlib_data_path).joinpath(f"instruments/{_index}.txt"),
+                    Path(quant_master_data_path).joinpath(f"instruments/{_index}.txt"),
                     sep="\t",
                     names=["symbol", "start_date", "end_date"],
                 )
@@ -367,7 +367,7 @@ def get_us_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
     return _US_SYMBOLS
 
 
-def get_in_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
+def get_in_stock_symbols(quant_master_data_path: [str, Path] = None) -> list:
     """get IN stock symbols
 
     Returns
@@ -388,10 +388,10 @@ def get_in_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
 
     if _IN_SYMBOLS is None:
         _all_symbols = _get_nifty()
-        if qlib_data_path is not None:
+        if quant_master_data_path is not None:
             for _index in ["nifty"]:
                 ins_df = pd.read_csv(
-                    Path(qlib_data_path).joinpath(f"instruments/{_index}.txt"),
+                    Path(quant_master_data_path).joinpath(f"instruments/{_index}.txt"),
                     sep="\t",
                     names=["symbol", "start_date", "end_date"],
                 )
@@ -408,7 +408,7 @@ def get_in_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
     return _IN_SYMBOLS
 
 
-def get_br_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
+def get_br_stock_symbols(quant_master_data_path: [str, Path] = None) -> list:
     """get Brazil(B3) stock symbols
 
     Returns
@@ -438,10 +438,10 @@ def get_br_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
 
     if _BR_SYMBOLS is None:
         _all_symbols = _get_ibovespa()
-        if qlib_data_path is not None:
+        if quant_master_data_path is not None:
             for _index in ["ibov"]:
                 ins_df = pd.read_csv(
-                    Path(qlib_data_path).joinpath(f"instruments/{_index}.txt"),
+                    Path(quant_master_data_path).joinpath(f"instruments/{_index}.txt"),
                     sep="\t",
                     names=["symbol", "start_date", "end_date"],
                 )
@@ -459,7 +459,7 @@ def get_br_stock_symbols(qlib_data_path: [str, Path] = None) -> list:
     return _BR_SYMBOLS
 
 
-def get_en_fund_symbols(qlib_data_path: [str, Path] = None) -> list:
+def get_en_fund_symbols(quant_master_data_path: [str, Path] = None) -> list:
     """get en fund symbols
 
     Returns
@@ -618,7 +618,7 @@ def generate_minutes_calendar_from_daily(
 
 
 def get_instruments(
-    qlib_dir: str,
+    quant_master_dir: str,
     index_name: str,
     method: str = "parse_instruments",
     freq: str = "day",
@@ -630,8 +630,8 @@ def get_instruments(
 
     Parameters
     ----------
-    qlib_dir: str
-        qlib data dir, default "Path(__file__).parent/qlib_data"
+    quant_master_dir: str
+        quant_master data dir, default "Path(__file__).parent/quant_master_data"
     index_name: str
         index name, value from ["csi100", "csi300"]
     method: str
@@ -649,15 +649,15 @@ def get_instruments(
     Examples
     -------
         # parse instruments
-        $ python collector.py --index_name CSI300 --qlib_dir ~/.qlib/qlib_data/cn_data --method parse_instruments
+        $ python collector.py --index_name CSI300 --quant_master_dir ~/.quant_master/quant_master_data/cn_data --method parse_instruments
 
         # parse new companies
-        $ python collector.py --index_name CSI300 --qlib_dir ~/.qlib/qlib_data/cn_data --method save_new_companies
+        $ python collector.py --index_name CSI300 --quant_master_dir ~/.quant_master/quant_master_data/cn_data --method save_new_companies
 
     """
     _cur_module = importlib.import_module("data_collector.{}.collector".format(market_index))
     obj = getattr(_cur_module, f"{index_name.upper()}Index")(
-        qlib_dir=qlib_dir, index_name=index_name, freq=freq, request_retry=request_retry, retry_sleep=retry_sleep
+        quant_master_dir=quant_master_dir, index_name=index_name, freq=freq, request_retry=request_retry, retry_sleep=retry_sleep
     )
     getattr(obj, method)()
 
@@ -726,7 +726,7 @@ def calc_adjusted_price(
     df.sort_values(_date_field_name, inplace=True)
     symbol = df.iloc[0][_symbol_field_name]
     df[_date_field_name] = pd.to_datetime(df[_date_field_name])
-    # get 1d data from qlib
+    # get 1d data from quant_master
     _start = pd.Timestamp(df[_date_field_name].min()).strftime("%Y-%m-%d")
     _end = (pd.Timestamp(df[_date_field_name].max()) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
     data_1d: pd.DataFrame = get_1d_data(_date_field_name, _symbol_field_name, symbol, _start, _end, _1d_data_all)

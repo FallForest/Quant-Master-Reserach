@@ -24,7 +24,7 @@ std                0.007575
 annualized_return  0.264280
 information_ratio  2.261392
 max_drawdown      -0.071842
-[1706497:MainThread](2021-12-07 14:08:30,263) INFO - qlib.workflow - [record_temp.py:441] - Portfolio analysis record 'port_analysis_30minute.
+[1706497:MainThread](2021-12-07 14:08:30,263) INFO - quant_master.workflow - [record_temp.py:441] - Portfolio analysis record 'port_analysis_30minute.
 pkl' has been saved as the artifact of the Experiment 2
 'The following are analysis results of benchmark return(30minute).'
                        risk
@@ -48,7 +48,7 @@ std                0.003343
 annualized_return  0.294536
 information_ratio  2.018860
 max_drawdown      -0.075579
-[1706497:MainThread](2021-12-07 14:08:30,277) INFO - qlib.workflow - [record_temp.py:441] - Portfolio analysis record 'port_analysis_5minute.p
+[1706497:MainThread](2021-12-07 14:08:30,277) INFO - quant_master.workflow - [record_temp.py:441] - Portfolio analysis record 'port_analysis_5minute.p
 kl' has been saved as the artifact of the Experiment 2
 'The following are analysis results of benchmark return(5minute).'
                        risk
@@ -71,42 +71,42 @@ std                0.001412
 annualized_return  0.281536
 information_ratio  1.866091
 max_drawdown      -0.078194
-[1706497:MainThread](2021-12-07 14:08:30,287) INFO - qlib.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_1day
+[1706497:MainThread](2021-12-07 14:08:30,287) INFO - quant_master.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_1day
 .pkl' has been saved as the artifact of the Experiment 2
 'The following are analysis results of indicators(1day).'
         value
 ffr  0.945821
 pa   0.000324
 pos  0.542882
-[1706497:MainThread](2021-12-07 14:08:30,293) INFO - qlib.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_30mi
+[1706497:MainThread](2021-12-07 14:08:30,293) INFO - quant_master.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_30mi
 nute.pkl' has been saved as the artifact of the Experiment 2
 'The following are analysis results of indicators(30minute).'
         value
 ffr  0.982910
 pa   0.000037
 pos  0.500806
-[1706497:MainThread](2021-12-07 14:08:30,302) INFO - qlib.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_5min
+[1706497:MainThread](2021-12-07 14:08:30,302) INFO - quant_master.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_5min
 ute.pkl' has been saved as the artifact of the Experiment 2
 'The following are analysis results of indicators(5minute).'
         value
 ffr  0.991017
 pa   0.000000
 pos  0.000000
-[1706497:MainThread](2021-12-07 14:08:30,627) INFO - qlib.timer - [log.py:113] - Time cost: 0.014s | waiting `async_log` Done
+[1706497:MainThread](2021-12-07 14:08:30,627) INFO - quant_master.timer - [log.py:113] - Time cost: 0.014s | waiting `async_log` Done
 """
 
 from copy import deepcopy
-import qlib
+import quant_master
 import fire
 import pandas as pd
-from qlib.constant import REG_CN
-from qlib.config import HIGH_FREQ_CONFIG
-from qlib.data import D
-from qlib.utils import exists_qlib_data, init_instance_by_config, flatten_dict
-from qlib.workflow import R
-from qlib.workflow.record_temp import SignalRecord, PortAnaRecord
-from qlib.tests.data import GetData
-from qlib.backtest import collect_data
+from quant_master.constant import REG_CN
+from quant_master.config import HIGH_FREQ_CONFIG
+from quant_master.data import D
+from quant_master.utils import exists_quant_master_data, init_instance_by_config, flatten_dict
+from quant_master.workflow import R
+from quant_master.workflow.record_temp import SignalRecord, PortAnaRecord
+from quant_master.tests.data import GetData
+from quant_master.backtest import collect_data
 
 
 class NestedDecisionExecutionWorkflow:
@@ -123,7 +123,7 @@ class NestedDecisionExecutionWorkflow:
     task = {
         "model": {
             "class": "LGBModel",
-            "module_path": "qlib.contrib.model.gbdt",
+            "module_path": "quant_master.contrib.model.gbdt",
             "kwargs": {
                 "loss": "mse",
                 "colsample_bytree": 0.8879,
@@ -138,11 +138,11 @@ class NestedDecisionExecutionWorkflow:
         },
         "dataset": {
             "class": "DatasetH",
-            "module_path": "qlib.data.dataset",
+            "module_path": "quant_master.data.dataset",
             "kwargs": {
                 "handler": {
                     "class": "Alpha158",
-                    "module_path": "qlib.contrib.data.handler",
+                    "module_path": "quant_master.contrib.data.handler",
                     "kwargs": data_handler_config,
                 },
                 "segments": {
@@ -159,17 +159,17 @@ class NestedDecisionExecutionWorkflow:
     port_analysis_config = {
         "executor": {
             "class": "NestedExecutor",
-            "module_path": "qlib.backtest.executor",
+            "module_path": "quant_master.backtest.executor",
             "kwargs": {
                 "time_per_step": "day",
                 "inner_executor": {
                     "class": "NestedExecutor",
-                    "module_path": "qlib.backtest.executor",
+                    "module_path": "quant_master.backtest.executor",
                     "kwargs": {
                         "time_per_step": "30min",
                         "inner_executor": {
                             "class": "SimulatorExecutor",
-                            "module_path": "qlib.backtest.executor",
+                            "module_path": "quant_master.backtest.executor",
                             "kwargs": {
                                 "time_per_step": "5min",
                                 "generate_portfolio_metrics": True,
@@ -181,7 +181,7 @@ class NestedDecisionExecutionWorkflow:
                         },
                         "inner_strategy": {
                             "class": "TWAPStrategy",
-                            "module_path": "qlib.contrib.strategy.rule_strategy",
+                            "module_path": "quant_master.contrib.strategy.rule_strategy",
                         },
                         "generate_portfolio_metrics": True,
                         "indicator_config": {
@@ -191,7 +191,7 @@ class NestedDecisionExecutionWorkflow:
                 },
                 "inner_strategy": {
                     "class": "SBBStrategyEMA",
-                    "module_path": "qlib.contrib.strategy.rule_strategy",
+                    "module_path": "quant_master.contrib.strategy.rule_strategy",
                     "kwargs": {
                         "instruments": market,
                         "freq": "1min",
@@ -219,16 +219,16 @@ class NestedDecisionExecutionWorkflow:
         },
     }
 
-    def _init_qlib(self):
-        """initialize qlib"""
-        provider_uri_day = "~/.qlib/qlib_data/cn_data"  # target_dir
-        GetData().qlib_data(target_dir=provider_uri_day, region=REG_CN, version="v2", exists_skip=True)
+    def _init_quant_master(self):
+        """initialize quant_master"""
+        provider_uri_day = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+        GetData().quant_master_data(target_dir=provider_uri_day, region=REG_CN, version="v2", exists_skip=True)
         provider_uri_1min = HIGH_FREQ_CONFIG.get("provider_uri")
-        GetData().qlib_data(
+        GetData().quant_master_data(
             target_dir=provider_uri_1min, interval="1min", region=REG_CN, version="v2", exists_skip=True
         )
         provider_uri_map = {"1min": provider_uri_1min, "day": provider_uri_day}
-        qlib.init(provider_uri=provider_uri_map, dataset_cache=None, expression_cache=None)
+        quant_master.init(provider_uri=provider_uri_map, dataset_cache=None, expression_cache=None)
 
     def _train_model(self, model, dataset):
         with R.start(experiment_name=self.exp_name):
@@ -242,13 +242,13 @@ class NestedDecisionExecutionWorkflow:
             sr.generate()
 
     def backtest(self):
-        self._init_qlib()
+        self._init_quant_master()
         model = init_instance_by_config(self.task["model"])
         dataset = init_instance_by_config(self.task["dataset"])
         self._train_model(model, dataset)
         strategy_config = {
             "class": "TopkDropoutStrategy",
-            "module_path": "qlib.contrib.strategy.signal_strategy",
+            "module_path": "quant_master.contrib.strategy.signal_strategy",
             "kwargs": {
                 "signal": (model, dataset),
                 "topk": 50,
@@ -269,11 +269,11 @@ class NestedDecisionExecutionWorkflow:
 
         # user could use following methods to analysis the position
         # report_normal_df = recorder.load_object("portfolio_analysis/report_normal_1day.pkl")
-        # from qlib.contrib.report import analysis_position
+        # from quant_master.contrib.report import analysis_position
         # analysis_position.report_graph(report_normal_df)
 
     def collect_data(self):
-        self._init_qlib()
+        self._init_quant_master()
         model = init_instance_by_config(self.task["model"])
         dataset = init_instance_by_config(self.task["dataset"])
         self._train_model(model, dataset)
@@ -282,7 +282,7 @@ class NestedDecisionExecutionWorkflow:
         backtest_config["benchmark"] = self.benchmark
         strategy_config = {
             "class": "TopkDropoutStrategy",
-            "module_path": "qlib.contrib.strategy.signal_strategy",
+            "module_path": "quant_master.contrib.strategy.signal_strategy",
             "kwargs": {
                 "signal": (model, dataset),
                 "topk": 50,
@@ -303,7 +303,7 @@ class NestedDecisionExecutionWorkflow:
     #   - the daily backtest will be similar as multi-level(the data quality makes this gap smaller)
 
     def check_diff_freq(self):
-        self._init_qlib()
+        self._init_quant_master()
         exp = R.get_exp(experiment_name="backtest")
         rec = next(iter(exp.list_recorders().values()))  # assuming this will get the latest recorder
         for check_key in "account", "total_turnover", "total_cost":
@@ -324,7 +324,7 @@ class NestedDecisionExecutionWorkflow:
 
         .. code-block:: shell
 
-            [1724971:MainThread](2021-12-07 16:24:31,156) INFO - qlib.workflow - [record_temp.py:441] - Portfolio analysis record 'port_analysis_1day.pkl'
+            [1724971:MainThread](2021-12-07 16:24:31,156) INFO - quant_master.workflow - [record_temp.py:441] - Portfolio analysis record 'port_analysis_1day.pkl'
             has been saved as the artifact of the Experiment 2
             'The following are analysis results of benchmark return(1day).'
                                    risk
@@ -347,23 +347,23 @@ class NestedDecisionExecutionWorkflow:
             annualized_return  0.281801
             information_ratio  2.998749
             max_drawdown      -0.029568
-            [1724971:MainThread](2021-12-07 16:24:31,170) INFO - qlib.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_1day.
+            [1724971:MainThread](2021-12-07 16:24:31,170) INFO - quant_master.workflow - [record_temp.py:466] - Indicator analysis record 'indicator_analysis_1day.
             pkl' has been saved as the artifact of the Experiment 2
             'The following are analysis results of indicators(1day).'
                  value
             ffr    1.0
             pa     0.0
             pos    0.0
-            [1724971:MainThread](2021-12-07 16:24:31,188) INFO - qlib.timer - [log.py:113] - Time cost: 0.007s | waiting `async_log` Done
+            [1724971:MainThread](2021-12-07 16:24:31,188) INFO - quant_master.timer - [log.py:113] - Time cost: 0.007s | waiting `async_log` Done
 
         """
-        self._init_qlib()
+        self._init_quant_master()
         model = init_instance_by_config(self.task["model"])
         dataset = init_instance_by_config(self.task["dataset"])
         self._train_model(model, dataset)
         strategy_config = {
             "class": "TopkDropoutStrategy",
-            "module_path": "qlib.contrib.strategy.signal_strategy",
+            "module_path": "quant_master.contrib.strategy.signal_strategy",
             "kwargs": {
                 "signal": (model, dataset),
                 "topk": 50,
@@ -374,7 +374,7 @@ class NestedDecisionExecutionWorkflow:
         pa_conf["strategy"] = strategy_config
         pa_conf["executor"] = {
             "class": "SimulatorExecutor",
-            "module_path": "qlib.backtest.executor",
+            "module_path": "quant_master.backtest.executor",
             "kwargs": {
                 "time_per_step": "day",
                 "generate_portfolio_metrics": True,

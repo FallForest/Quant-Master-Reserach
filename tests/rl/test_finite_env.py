@@ -8,7 +8,7 @@ import numpy as np
 from tianshou.data import Batch, Collector
 from tianshou.policy import BasePolicy
 from torch.utils.data import DataLoader, Dataset, DistributedSampler
-from qlib.rl.utils.finite_env import (
+from quant_master.rl.utils.finite_env import (
     LogWriter,
     FiniteDummyVectorEnv,
     FiniteShmemVectorEnv,

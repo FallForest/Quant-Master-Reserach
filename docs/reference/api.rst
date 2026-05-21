@@ -6,7 +6,7 @@ API Reference
 
 
 
-Here you can find all ``Qlib`` interfaces.
+Here you can find all ``QuantMaster`` interfaces.
 
 
 Data
@@ -15,70 +15,70 @@ Data
 Provider
 --------
 
-.. automodule:: qlib.data.data
+.. automodule:: quant_master.data.data
     :members:
 
 Filter
 ------
 
-.. automodule:: qlib.data.filter
+.. automodule:: quant_master.data.filter
     :members:
 
 Class
 -----
-.. automodule:: qlib.data.base
+.. automodule:: quant_master.data.base
     :members:
 
 Operator
 --------
-.. automodule:: qlib.data.ops
+.. automodule:: quant_master.data.ops
     :members:
 
 Cache
 -----
-.. autoclass:: qlib.data.cache.MemCacheUnit
+.. autoclass:: quant_master.data.cache.MemCacheUnit
     :members:
 
-.. autoclass:: qlib.data.cache.MemCache
+.. autoclass:: quant_master.data.cache.MemCache
     :members:
 
-.. autoclass:: qlib.data.cache.ExpressionCache
+.. autoclass:: quant_master.data.cache.ExpressionCache
     :members:
 
-.. autoclass:: qlib.data.cache.DatasetCache
+.. autoclass:: quant_master.data.cache.DatasetCache
     :members:
 
-.. autoclass:: qlib.data.cache.DiskExpressionCache
+.. autoclass:: quant_master.data.cache.DiskExpressionCache
     :members:
 
-.. autoclass:: qlib.data.cache.DiskDatasetCache
+.. autoclass:: quant_master.data.cache.DiskDatasetCache
     :members:
 
 
 Storage
 -------
-.. autoclass:: qlib.data.storage.storage.BaseStorage
+.. autoclass:: quant_master.data.storage.storage.BaseStorage
     :members:
 
-.. autoclass:: qlib.data.storage.storage.CalendarStorage
+.. autoclass:: quant_master.data.storage.storage.CalendarStorage
     :members:
 
-.. autoclass:: qlib.data.storage.storage.InstrumentStorage
+.. autoclass:: quant_master.data.storage.storage.InstrumentStorage
     :members:
 
-.. autoclass:: qlib.data.storage.storage.FeatureStorage
+.. autoclass:: quant_master.data.storage.storage.FeatureStorage
     :members:
 
-.. autoclass:: qlib.data.storage.file_storage.FileStorageMixin
+.. autoclass:: quant_master.data.storage.file_storage.FileStorageMixin
     :members:
 
-.. autoclass:: qlib.data.storage.file_storage.FileCalendarStorage
+.. autoclass:: quant_master.data.storage.file_storage.FileCalendarStorage
     :members:
 
-.. autoclass:: qlib.data.storage.file_storage.FileInstrumentStorage
+.. autoclass:: quant_master.data.storage.file_storage.FileInstrumentStorage
     :members:
 
-.. autoclass:: qlib.data.storage.file_storage.FileFeatureStorage
+.. autoclass:: quant_master.data.storage.file_storage.FileFeatureStorage
     :members:
 
 
@@ -87,22 +87,22 @@ Dataset
 
 Dataset Class
 ~~~~~~~~~~~~~
-.. automodule:: qlib.data.dataset.__init__
+.. automodule:: quant_master.data.dataset.__init__
     :members:
 
 Data Loader
 ~~~~~~~~~~~
-.. automodule:: qlib.data.dataset.loader
+.. automodule:: quant_master.data.dataset.loader
     :members:
 
 Data Handler
 ~~~~~~~~~~~~
-.. automodule:: qlib.data.dataset.handler
+.. automodule:: quant_master.data.dataset.handler
     :members:
 
 Processor
 ~~~~~~~~~
-.. automodule:: qlib.data.dataset.processor
+.. automodule:: quant_master.data.dataset.processor
     :members:
 
 
@@ -111,51 +111,51 @@ Contrib
 
 Model
 -----
-.. automodule:: qlib.model.base
+.. automodule:: quant_master.model.base
     :members:
 
 Strategy
 --------
 
-.. automodule:: qlib.contrib.strategy
+.. automodule:: quant_master.contrib.strategy
     :members:
 
 Evaluate
 --------
 
-.. automodule:: qlib.contrib.evaluate
+.. automodule:: quant_master.contrib.evaluate
     :members:
 
 
 Report
 ------
 
-.. automodule:: qlib.contrib.report.analysis_position.report
+.. automodule:: quant_master.contrib.report.analysis_position.report
     :members:
 
 
 
-.. automodule:: qlib.contrib.report.analysis_position.score_ic
+.. automodule:: quant_master.contrib.report.analysis_position.score_ic
     :members:
 
 
 
-.. automodule:: qlib.contrib.report.analysis_position.cumulative_return
+.. automodule:: quant_master.contrib.report.analysis_position.cumulative_return
     :members:
 
 
 
-.. automodule:: qlib.contrib.report.analysis_position.risk_analysis
+.. automodule:: quant_master.contrib.report.analysis_position.risk_analysis
     :members:
 
 
 
-.. automodule:: qlib.contrib.report.analysis_position.rank_label
+.. automodule:: quant_master.contrib.report.analysis_position.rank_label
     :members:
 
 
 
-.. automodule:: qlib.contrib.report.analysis_model.analysis_model_performance
+.. automodule:: quant_master.contrib.report.analysis_model.analysis_model_performance
     :members:
 
 
@@ -165,22 +165,22 @@ Workflow
 
 Experiment Manager
 ------------------
-.. autoclass:: qlib.workflow.expm.ExpManager
+.. autoclass:: quant_master.workflow.expm.ExpManager
     :members:
 
 Experiment
 ----------
-.. autoclass:: qlib.workflow.exp.Experiment
+.. autoclass:: quant_master.workflow.exp.Experiment
     :members:
 
 Recorder
 --------
-.. autoclass:: qlib.workflow.recorder.Recorder
+.. autoclass:: quant_master.workflow.recorder.Recorder
     :members:
 
 Record Template
 ---------------
-.. automodule:: qlib.workflow.record_temp
+.. automodule:: quant_master.workflow.record_temp
     :members:
 
 Task Management
@@ -189,37 +189,37 @@ Task Management
 
 TaskGen
 -------
-.. automodule:: qlib.workflow.task.gen
+.. automodule:: quant_master.workflow.task.gen
     :members:
 
 TaskManager
 -----------
-.. automodule:: qlib.workflow.task.manage
+.. automodule:: quant_master.workflow.task.manage
     :members:
 
 Trainer
 -------
-.. automodule:: qlib.model.trainer
+.. automodule:: quant_master.model.trainer
     :members:
 
 Collector
 ---------
-.. automodule:: qlib.workflow.task.collect
+.. automodule:: quant_master.workflow.task.collect
     :members:
 
 Group
 -----
-.. automodule:: qlib.model.ens.group
+.. automodule:: quant_master.model.ens.group
     :members:
 
 Ensemble
 --------
-.. automodule:: qlib.model.ens.ensemble
+.. automodule:: quant_master.model.ens.ensemble
     :members:
 
 Utils
 -----
-.. automodule:: qlib.workflow.task.utils
+.. automodule:: quant_master.workflow.task.utils
     :members:
 
 
@@ -229,23 +229,23 @@ Online Serving
 
 Online Manager
 --------------
-.. automodule:: qlib.workflow.online.manager
+.. automodule:: quant_master.workflow.online.manager
     :members:
 
 Online Strategy
 ---------------
-.. automodule:: qlib.workflow.online.strategy
+.. automodule:: quant_master.workflow.online.strategy
     :members:
 
 Online Tool
 -----------
-.. automodule:: qlib.workflow.online.utils
+.. automodule:: quant_master.workflow.online.utils
     :members:
 
 
 RecordUpdater
 -------------
-.. automodule:: qlib.workflow.online.update
+.. automodule:: quant_master.workflow.online.update
     :members:
 
 
@@ -255,7 +255,7 @@ Utils
 Serializable
 ------------
 
-.. automodule:: qlib.utils.serial
+.. automodule:: quant_master.utils.serial
     :members:
 
 RL
@@ -263,30 +263,30 @@ RL
 
 Base Component
 --------------
-.. automodule:: qlib.rl
+.. automodule:: quant_master.rl
     :members:
     :imported-members:
 
 Strategy
 --------
-.. automodule:: qlib.rl.strategy
+.. automodule:: quant_master.rl.strategy
     :members:
     :imported-members:
 
 Trainer
 -------
-.. automodule:: qlib.rl.trainer
+.. automodule:: quant_master.rl.trainer
     :members:
     :imported-members:
 
 Order Execution
 ---------------
-.. automodule:: qlib.rl.order_execution
+.. automodule:: quant_master.rl.order_execution
     :members:
     :imported-members:
 
 Utils
 ---------------
-.. automodule:: qlib.rl.utils
+.. automodule:: quant_master.rl.utils
     :members:
     :imported-members:

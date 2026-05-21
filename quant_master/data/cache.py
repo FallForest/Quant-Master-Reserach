@@ -208,7 +208,7 @@ class MemCacheExpire:
 
 
 class CacheUtils:
-    LOCK_ID = "QUANT_MASTER"
+    LOCK_ID = "QLIB"
 
     @staticmethod
     def organize_meta_file():

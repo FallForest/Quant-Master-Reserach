@@ -3,13 +3,13 @@
 =============================
 ``Online`` & ``Offline`` mode
 =============================
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 
 Introduction
 ============
 
-``Qlib`` supports ``Online`` mode and ``Offline`` mode. Only the ``Offline`` mode is introduced in this document.
+``QuantMaster`` supports ``Online`` mode and ``Offline`` mode. Only the ``Offline`` mode is introduced in this document.
 
 The ``Online`` mode is designed to solve the following problems:
 
@@ -17,13 +17,13 @@ The ``Online`` mode is designed to solve the following problems:
 - Reduce the amount of cache to be generated.
 - Make the data can be accessed in a remote way.
 
-Qlib-Server
+QuantMaster-Server
 ===========
 
-``Qlib-Server`` is the assorted server system for ``Qlib``, which utilizes ``Qlib`` for basic calculations and provides extensive server system and cache mechanism. With QLibServer, the data provided for ``Qlib`` can be managed in a centralized manner. With ``Qlib-Server``, users can use ``Qlib`` in ``Online`` mode.
+``QuantMaster-Server`` is the assorted server system for ``QuantMaster``, which utilizes ``QuantMaster`` for basic calculations and provides extensive server system and cache mechanism. With QLibServer, the data provided for ``QuantMaster`` can be managed in a centralized manner. With ``QuantMaster-Server``, users can use ``QuantMaster`` in ``Online`` mode.
 
 
 
 Reference
 =========
-If users are interested in ``Qlib-Server`` and ``Online`` mode, please refer to `Qlib-Server Project <https://github.com/microsoft/qlib-server>`_ and `Qlib-Server Document <https://qlib-server.readthedocs.io/en/latest/>`_.
+If users are interested in ``QuantMaster-Server`` and ``Online`` mode, please refer to `QuantMaster-Server Project <https://github.com/microsoft/quant_master-server>`_ and `QuantMaster-Server Document <https://quant_master-server.readthedocs.io/en/latest/>`_.

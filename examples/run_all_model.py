@@ -19,9 +19,9 @@ from pathlib import Path
 from operator import xor
 from pprint import pprint
 
-import qlib
-from qlib.workflow import R
-from qlib.tests.data import GetData
+import quant_master
+from quant_master.workflow import R
+from quant_master.tests.data import GetData
 
 
 # decorator to check the arguments
@@ -206,13 +206,13 @@ def gen_yaml_file_without_seed_kwargs(yaml_path, temp_dir):
 
 
 class ModelRunner:
-    def _init_qlib(self, exp_folder_name):
-        # init qlib
-        GetData().qlib_data(exists_skip=True)
-        qlib.init(
+    def _init_quant_master(self, exp_folder_name):
+        # init quant_master
+        GetData().quant_master_data(exists_skip=True)
+        quant_master.init(
             exp_manager={
                 "class": "MLflowExpManager",
-                "module_path": "qlib.workflow.expm",
+                "module_path": "quant_master.workflow.expm",
                 "kwargs": {
                     "uri": "file:" + str(Path(os.getcwd()).resolve() / exp_folder_name),
                     "default_exp_name": "Experiment",
@@ -229,7 +229,7 @@ class ModelRunner:
         dataset="Alpha360",
         universe="",
         exclude=False,
-        qlib_uri: str = "git+https://github.com/microsoft/qlib#egg=pyqlib",
+        quant_master_uri: str = "git+https://github.com/microsoft/quant_master#egg=pyquant_master",
         exp_folder_name: str = "run_all_model_records",
         wait_before_rm_env: bool = False,
         wait_when_err: bool = False,
@@ -252,8 +252,8 @@ class ModelRunner:
         universe  : str
             the stock universe of the dataset.
             default "" indicates that
-        qlib_uri : str
-            the uri to install qlib with pip
+        quant_master_uri : str
+            the uri to install quant_master with pip
             it could be URI on the remote or local path (NOTE: the local path must be an absolute path)
         exp_folder_name: str
             the name of the experiment folder
@@ -299,7 +299,7 @@ class ModelRunner:
             python run_all_model.py run 3 lightgbm Alpha158 csi500
 
         """
-        self._init_qlib(exp_folder_name)
+        self._init_quant_master(exp_folder_name)
 
         # get all folders
         folders = get_all_folders(models, exclude)
@@ -343,18 +343,18 @@ class ModelRunner:
                     wait_when_err=wait_when_err,
                 )
                 sys.stderr.write("\n")
-            # install qlib
-            sys.stderr.write("Installing qlib...\n")
+            # install quant_master
+            sys.stderr.write("Installing quant_master...\n")
             execute(f"{python_path} -m pip install --upgrade pip", wait_when_err=wait_when_err)  # TODO: FIX ME!
             execute(f"{python_path} -m pip install --upgrade cython", wait_when_err=wait_when_err)  # TODO: FIX ME!
             if fn == "TFT":
                 execute(
-                    f"cd {env_path} && {python_path} -m pip install --upgrade --force-reinstall --ignore-installed PyYAML -e {qlib_uri}",
+                    f"cd {env_path} && {python_path} -m pip install --upgrade --force-reinstall --ignore-installed PyYAML -e {quant_master_uri}",
                     wait_when_err=wait_when_err,
                 )  # TODO: FIX ME!
             else:
                 execute(
-                    f"cd {env_path} && {python_path} -m pip install --upgrade --force-reinstall -e {qlib_uri}",
+                    f"cd {env_path} && {python_path} -m pip install --upgrade --force-reinstall -e {quant_master_uri}",
                     wait_when_err=wait_when_err,
                 )  # TODO: FIX ME!
             sys.stderr.write("\n")

@@ -5,20 +5,20 @@ Custom Model Integration
 Introduction
 ============
 
-``Qlib``'s `Model Zoo` includes models such as ``LightGBM``, ``MLP``, ``LSTM``, etc.. These models are examples of ``Forecast Model``. In addition to the default models ``Qlib`` provide, users can integrate their own custom models into ``Qlib``.
+``QuantMaster``'s `Model Zoo` includes models such as ``LightGBM``, ``MLP``, ``LSTM``, etc.. These models are examples of ``Forecast Model``. In addition to the default models ``QuantMaster`` provide, users can integrate their own custom models into ``QuantMaster``.
 
 Users can integrate their own custom models according to the following steps.
 
-- Define a custom model class, which should be a subclass of the `qlib.model.base.Model <../reference/api.html#module-qlib.model.base>`_.
+- Define a custom model class, which should be a subclass of the `quant_master.model.base.Model <../reference/api.html#module-quant_master.model.base>`_.
 - Write a configuration file that describes the path and parameters of the custom model.
 - Test the custom model.
 
 Custom Model Class
 ==================
-The Custom models need to inherit `qlib.model.base.Model <../reference/api.html#module-qlib.model.base>`_ and override the methods in it.
+The Custom models need to inherit `quant_master.model.base.Model <../reference/api.html#module-quant_master.model.base>`_ and override the methods in it.
 
 - Override the `__init__` method
-    - ``Qlib`` passes the initialized parameters to the \_\_init\_\_ method.
+    - ``QuantMaster`` passes the initialized parameters to the \_\_init\_\_ method.
     - The hyperparameters of model in the configuration must be consistent with those defined in the `__init__` method.
     - Code Example: In the following example, the hyperparameters of model in the configuration file should contain parameters such as `loss:mse`.
 
@@ -32,7 +32,7 @@ The Custom models need to inherit `qlib.model.base.Model <../reference/api.html#
                 self._model = None
 
 - Override the `fit` method
-    - ``Qlib`` calls the fit method to train the model.
+    - ``QuantMaster`` calls the fit method to train the model.
     - The parameters must include training feature `dataset`, which is designed in the interface.
     - The parameters could include some `optional` parameters with default values, such as `num_boost_round = 1000` for `GBDT`.
     - Code Example: In the following example, `num_boost_round = 1000` is an optional parameter.
@@ -73,7 +73,7 @@ The Custom models need to inherit `qlib.model.base.Model <../reference/api.html#
 - Override the `predict` method
     - The parameters must include the parameter `dataset`, which will be used to get the test dataset.
     - Return the `prediction score`.
-    - Please refer to `Model API <../reference/api.html#module-qlib.model.base>`_ for the parameter types of the fit method.
+    - Please refer to `Model API <../reference/api.html#module-quant_master.model.base>`_ for the parameter types of the fit method.
     - Code Example: In the following example, users need to use `LightGBM` to predict the label(such as `preds`) of test data `x_test` and return it.
 
         .. code-block:: Python
@@ -107,7 +107,7 @@ The Custom models need to inherit `qlib.model.base.Model <../reference/api.html#
 Configuration File
 ==================
 
-The configuration file is described in detail in the `Workflow <../component/workflow.html#complete-example>`_ document. In order to integrate the custom model into ``Qlib``, users need to modify the "model" field in the configuration file. The configuration describes which models to use and how we can initialize it.
+The configuration file is described in detail in the `Workflow <../component/workflow.html#complete-example>`_ document. In order to integrate the custom model into ``QuantMaster``, users need to modify the "model" field in the configuration file. The configuration describes which models to use and how we can initialize it.
 
 - Example: The following example describes the `model` field of configuration file about the custom lightgbm model mentioned above, where `module_path` is the module path, `class` is the class name, and `args` is the hyperparameter passed into the __init__ method. All parameters in the field is passed to `self._params` by `\*\*kwargs` in `__init__` except `loss = mse`.
 
@@ -115,7 +115,7 @@ The configuration file is described in detail in the `Workflow <../component/wor
 
         model:
             class: LGBModel
-            module_path: qlib.contrib.model.gbdt
+            module_path: quant_master.contrib.model.gbdt
             args:
                 loss: mse
                 colsample_bytree: 0.8879
@@ -135,10 +135,10 @@ Assuming that the configuration file is ``examples/benchmarks/LightGBM/workflow_
 
 .. code-block:: bash
 
-    cd examples  # Avoid running program under the directory contains `qlib`
+    cd examples  # Avoid running program under the directory contains `quant_master`
     qrun benchmarks/LightGBM/workflow_config_lightgbm.yaml
 
-.. note:: ``qrun`` is a built-in command of ``Qlib``.
+.. note:: ``qrun`` is a built-in command of ``QuantMaster``.
 
 Also, ``Model`` can also be tested as a single module. An example has been given in ``examples/workflow_by_code.ipynb``.
 
@@ -146,4 +146,4 @@ Also, ``Model`` can also be tested as a single module. An example has been given
 Reference
 =========
 
-To know more about ``Forecast Model``, please refer to `Forecast Model: Model Training & Prediction <../component/model.html>`_ and `Model API <../reference/api.html#module-qlib.model.base>`_.
+To know more about ``Forecast Model``, please refer to `Forecast Model: Model Training & Prediction <../component/model.html>`_ and `Model API <../reference/api.html#module-quant_master.model.base>`_.

@@ -15,9 +15,9 @@ import os
 import datetime as dte
 
 
-from qlib.model.base import ModelFT
-from qlib.data.dataset import DatasetH
-from qlib.data.dataset.handler import DataHandlerLP
+from quant_master.model.base import ModelFT
+from quant_master.data.dataset import DatasetH
+from quant_master.data.dataset.handler import DataHandlerLP
 
 # To register new datasets, please add them here.
 ALLOW_DATASET = ["Alpha158", "Alpha360"]
@@ -90,7 +90,7 @@ def fill_test_na(test_df):
     return test_df_res
 
 
-def process_qlib_data(df, dataset, fillna=False):
+def process_quant_master_data(df, dataset, fillna=False):
     """Prepare data to fit the TFT model.
 
     Args:
@@ -120,7 +120,7 @@ def process_qlib_data(df, dataset, fillna=False):
 
 
 def process_predicted(df, col_name):
-    """Transform the TFT predicted data into Qlib format.
+    """Transform the TFT predicted data into QuantMaster format.
 
     Args:
       df: Original DataFrame.
@@ -164,7 +164,7 @@ class TFTModel(ModelFT):
         )
         return transform_df(df_train), transform_df(df_valid)
 
-    def fit(self, dataset: DatasetH, MODEL_FOLDER="qlib_tft_model", USE_GPU_ID=0, **kwargs):
+    def fit(self, dataset: DatasetH, MODEL_FOLDER="quant_master_tft_model", USE_GPU_ID=0, **kwargs):
         DATASET = self.params["DATASET"]
         LABEL_SHIFT = self.params["label_shift"]
         LABEL_COL = DATASET_SETTING[DATASET]["label_col"]
@@ -176,8 +176,8 @@ class TFTModel(ModelFT):
         dtrain.loc[:, LABEL_COL] = get_shifted_label(dtrain, shifts=LABEL_SHIFT, col_shift=LABEL_COL)
         dvalid.loc[:, LABEL_COL] = get_shifted_label(dvalid, shifts=LABEL_SHIFT, col_shift=LABEL_COL)
 
-        train = process_qlib_data(dtrain, DATASET, fillna=True).dropna()
-        valid = process_qlib_data(dvalid, DATASET, fillna=True).dropna()
+        train = process_quant_master_data(dtrain, DATASET, fillna=True).dropna()
+        valid = process_quant_master_data(dvalid, DATASET, fillna=True).dropna()
 
         ExperimentConfig = expt_settings.configs.ExperimentConfig
         config = ExperimentConfig(DATASET)
@@ -254,7 +254,7 @@ class TFTModel(ModelFT):
         d_test = dataset.prepare("test", col_set=["feature", "label"])
         d_test = transform_df(d_test)
         d_test.loc[:, self.label_col] = get_shifted_label(d_test, shifts=self.label_shift, col_shift=self.label_col)
-        test = process_qlib_data(d_test, self.expt_name, fillna=True).dropna()
+        test = process_quant_master_data(d_test, self.expt_name, fillna=True).dropna()
 
         use_gpu = (True, self.gpu_id)
         # ===========================Predicting Process===========================
@@ -310,7 +310,7 @@ class TFTModel(ModelFT):
         # path.mkdir(parents=True)
         # self.model.save(path)
 
-        # save qlib model wrapper
+        # save quant_master model wrapper
         drop_attrs = ["model", "tf_graph", "sess", "data_formatter"]
         orig_attr = {}
         for attr in drop_attrs:

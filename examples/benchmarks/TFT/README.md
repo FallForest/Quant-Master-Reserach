@@ -8,10 +8,10 @@
 Users can follow the ``workflow_by_code_tft.py`` to run the benchmark. 
 
 ## PyTorch Workflow
-``workflow_config_tft_Alpha360_2026_csi300_top20_ndrop1.yaml`` uses ``qlib.contrib.model.pytorch_tft.TFTModel`` and follows the same qrun workflow as the PyTorch Transformer benchmark.
+``workflow_config_tft_Alpha360_2026_csi300_top20_ndrop1.yaml`` uses ``quant_master.contrib.model.pytorch_tft.TFTModel`` and follows the same qrun workflow as the PyTorch Transformer benchmark.
 
 ```bash
-python -m qlib.cli.run examples/benchmarks/TFT/workflow_config_tft_Alpha360_2026_csi300_top20_ndrop1.yaml
+python -m quant_master.cli.run examples/benchmarks/TFT/workflow_config_tft_Alpha360_2026_csi300_top20_ndrop1.yaml
 ```
 
 ### Notes

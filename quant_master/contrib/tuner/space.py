@@ -11,7 +11,7 @@ TopkAmountStrategySpace = {
     "buffer_margin": hp.choice("buffer_margin", [200, 250, 300]),
 }
 
-QuantMasterDataLabelSpace = {
+QLibDataLabelSpace = {
     "labels": hp.choice(
         "labels",
         [["Ref($vwap, -2)/Ref($vwap, -1) - 1"], ["Ref($close, -5)/$close - 1"]],

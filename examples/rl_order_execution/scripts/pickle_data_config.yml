@@ -7,19 +7,19 @@ valid_end_time: !!str &vend 2021-09-30
 test_start_time: !!str &tstart 2021-10-01
 # the instrument set
 instruments: &ins csi300s19_22
-# qlib related configuration
-qlib_conf:
+# quant_master related configuration
+quant_master_conf:
     provider_uri: 
-        5min: ./data/bin # path to generated qlib bin
+        5min: ./data/bin # path to generated quant_master bin
     redis_port: 233
 feature_conf:
     path: ./data/pickle/feature.pkl # output path of feature
     class: DatasetH
-    module_path: qlib.data.dataset
+    module_path: quant_master.data.dataset
     kwargs:
         handler:
             class: HighFreqGeneralHandler
-            module_path: qlib.contrib.data.highfreq_handler
+            module_path: quant_master.contrib.data.highfreq_handler
             kwargs:
                 start_time: *start
                 end_time: *end
@@ -31,7 +31,7 @@ feature_conf:
                 columns: ["$open", "$high", "$low", "$close"]
                 infer_processors:
                 - class: HighFreqNorm
-                  module_path: qlib.contrib.data.highfreq_processor
+                  module_path: quant_master.contrib.data.highfreq_processor
                   kwargs:
                     feature_save_dir: ./stat/  #  output path of statistics of features (for feature normalization)
                     norm_groups: 
@@ -39,7 +39,7 @@ feature_conf:
                         volume: 2
                 inst_processors:
                 - class: TimeRangeFlt
-                  module_path: qlib.data.dataset.processor
+                  module_path: quant_master.data.dataset.processor
                   kwargs:
                     start_time: "2020-01-01"
                     end_time: "2021-12-31"
@@ -51,11 +51,11 @@ feature_conf:
 backtest_conf:
     path: ./data/pickle/backtest.pkl # output path of backtest
     class: DatasetH
-    module_path: qlib.data.dataset
+    module_path: quant_master.data.dataset
     kwargs:
         handler:
             class: HighFreqGeneralBacktestHandler
-            module_path: qlib.contrib.data.highfreq_handler
+            module_path: quant_master.contrib.data.highfreq_handler
             kwargs:
                 start_time: *start
                 end_time: *end
@@ -65,7 +65,7 @@ backtest_conf:
                 columns: ["$close", "$volume"]
                 inst_processors:
                 - class: TimeRangeFlt
-                  module_path: qlib.data.dataset.processor
+                  module_path: quant_master.data.dataset.processor
                   kwargs:
                     start_time: "2020-01-01"
                     end_time: "2021-12-31"

@@ -1,5 +1,5 @@
-qlib_init:
-    provider_uri: "~/.qlib/qlib_data/cn_data"
+quant_master_init:
+    provider_uri: "~/.quant_master/quant_master_data/cn_data"
     region: cn
     kernels: 1
     joblib_backend: threading
@@ -8,7 +8,7 @@ benchmark: &benchmark SH000300
 port_analysis_config: &port_analysis_config
     strategy:
         class: TopkDropoutStrategy
-        module_path: qlib.contrib.strategy
+        module_path: quant_master.contrib.strategy
         kwargs:
             signal: <PRED>
             topk: 20
@@ -27,17 +27,17 @@ port_analysis_config: &port_analysis_config
 task:
     model:
         class: PretrainedSignalModel
-        module_path: qlib.contrib.model.pretrained_signal
+        module_path: quant_master.contrib.model.pretrained_signal
         kwargs:
-            signal_path: "C:/Users/15728/Desktop/qlib/reports/MetaEnsemble/meta_icir_pred_top20_source.pkl"
+            signal_path: "C:/Users/15728/Desktop/quant_master/reports/MetaEnsemble/meta_icir_pred_top20_source.pkl"
             score_column: score
     dataset:
         class: DatasetH
-        module_path: qlib.data.dataset
+        module_path: quant_master.data.dataset
         kwargs:
             handler:
                 class: Alpha158
-                module_path: qlib.contrib.data.handler
+                module_path: quant_master.contrib.data.handler
                 kwargs:
                     start_time: 2012-01-01
                     end_time: 2026-04-30
@@ -50,16 +50,16 @@ task:
                 test: [2024-01-01, 2026-04-30]
     record:
         - class: SignalRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs:
             model: <MODEL>
             dataset: <DATASET>
         - class: SigAnaRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs:
             ana_long_short: False
             ann_scaler: 252
         - class: PortAnaRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs:
             config: *port_analysis_config

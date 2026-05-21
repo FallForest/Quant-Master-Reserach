@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from qlib.contrib.strategy.cost_control import SoftTopkStrategy
+from quant_master.contrib.strategy.cost_control import SoftTopkStrategy
 
 
 class MockPosition:

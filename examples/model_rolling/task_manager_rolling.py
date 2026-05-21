@@ -10,21 +10,21 @@ Based on the ability of TaskManager, `worker` method offer a simple way for mult
 from pprint import pprint
 
 import fire
-import qlib
-from qlib.constant import REG_CN
-from qlib.workflow import R
-from qlib.workflow.task.gen import RollingGen, task_generator
-from qlib.workflow.task.manage import TaskManager, run_task
-from qlib.workflow.task.collect import RecorderCollector
-from qlib.model.ens.group import RollingGroup
-from qlib.model.trainer import TrainerR, TrainerRM, task_train
-from qlib.tests.config import CSI100_RECORD_LGB_TASK_CONFIG, CSI100_RECORD_XGBOOST_TASK_CONFIG
+import quant_master
+from quant_master.constant import REG_CN
+from quant_master.workflow import R
+from quant_master.workflow.task.gen import RollingGen, task_generator
+from quant_master.workflow.task.manage import TaskManager, run_task
+from quant_master.workflow.task.collect import RecorderCollector
+from quant_master.model.ens.group import RollingGroup
+from quant_master.model.trainer import TrainerR, TrainerRM, task_train
+from quant_master.tests.config import CSI100_RECORD_LGB_TASK_CONFIG, CSI100_RECORD_XGBOOST_TASK_CONFIG
 
 
 class RollingTaskExample:
     def __init__(
         self,
-        provider_uri="~/.qlib/qlib_data/cn_data",
+        provider_uri="~/.quant_master/quant_master_data/cn_data",
         region=REG_CN,
         task_url="mongodb://10.0.0.4:27017/",
         task_db_name="rolling_db",
@@ -41,7 +41,7 @@ class RollingTaskExample:
             "task_url": task_url,
             "task_db_name": task_db_name,
         }
-        qlib.init(provider_uri=provider_uri, region=region, mongo=mongo_conf)
+        quant_master.init(provider_uri=provider_uri, region=region, mongo=mongo_conf)
         self.experiment_name = experiment_name
         if task_pool is None:
             self.trainer = TrainerR(experiment_name=self.experiment_name)

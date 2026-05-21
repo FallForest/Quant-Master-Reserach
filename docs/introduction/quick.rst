@@ -8,7 +8,7 @@ Introduction
 
 This ``Quick Start`` guide tries to demonstrate
 
-- It's very easy to build a complete Quant research workflow and try users' ideas with ``Qlib``.
+- It's very easy to build a complete Quant research workflow and try users' ideas with ``QuantMaster``.
 - Though with public data and simple models, machine learning technologies work very well in practical Quant investment.
 
 
@@ -16,23 +16,23 @@ This ``Quick Start`` guide tries to demonstrate
 Installation
 ============
 
-Users can easily install ``Qlib`` according to the following steps:
+Users can easily install ``QuantMaster`` according to the following steps:
 
-- Before installing ``Qlib`` from source, users need to install some dependencies:
+- Before installing ``QuantMaster`` from source, users need to install some dependencies:
 
     .. code-block::
 
         pip install numpy
         pip install --upgrade  cython
 
-- Clone the repository and install ``Qlib``
+- Clone the repository and install ``QuantMaster``
 
     .. code-block::
 
-        git clone https://github.com/microsoft/qlib.git && cd qlib
+        git clone https://github.com/microsoft/quant_master.git && cd quant_master
         python setup.py install
 
-To known more about `installation`, please refer to `Qlib Installation <../start/installation.html>`_.
+To known more about `installation`, please refer to `QuantMaster Installation <../start/installation.html>`_.
 
 Prepare Data
 ============
@@ -41,7 +41,7 @@ Load and prepare data by running the following code:
 
 .. code-block::
 
-    python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data --region cn
+    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
 
 This dataset is created by public data collected by crawler scripts in ``scripts/data_collector/``, which have been released in the same repository. Users could create the same dataset with it.
 
@@ -50,14 +50,14 @@ To known more about `prepare data`, please refer to `Data Preparation <../compon
 Auto Quant Research Workflow
 ============================
 
-``Qlib`` provides a tool named ``qrun`` to run the whole workflow automatically (including building dataset, training models, backtest and evaluation). Users can start an auto quant research workflow and have a graphical reports analysis according to the following steps:
+``QuantMaster`` provides a tool named ``qrun`` to run the whole workflow automatically (including building dataset, training models, backtest and evaluation). Users can start an auto quant research workflow and have a graphical reports analysis according to the following steps:
 
 - Quant Research Workflow:
     - Run  ``qrun`` with a config file of the LightGBM model `workflow_config_lightgbm.yaml` as following.
 
         .. code-block::
 
-            cd examples  # Avoid running program under the directory contains `qlib`
+            cd examples  # Avoid running program under the directory contains `quant_master`
             qrun benchmarks/LightGBM/workflow_config_lightgbm.yaml
 
 
@@ -92,4 +92,4 @@ Auto Quant Research Workflow
 Custom Model Integration
 ========================
 
-``Qlib`` provides a batch of models (such as ``lightGBM`` and ``MLP`` models) as examples of ``Forecast Model``. In addition to the default model, users can integrate their own custom models into ``Qlib``. If users are interested in the custom model, please refer to `Custom Model Integration <../start/integration.html>`_.
+``QuantMaster`` provides a batch of models (such as ``lightGBM`` and ``MLP`` models) as examples of ``Forecast Model``. In addition to the default model, users can integrate their own custom models into ``QuantMaster``. If users are interested in the custom model, please refer to `Custom Model Integration <../start/integration.html>`_.

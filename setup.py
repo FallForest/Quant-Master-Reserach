@@ -9,14 +9,14 @@ NUMPY_INCLUDE = numpy.get_include()
 setup(
     ext_modules=[
         Extension(
-            "qlib.data._libs.rolling",
-            ["qlib/data/_libs/rolling.pyx"],
+            "quant_master.data._libs.rolling",
+            ["quant_master/data/_libs/rolling.pyx"],
             language="c++",
             include_dirs=[NUMPY_INCLUDE],
         ),
         Extension(
-            "qlib.data._libs.expanding",
-            ["qlib/data/_libs/expanding.pyx"],
+            "quant_master.data._libs.expanding",
+            ["quant_master/data/_libs/expanding.pyx"],
             language="c++",
             include_dirs=[NUMPY_INCLUDE],
         ),

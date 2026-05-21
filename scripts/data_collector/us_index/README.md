@@ -9,11 +9,11 @@ pip install -r requirements.txt
 ## Collector Data
 
 ```bash
-# parse instruments, using in qlib/instruments.
-python collector.py --index_name SP500 --qlib_dir ~/.qlib/qlib_data/us_data --method parse_instruments
+# parse instruments, using in quant_master/instruments.
+python collector.py --index_name SP500 --quant_master_dir ~/.quant_master/quant_master_data/us_data --method parse_instruments
 
 # parse new companies
-python collector.py --index_name SP500 --qlib_dir ~/.qlib/qlib_data/us_data --method save_new_companies
+python collector.py --index_name SP500 --quant_master_dir ~/.quant_master/quant_master_data/us_data --method save_new_companies
 
 # index_name support: SP500, NASDAQ100, DJIA, SP400
 # help

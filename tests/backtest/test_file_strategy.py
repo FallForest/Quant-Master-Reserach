@@ -2,11 +2,11 @@
 # Licensed under the MIT License.
 
 import unittest
-from qlib.backtest import backtest
-from qlib.tests import TestAutoData
+from quant_master.backtest import backtest
+from quant_master.tests import TestAutoData
 import pandas as pd
 from pathlib import Path
-from qlib.data import D
+from quant_master.data import D
 import numpy as np
 
 DIRNAME = Path(__file__).absolute().resolve().parent
@@ -62,7 +62,7 @@ class FileStrTest(TestAutoData):
         # 3) run the strategy
         strategy_config = {
             "class": "FileOrderStrategy",
-            "module_path": "qlib.contrib.strategy.rule_strategy",
+            "module_path": "quant_master.contrib.strategy.rule_strategy",
             "kwargs": {"file": self.EXAMPLE_FILE},
         }
 
@@ -90,7 +90,7 @@ class FileStrTest(TestAutoData):
         }
         executor_config = {
             "class": "SimulatorExecutor",
-            "module_path": "qlib.backtest.executor",
+            "module_path": "quant_master.backtest.executor",
             "kwargs": {
                 "time_per_step": freq,
                 "generate_portfolio_metrics": False,

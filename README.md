@@ -1,76 +1,47 @@
-[![Python Versions](https://img.shields.io/pypi/pyversions/pyqlib.svg?logo=python&logoColor=white)](https://pypi.org/project/pyqlib/#files)
-[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows%20%7C%20macos-lightgrey)](https://pypi.org/project/pyqlib/#files)
-[![PypI Versions](https://img.shields.io/pypi/v/pyqlib)](https://pypi.org/project/pyqlib/#history)
-[![Upload Python Package](https://github.com/microsoft/qlib/workflows/Upload%20Python%20Package/badge.svg)](https://pypi.org/project/pyqlib/)
-[![Github Actions Test Status](https://github.com/microsoft/qlib/workflows/Test/badge.svg?branch=main)](https://github.com/microsoft/qlib/actions)
-[![Documentation Status](https://readthedocs.org/projects/qlib/badge/?version=latest)](https://qlib.readthedocs.io/en/latest/?badge=latest)
-[![License](https://img.shields.io/pypi/l/pyqlib)](LICENSE)
-[![Join the chat at https://gitter.im/Microsoft/qlib](https://badges.gitter.im/Microsoft/qlib.svg)](https://gitter.im/Microsoft/qlib?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+﻿[![Python Versions](https://img.shields.io/pypi/pyversions/pyquant_master.svg?logo=python&logoColor=white)](https://pypi.org/project/pyquant_master/#files)
+[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows%20%7C%20macos-lightgrey)](https://pypi.org/project/pyquant_master/#files)
+[![PypI Versions](https://img.shields.io/pypi/v/pyquant_master)](https://pypi.org/project/pyquant_master/#history)
+[![Upload Python Package](https://github.com/microsoft/quant_master/workflows/Upload%20Python%20Package/badge.svg)](https://pypi.org/project/pyquant_master/)
+[![Github Actions Test Status](https://github.com/microsoft/quant_master/workflows/Test/badge.svg?branch=main)](https://github.com/microsoft/quant_master/actions)
+[![Documentation Status](https://readthedocs.org/projects/quant_master/badge/?version=latest)](https://quant_master.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/pypi/l/pyquant_master)](LICENSE)
+[![Join the chat at https://gitter.im/Microsoft/quant_master](https://badges.gitter.im/Microsoft/quant_master.svg)](https://gitter.im/Microsoft/quant_master?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## :newspaper: **What's NEW!** &nbsp;   :sparkling_heart: 
 
 Recent released features
 
-### Introducing <a href="https://github.com/microsoft/RD-Agent"><img src="docs/_static/img/rdagent_logo.png" alt="RD_Agent" style="height: 2em"></a>: LLM-Based Autonomous Evolving Agents for Industrial Data-Driven R&D
-
-We are excited to announce the release of **RD-Agent**📢, a powerful tool that supports automated factor mining and model optimization in quant investment R&D.
-
-RD-Agent is now available on [GitHub](https://github.com/microsoft/RD-Agent), and we welcome your star🌟!
-
-To learn more, please visit the [RD-Agent repository](https://github.com/microsoft/RD-Agent). We have prepared several public demo videos for you:
-
-| Scenario | Demo video (English) | Demo video (中文) |
-| --                      | ------    | ------    |
-| Quant Factor Mining | [YouTube](https://www.youtube.com/watch?v=X4DK2QZKaKY&t=6s) | [YouTube](https://www.youtube.com/watch?v=X4DK2QZKaKY&t=6s) |
-| Quant Factor Mining from reports | [YouTube](https://www.youtube.com/watch?v=ECLTXVcSx-c) | [YouTube](https://www.youtube.com/watch?v=ECLTXVcSx-c) |
-| Quant Model Optimization | [YouTube](https://www.youtube.com/watch?v=dm0dWL49Bc0&t=104s) | [YouTube](https://www.youtube.com/watch?v=dm0dWL49Bc0&t=104s) |
-
-- 📃**Paper**: [R&D-Agent-Quant: A Multi-Agent Framework for Data-Centric Factors and Model Joint Optimization](https://arxiv.org/abs/2505.15155)
-- 👾**Code**: https://github.com/microsoft/RD-Agent/
-```BibTeX
-@misc{li2025rdagentquant,
-    title={R\&D-Agent-Quant: A Multi-Agent Framework for Data-Centric Factors and Model Joint Optimization},
-    author={Yuante Li and Xu Yang and Xiao Yang and Minrui Xu and Xisen Wang and Weiqing Liu and Jiang Bian},
-    year={2025},
-    eprint={2505.15155},
-    archivePrefix={arXiv},
-    primaryClass={cs.AI}
-}
-```
-![image](https://github.com/user-attachments/assets/3198bc10-47ba-4ee0-8a8e-46d5ce44f45d)
 
 ***
 
 | Feature | Status |
 | --                      | ------    |
-| [R&D-Agent-Quant](https://arxiv.org/abs/2505.15155) Published | Apply R&D-Agent to Qlib for quant trading | 
-| BPQP for End-to-end learning | 📈Coming soon!([Under review](https://github.com/microsoft/qlib/pull/1863)) |
-| 🔥LLM-driven Auto Quant Factory🔥 | 🚀 Released in [♾️RD-Agent](https://github.com/microsoft/RD-Agent) on Aug 8, 2024 |
-| KRNN and Sandwich models | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/1414/) on May 26, 2023 |
-| Release Qlib v0.9.0 | :octocat: [Released](https://github.com/microsoft/qlib/releases/tag/v0.9.0) on Dec 9, 2022 |
-| RL Learning Framework | :hammer: :chart_with_upwards_trend: Released on Nov 10, 2022. [#1332](https://github.com/microsoft/qlib/pull/1332), [#1322](https://github.com/microsoft/qlib/pull/1322), [#1316](https://github.com/microsoft/qlib/pull/1316),[#1299](https://github.com/microsoft/qlib/pull/1299),[#1263](https://github.com/microsoft/qlib/pull/1263), [#1244](https://github.com/microsoft/qlib/pull/1244), [#1169](https://github.com/microsoft/qlib/pull/1169), [#1125](https://github.com/microsoft/qlib/pull/1125), [#1076](https://github.com/microsoft/qlib/pull/1076)|
-| HIST and IGMTF models | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/1040) on Apr 10, 2022 |
-| Qlib [notebook tutorial](https://github.com/microsoft/qlib/tree/main/examples/tutorial) | 📖 [Released](https://github.com/microsoft/qlib/pull/1037) on Apr 7, 2022 | 
-| Ibovespa index data | :rice: [Released](https://github.com/microsoft/qlib/pull/990) on Apr 6, 2022 |
-| Point-in-Time database | :hammer: [Released](https://github.com/microsoft/qlib/pull/343) on Mar 10, 2022 |
-| Arctic Provider Backend & Orderbook data example | :hammer: [Released](https://github.com/microsoft/qlib/pull/744) on Jan 17, 2022 |
-| Meta-Learning-based framework & DDG-DA  | :chart_with_upwards_trend:  :hammer: [Released](https://github.com/microsoft/qlib/pull/743) on Jan 10, 2022 | 
-| Planning-based portfolio optimization | :hammer: [Released](https://github.com/microsoft/qlib/pull/754) on Dec 28, 2021 | 
-| Release Qlib v0.8.0 | :octocat: [Released](https://github.com/microsoft/qlib/releases/tag/v0.8.0) on Dec 8, 2021 |
-| ADD model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/704) on Nov 22, 2021 |
-| ADARNN  model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/689) on Nov 14, 2021 |
-| TCN  model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/668) on Nov 4, 2021 |
-| Nested Decision Framework | :hammer: [Released](https://github.com/microsoft/qlib/pull/438) on Oct 1, 2021. [Example](https://github.com/microsoft/qlib/blob/main/examples/nested_decision_execution/workflow.py) and [Doc](https://qlib.readthedocs.io/en/latest/component/highfreq.html) |
-| Temporal Routing Adaptor (TRA) | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/531) on July 30, 2021 |
-| Transformer & Localformer | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/508) on July 22, 2021 |
-| Release Qlib v0.7.0 | :octocat: [Released](https://github.com/microsoft/qlib/releases/tag/v0.7.0) on July 12, 2021 |
-| TCTS Model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/491) on July 1, 2021 |
-| Online serving and automatic model rolling | :hammer:  [Released](https://github.com/microsoft/qlib/pull/290) on May 17, 2021 | 
-| DoubleEnsemble Model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/286) on Mar 2, 2021 | 
-| High-frequency data processing example | :hammer: [Released](https://github.com/microsoft/qlib/pull/257) on Feb 5, 2021  |
-| High-frequency trading example | :chart_with_upwards_trend: [Part of code released](https://github.com/microsoft/qlib/pull/227) on Jan 28, 2021  | 
-| High-frequency data(1min) | :rice: [Released](https://github.com/microsoft/qlib/pull/221) on Jan 27, 2021 |
-| Tabnet Model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/qlib/pull/205) on Jan 22, 2021 |
+| BPQP for End-to-end learning | 馃搱Coming soon!([Under review](https://github.com/microsoft/quant_master/pull/1863)) |
+| KRNN and Sandwich models | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/1414/) on May 26, 2023 |
+| Release QuantMaster v0.9.0 | :octocat: [Released](https://github.com/microsoft/quant_master/releases/tag/v0.9.0) on Dec 9, 2022 |
+| RL Learning Framework | :hammer: :chart_with_upwards_trend: Released on Nov 10, 2022. [#1332](https://github.com/microsoft/quant_master/pull/1332), [#1322](https://github.com/microsoft/quant_master/pull/1322), [#1316](https://github.com/microsoft/quant_master/pull/1316),[#1299](https://github.com/microsoft/quant_master/pull/1299),[#1263](https://github.com/microsoft/quant_master/pull/1263), [#1244](https://github.com/microsoft/quant_master/pull/1244), [#1169](https://github.com/microsoft/quant_master/pull/1169), [#1125](https://github.com/microsoft/quant_master/pull/1125), [#1076](https://github.com/microsoft/quant_master/pull/1076)|
+| HIST and IGMTF models | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/1040) on Apr 10, 2022 |
+| QuantMaster [notebook tutorial](https://github.com/microsoft/quant_master/tree/main/examples/tutorial) | 馃摉 [Released](https://github.com/microsoft/quant_master/pull/1037) on Apr 7, 2022 | 
+| Ibovespa index data | :rice: [Released](https://github.com/microsoft/quant_master/pull/990) on Apr 6, 2022 |
+| Point-in-Time database | :hammer: [Released](https://github.com/microsoft/quant_master/pull/343) on Mar 10, 2022 |
+| Arctic Provider Backend & Orderbook data example | :hammer: [Released](https://github.com/microsoft/quant_master/pull/744) on Jan 17, 2022 |
+| Meta-Learning-based framework & DDG-DA  | :chart_with_upwards_trend:  :hammer: [Released](https://github.com/microsoft/quant_master/pull/743) on Jan 10, 2022 | 
+| Planning-based portfolio optimization | :hammer: [Released](https://github.com/microsoft/quant_master/pull/754) on Dec 28, 2021 | 
+| Release QuantMaster v0.8.0 | :octocat: [Released](https://github.com/microsoft/quant_master/releases/tag/v0.8.0) on Dec 8, 2021 |
+| ADD model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/704) on Nov 22, 2021 |
+| ADARNN  model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/689) on Nov 14, 2021 |
+| TCN  model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/668) on Nov 4, 2021 |
+| Nested Decision Framework | :hammer: [Released](https://github.com/microsoft/quant_master/pull/438) on Oct 1, 2021. [Example](https://github.com/microsoft/quant_master/blob/main/examples/nested_decision_execution/workflow.py) and [Doc](https://quant_master.readthedocs.io/en/latest/component/highfreq.html) |
+| Temporal Routing Adaptor (TRA) | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/531) on July 30, 2021 |
+| Transformer & Localformer | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/508) on July 22, 2021 |
+| Release QuantMaster v0.7.0 | :octocat: [Released](https://github.com/microsoft/quant_master/releases/tag/v0.7.0) on July 12, 2021 |
+| TCTS Model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/491) on July 1, 2021 |
+| Online serving and automatic model rolling | :hammer:  [Released](https://github.com/microsoft/quant_master/pull/290) on May 17, 2021 | 
+| DoubleEnsemble Model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/286) on Mar 2, 2021 | 
+| High-frequency data processing example | :hammer: [Released](https://github.com/microsoft/quant_master/pull/257) on Feb 5, 2021  |
+| High-frequency trading example | :chart_with_upwards_trend: [Part of code released](https://github.com/microsoft/quant_master/pull/227) on Jan 28, 2021  | 
+| High-frequency data(1min) | :rice: [Released](https://github.com/microsoft/quant_master/pull/221) on Jan 27, 2021 |
+| Tabnet Model | :chart_with_upwards_trend: [Released](https://github.com/microsoft/quant_master/pull/205) on Jan 22, 2021 |
 
 Features released before 2021 are not listed here.
 
@@ -78,12 +49,12 @@ Features released before 2021 are not listed here.
   <img src="docs/_static/img/logo/1.png" />
 </p>
 
-Qlib is an open-source, AI-oriented quantitative investment platform that aims to realize the potential, empower research, and create value using AI technologies in quantitative investment, from exploring ideas to implementing productions. Qlib supports diverse machine learning modeling paradigms, including supervised learning, market dynamics modeling, and reinforcement learning.
+QuantMaster is an open-source, AI-oriented quantitative investment platform that aims to realize the potential, empower research, and create value using AI technologies in quantitative investment, from exploring ideas to implementing productions. QuantMaster supports diverse machine learning modeling paradigms, including supervised learning, market dynamics modeling, and reinforcement learning.
 
-An increasing number of SOTA Quant research works/papers in diverse paradigms are being released in Qlib to collaboratively solve key challenges in quantitative investment. For example, 1) using supervised learning to mine the market's complex non-linear patterns from rich and heterogeneous financial data, 2) modeling the dynamic nature of the financial market using adaptive concept drift technology, and 3) using reinforcement learning to model continuous investment decisions and assist investors in optimizing their trading strategies.
+An increasing number of SOTA Quant research works/papers in diverse paradigms are being released in QuantMaster to collaboratively solve key challenges in quantitative investment. For example, 1) using supervised learning to mine the market's complex non-linear patterns from rich and heterogeneous financial data, 2) modeling the dynamic nature of the financial market using adaptive concept drift technology, and 3) using reinforcement learning to model continuous investment decisions and assist investors in optimizing their trading strategies.
 
 It contains the full ML pipeline of data processing, model training, back-testing; and covers the entire chain of quantitative investment: alpha seeking, risk modeling, portfolio optimization, and order execution. 
-For more details, please refer to our paper ["Qlib: An AI-oriented Quantitative Investment Platform"](https://arxiv.org/abs/2009.11189).
+For more details, please refer to our paper ["QuantMaster: An AI-oriented Quantitative Investment Platform"](https://arxiv.org/abs/2009.11189).
 
 
 <table>
@@ -95,7 +66,7 @@ For more details, please refer to our paper ["Qlib: An AI-oriented Quantitative 
     <tr>
       <td>
         <li><a href="#plans"><strong>Plans</strong></a></li>
-        <li><a href="#framework-of-qlib">Framework of Qlib</a></li>
+        <li><a href="#framework-of-quant_master">Framework of QuantMaster</a></li>
         <li><a href="#quick-start">Quick Start</a></li>
           <ul dir="auto">
             <li type="circle"><a href="#installation">Installation</a> </li>
@@ -104,10 +75,10 @@ For more details, please refer to our paper ["Qlib: An AI-oriented Quantitative 
             <li type="circle"><a href="#building-customized-quant-research-workflow-by-code">Building Customized Quant Research Workflow by Code</a></li></ul>
         <li><a href="#quant-dataset-zoo"><strong>Quant Dataset Zoo</strong></a></li>
         <li><a href="#learning-framework">Learning Framework</a></li>
-        <li><a href="#more-about-qlib">More About Qlib</a></li>
+        <li><a href="#more-about-quant_master">More About QuantMaster</a></li>
         <li><a href="#offline-mode-and-online-mode">Offline Mode and Online Mode</a>
         <ul>
-          <li type="circle"><a href="#performance-of-qlib-data-server">Performance of Qlib Data Server</a></li></ul>
+          <li type="circle"><a href="#performance-of-quant_master-data-server">Performance of QuantMaster Data Server</a></li></ul>
         <li><a href="#related-reports">Related Reports</a></li>
         <li><a href="#contact-us">Contact Us</a></li>
         <li><a href="#contributing">Contributing</a></li>
@@ -140,33 +111,33 @@ Your feedbacks about the features are very important.
 <!-- | Feature                        | Status      | -->
 <!-- | --                      | ------    | -->
 
-# Framework of Qlib
+# Framework of QuantMaster
 
 <div style="align: center">
 <img src="docs/_static/img/framework-abstract.jpg" />
 </div>
 
-The high-level framework of Qlib can be found above(users can find the [detailed framework](https://qlib.readthedocs.io/en/latest/introduction/introduction.html#framework) of Qlib's design when getting into nitty gritty).
+The high-level framework of QuantMaster can be found above(users can find the [detailed framework](https://quant_master.readthedocs.io/en/latest/introduction/introduction.html#framework) of QuantMaster's design when getting into nitty gritty).
 The components are designed as loose-coupled modules, and each component could be used stand-alone.
 
-Qlib provides a strong infrastructure to support Quant research. [Data](https://qlib.readthedocs.io/en/latest/component/data.html) is always an important part.
-A strong learning framework is designed to support diverse learning paradigms (e.g. [reinforcement learning](https://qlib.readthedocs.io/en/latest/component/rl.html), [supervised learning](https://qlib.readthedocs.io/en/latest/component/workflow.html#model-section)) and patterns at different levels(e.g. [market dynamic modeling](https://qlib.readthedocs.io/en/latest/component/meta.html)).
-By modeling the market, [trading strategies](https://qlib.readthedocs.io/en/latest/component/strategy.html) will generate trade decisions that will be executed. Multiple trading strategies and executors in different levels or granularities can be [nested to be optimized and run together](https://qlib.readthedocs.io/en/latest/component/highfreq.html).
-At last, a comprehensive [analysis](https://qlib.readthedocs.io/en/latest/component/report.html) will be provided and the model can be [served online](https://qlib.readthedocs.io/en/latest/component/online.html) in a low cost.
+QuantMaster provides a strong infrastructure to support Quant research. [Data](https://quant_master.readthedocs.io/en/latest/component/data.html) is always an important part.
+A strong learning framework is designed to support diverse learning paradigms (e.g. [reinforcement learning](https://quant_master.readthedocs.io/en/latest/component/rl.html), [supervised learning](https://quant_master.readthedocs.io/en/latest/component/workflow.html#model-section)) and patterns at different levels(e.g. [market dynamic modeling](https://quant_master.readthedocs.io/en/latest/component/meta.html)).
+By modeling the market, [trading strategies](https://quant_master.readthedocs.io/en/latest/component/strategy.html) will generate trade decisions that will be executed. Multiple trading strategies and executors in different levels or granularities can be [nested to be optimized and run together](https://quant_master.readthedocs.io/en/latest/component/highfreq.html).
+At last, a comprehensive [analysis](https://quant_master.readthedocs.io/en/latest/component/report.html) will be provided and the model can be [served online](https://quant_master.readthedocs.io/en/latest/component/online.html) in a low cost.
 
 
 # Quick Start
 
 This quick start guide tries to demonstrate
-1. It's very easy to build a complete Quant research workflow and try your ideas with _Qlib_.
+1. It's very easy to build a complete Quant research workflow and try your ideas with _QuantMaster_.
 2. Though with *public data* and *simple models*, machine learning technologies **work very well** in practical Quant investment.
 
-Here is a quick **[demo](https://terminalizer.com/view/3f24561a4470)** shows how to install ``Qlib``, and run LightGBM with ``qrun``. **But**, please make sure you have already prepared the data following the [instruction](#data-preparation).
+Here is a quick **[demo](https://terminalizer.com/view/3f24561a4470)** shows how to install ``QuantMaster``, and run LightGBM with ``qrun``. **But**, please make sure you have already prepared the data following the [instruction](#data-preparation).
 
 
 ## Installation
 
-This table demonstrates the supported Python version of `Qlib`:
+This table demonstrates the supported Python version of `QuantMaster`:
 |               | install with pip      | install from source  |        plot        |
 | ------------- |:---------------------:|:--------------------:|:------------------:|
 | Python 3.8    | :heavy_check_mark:    | :heavy_check_mark:   | :heavy_check_mark: |
@@ -177,45 +148,45 @@ This table demonstrates the supported Python version of `Qlib`:
 
 **Note**: 
 1. **Conda** is suggested for managing your Python environment. In some cases, using Python outside of a `conda` environment may result in missing header files, causing the installation failure of certain packages.
-2. Please pay attention that installing cython in Python 3.6 will raise some error when installing ``Qlib`` from source. If users use Python 3.6 on their machines, it is recommended to *upgrade* Python to version 3.8 or higher, or use `conda`'s Python to install ``Qlib`` from source.
+2. Please pay attention that installing cython in Python 3.6 will raise some error when installing ``QuantMaster`` from source. If users use Python 3.6 on their machines, it is recommended to *upgrade* Python to version 3.8 or higher, or use `conda`'s Python to install ``QuantMaster`` from source.
 
 ### Install with pip
-Users can easily install ``Qlib`` by pip according to the following command.
+Users can easily install ``QuantMaster`` by pip according to the following command.
 
 ```bash
-  pip install pyqlib
+  pip install pyquant_master
 ```
 
-**Note**: pip will install the latest stable qlib. However, the main branch of qlib is in active development. If you want to test the latest scripts or functions in the main branch. Please install qlib with the methods below.
+**Note**: pip will install the latest stable quant_master. However, the main branch of quant_master is in active development. If you want to test the latest scripts or functions in the main branch. Please install quant_master with the methods below.
 
 ### Install from source
-Also, users can install the latest dev version ``Qlib`` by the source code according to the following steps:
+Also, users can install the latest dev version ``QuantMaster`` by the source code according to the following steps:
 
-* Before installing ``Qlib`` from source, users need to install some dependencies:
+* Before installing ``QuantMaster`` from source, users need to install some dependencies:
 
   ```bash
   pip install numpy
   pip install --upgrade cython
   ```
 
-* Clone the repository and install ``Qlib`` as follows.
+* Clone the repository and install ``QuantMaster`` as follows.
     ```bash
-    git clone https://github.com/microsoft/qlib.git && cd qlib
+    git clone https://github.com/microsoft/quant_master.git && cd quant_master
     pip install .  # `pip install -e .[dev]` is recommended for development. check details in docs/developer/code_standard_and_dev_guide.rst
     ```
 
-**Tips**: If you fail to install `Qlib` or run the examples in your environment,  comparing your steps and the [CI workflow](.github/workflows/test_qlib_from_source.yml) may help you find the problem.
+**Tips**: If you fail to install `QuantMaster` or run the examples in your environment,  comparing your steps and the [CI workflow](.github/workflows/test_quant_master_from_source.yml) may help you find the problem.
 
 **Tips for Mac**: If you are using Mac with M1, you might encounter issues in building the wheel for LightGBM, which is due to missing dependencies from OpenMP. To solve the problem, install openmp first with ``brew install libomp`` and then run ``pip install .`` to build it successfully. 
 
 ## Data Preparation
-❗ Due to more restrict data security policy. The official dataset is disabled temporarily. You can try [this data source](https://github.com/chenditc/investment_data/releases) contributed by the community.
+鉂?Due to more restrict data security policy. The official dataset is disabled temporarily. You can try [this data source](https://github.com/chenditc/investment_data/releases) contributed by the community.
 Here is an example to download the latest data.
 ```bash
-wget https://github.com/chenditc/investment_data/releases/latest/download/qlib_bin.tar.gz
-mkdir -p ~/.qlib/qlib_data/cn_data
-tar -zxvf qlib_bin.tar.gz -C ~/.qlib/qlib_data/cn_data --strip-components=1
-rm -f qlib_bin.tar.gz
+wget https://github.com/chenditc/investment_data/releases/latest/download/quant_master_bin.tar.gz
+mkdir -p ~/.quant_master/quant_master_data/cn_data
+tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/cn_data --strip-components=1
+rm -f quant_master_bin.tar.gz
 ```
 
 The official dataset below will resume in short future.
@@ -228,10 +199,10 @@ Load and prepare data by running the following code:
 ### Get with module
   ```bash
   # get 1d data
-  python -m qlib.cli.data qlib_data --target_dir ~/.qlib/qlib_data/cn_data --region cn
+  python -m quant_master.cli.data quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
 
   # get 1min data
-  python -m qlib.cli.data qlib_data --target_dir ~/.qlib/qlib_data/cn_data_1min --region cn --interval 1min
+  python -m quant_master.cli.data quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data_1min --region cn --interval 1min
 
   ```
 
@@ -239,70 +210,68 @@ Load and prepare data by running the following code:
 
   ```bash
   # get 1d data
-  python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data --region cn
+  python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
 
   # get 1min data
-  python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data_1min --region cn --interval 1min
+  python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data_1min --region cn --interval 1min
 
   ```
 
 This dataset is created by public data collected by [crawler scripts](scripts/data_collector/), which have been released in
 the same repository.
-Users could create the same dataset with it. [Description of dataset](https://github.com/microsoft/qlib/tree/main/scripts/data_collector#description-of-dataset)
+Users could create the same dataset with it. [Description of dataset](https://github.com/microsoft/quant_master/tree/main/scripts/data_collector#description-of-dataset)
 
 *Please pay **ATTENTION** that the data is collected from [Yahoo Finance](https://finance.yahoo.com/lookup), and the data might not be perfect.
-We recommend users to prepare their own data if they have a high-quality dataset. For more information, users can refer to the [related document](https://qlib.readthedocs.io/en/latest/component/data.html#converting-csv-format-into-qlib-format)*.
+We recommend users to prepare their own data if they have a high-quality dataset. For more information, users can refer to the [related document](https://quant_master.readthedocs.io/en/latest/component/data.html#converting-csv-and-parquet-format-into-quant_master-format)*.
 
-### Automatic update of daily frequency data (from yahoo finance)
-  > This step is *Optional* if users only want to try their models and strategies on history data.
-  > 
-  > For Yahoo 1d data, `update_data_to_bin` is the recommended entrypoint. It runs download, normalize, and dump internally.
-  >
-  > **NOTE**: Users can't incrementally  update data based on the offline data provided by Qlib(some fields are removed to reduce the data size). Users should use [yahoo collector](https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance) to download Yahoo data from scratch and then incrementally update it.
-  >
-  > **NOTE**: Incremental updates require an overlap day. The source data used for the update must include the last trading day already stored in the target qlib directory.
-  > 
-  > For more information, please refer to: [yahoo collector](https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance)
+### Automatic update of Yahoo CN daily data
 
-  * Automatic update of data to the "qlib" directory each trading day(Linux)
-      * use *crontab*: `crontab -e`
-      * set up timed tasks:
+Only one Yahoo daily update path is maintained for CN data:
 
-        ```
-        * * * * 1-5 python <script path> update_data_to_bin --qlib_data_1d_dir <user data dir>
-        ```
-        * **script path**: *scripts/data_collector/yahoo/collector.py*
+```bash
+python scripts/data_collector/yahoo/collector.py update_data_to_bin \
+  --quant_master_data_1d_dir .qmData/cn_data \
+  --source_dir .qmData/yahoo/source \
+  --normalize_dir .qmData/yahoo/normalize \
+  --region CN \
+  --end_date 2026-05-20
+```
 
-  * Manual update of data
-      ```
-      python scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --end_date <end date>
-      ```
-      * *end_date*: end of trading day(not included)
+Notes:
+
+- `update_data_to_bin` is the public entrypoint. It runs download, normalize, and dump internally.
+- The maintained pipeline now uses an explicit browser-style HTTP session/header when talking to Yahoo.
+- `end_date` is an open upper bound. To include `2026-05-19`, use `--end_date 2026-05-20`.
+- `source_dir` and `normalize_dir` are optional. If omitted, the script uses `scripts/data_collector/yahoo/source` and `scripts/data_collector/yahoo/normalize`. This repository passes `.qmData/yahoo/...` explicitly to keep cache files under `.qmData/`.
+- Incremental updates require an overlap trading day, so the source data must include the last trading day already stored in the target data directory.
+- The maintained target directory in this repository is `.qmData/cn_data`.
+- Leave `--max_workers` at its default for the Yahoo download step. The implementation already uses a stable single-worker download pattern and then scales later stages automatically.
+- Do not use the older split `download_data -> normalize_data -> dump_bin` chain as a user workflow. It is kept only as an internal implementation detail behind `update_data_to_bin`.
 
 ### Checking the health of the data
   * We provide a script to check the health of the data, you can run the following commands to check whether the data is healthy or not.
     ```
-    python scripts/check_data_health.py check_data --qlib_dir ~/.qlib/qlib_data/cn_data
+    python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/cn_data
     ```
   * Of course, you can also add some parameters to adjust the test results, such as this.
     ```
-    python scripts/check_data_health.py check_data --qlib_dir ~/.qlib/qlib_data/cn_data --missing_data_num 30055 --large_step_threshold_volume 94485 --large_step_threshold_price 20
+    python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/cn_data --missing_data_num 30055 --large_step_threshold_volume 94485 --large_step_threshold_price 20
     ```
-  * If you want more information about `check_data_health`, please refer to the [documentation](https://qlib.readthedocs.io/en/latest/component/data.html#checking-the-health-of-the-data).
+  * If you want more information about `check_data_health`, please refer to the [documentation](https://quant_master.readthedocs.io/en/latest/component/data.html#checking-the-health-of-the-data).
 
 <!-- 
 - Run the initialization code and get stock data:
 
   ```python
-  import qlib
-  from qlib.data import D
-  from qlib.constant import REG_CN
+  import quant_master
+  from quant_master.data import D
+  from quant_master.constant import REG_CN
 
   # Initialization
-  mount_path = "~/.qlib/qlib_data/cn_data"  # target_dir
-  qlib.init(mount_path=mount_path, region=REG_CN)
+  mount_path = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+  quant_master.init(mount_path=mount_path, region=REG_CN)
 
-  # Get stock data by Qlib
+  # Get stock data by QuantMaster
   # Load trading calendar with the given time range and frequency
   print(D.calendar(start_time='2010-01-01', end_time='2017-12-31', freq='day')[:2])
 
@@ -320,16 +289,16 @@ We recommend users to prepare their own data if they have a high-quality dataset
 ## Docker images
 1. Pulling a docker image from a docker hub repository
     ```bash
-    docker pull pyqlib/qlib_image_stable:stable
+    docker pull pyquant_master/quant_master_image_stable:stable
     ```
 2. Start a new Docker container
     ```bash
-    docker run -it --name <container name> -v <Mounted local directory>:/app pyqlib/qlib_image_stable:stable
+    docker run -it --name <container name> -v <Mounted local directory>:/app pyquant_master/quant_master_image_stable:stable
     ```
-3. At this point you are in the docker environment and can run the qlib scripts. An example:
+3. At this point you are in the docker environment and can run the quant_master scripts. An example:
     ```bash
-    >>> python scripts/get_data.py qlib_data --name qlib_data_simple --target_dir ~/.qlib/qlib_data/cn_data --interval 1d --region cn
-    >>> python qlib/cli/run.py examples/benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml
+    >>> python scripts/get_data.py quant_master_data --name quant_master_data_simple --target_dir ~/.quant_master/quant_master_data/cn_data --interval 1d --region cn
+    >>> python quant_master/cli/run.py examples/benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml
     ```
 4. Exit the container
     ```bash
@@ -347,21 +316,21 @@ We recommend users to prepare their own data if they have a high-quality dataset
     ```bash
     docker rm <container name>
     ```
-8. If you want to know more information, please refer to the [documentation](https://qlib.readthedocs.io/en/latest/developer/how_to_build_image.html).
+8. If you want to know more information, please refer to the [documentation](https://quant_master.readthedocs.io/en/latest/developer/how_to_build_image.html).
 
 ## Auto Quant Research Workflow
-Qlib provides a tool named `qrun` to run the whole workflow automatically (including building dataset, training models, backtest and evaluation). You can start an auto quant research workflow and have a graphical reports analysis according to the following steps: 
+QuantMaster provides a tool named `qrun` to run the whole workflow automatically (including building dataset, training models, backtest and evaluation). You can start an auto quant research workflow and have a graphical reports analysis according to the following steps: 
 
 1. Quant Research Workflow: Run  `qrun` with lightgbm workflow config ([workflow_config_lightgbm_Alpha158.yaml](examples/benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml) as following.
     ```bash
-      cd examples  # Avoid running program under the directory contains `qlib`
+      cd examples  # Avoid running program under the directory contains `quant_master`
       qrun benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml
     ```
     If users want to use `qrun` under debug mode, please use the following command:
     ```bash
-    python -m pdb qlib/cli/run.py examples/benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml
+    python -m pdb quant_master/cli/run.py examples/benchmarks/LightGBM/workflow_config_lightgbm_Alpha158.yaml
     ```
-    The result of `qrun` is as follows, please refer to [docs](https://qlib.readthedocs.io/en/latest/component/strategy.html#result) for more explanations about the result. 
+    The result of `qrun` is as follows, please refer to [docs](https://quant_master.readthedocs.io/en/latest/component/strategy.html#result) for more explanations about the result. 
 
     ```bash
 
@@ -380,24 +349,24 @@ Qlib provides a tool named `qrun` to run the whole workflow automatically (inclu
     information_ratio  1.444287
     max_drawdown      -0.091078
     ```
-    Here are detailed documents for `qrun` and [workflow](https://qlib.readthedocs.io/en/latest/component/workflow.html).
+    Here are detailed documents for `qrun` and [workflow](https://quant_master.readthedocs.io/en/latest/component/workflow.html).
 
 2. Graphical Reports Analysis: First, run `python -m pip install .[analysis]` to install the required dependencies. Then run `examples/workflow_by_code.ipynb` with `jupyter notebook` to get graphical reports. 
     - Forecasting signal (model prediction) analysis
       - Cumulative Return of groups
-      ![Cumulative Return](https://github.com/microsoft/qlib/blob/main/docs/_static/img/analysis/analysis_model_cumulative_return.png)
+      ![Cumulative Return](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/analysis/analysis_model_cumulative_return.png)
       - Return distribution
-      ![long_short](https://github.com/microsoft/qlib/blob/main/docs/_static/img/analysis/analysis_model_long_short.png)
+      ![long_short](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/analysis/analysis_model_long_short.png)
       - Information Coefficient (IC)
-      ![Information Coefficient](https://github.com/microsoft/qlib/blob/main/docs/_static/img/analysis/analysis_model_IC.png)
-      ![Monthly IC](https://github.com/microsoft/qlib/blob/main/docs/_static/img/analysis/analysis_model_monthly_IC.png)
-      ![IC](https://github.com/microsoft/qlib/blob/main/docs/_static/img/analysis/analysis_model_NDQ.png)
+      ![Information Coefficient](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/analysis/analysis_model_IC.png)
+      ![Monthly IC](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/analysis/analysis_model_monthly_IC.png)
+      ![IC](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/analysis/analysis_model_NDQ.png)
       - Auto Correlation of forecasting signal (model prediction)
-      ![Auto Correlation](https://github.com/microsoft/qlib/blob/main/docs/_static/img/analysis/analysis_model_auto_correlation.png)
+      ![Auto Correlation](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/analysis/analysis_model_auto_correlation.png)
 
     - Portfolio analysis
       - Backtest return
-      ![Report](https://github.com/microsoft/qlib/blob/main/docs/_static/img/analysis/report.png)
+      ![Report](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/analysis/report.png)
       <!-- 
       - Score IC
       ![Score IC](docs/_static/img/score_ic.png)
@@ -408,25 +377,25 @@ Qlib provides a tool named `qrun` to run the whole workflow automatically (inclu
       - Rank Label
       ![Rank Label](docs/_static/img/rank_label.png)
       -->
-   - [Explanation](https://qlib.readthedocs.io/en/latest/component/report.html) of above results
+   - [Explanation](https://quant_master.readthedocs.io/en/latest/component/report.html) of above results
 
 ## Building Customized Quant Research Workflow by Code
-The automatic workflow may not suit the research workflow of all Quant researchers. To support a flexible Quant research workflow, Qlib also provides a modularized interface to allow researchers to build their own workflow by code. [Here](examples/workflow_by_code.ipynb) is a demo for customized Quant research workflow by code.
+The automatic workflow may not suit the research workflow of all Quant researchers. To support a flexible Quant research workflow, QuantMaster also provides a modularized interface to allow researchers to build their own workflow by code. [Here](examples/workflow_by_code.ipynb) is a demo for customized Quant research workflow by code.
 
 # Main Challenges & Solutions in Quant Research
 Quant investment is a very unique scenario with lots of key challenges to be solved.
-Currently, Qlib provides some solutions for several of them.
+Currently, QuantMaster provides some solutions for several of them.
 
 ## Forecasting: Finding Valuable Signals/Patterns
 Accurate forecasting of the stock price trend is a very important part to construct profitable portfolios.
 However, huge amount of data with various formats in the financial market which make it challenging to build forecasting models.
 
-An increasing number of SOTA Quant research works/papers, which focus on building forecasting models to mine valuable signals/patterns in complex financial data, are released in `Qlib`
+An increasing number of SOTA Quant research works/papers, which focus on building forecasting models to mine valuable signals/patterns in complex financial data, are released in `QuantMaster`
 
 
 ### [Quant Model (Paper) Zoo](examples/benchmarks)
 
-Here is a list of models built on `Qlib`.
+Here is a list of models built on `QuantMaster`.
 - [GBDT based on XGBoost (Tianqi Chen, et al. KDD 2016)](examples/benchmarks/XGBoost/)
 - [GBDT based on LightGBM (Guolin Ke, et al. NIPS 2017)](examples/benchmarks/LightGBM/)
 - [GBDT based on Catboost (Liudmila Prokhorenkova, et al. NIPS 2018)](examples/benchmarks/CatBoost/)
@@ -456,9 +425,9 @@ Your PR of new Quant models is highly welcomed.
 The performance of each model on the `Alpha158` and `Alpha360` datasets can be found [here](examples/benchmarks/README.md).
 
 ### Run a single model
-All the models listed above are runnable with ``Qlib``. Users can find the config files we provide and some details about the model through the [benchmarks](examples/benchmarks) folder. More information can be retrieved at the model files listed above.
+All the models listed above are runnable with ``QuantMaster``. Users can find the config files we provide and some details about the model through the [benchmarks](examples/benchmarks) folder. More information can be retrieved at the model files listed above.
 
-`Qlib` provides three different ways to run a single model, users can pick the one that fits their cases best:
+`QuantMaster` provides three different ways to run a single model, users can pick the one that fits their cases best:
 - Users can use the tool `qrun` mentioned above to run a model's workflow based from a config file.
 - Users can create a `workflow_by_code` python script based on the [one](examples/workflow_by_code.py) listed in the `examples` folder.
 
@@ -466,7 +435,7 @@ All the models listed above are runnable with ``Qlib``. Users can find the confi
     - **NOTE**: Each baseline has different environment dependencies, please make sure that your python version aligns with the requirements(e.g. TFT only supports Python 3.6~3.7 due to the limitation of `tensorflow==1.15.0`)
 
 ### Run multiple models
-`Qlib` also provides a script [`run_all_model.py`](examples/run_all_model.py) which can run multiple models for several iterations. (**Note**: the script only support *Linux* for now. Other OS will be supported in the future. Besides, it doesn't support parallel running the same model for multiple times as well, and this will be fixed in the future development too.)
+`QuantMaster` also provides a script [`run_all_model.py`](examples/run_all_model.py) which can run multiple models for several iterations. (**Note**: the script only support *Linux* for now. Other OS will be supported in the future. Besides, it doesn't support parallel running the same model for multiple times as well, and this will be fixed in the future development too.)
 
 The script will create a unique virtual environment for each model, and delete the environments after training. Thus, only experiment results such as `IC` and `backtest` results will be generated and stored.
 
@@ -478,10 +447,10 @@ python run_all_model.py run 10
 It also provides the API to run specific models at once. For more use cases, please refer to the file's [docstrings](examples/run_all_model.py). 
 
 ### Break change
-In `pandas`, `group_key` is one of the parameters of the `groupby` method. From version 1.5 to 2.0 of `pandas`, the default value of `group_key` has been changed from `no default` to `True`, which will cause qlib to report an error during operation. So we set `group_key=False`, but it doesn't guarantee that some programmes will run correctly, including:
-* qlib\examples\rl_order_execution\scripts\gen_training_orders.py
-* qlib\examples\benchmarks\TRA\src\dataset.MTSDatasetH.py
-* qlib\examples\benchmarks\TFT\tft.py
+In `pandas`, `group_key` is one of the parameters of the `groupby` method. From version 1.5 to 2.0 of `pandas`, the default value of `group_key` has been changed from `no default` to `True`, which will cause quant_master to report an error during operation. So we set `group_key=False`, but it doesn't guarantee that some programmes will run correctly, including:
+* quant_master\examples\rl_order_execution\scripts\gen_training_orders.py
+* quant_master\examples\benchmarks\TRA\src\dataset.MTSDatasetH.py
+* quant_master\examples\benchmarks\TFT\tft.py
 
 
 
@@ -490,45 +459,45 @@ In `pandas`, `group_key` is one of the parameters of the `groupby` method. From 
 Due to the non-stationary nature of the environment of the financial market, the data distribution may change in different periods, which makes the performance of models build on training data decays in the future test data.
 So adapting the forecasting models/strategies to market dynamics is very important to the model/strategies' performance.
 
-Here is a list of solutions built on `Qlib`.
+Here is a list of solutions built on `QuantMaster`.
 - [Rolling Retraining](examples/benchmarks_dynamic/baseline/)
 - [DDG-DA on pytorch (Wendi, et al. AAAI 2022)](examples/benchmarks_dynamic/DDG-DA/)
 
 ##  Reinforcement Learning: modeling continuous decisions
-Qlib now supports reinforcement learning, a feature designed to model continuous investment decisions. This functionality assists investors in optimizing their trading strategies by learning from interactions with the environment to maximize some notion of cumulative reward.
+QuantMaster now supports reinforcement learning, a feature designed to model continuous investment decisions. This functionality assists investors in optimizing their trading strategies by learning from interactions with the environment to maximize some notion of cumulative reward.
 
-Here is a list of solutions built on `Qlib` categorized by scenarios.
+Here is a list of solutions built on `QuantMaster` categorized by scenarios.
 
 ### [RL for order execution](examples/rl_order_execution)
-[Here](https://qlib.readthedocs.io/en/latest/component/rl/overall.html#order-execution) is the introduction of this scenario.  All the methods below are compared [here](examples/rl_order_execution).
+[Here](https://quant_master.readthedocs.io/en/latest/component/rl/overall.html#order-execution) is the introduction of this scenario.  All the methods below are compared [here](examples/rl_order_execution).
 - [TWAP](examples/rl_order_execution/exp_configs/backtest_twap.yml)
 - [PPO: "An End-to-End Optimal Trade Execution Framework based on Proximal Policy Optimization", IJCAL 2020](examples/rl_order_execution/exp_configs/backtest_ppo.yml)
 - [OPDS: "Universal Trading for Order Execution with Oracle Policy Distillation", AAAI 2021](examples/rl_order_execution/exp_configs/backtest_opds.yml)
 
 # Quant Dataset Zoo
-Dataset plays a very important role in Quant. Here is a list of the datasets built on `Qlib`:
+Dataset plays a very important role in Quant. Here is a list of the datasets built on `QuantMaster`:
 
 | Dataset                                    | US Market | China Market |
 | --                                         | --        | --           |
-| [Alpha360](./qlib/contrib/data/handler.py) |  √        |  √           |
-| [Alpha158](./qlib/contrib/data/handler.py) |  √        |  √           |
+| [Alpha360](./quant_master/contrib/data/handler.py) |  鈭?       |  鈭?          |
+| [Alpha158](./quant_master/contrib/data/handler.py) |  鈭?       |  鈭?          |
 
-[Here](https://qlib.readthedocs.io/en/latest/advanced/alpha.html) is a tutorial to build dataset with `Qlib`.
+[Here](https://quant_master.readthedocs.io/en/latest/advanced/alpha.html) is a tutorial to build dataset with `QuantMaster`.
 Your PR to build new Quant dataset is highly welcomed.
 
 
 # Learning Framework
-Qlib is high customizable and a lot of its components are learnable.
+QuantMaster is high customizable and a lot of its components are learnable.
 The learnable components are instances of `Forecast Model` and `Trading Agent`. They are learned based on the `Learning Framework` layer and then applied to multiple scenarios in `Workflow` layer.
 The learning framework leverages the `Workflow` layer as well(e.g. sharing `Information Extractor`, creating environments based on `Execution Env`).
 
 Based on learning paradigms, they can be categorized into reinforcement learning and supervised learning.
-- For supervised learning, the detailed docs can be found [here](https://qlib.readthedocs.io/en/latest/component/model.html).
-- For reinforcement learning, the detailed docs can be found [here](https://qlib.readthedocs.io/en/latest/component/rl.html). Qlib's RL learning framework leverages `Execution Env` in `Workflow` layer to create environments.  It's worth noting that `NestedExecutor` is supported as well. This empowers users to optimize different level of strategies/models/agents together (e.g. optimizing an order execution strategy for a specific portfolio management strategy).
+- For supervised learning, the detailed docs can be found [here](https://quant_master.readthedocs.io/en/latest/component/model.html).
+- For reinforcement learning, the detailed docs can be found [here](https://quant_master.readthedocs.io/en/latest/component/rl.html). QuantMaster's RL learning framework leverages `Execution Env` in `Workflow` layer to create environments.  It's worth noting that `NestedExecutor` is supported as well. This empowers users to optimize different level of strategies/models/agents together (e.g. optimizing an order execution strategy for a specific portfolio management strategy).
 
 
-# More About Qlib
-If you want to have a quick glance at the most frequently used components of qlib, you can try notebooks [here](examples/tutorial/).
+# More About QuantMaster
+If you want to have a quick glance at the most frequently used components of quant_master, you can try notebooks [here](examples/tutorial/).
 
 The detailed documents are organized in [docs](docs/).
 [Sphinx](http://www.sphinx-doc.org) and the readthedocs theme is required to build the documentation in html formats. 
@@ -539,58 +508,58 @@ conda install sphinx sphinx_rtd_theme -y
 # pip install sphinx sphinx_rtd_theme
 make html
 ```
-You can also view the [latest document](http://qlib.readthedocs.io/) online directly.
+You can also view the [latest document](http://quant_master.readthedocs.io/) online directly.
 
-Qlib is in active and continuing development. Our plan is in the roadmap, which is managed as a [github project](https://github.com/microsoft/qlib/projects/1).
+QuantMaster is in active and continuing development. Our plan is in the roadmap, which is managed as a [github project](https://github.com/microsoft/quant_master/projects/1).
 
 
 
 # Offline Mode and Online Mode
-The data server of Qlib can either deployed as `Offline` mode or `Online` mode. The default mode is offline mode.
+The data server of QuantMaster can either deployed as `Offline` mode or `Online` mode. The default mode is offline mode.
 
 Under `Offline` mode, the data will be deployed locally. 
 
-Under `Online` mode, the data will be deployed as a shared data service. The data and their cache will be shared by all the clients. The data retrieval performance is expected to be improved due to a higher rate of cache hits. It will consume less disk space, too. The documents of the online mode can be found in [Qlib-Server](https://qlib-server.readthedocs.io/). The online mode can be deployed automatically with [Azure CLI based scripts](https://qlib-server.readthedocs.io/en/latest/build.html#one-click-deployment-in-azure). The source code of online data server can be found in [Qlib-Server repository](https://github.com/microsoft/qlib-server).
+Under `Online` mode, the data will be deployed as a shared data service. The data and their cache will be shared by all the clients. The data retrieval performance is expected to be improved due to a higher rate of cache hits. It will consume less disk space, too. The documents of the online mode can be found in [QuantMaster-Server](https://quant_master-server.readthedocs.io/). The online mode can be deployed automatically with [Azure CLI based scripts](https://quant_master-server.readthedocs.io/en/latest/build.html#one-click-deployment-in-azure). The source code of online data server can be found in [QuantMaster-Server repository](https://github.com/microsoft/quant_master-server).
 
-## Performance of Qlib Data Server
-The performance of data processing is important to data-driven methods like AI technologies. As an AI-oriented platform, Qlib provides a solution for data storage and data processing. To demonstrate the performance of Qlib data server, we
+## Performance of QuantMaster Data Server
+The performance of data processing is important to data-driven methods like AI technologies. As an AI-oriented platform, QuantMaster provides a solution for data storage and data processing. To demonstrate the performance of QuantMaster data server, we
 compare it with several other data storage solutions. 
 
 We evaluate the performance of several storage solutions by finishing the same task,
 which creates a dataset (14 features/factors) from the basic OHLCV daily data of a stock market (800 stocks each day from 2007 to 2020). The task involves data queries and processing.
 
-|                         | HDF5      | MySQL     | MongoDB   | InfluxDB  | Qlib -E -D  | Qlib +E -D   | Qlib +E +D  |
+|                         | HDF5      | MySQL     | MongoDB   | InfluxDB  | QuantMaster -E -D  | QuantMaster +E -D   | QuantMaster +E +D  |
 | --                      | ------    | ------    | --------  | --------- | ----------- | ------------ | ----------- |
-| Total (1CPU) (seconds)  | 184.4±3.7 | 365.3±7.5 | 253.6±6.7 | 368.2±3.6 | 147.0±8.8   | 47.6±1.0     | **7.4±0.3** |
-| Total (64CPU) (seconds) |           |           |           |           | 8.8±0.6     | **4.2±0.2**  |             |
+| Total (1CPU) (seconds)  | 184.4卤3.7 | 365.3卤7.5 | 253.6卤6.7 | 368.2卤3.6 | 147.0卤8.8   | 47.6卤1.0     | **7.4卤0.3** |
+| Total (64CPU) (seconds) |           |           |           |           | 8.8卤0.6     | **4.2卤0.2**  |             |
 * `+(-)E` indicates with (out) `ExpressionCache`
 * `+(-)D` indicates with (out) `DatasetCache`
 
 Most general-purpose databases take too much time to load data. After looking into the underlying implementation, we find that data go through too many layers of interfaces and unnecessary format transformations in general-purpose database solutions.
 Such overheads greatly slow down the data loading process.
-Qlib data are stored in a compact format, which is efficient to be combined into arrays for scientific computation.
+QuantMaster data are stored in a compact format, which is efficient to be combined into arrays for scientific computation.
 
 # Related Reports
-- [Guide To Qlib: Microsoft’s AI Investment Platform](https://analyticsindiamag.com/qlib/)
-- [微软也搞AI量化平台？还是开源的！](https://mp.weixin.qq.com/s/47bP5YwxfTp2uTHjUBzJQQ)
-- [微矿Qlib：业内首个AI量化投资开源平台](https://mp.weixin.qq.com/s/vsJv7lsgjEi-ALYUz4CvtQ)
+- [Guide To QuantMaster: Microsoft鈥檚 AI Investment Platform](https://analyticsindiamag.com/quant_master/)
+- [寰蒋涔熸悶AI閲忓寲骞冲彴锛熻繕鏄紑婧愮殑锛乚(https://mp.weixin.qq.com/s/47bP5YwxfTp2uTHjUBzJQQ)
+- [寰熆QuantMaster锛氫笟鍐呴涓狝I閲忓寲鎶曡祫寮€婧愬钩鍙癩(https://mp.weixin.qq.com/s/vsJv7lsgjEi-ALYUz4CvtQ)
 
 # Contact Us
-- If you have any issues, please create issue [here](https://github.com/microsoft/qlib/issues/new/choose) or send messages in [gitter](https://gitter.im/Microsoft/qlib).
-- If you want to make contributions to `Qlib`, please [create pull requests](https://github.com/microsoft/qlib/compare). 
-- For other reasons, you are welcome to contact us by email([qlib@microsoft.com](mailto:qlib@microsoft.com)).
+- If you have any issues, please create issue [here](https://github.com/microsoft/quant_master/issues/new/choose) or send messages in [gitter](https://gitter.im/Microsoft/quant_master).
+- If you want to make contributions to `QuantMaster`, please [create pull requests](https://github.com/microsoft/quant_master/compare). 
+- For other reasons, you are welcome to contact us by email([quant_master@microsoft.com](mailto:quant_master@microsoft.com)).
   - We are recruiting new members(both FTEs and interns), your resumes are welcome!
 
 Join IM discussion groups:
-|[Gitter](https://gitter.im/Microsoft/qlib)|
+|[Gitter](https://gitter.im/Microsoft/quant_master)|
 |----|
-|![image](https://github.com/microsoft/qlib/blob/main/docs/_static/img/qrcode/gitter_qr.png)|
+|![image](https://github.com/microsoft/quant_master/blob/main/docs/_static/img/qrcode/gitter_qr.png)|
 
 # Contributing
 We appreciate all contributions and thank all the contributors!
-<a href="https://github.com/microsoft/qlib/graphs/contributors"><img src="https://contrib.rocks/image?repo=microsoft/qlib" /></a>
+<a href="https://github.com/microsoft/quant_master/graphs/contributors"><img src="https://contrib.rocks/image?repo=microsoft/quant_master" /></a>
 
-Before we released Qlib as an open-source project on Github in Sep 2020, Qlib is an internal project in our group. Unfortunately, the internal commit history is not kept. A lot of members in our group have also contributed a lot to Qlib, which includes Ruihua Wang, Yinda Zhang, Haisu Yu, Shuyu Wang, Bochen Pang, and [Dong Zhou](https://github.com/evanzd/evanzd). Especially thanks to [Dong Zhou](https://github.com/evanzd/evanzd) due to his initial version of Qlib.
+Before we released QuantMaster as an open-source project on Github in Sep 2020, QuantMaster is an internal project in our group. Unfortunately, the internal commit history is not kept. A lot of members in our group have also contributed a lot to QuantMaster, which includes Ruihua Wang, Yinda Zhang, Haisu Yu, Shuyu Wang, Bochen Pang, and [Dong Zhou](https://github.com/evanzd/evanzd). Especially thanks to [Dong Zhou](https://github.com/evanzd/evanzd) due to his initial version of QuantMaster.
 
 ## Guidance
 
@@ -598,27 +567,27 @@ This project welcomes contributions and suggestions.
 **Here are some 
 [code standards and development guidance](docs/developer/code_standard_and_dev_guide.rst) for submiting a pull request.**
 
-Making contributions is not a hard thing. Solving an issue(maybe just answering a question raised in [issues list](https://github.com/microsoft/qlib/issues) or [gitter](https://gitter.im/Microsoft/qlib)), fixing/issuing a bug, improving the documents and even fixing a typo are important contributions to Qlib.
+Making contributions is not a hard thing. Solving an issue(maybe just answering a question raised in [issues list](https://github.com/microsoft/quant_master/issues) or [gitter](https://gitter.im/Microsoft/quant_master)), fixing/issuing a bug, improving the documents and even fixing a typo are important contributions to QuantMaster.
 
-For example, if you want to contribute to Qlib's document/code, you can follow the steps in the figure below.
+For example, if you want to contribute to QuantMaster's document/code, you can follow the steps in the figure below.
 <p align="center">
-  <img src="https://github.com/demon143/qlib/blob/main/docs/_static/img/change%20doc.gif" />
+  <img src="https://github.com/demon143/quant_master/blob/main/docs/_static/img/change%20doc.gif" />
 </p>
 
 If you don't know how to start to contribute, you can refer to the following examples.
 | Type | Examples |
 | -- | -- |
-| Solving issues | [Answer a question](https://github.com/microsoft/qlib/issues/749);  [issuing](https://github.com/microsoft/qlib/issues/765) or [fixing](https://github.com/microsoft/qlib/pull/792) a bug |
-| Docs | [Improve docs quality](https://github.com/microsoft/qlib/pull/797/files) ;  [Fix a typo](https://github.com/microsoft/qlib/pull/774) | 
-| Feature |  Implement a [requested feature](https://github.com/microsoft/qlib/projects) like [this](https://github.com/microsoft/qlib/pull/754); [Refactor interfaces](https://github.com/microsoft/qlib/pull/539/files) |
-| Dataset | [Add a dataset](https://github.com/microsoft/qlib/pull/733) | 
-| Models |  [Implement a new model](https://github.com/microsoft/qlib/pull/689), [some instructions to contribute models](https://github.com/microsoft/qlib/tree/main/examples/benchmarks#contributing) |
+| Solving issues | [Answer a question](https://github.com/microsoft/quant_master/issues/749);  [issuing](https://github.com/microsoft/quant_master/issues/765) or [fixing](https://github.com/microsoft/quant_master/pull/792) a bug |
+| Docs | [Improve docs quality](https://github.com/microsoft/quant_master/pull/797/files) ;  [Fix a typo](https://github.com/microsoft/quant_master/pull/774) | 
+| Feature |  Implement a [requested feature](https://github.com/microsoft/quant_master/projects) like [this](https://github.com/microsoft/quant_master/pull/754); [Refactor interfaces](https://github.com/microsoft/quant_master/pull/539/files) |
+| Dataset | [Add a dataset](https://github.com/microsoft/quant_master/pull/733) | 
+| Models |  [Implement a new model](https://github.com/microsoft/quant_master/pull/689), [some instructions to contribute models](https://github.com/microsoft/quant_master/tree/main/examples/benchmarks#contributing) |
 
-[Good first issues](https://github.com/microsoft/qlib/labels/good%20first%20issue) are labelled to indicate that they are easy to start your contributions.
+[Good first issues](https://github.com/microsoft/quant_master/labels/good%20first%20issue) are labelled to indicate that they are easy to start your contributions.
 
-You can find some impefect implementation in Qlib by  `rg 'TODO|FIXME' qlib`
+You can find some impefect implementation in QuantMaster by  `rg 'TODO|FIXME' quant_master`
  
-If you would like to become one of Qlib's maintainers to contribute more (e.g. help merge PR, triage issues), please contact us by email([qlib@microsoft.com](mailto:qlib@microsoft.com)).  We are glad to help to upgrade your permission.
+If you would like to become one of QuantMaster's maintainers to contribute more (e.g. help merge PR, triage issues), please contact us by email([quant_master@microsoft.com](mailto:quant_master@microsoft.com)).  We are glad to help to upgrade your permission.
 
 ## License
 Most contributions require you to agree to a

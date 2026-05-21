@@ -1,5 +1,5 @@
-from qlib.data.dataset.handler import DataHandler, DataHandlerLP
-from qlib.contrib.data.handler import check_transform_proc
+from quant_master.data.dataset.handler import DataHandler, DataHandlerLP
+from quant_master.contrib.data.handler import check_transform_proc
 
 
 class HighFreqHandler(DataHandlerLP):
@@ -18,7 +18,7 @@ class HighFreqHandler(DataHandlerLP):
         learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
 
         data_loader = {
-            "class": "QlibDataLoader",
+            "class": "QuantMasterDataLoader",
             "kwargs": {
                 "config": self.get_feature_config(),
                 "swap_level": False,
@@ -109,7 +109,7 @@ class HighFreqBacktestHandler(DataHandler):
         end_time=None,
     ):
         data_loader = {
-            "class": "QlibDataLoader",
+            "class": "QuantMasterDataLoader",
             "kwargs": {
                 "config": self.get_feature_config(),
                 "swap_level": False,

@@ -12,20 +12,20 @@ Finally, the OnlineManager will finish second routine and update all strategies.
 
 import os
 import fire
-import qlib
-from qlib.model.trainer import DelayTrainerR, DelayTrainerRM, TrainerR, TrainerRM, end_task_train, task_train
-from qlib.workflow import R
-from qlib.workflow.online.strategy import RollingStrategy
-from qlib.workflow.task.gen import RollingGen
-from qlib.workflow.online.manager import OnlineManager
-from qlib.tests.config import CSI100_RECORD_XGBOOST_TASK_CONFIG_ROLLING, CSI100_RECORD_LGB_TASK_CONFIG_ROLLING
-from qlib.workflow.task.manage import TaskManager
+import quant_master
+from quant_master.model.trainer import DelayTrainerR, DelayTrainerRM, TrainerR, TrainerRM, end_task_train, task_train
+from quant_master.workflow import R
+from quant_master.workflow.online.strategy import RollingStrategy
+from quant_master.workflow.task.gen import RollingGen
+from quant_master.workflow.online.manager import OnlineManager
+from quant_master.tests.config import CSI100_RECORD_XGBOOST_TASK_CONFIG_ROLLING, CSI100_RECORD_LGB_TASK_CONFIG_ROLLING
+from quant_master.workflow.task.manage import TaskManager
 
 
 class RollingOnlineExample:
     def __init__(
         self,
-        provider_uri="~/.qlib/qlib_data/cn_data",
+        provider_uri="~/.quant_master/quant_master_data/cn_data",
         region="cn",
         trainer=DelayTrainerRM(),  # you can choose from TrainerR, TrainerRM, DelayTrainerR, DelayTrainerRM
         task_url="mongodb://10.0.0.4:27017/",  # not necessary when using TrainerR or DelayTrainerR
@@ -42,7 +42,7 @@ class RollingOnlineExample:
             "task_url": task_url,  # your MongoDB url
             "task_db_name": task_db_name,  # database name
         }
-        qlib.init(provider_uri=provider_uri, region=region, mongo=mongo_conf)
+        quant_master.init(provider_uri=provider_uri, region=region, mongo=mongo_conf)
         self.tasks = tasks
         self.add_tasks = add_tasks
         self.rolling_step = rolling_step

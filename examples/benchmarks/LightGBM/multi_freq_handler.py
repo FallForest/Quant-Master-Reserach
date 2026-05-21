@@ -3,11 +3,11 @@
 
 import pandas as pd
 
-from qlib.data.dataset.loader import QlibDataLoader
-from qlib.contrib.data.handler import DataHandlerLP, _DEFAULT_LEARN_PROCESSORS, check_transform_proc
+from quant_master.data.dataset.loader import QuantMasterDataLoader
+from quant_master.contrib.data.handler import DataHandlerLP, _DEFAULT_LEARN_PROCESSORS, check_transform_proc
 
 
-class Avg15minLoader(QlibDataLoader):
+class Avg15minLoader(QuantMasterDataLoader):
     def load(self, instruments=None, start_time=None, end_time=None) -> pd.DataFrame:
         df = super(Avg15minLoader, self).load(instruments, start_time, end_time)
         if self.is_group:

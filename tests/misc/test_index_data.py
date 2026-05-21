@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import qlib.utils.index_data as idd
+import quant_master.utils.index_data as idd
 
 import unittest
 

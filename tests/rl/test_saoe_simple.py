@@ -12,14 +12,14 @@ import pytest
 import torch
 from tianshou.data import Batch
 
-from qlib.backtest import Order
-from qlib.config import C
-from qlib.log import set_log_with_config
-from qlib.rl.data import pickle_styled
-from qlib.rl.data.pickle_styled import PickleProcessedDataProvider
-from qlib.rl.order_execution import *
-from qlib.rl.trainer import backtest, train
-from qlib.rl.utils import ConsoleWriter, CsvWriter, EnvWrapperStatus
+from quant_master.backtest import Order
+from quant_master.config import C
+from quant_master.log import set_log_with_config
+from quant_master.rl.data import pickle_styled
+from quant_master.rl.data.pickle_styled import PickleProcessedDataProvider
+from quant_master.rl.order_execution import *
+from quant_master.rl.trainer import backtest, train
+from quant_master.rl.utils import ConsoleWriter, CsvWriter, EnvWrapperStatus
 
 pytestmark = pytest.mark.skipif(sys.version_info < (3, 8), reason="Pickle styled data only supports Python >= 3.8")
 

@@ -2,7 +2,7 @@ order_file: ./data/orders/test_orders.pkl
 start_time: "9:30"
 end_time: "14:54"
 data_granularity: "5min"
-qlib:
+quant_master:
   provider_uri_5min: ./data/bin/
 exchange:
   limit_threshold: null
@@ -12,10 +12,10 @@ strategies:
   1day:
     class: TWAPStrategy
     kwargs: {}
-    module_path: qlib.contrib.strategy.rule_strategy
+    module_path: quant_master.contrib.strategy.rule_strategy
   30min:
     class: TWAPStrategy
     kwargs: {}
-    module_path: qlib.contrib.strategy.rule_strategy
+    module_path: quant_master.contrib.strategy.rule_strategy
 concurrency: 16
 output_dir: outputs/twap/

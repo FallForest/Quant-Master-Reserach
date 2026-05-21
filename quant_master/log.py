@@ -23,7 +23,7 @@ class MetaLogger(type):
 
 class QuantMasterLogger(metaclass=MetaLogger):
     """
-    Customized logger for Quant-Master.
+    Customized logger for QuantMaster.
     """
 
     def __init__(self, module_name):
@@ -48,7 +48,7 @@ class QuantMasterLogger(metaclass=MetaLogger):
         return self.logger.__getattribute__(name)
 
 
-class _QuantMasterLoggerManager:
+class _QLibLoggerManager:
     def __init__(self):
         self._loggers = {}
 
@@ -71,7 +71,7 @@ class _QuantMasterLoggerManager:
 
         if not module_name.startswith("quant_master."):
             # Add a prefix of quant_master. when the requested ``module_name`` doesn't start with ``quant_master.``.
-            # If the module_name is already quant_master.xxx, we do not format here.
+            # If the module_name is already quant_master.xxx, we do not format here. Otherwise, it will become quant_master.quant_master.xxx.
             module_name = "quant_master.{}".format(module_name)
 
         # Get logger.
@@ -80,7 +80,7 @@ class _QuantMasterLoggerManager:
         return module_logger
 
 
-get_module_logger = _QuantMasterLoggerManager()
+get_module_logger = _QLibLoggerManager()
 
 
 class TimeInspector:

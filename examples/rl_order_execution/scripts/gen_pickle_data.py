@@ -7,7 +7,7 @@ import os
 import shutil
 from copy import deepcopy
 
-from qlib.contrib.data.highfreq_provider import HighFreqProvider
+from quant_master.contrib.data.highfreq_provider import HighFreqProvider
 
 loader = yaml.FullLoader
 

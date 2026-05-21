@@ -4,15 +4,15 @@ This page lists a batch of methods designed for alpha seeking. Each method tries
 The alpha is evaluated in two ways.
 1. The correlation between the alpha and future return.
 1. Constructing portfolio based on the alpha and evaluating the final total return.
-   - The explanation of metrics can be found [here](https://qlib.readthedocs.io/en/latest/component/report.html#id4)
+   - The explanation of metrics can be found [here](https://quant_master.readthedocs.io/en/latest/component/report.html#id4)
 
-Here are the results of each benchmark model running on Qlib's `Alpha360` and `Alpha158` dataset with China's A shared-stock & CSI300 data respectively. The values of each metric are the mean and std calculated based on 20 runs with different random seeds.
+Here are the results of each benchmark model running on QuantMaster's `Alpha360` and `Alpha158` dataset with China's A shared-stock & CSI300 data respectively. The values of each metric are the mean and std calculated based on 20 runs with different random seeds.
 
 The numbers shown below demonstrate the performance of the entire `workflow` of each model. We will update the `workflow` as well as models in the near future for better results.
 <!-- 
-> If you need to reproduce the results below, please use the **v1** dataset: `python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data --region cn --version v1`
+> If you need to reproduce the results below, please use the **v1** dataset: `python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn --version v1`
 >
-> In the new version of qlib, the default dataset is **v2**. Since the data is collected from the YahooFinance API (which is not very stable), the results of *v2* and *v1* may differ -->
+> In the new version of quant_master, the default dataset is **v2**. Since the data is collected from the YahooFinance API (which is not very stable), the results of *v2* and *v1* may differ -->
 
 > NOTE:
 > The backtest start from 0.8.0 is quite different from previous version. Please check out the changelog for the difference.
@@ -131,15 +131,15 @@ Your contributions to new models are highly welcome!
 
 If you want to contribute your new models, you can follow the steps below.
 1. Create a folder for your model
-2. The folder contains following items(you can refer to [this example](https://github.com/microsoft/qlib/tree/main/examples/benchmarks/TCTS)).
+2. The folder contains following items(you can refer to [this example](https://github.com/microsoft/quant_master/tree/main/examples/benchmarks/TCTS)).
     - `requirements.txt`: required dependencies.
     - `README.md`: a brief introduction to your models
     - `workflow_config_<model name>_<dataset>.yaml`: a configuration which can read by `qrun`. You are encouraged to run your model in all datasets.
-3. You can integrate your model as a module [in this folder](https://github.com/microsoft/qlib/tree/main/qlib/contrib/model).
-4. Please update your results in the above **Benchmark Tables**, e.g. [Alpha360](#alpha158-dataset), [Alpha158](#alpha158-dataset)(the values of each metric are the mean and std calculated based on **20 Runs** with different random seeds. You can accomplish the above operations through the automated [script](https://github.com/microsoft/qlib/blob/main/examples/run_all_model.py) provided by Qlib, and get the final result in the .md file. if you don't have enough computational resource, you can ask for help in the PR).
-5. Update the info in the index page in the [news list](https://github.com/microsoft/qlib#newspaper-whats-new----sparkling_heart) and [model list](https://github.com/microsoft/qlib#quant-model-paper-zoo).
+3. You can integrate your model as a module [in this folder](https://github.com/microsoft/quant_master/tree/main/quant_master/contrib/model).
+4. Please update your results in the above **Benchmark Tables**, e.g. [Alpha360](#alpha158-dataset), [Alpha158](#alpha158-dataset)(the values of each metric are the mean and std calculated based on **20 Runs** with different random seeds. You can accomplish the above operations through the automated [script](https://github.com/microsoft/quant_master/blob/main/examples/run_all_model.py) provided by QuantMaster, and get the final result in the .md file. if you don't have enough computational resource, you can ask for help in the PR).
+5. Update the info in the index page in the [news list](https://github.com/microsoft/quant_master#newspaper-whats-new----sparkling_heart) and [model list](https://github.com/microsoft/quant_master#quant-model-paper-zoo).
 
-Finally, you can send PR for review. ([here is an example](https://github.com/microsoft/qlib/pull/1040))
+Finally, you can send PR for review. ([here is an example](https://github.com/microsoft/quant_master/pull/1040))
 
 
 # FAQ

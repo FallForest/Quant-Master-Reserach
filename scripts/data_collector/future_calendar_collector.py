@@ -18,21 +18,21 @@ from loguru import logger
 class CollectorFutureCalendar:
     calendar_format = "%Y-%m-%d"
 
-    def __init__(self, qlib_dir: Union[str, Path], start_date: str = None, end_date: str = None):
+    def __init__(self, quant_master_dir: Union[str, Path], start_date: str = None, end_date: str = None):
         """
 
         Parameters
         ----------
-        qlib_dir:
-            qlib data directory
+        quant_master_dir:
+            quant_master data directory
         start_date
             start date
         end_date
             end date
         """
-        self.qlib_dir = Path(qlib_dir).expanduser().absolute()
-        self.calendar_path = self.qlib_dir.joinpath("calendars/day.txt")
-        self.future_path = self.qlib_dir.joinpath("calendars/day_future.txt")
+        self.quant_master_dir = Path(quant_master_dir).expanduser().absolute()
+        self.calendar_path = self.quant_master_dir.joinpath("calendars/day.txt")
+        self.future_path = self.quant_master_dir.joinpath("calendars/day_future.txt")
         self._calendar_list = self.calendar_list
         _latest_date = self._calendar_list[-1]
         self.start_date = _latest_date if start_date is None else pd.Timestamp(start_date)
@@ -91,13 +91,13 @@ class CollectorFutureCalendarUS(CollectorFutureCalendar):
         raise ValueError("Us calendar is not supported")
 
 
-def run(qlib_dir: Union[str, Path], region: str = "cn", start_date: str = None, end_date: str = None):
+def run(quant_master_dir: Union[str, Path], region: str = "cn", start_date: str = None, end_date: str = None):
     """Collect future calendar(day)
 
     Parameters
     ----------
-    qlib_dir:
-        qlib data directory
+    quant_master_dir:
+        quant_master data directory
     region:
         cn/CN or us/US
     start_date
@@ -108,12 +108,12 @@ def run(qlib_dir: Union[str, Path], region: str = "cn", start_date: str = None, 
     Examples
     -------
         # get cn future calendar
-        $ python future_calendar_collector.py --qlib_data_1d_dir <user data dir> --region cn
+        $ python future_calendar_collector.py --quant_master_data_1d_dir <user data dir> --region cn
     """
     logger.info(f"collector future calendar: region={region}")
     _cur_module = importlib.import_module("future_calendar_collector")
     _class = getattr(_cur_module, f"CollectorFutureCalendar{region.upper()}")
-    collector = _class(qlib_dir=qlib_dir, start_date=start_date, end_date=end_date)
+    collector = _class(quant_master_dir=quant_master_dir, start_date=start_date, end_date=end_date)
     collector.write_calendar(collector.collector())
 
 

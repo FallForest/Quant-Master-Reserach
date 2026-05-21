@@ -13,8 +13,8 @@ from pathlib import Path
 from loguru import logger
 from typing import Iterable, List
 
-import qlib
-from qlib.data import D
+import quant_master
+from quant_master.data import D
 
 CUR_DIR = Path(__file__).resolve().parent
 sys.path.append(str(CUR_DIR.parent.parent))
@@ -151,21 +151,21 @@ class BaostockNormalizeHS3005min(BaseNormalize):
     PM_RANGE = ("13:00:00", "14:59:00")
 
     def __init__(
-        self, qlib_data_1d_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
+        self, quant_master_data_1d_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
     ):
         """
 
         Parameters
         ----------
-        qlib_data_1d_dir: str, Path
-            the qlib data to be updated for yahoo, usually from: Normalised to 5min using local 1d data
+        quant_master_data_1d_dir: str, Path
+            the quant_master data to be updated for yahoo, usually from: Normalised to 5min using local 1d data
         date_field_name: str
             date field name, default is date
         symbol_field_name: str
             symbol field name, default is symbol
         """
         bs.login()
-        qlib.init(provider_uri=qlib_data_1d_dir)
+        quant_master.init(provider_uri=quant_master_data_1d_dir)
         self.all_1d_data = D.features(D.instruments("all"), ["$paused", "$volume", "$factor", "$close"], freq="day")
         super(BaostockNormalizeHS3005min, self).__init__(date_field_name, symbol_field_name)
 
@@ -289,7 +289,7 @@ class Run(BaseRun):
         Examples
         ---------
             # get hs300 5min data
-            $ python collector.py download_data --source_dir ~/.qlib/stock_data/source/hs300_5min_original --start 2022-01-01 --end 2022-01-30 --interval 5min --region HS300
+            $ python collector.py download_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --start 2022-01-01 --end 2022-01-30 --interval 5min --region HS300
         """
         super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
 
@@ -298,29 +298,29 @@ class Run(BaseRun):
         date_field_name: str = "date",
         symbol_field_name: str = "symbol",
         end_date: str = None,
-        qlib_data_1d_dir: str = None,
+        quant_master_data_1d_dir: str = None,
     ):
         """normalize data
 
         Attention
         ---------
-        qlib_data_1d_dir cannot be None, normalize 5min needs to use 1d data;
+        quant_master_data_1d_dir cannot be None, normalize 5min needs to use 1d data;
 
-            qlib_data_1d can be obtained like this:
-                $ python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data --interval 1d --region cn --version v3
+            quant_master_data_1d can be obtained like this:
+                $ python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --interval 1d --region cn --version v3
             or:
-                download 1d data, reference: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#1d-from-yahoo
+                download 1d data, reference: https://github.com/microsoft/quant_master/tree/main/scripts/data_collector/yahoo#1d-from-yahoo
 
         Examples
         ---------
-            $ python collector.py normalize_data --qlib_data_1d_dir ~/.qlib/qlib_data/cn_data --source_dir ~/.qlib/stock_data/source/hs300_5min_original --normalize_dir ~/.qlib/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
+            $ python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --normalize_dir ~/.quant_master/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
         """
-        if qlib_data_1d_dir is None or not Path(qlib_data_1d_dir).expanduser().exists():
+        if quant_master_data_1d_dir is None or not Path(quant_master_data_1d_dir).expanduser().exists():
             raise ValueError(
-                "If normalize 5min, the qlib_data_1d_dir parameter must be set: --qlib_data_1d_dir <user qlib 1d data >, Reference: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance"
+                "If normalize 5min, the quant_master_data_1d_dir parameter must be set: --quant_master_data_1d_dir <user quant_master 1d data >, Reference: https://github.com/microsoft/quant_master/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance"
             )
         super(Run, self).normalize_data(
-            date_field_name, symbol_field_name, end_date=end_date, qlib_data_1d_dir=qlib_data_1d_dir
+            date_field_name, symbol_field_name, end_date=end_date, quant_master_data_1d_dir=quant_master_data_1d_dir
         )
 
 

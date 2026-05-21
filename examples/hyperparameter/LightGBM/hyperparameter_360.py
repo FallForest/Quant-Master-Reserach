@@ -1,9 +1,9 @@
-import qlib
+import quant_master
 import optuna
-from qlib.constant import REG_CN
-from qlib.utils import init_instance_by_config
-from qlib.tests.data import GetData
-from qlib.tests.config import get_dataset_config, CSI300_MARKET, DATASET_ALPHA360_CLASS
+from quant_master.constant import REG_CN
+from quant_master.utils import init_instance_by_config
+from quant_master.tests.data import GetData
+from quant_master.tests.config import get_dataset_config, CSI300_MARKET, DATASET_ALPHA360_CLASS
 
 DATASET_CONFIG = get_dataset_config(market=CSI300_MARKET, dataset_class=DATASET_ALPHA360_CLASS)
 
@@ -12,7 +12,7 @@ def objective(trial):
     task = {
         "model": {
             "class": "LGBModel",
-            "module_path": "qlib.contrib.model.gbdt",
+            "module_path": "quant_master.contrib.model.gbdt",
             "kwargs": {
                 "loss": "mse",
                 "colsample_bytree": trial.suggest_uniform("colsample_bytree", 0.5, 1),
@@ -38,9 +38,9 @@ def objective(trial):
 
 
 if __name__ == "__main__":
-    provider_uri = "~/.qlib/qlib_data/cn_data"
-    GetData().qlib_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
-    qlib.init(provider_uri=provider_uri, region=REG_CN)
+    provider_uri = "~/.quant_master/quant_master_data/cn_data"
+    GetData().quant_master_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
+    quant_master.init(provider_uri=provider_uri, region=REG_CN)
 
     dataset = init_instance_by_config(DATASET_CONFIG)
 

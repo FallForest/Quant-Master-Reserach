@@ -1,26 +1,26 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT License.
 """
-Qlib provides two kinds of interfaces.
+QuantMaster provides two kinds of interfaces.
 (1) Users could define the Quant research workflow by a simple configuration.
-(2) Qlib is designed in a modularized way and supports creating research workflow by code just like building blocks.
+(2) QuantMaster is designed in a modularized way and supports creating research workflow by code just like building blocks.
 
 The interface of (1) is `qrun XXX.yaml`.  The interface of (2) is script like this, which nearly does the same thing as `qrun XXX.yaml`
 """
 
-import qlib
-from qlib.constant import REG_CN
-from qlib.utils import init_instance_by_config, flatten_dict
-from qlib.workflow import R
-from qlib.workflow.record_temp import SignalRecord, PortAnaRecord, SigAnaRecord
-from qlib.tests.data import GetData
-from qlib.tests.config import CSI300_BENCH, CSI300_GBDT_TASK
+import quant_master
+from quant_master.constant import REG_CN
+from quant_master.utils import init_instance_by_config, flatten_dict
+from quant_master.workflow import R
+from quant_master.workflow.record_temp import SignalRecord, PortAnaRecord, SigAnaRecord
+from quant_master.tests.data import GetData
+from quant_master.tests.config import CSI300_BENCH, CSI300_GBDT_TASK
 
 if __name__ == "__main__":
     # use default data
-    provider_uri = "~/.qlib/qlib_data/cn_data"  # target_dir
-    GetData().qlib_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
-    qlib.init(provider_uri=provider_uri, region=REG_CN)
+    provider_uri = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+    GetData().quant_master_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
+    quant_master.init(provider_uri=provider_uri, region=REG_CN)
 
     model = init_instance_by_config(CSI300_GBDT_TASK["model"])
     dataset = init_instance_by_config(CSI300_GBDT_TASK["dataset"])
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     port_analysis_config = {
         "executor": {
             "class": "SimulatorExecutor",
-            "module_path": "qlib.backtest.executor",
+            "module_path": "quant_master.backtest.executor",
             "kwargs": {
                 "time_per_step": "day",
                 "generate_portfolio_metrics": True,
@@ -36,7 +36,7 @@ if __name__ == "__main__":
         },
         "strategy": {
             "class": "TopkDropoutStrategy",
-            "module_path": "qlib.contrib.strategy.signal_strategy",
+            "module_path": "quant_master.contrib.strategy.signal_strategy",
             "kwargs": {
                 "signal": (model, dataset),
                 "topk": 50,
@@ -80,6 +80,6 @@ if __name__ == "__main__":
         sar.generate()
 
         # backtest. If users want to use backtest based on their own prediction,
-        # please refer to https://qlib.readthedocs.io/en/latest/component/recorder.html#record-template.
+        # please refer to https://quant_master.readthedocs.io/en/latest/component/recorder.html#record-template.
         par = PortAnaRecord(recorder, port_analysis_config, "day")
         par.generate()

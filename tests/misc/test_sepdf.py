@@ -3,7 +3,7 @@
 import unittest
 import numpy as np
 import pandas as pd
-from qlib.contrib.data.utils.sepdf import SepDataFrame
+from quant_master.contrib.data.utils.sepdf import SepDataFrame
 
 
 class SepDF(unittest.TestCase):

@@ -1,10 +1,10 @@
-qlib_init:
-  provider_uri: "~/.qlib/qlib_data/cn_data"
+quant_master_init:
+  provider_uri: "~/.quant_master/quant_master_data/cn_data"
   region: cn
 
 data_loader_config: &data_loader_config
   class: StaticDataLoader
-  module_path: qlib.data.dataset.loader
+  module_path: quant_master.data.dataset.loader
   kwargs:
     config:
       feature: data/feature.pkl
@@ -50,7 +50,7 @@ task:
     kwargs:
       handler:
         class: DataHandler
-        module_path: qlib.data.dataset.handler
+        module_path: quant_master.data.dataset.handler
         kwargs:
           data_loader: *data_loader_config
       segments:

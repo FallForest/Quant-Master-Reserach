@@ -17,8 +17,8 @@ import fire
 import pandas as pd
 from tqdm import tqdm
 from loguru import logger
-from qlib.utils import fname_to_code, get_period_offset
-from qlib.config import C
+from quant_master.utils import fname_to_code, get_period_offset
+from quant_master.config import C
 
 
 class DumpPitData:
@@ -53,7 +53,7 @@ class DumpPitData:
     def __init__(
         self,
         csv_path: str,
-        qlib_dir: str,
+        quant_master_dir: str,
         backup_dir: str = None,
         freq: str = "quarterly",
         max_workers: int = 16,
@@ -72,10 +72,10 @@ class DumpPitData:
         ----------
         csv_path: str
             stock data path or directory
-        qlib_dir: str
-            qlib(dump) data director
+        quant_master_dir: str
+            quant_master(dump) data director
         backup_dir: str, default None
-            if backup_dir is not None, backup qlib_dir to backup_dir
+            if backup_dir is not None, backup quant_master_dir to backup_dir
         freq: str, default "quarterly"
             data frequency
         max_workers: int, default None
@@ -102,10 +102,10 @@ class DumpPitData:
         self.csv_files = sorted(csv_path.glob(f"*{self.file_suffix}") if csv_path.is_dir() else [csv_path])
         if limit_nums is not None:
             self.csv_files = self.csv_files[: int(limit_nums)]
-        self.qlib_dir = Path(qlib_dir).expanduser()
+        self.quant_master_dir = Path(quant_master_dir).expanduser()
         self.backup_dir = backup_dir if backup_dir is None else Path(backup_dir).expanduser()
         if backup_dir is not None:
-            self._backup_qlib_dir(Path(backup_dir).expanduser())
+            self._backup_quant_master_dir(Path(backup_dir).expanduser())
 
         self.works = max_workers
         self.date_column_name = date_column_name
@@ -115,8 +115,8 @@ class DumpPitData:
 
         self._mode = self.ALL_MODE
 
-    def _backup_qlib_dir(self, target_dir: Path):
-        shutil.copytree(str(self.qlib_dir.resolve()), str(target_dir.resolve()))
+    def _backup_quant_master_dir(self, target_dir: Path):
+        shutil.copytree(str(self.quant_master_dir.resolve()), str(target_dir.resolve()))
 
     def get_source_data(self, file_path: Path) -> pd.DataFrame:
         df = pd.read_csv(str(file_path.resolve()), low_memory=False)
@@ -140,7 +140,7 @@ class DumpPitData:
         )
 
     def get_filenames(self, symbol, field, interval):
-        dir_name = self.qlib_dir.joinpath(self.PIT_DIR_NAME, symbol)
+        dir_name = self.quant_master_dir.joinpath(self.PIT_DIR_NAME, symbol)
         dir_name.mkdir(parents=True, exist_ok=True)
         return (
             dir_name.joinpath(f"{field}_{interval[0]}{self.DATA_FILE_SUFFIX}".lower()),

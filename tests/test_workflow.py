@@ -4,8 +4,8 @@ import unittest
 from pathlib import Path
 import shutil
 
-from qlib.workflow import R
-from qlib.tests import TestAutoData
+from quant_master.workflow import R
+from quant_master.tests import TestAutoData
 
 
 class WorkflowTest(TestAutoData):

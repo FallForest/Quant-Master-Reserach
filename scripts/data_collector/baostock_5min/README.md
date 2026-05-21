@@ -1,10 +1,10 @@
 ## Collector Data
 
-### Get Qlib data(`bin file`)
+### Get QuantMaster data(`bin file`)
 
-  - get data: `python scripts/get_data.py qlib_data`
+  - get data: `python scripts/get_data.py quant_master_data`
   - parameters:
-    - `target_dir`: save dir, by default *~/.qlib/qlib_data/cn_data_5min*
+    - `target_dir`: save dir, by default *~/.quant_master/quant_master_data/cn_data_5min*
     - `version`: dataset version, value from [`v2`], by default `v2`
       - `v2` end date is *2022-12*
     - `interval`: `5min`
@@ -14,12 +14,12 @@
   - examples:
     ```bash
     # hs300 5min
-    python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/hs300_data_5min --region hs300 --interval 5min
+    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/hs300_data_5min --region hs300 --interval 5min
     ```
     
-### Collector *Baostock high frequency* data to qlib
-> collector *Baostock high frequency* data and *dump* into `qlib` format.
-> If the above ready-made data can't meet users' requirements,  users can follow this section to crawl the latest data and convert it to qlib-data.
+### Collector *Baostock high frequency* data to quant_master
+> collector *Baostock high frequency* data and *dump* into `quant_master` format.
+> If the above ready-made data can't meet users' requirements,  users can follow this section to crawl the latest data and convert it to quant_master-data.
   1. download data to csv: `python scripts/data_collector/baostock_5min/collector.py download_data`
      
      This will download the raw data such as date, symbol, open, high, low, close, volume, amount, adjustflag from baostock to a local directory. One file per symbol.
@@ -32,7 +32,7 @@
      - examples:
           ```bash
           # cn 5min data
-          python collector.py download_data --source_dir ~/.qlib/stock_data/source/hs300_5min_original --start 2022-01-01 --end 2022-01-30 --interval 5min --region HS300
+          python collector.py download_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --start 2022-01-01 --end 2022-01-30 --interval 5min --region HS300
           ```
   2. normalize data: `python scripts/data_collector/baostock_5min/collector.py normalize_data`
      
@@ -43,21 +43,21 @@
           - `source_dir`: csv directory
           - `normalize_dir`: result directory
           - `interval`: `5min`
-            > if **`interval == 5min`**, `qlib_data_1d_dir` cannot be `None`
+            > if **`interval == 5min`**, `quant_master_data_1d_dir` cannot be `None`
           - `region`: `HS300`
           - `date_field_name`: column *name* identifying time in csv files, by default `date`
           - `symbol_field_name`: column *name* identifying symbol in csv files, by default `symbol`
           - `end_date`: if not `None`, normalize the last date saved (*including end_date*); if `None`, it will ignore this parameter; by default `None`
-          - `qlib_data_1d_dir`: qlib directory(1d data)
-            if interval==5min, qlib_data_1d_dir cannot be None, normalize 5min needs to use 1d data;
+          - `quant_master_data_1d_dir`: quant_master directory(1d data)
+            if interval==5min, quant_master_data_1d_dir cannot be None, normalize 5min needs to use 1d data;
             ```
-                # qlib_data_1d can be obtained like this:
-                python scripts/get_data.py qlib_data --target_dir ~/.qlib/qlib_data/cn_data --interval 1d --region cn --version v3
+                # quant_master_data_1d can be obtained like this:
+                python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --interval 1d --region cn --version v3
             ```
       - examples:
         ```bash
         # normalize 5min cn
-        python collector.py normalize_data --qlib_data_1d_dir ~/.qlib/qlib_data/cn_data --source_dir ~/.qlib/stock_data/source/hs300_5min_original --normalize_dir ~/.qlib/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
+        python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --normalize_dir ~/.quant_master/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
         ```
   3. dump data: `python scripts/dump_bin.py dump_all`
     
@@ -65,7 +65,7 @@
     
      - parameters:
        - `data_path`: stock data path or directory, **normalize result(normalize_dir)**
-       - `qlib_dir`: qlib(dump) data director
+       - `quant_master_dir`: quant_master(dump) data director
        - `freq`: transaction frequency, by default `day`
          > `freq_map = {1d:day, 5mih: 5min}`
        - `max_workers`: number of threads, by default *16*
@@ -78,5 +78,5 @@
      - examples:
        ```bash
        # dump 5min cn
-       python dump_bin.py dump_all --data_path ~/.qlib/stock_data/source/hs300_5min_nor --qlib_dir ~/.qlib/qlib_data/hs300_5min_bin --freq 5min --exclude_fields date,symbol
+       python dump_bin.py dump_all --data_path ~/.quant_master/stock_data/source/hs300_5min_nor --quant_master_dir ~/.quant_master/quant_master_data/hs300_5min_bin --freq 5min --exclude_fields date,symbol
        ```

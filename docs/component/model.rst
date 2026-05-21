@@ -9,37 +9,37 @@ Introduction
 
 ``Forecast Model`` is designed to make the `prediction score` about stocks. Users can use the ``Forecast Model`` in an automatic workflow by ``qrun``, please refer to `Workflow: Workflow Management <workflow.html>`_.
 
-Because the components in ``Qlib`` are designed in a loosely-coupled way, ``Forecast Model`` can be used as an independent module also.
+Because the components in ``QuantMaster`` are designed in a loosely-coupled way, ``Forecast Model`` can be used as an independent module also.
 
 Base Class & Interface
 ======================
 
-``Qlib`` provides a base class `qlib.model.base.Model <../reference/api.html#module-qlib.model.base>`_ from which all models should inherit.
+``QuantMaster`` provides a base class `quant_master.model.base.Model <../reference/api.html#module-quant_master.model.base>`_ from which all models should inherit.
 
 The base class provides the following interfaces:
 
-.. autoclass:: qlib.model.base.Model
+.. autoclass:: quant_master.model.base.Model
     :members:
     :noindex:
 
-``Qlib`` also provides a base class `qlib.model.base.ModelFT <../reference/api.html#qlib.model.base.ModelFT>`_, which includes the method for finetuning the model.
+``QuantMaster`` also provides a base class `quant_master.model.base.ModelFT <../reference/api.html#quant_master.model.base.ModelFT>`_, which includes the method for finetuning the model.
 
-For other interfaces such as `finetune`, please refer to `Model API <../reference/api.html#module-qlib.model.base>`_.
+For other interfaces such as `finetune`, please refer to `Model API <../reference/api.html#module-quant_master.model.base>`_.
 
 Example
 =======
 
-``Qlib``'s `Model Zoo` includes models such as ``LightGBM``, ``MLP``, ``LSTM``, etc.. These models are treated as the baselines of ``Forecast Model``. The following steps show how to run`` LightGBM`` as an independent module.
+``QuantMaster``'s `Model Zoo` includes models such as ``LightGBM``, ``MLP``, ``LSTM``, etc.. These models are treated as the baselines of ``Forecast Model``. The following steps show how to run`` LightGBM`` as an independent module.
 
-- Initialize ``Qlib`` with `qlib.init` first, please refer to `Initialization <../start/initialization.html>`_.
+- Initialize ``QuantMaster`` with `quant_master.init` first, please refer to `Initialization <../start/initialization.html>`_.
 - Run the following code to get the `prediction score` `pred_score`
     .. code-block:: Python
 
-        from qlib.contrib.model.gbdt import LGBModel
-        from qlib.contrib.data.handler import Alpha158
-        from qlib.utils import init_instance_by_config, flatten_dict
-        from qlib.workflow import R
-        from qlib.workflow.record_temp import SignalRecord, PortAnaRecord
+        from quant_master.contrib.model.gbdt import LGBModel
+        from quant_master.contrib.data.handler import Alpha158
+        from quant_master.utils import init_instance_by_config, flatten_dict
+        from quant_master.workflow import R
+        from quant_master.workflow.record_temp import SignalRecord, PortAnaRecord
 
         market = "csi300"
         benchmark = "SH000300"
@@ -55,7 +55,7 @@ Example
         task = {
             "model": {
                 "class": "LGBModel",
-                "module_path": "qlib.contrib.model.gbdt",
+                "module_path": "quant_master.contrib.model.gbdt",
                 "kwargs": {
                     "loss": "mse",
                     "colsample_bytree": 0.8879,
@@ -70,11 +70,11 @@ Example
             },
             "dataset": {
                 "class": "DatasetH",
-                "module_path": "qlib.data.dataset",
+                "module_path": "quant_master.data.dataset",
                 "kwargs": {
                     "handler": {
                         "class": "Alpha158",
-                        "module_path": "qlib.contrib.data.handler",
+                        "module_path": "quant_master.contrib.data.handler",
                         "kwargs": data_handler_config,
                     },
                     "segments": {
@@ -103,8 +103,8 @@ Example
 
     .. note::
 
-        `Alpha158` is the data handler provided by ``Qlib``, please refer to `Data Handler <data.html#data-handler>`_.
-        `SignalRecord` is the `Record Template` in ``Qlib``, please refer to `Workflow <recorder.html#record-template>`_.
+        `Alpha158` is the data handler provided by ``QuantMaster``, please refer to `Data Handler <data.html#data-handler>`_.
+        `SignalRecord` is the `Record Template` in ``QuantMaster``, please refer to `Workflow <recorder.html#record-template>`_.
 
 Also, the above example has been given in ``examples/train_backtest_analyze.ipynb``.
 Technically, the meaning of the model prediction depends on the label setting designed by user.
@@ -114,9 +114,9 @@ By default, the meaning of the score is normally the rating of the instruments b
 Custom Model
 ============
 
-Qlib supports custom models. If users are interested in customizing their own models and integrating the models into ``Qlib``, please refer to `Custom Model Integration <../start/integration.html>`_.
+QuantMaster supports custom models. If users are interested in customizing their own models and integrating the models into ``QuantMaster``, please refer to `Custom Model Integration <../start/integration.html>`_.
 
 
 API
 ===
-Please refer to `Model API <../reference/api.html#module-qlib.model.base>`_.
+Please refer to `Model API <../reference/api.html#module-quant_master.model.base>`_.

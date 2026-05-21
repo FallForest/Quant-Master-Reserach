@@ -20,11 +20,11 @@ from loguru import logger
 from yahooquery import Ticker
 from dateutil.tz import tzlocal
 
-import qlib
-from qlib.data import D
-from qlib.tests.data import GetData
-from qlib.utils import code_to_fname, fname_to_code, exists_qlib_data
-from qlib.constant import REG_CN as REGION_CN
+import quant_master
+from quant_master.data import D
+from quant_master.tests.data import GetData
+from quant_master.utils import code_to_fname, fname_to_code, exists_quant_master_data
+from quant_master.constant import REG_CN as REGION_CN
 
 CUR_DIR = Path(__file__).resolve().parent
 sys.path.append(str(CUR_DIR.parent.parent))
@@ -509,14 +509,14 @@ class YahooNormalize1d(YahooNormalize, ABC):
 
 class YahooNormalize1dExtend(YahooNormalize1d):
     def __init__(
-        self, old_qlib_data_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
+        self, old_quant_master_data_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
     ):
         """
 
         Parameters
         ----------
-        old_qlib_data_dir: str, Path
-            the qlib data to be updated for yahoo, usually from: https://github.com/microsoft/qlib/tree/main/scripts#download-cn-data
+        old_quant_master_data_dir: str, Path
+            the quant_master data to be updated for yahoo, usually from: https://github.com/microsoft/quant_master/tree/main/scripts#download-cn-data
         date_field_name: str
             date field name, default is date
         symbol_field_name: str
@@ -524,11 +524,11 @@ class YahooNormalize1dExtend(YahooNormalize1d):
         """
         super(YahooNormalize1dExtend, self).__init__(date_field_name, symbol_field_name)
         self.column_list = ["open", "high", "low", "close", "volume", "factor", "change"]
-        self.old_qlib_data = self._get_old_data(old_qlib_data_dir)
+        self.old_quant_master_data = self._get_old_data(old_quant_master_data_dir)
 
-    def _get_old_data(self, qlib_data_dir: [str, Path]):
-        qlib_data_dir = str(Path(qlib_data_dir).expanduser().resolve())
-        qlib.init(provider_uri=qlib_data_dir, expression_cache=None, dataset_cache=None)
+    def _get_old_data(self, quant_master_data_dir: [str, Path]):
+        quant_master_data_dir = str(Path(quant_master_data_dir).expanduser().resolve())
+        quant_master.init(provider_uri=quant_master_data_dir, expression_cache=None, dataset_cache=None)
         df = D.features(D.instruments("all"), ["$" + col for col in self.column_list])
         df.columns = self.column_list
         return df
@@ -537,10 +537,10 @@ class YahooNormalize1dExtend(YahooNormalize1d):
         df = super(YahooNormalize1dExtend, self).normalize(df)
         df.set_index(self._date_field_name, inplace=True)
         symbol_name = df[self._symbol_field_name].iloc[0]
-        old_symbol_list = self.old_qlib_data.index.get_level_values("instrument").unique().to_list()
+        old_symbol_list = self.old_quant_master_data.index.get_level_values("instrument").unique().to_list()
         if str(symbol_name).upper() not in old_symbol_list:
             return df.reset_index()
-        old_df = self.old_qlib_data.loc[str(symbol_name).upper()]
+        old_df = self.old_quant_master_data.loc[str(symbol_name).upper()]
         latest_date = old_df.index[-1]
         df = df.loc[latest_date:]
         new_latest_data = df.iloc[0]
@@ -564,21 +564,21 @@ class YahooNormalize1min(YahooNormalize, ABC):
     CALC_PAUSED_NUM = True
 
     def __init__(
-        self, qlib_data_1d_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
+        self, quant_master_data_1d_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
     ):
         """
 
         Parameters
         ----------
-        qlib_data_1d_dir: str, Path
-            the qlib data to be updated for yahoo, usually from: Normalised to 1min using local 1d data
+        quant_master_data_1d_dir: str, Path
+            the quant_master data to be updated for yahoo, usually from: Normalised to 1min using local 1d data
         date_field_name: str
             date field name, default is date
         symbol_field_name: str
             symbol field name, default is symbol
         """
         super(YahooNormalize1min, self).__init__(date_field_name, symbol_field_name)
-        qlib.init(provider_uri=qlib_data_1d_dir)
+        quant_master.init(provider_uri=quant_master_data_1d_dir)
         self.all_1d_data = D.features(D.instruments("all"), ["$paused", "$volume", "$factor", "$close"], freq="day")
 
     def _get_1d_calendar_list(self) -> Iterable[pd.Timestamp]:
@@ -788,9 +788,9 @@ class Run(BaseRun):
         Examples
         ---------
             # get daily data
-            $ python collector.py download_data --source_dir ~/.qlib/stock_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1d
+            $ python collector.py download_data --source_dir ~/.quant_master/stock_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1d
             # get 1m data
-            $ python collector.py download_data --source_dir ~/.qlib/stock_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1m
+            $ python collector.py download_data --source_dir ~/.quant_master/stock_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1m
         """
         if self.interval == "1d" and pd.Timestamp(end) > pd.Timestamp(datetime.datetime.now().strftime("%Y-%m-%d")):
             raise ValueError(f"end_date: {end} is greater than the current date.")
@@ -802,7 +802,7 @@ class Run(BaseRun):
         date_field_name: str = "date",
         symbol_field_name: str = "symbol",
         end_date: str = None,
-        qlib_data_1d_dir: str = None,
+        quant_master_data_1d_dir: str = None,
     ):
         """normalize data
 
@@ -814,32 +814,32 @@ class Run(BaseRun):
             symbol field name, default symbol
         end_date: str
             if not None, normalize the last date saved (including end_date); if None, it will ignore this parameter; by default None
-        qlib_data_1d_dir: str
-            if interval==1min, qlib_data_1d_dir cannot be None, normalize 1min needs to use 1d data;
+        quant_master_data_1d_dir: str
+            if interval==1min, quant_master_data_1d_dir cannot be None, normalize 1min needs to use 1d data;
 
-                qlib_data_1d can be obtained like this:
-                    $ python scripts/get_data.py qlib_data --target_dir <qlib_data_1d_dir> --interval 1d
-                    $ python scripts/data_collector/yahoo/collector.py update_data_to_bin --qlib_data_1d_dir <qlib_data_1d_dir> --trading_date 2021-06-01
+                quant_master_data_1d can be obtained like this:
+                    $ python scripts/get_data.py quant_master_data --target_dir <quant_master_data_1d_dir> --interval 1d
+                    $ python scripts/data_collector/yahoo/collector.py update_data_to_bin --quant_master_data_1d_dir <quant_master_data_1d_dir> --trading_date 2021-06-01
                 or:
-                    download 1d data, reference: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#1d-from-yahoo
+                    download 1d data, reference: https://github.com/microsoft/quant_master/tree/main/scripts/data_collector/yahoo#1d-from-yahoo
 
         Examples
         ---------
-            $ python collector.py normalize_data --source_dir ~/.qlib/stock_data/source --normalize_dir ~/.qlib/stock_data/normalize --region cn --interval 1d
-            $ python collector.py normalize_data --qlib_data_1d_dir ~/.qlib/qlib_data/cn_data --source_dir ~/.qlib/stock_data/source_cn_1min --normalize_dir ~/.qlib/stock_data/normalize_cn_1min --region CN --interval 1min
+            $ python collector.py normalize_data --source_dir ~/.quant_master/stock_data/source --normalize_dir ~/.quant_master/stock_data/normalize --region cn --interval 1d
+            $ python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --source_dir ~/.quant_master/stock_data/source_cn_1min --normalize_dir ~/.quant_master/stock_data/normalize_cn_1min --region CN --interval 1min
         """
         if self.interval.lower() == "1min":
-            if qlib_data_1d_dir is None or not Path(qlib_data_1d_dir).expanduser().exists():
+            if quant_master_data_1d_dir is None or not Path(quant_master_data_1d_dir).expanduser().exists():
                 raise ValueError(
-                    "If normalize 1min, the qlib_data_1d_dir parameter must be set: --qlib_data_1d_dir <user qlib 1d data >, Reference: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance"
+                    "If normalize 1min, the quant_master_data_1d_dir parameter must be set: --quant_master_data_1d_dir <user quant_master 1d data >, Reference: https://github.com/microsoft/quant_master/tree/main/scripts/data_collector/yahoo#automatic-update-of-daily-frequency-datafrom-yahoo-finance"
                 )
         super(Run, self).normalize_data(
-            date_field_name, symbol_field_name, end_date=end_date, qlib_data_1d_dir=qlib_data_1d_dir
+            date_field_name, symbol_field_name, end_date=end_date, quant_master_data_1d_dir=quant_master_data_1d_dir
         )
 
     def update_data_to_bin(
         self,
-        qlib_data_1d_dir: str,
+        quant_master_data_1d_dir: str,
         end_date: str = None,
         check_data_length: int = None,
         delay: float = 1,
@@ -849,8 +849,8 @@ class Run(BaseRun):
 
         Parameters
         ----------
-        qlib_data_1d_dir: str
-            the qlib data to be updated for yahoo, usually from: https://github.com/microsoft/qlib/tree/main/scripts#download-cn-data
+        quant_master_data_1d_dir: str
+            the quant_master data to be updated for yahoo, usually from: https://github.com/microsoft/quant_master/tree/main/scripts#download-cn-data
 
         end_date: str
             end datetime, default ``pd.Timestamp(trading_date + pd.Timedelta(days=1))``; open interval(excluding end)
@@ -862,28 +862,28 @@ class Run(BaseRun):
             exists skip, by default False
         Notes
         -----
-            If the data in qlib_data_dir is incomplete, np.nan will be populated to trading_date for the previous trading day
+            If the data in quant_master_data_dir is incomplete, np.nan will be populated to trading_date for the previous trading day
             This is the recommended Yahoo 1d entrypoint. It handles download, normalize and dump internally.
             For incremental updates, the downloaded source data must include the last trading day already stored in
-            qlib_data_1d_dir as the overlap date.
+            quant_master_data_1d_dir as the overlap date.
 
         Examples
         -------
-            $ python collector.py update_data_to_bin --qlib_data_1d_dir <user data dir> --end_date <end date>
+            $ python collector.py update_data_to_bin --quant_master_data_1d_dir <user data dir> --end_date <end date>
         """
 
         if self.interval.lower() != "1d":
             logger.warning(f"currently supports 1d data updates: --interval 1d")
 
-        # download qlib 1d data
-        qlib_data_1d_dir = str(Path(qlib_data_1d_dir).expanduser().resolve())
-        if not exists_qlib_data(qlib_data_1d_dir):
-            GetData().qlib_data(
-                target_dir=qlib_data_1d_dir, interval=self.interval, region=self.region, exists_skip=exists_skip
+        # download quant_master 1d data
+        quant_master_data_1d_dir = str(Path(quant_master_data_1d_dir).expanduser().resolve())
+        if not exists_quant_master_data(quant_master_data_1d_dir):
+            GetData().quant_master_data(
+                target_dir=quant_master_data_1d_dir, interval=self.interval, region=self.region, exists_skip=exists_skip
             )
 
         # start/end date
-        calendar_df = pd.read_csv(Path(qlib_data_1d_dir).joinpath("calendars/day.txt"))
+        calendar_df = pd.read_csv(Path(quant_master_data_1d_dir).joinpath("calendars/day.txt"))
         trading_date = (pd.Timestamp(calendar_df.iloc[-1, 0]) - pd.Timedelta(days=1)).strftime("%Y-%m-%d")
 
         if end_date is None:
@@ -898,7 +898,7 @@ class Run(BaseRun):
             if self.max_workers is None or self.max_workers <= 1
             else self.max_workers
         )
-        # normalize data against the existing qlib dataset so the overlap trading day can be removed safely
+        # normalize data against the existing quant_master dataset so the overlap trading day can be removed safely
         _class = getattr(self._cur_module, f"{self.normalize_class_name}Extend")
         yc = Normalize(
             source_dir=self.source_dir,
@@ -907,14 +907,14 @@ class Run(BaseRun):
             max_workers=self.max_workers,
             date_field_name="date",
             symbol_field_name="symbol",
-            old_qlib_data_dir=qlib_data_1d_dir,
+            old_quant_master_data_dir=quant_master_data_1d_dir,
         )
         yc.normalize()
 
         # dump bin
         _dump = DumpDataUpdate(
             data_path=self.normalize_dir,
-            qlib_dir=qlib_data_1d_dir,
+            quant_master_dir=quant_master_data_1d_dir,
             exclude_fields="symbol,date",
             max_workers=self.max_workers,
         )
@@ -930,7 +930,7 @@ class Run(BaseRun):
             importlib.import_module(f"data_collector.{_region}_index.collector"), "get_instruments"
         )
         for _index in index_list:
-            get_instruments(str(qlib_data_1d_dir), _index, market_index=f"{_region}_index")
+            get_instruments(str(quant_master_data_1d_dir), _index, market_index=f"{_region}_index")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 #!/bin/sh
-git clone https://github.com/microsoft/qlib.git
-cd qlib
+git clone https://github.com/microsoft/quant_master.git
+cd quant_master
 ls
-pip install pyqlib
+pip install pyquant_master
 # or
 # pip install numpy
 # pip install --upgrade cython

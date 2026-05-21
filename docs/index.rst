@@ -1,8 +1,8 @@
 ======================
-``Qlib`` Documentation
+``QuantMaster`` Documentation
 ======================
 
-``Qlib`` is an AI-oriented quantitative investment platform, which aims to realize the potential, empower the research, and create the value of AI technologies in quantitative investment.
+``QuantMaster`` is an AI-oriented quantitative investment platform, which aims to realize the potential, empower the research, and create the value of AI technologies in quantitative investment.
 
 .. _user_guide:
 
@@ -41,7 +41,7 @@ Document Structure
    Portfolio Management and Backtest <component/strategy.rst>
    Nested Decision Execution: High-Frequency Trading <component/highfreq.rst>
    Meta Controller: Meta-Task & Meta-Dataset & Meta-Model <component/meta.rst>
-   Qlib Recorder: Experiment Management <component/recorder.rst>
+   QuantMaster Recorder: Experiment Management <component/recorder.rst>
    Analysis: Evaluation & Results Analysis <component/report.rst>
    Online Serving: Online Management & Strategy & Tool <component/online.rst>
    Reinforcement Learning <component/rl/toctree>

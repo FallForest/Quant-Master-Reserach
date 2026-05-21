@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from torch.utils.data import Dataset, DataLoader
-from qlib.rl.utils.data_queue import DataQueue
+from quant_master.rl.utils.data_queue import DataQueue
 
 
 class DummyDataset(Dataset):

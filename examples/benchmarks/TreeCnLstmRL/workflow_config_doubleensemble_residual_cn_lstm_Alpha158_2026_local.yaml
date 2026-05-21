@@ -1,5 +1,5 @@
-qlib_init:
-    provider_uri: "~/.qlib/qlib_data/cn_data"
+quant_master_init:
+    provider_uri: "~/.quant_master/quant_master_data/cn_data"
     region: cn
     kernels: 1
     joblib_backend: threading
@@ -14,7 +14,7 @@ data_handler_config: &data_handler_config
 port_analysis_config: &port_analysis_config
     strategy:
         class: TopkDropoutStrategy
-        module_path: qlib.contrib.strategy
+        module_path: quant_master.contrib.strategy
         kwargs:
             signal: <PRED>
             topk: 50
@@ -33,7 +33,7 @@ port_analysis_config: &port_analysis_config
 task:
     model:
         class: DoubleEnsembleResidualCnLstmModel
-        module_path: qlib.contrib.model.double_ensemble_residual_cn_lstm
+        module_path: quant_master.contrib.model.double_ensemble_residual_cn_lstm
         kwargs:
             stack_metric: topk_turnover
             topk: 50
@@ -85,11 +85,11 @@ task:
                 GPU: 0
     dataset:
         class: TSDatasetH
-        module_path: qlib.data.dataset
+        module_path: quant_master.data.dataset
         kwargs:
             handler:
                 class: Alpha158
-                module_path: qlib.contrib.data.handler
+                module_path: quant_master.contrib.data.handler
                 kwargs: *data_handler_config
             segments:
                 train: [2012-01-01, 2020-12-31]
@@ -98,16 +98,16 @@ task:
             step_len: 20
     record:
         - class: SignalRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs:
             model: <MODEL>
             dataset: <DATASET>
         - class: SigAnaRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs:
             ana_long_short: False
             ann_scaler: 252
         - class: PortAnaRecord
-          module_path: qlib.workflow.record_temp
+          module_path: quant_master.workflow.record_temp
           kwargs:
             config: *port_analysis_config

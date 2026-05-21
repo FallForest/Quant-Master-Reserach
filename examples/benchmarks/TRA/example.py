@@ -1,8 +1,8 @@
 import argparse
 
-import qlib
+import quant_master
 from ruamel.yaml import YAML
-from qlib.utils import init_instance_by_config
+from quant_master.utils import init_instance_by_config
 
 
 def main(seed, config_file="configs/config_alstm.yaml"):
@@ -18,9 +18,9 @@ def main(seed, config_file="configs/config_alstm.yaml"):
     )
 
     # initialize workflow
-    qlib.init(
-        provider_uri=config["qlib_init"]["provider_uri"],
-        region=config["qlib_init"]["region"],
+    quant_master.init(
+        provider_uri=config["quant_master_init"]["provider_uri"],
+        region=config["quant_master_init"]["region"],
     )
     dataset = init_instance_by_config(config["task"]["dataset"])
     model = init_instance_by_config(config["task"]["model"])

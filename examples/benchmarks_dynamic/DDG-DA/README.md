@@ -1,5 +1,5 @@
 # Introduction
-This is the implementation of `DDG-DA` based on `Meta Controller` component provided by `Qlib`.
+This is the implementation of `DDG-DA` based on `Meta Controller` component provided by `QuantMaster`.
 
 Please refer to the paper for more details: *DDG-DA: Data Distribution Generation for Predictable Concept Drift Adaptation* [[arXiv](https://arxiv.org/abs/2201.04038)]
 
@@ -10,7 +10,7 @@ In many real-world scenarios, we often deal with streaming data that is sequenti
 Therefore, we propose a novel method `DDG-DA`, that can effectively forecast the evolution of data distribution and improve the performance of models. Specifically, we first train a predictor to estimate the future data distribution, then leverage it to generate training samples, and finally train models on the generated data.
 
 # Dataset
-The data in the paper are private. So we conduct experiments on Qlib's public dataset.
+The data in the paper are private. So we conduct experiments on QuantMaster's public dataset.
 Though the dataset is different, the conclusion remains the same. By applying `DDG-DA`, users can see rising trends at the test phase both in the proxy models' ICs and the performances of the forecasting models.
 
 # Run the Code
@@ -25,7 +25,7 @@ The default forecasting models are `Linear`. Users can choose other forecasting 
 ```
 
 # Results
-The results of related methods in Qlib's public dataset can be found [here](../)
+The results of related methods in QuantMaster's public dataset can be found [here](../)
 
 # Requirements
 Here are the minimal hardware requirements to run the ``workflow.py`` of DDG-DA.

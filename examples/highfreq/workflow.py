@@ -3,16 +3,16 @@
 
 import fire
 
-import qlib
-from qlib.constant import REG_CN
-from qlib.config import HIGH_FREQ_CONFIG
+import quant_master
+from quant_master.constant import REG_CN
+from quant_master.config import HIGH_FREQ_CONFIG
 
-from qlib.utils import init_instance_by_config
-from qlib.utils.pickle_utils import restricted_pickle_load
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.data.ops import Operators
-from qlib.data.data import Cal
-from qlib.tests.data import GetData
+from quant_master.utils import init_instance_by_config
+from quant_master.utils.pickle_utils import restricted_pickle_load
+from quant_master.data.dataset.handler import DataHandlerLP
+from quant_master.data.ops import Operators
+from quant_master.data.data import Cal
+from quant_master.tests.data import GetData
 
 from highfreq_ops import get_calendar_day, DayLast, FFillNan, BFillNan, Date, Select, IsNull, Cut
 
@@ -44,7 +44,7 @@ class HighfreqWorkflow:
     task = {
         "dataset": {
             "class": "DatasetH",
-            "module_path": "qlib.data.dataset",
+            "module_path": "quant_master.data.dataset",
             "kwargs": {
                 "handler": {
                     "class": "HighFreqHandler",
@@ -62,7 +62,7 @@ class HighfreqWorkflow:
         },
         "dataset_backtest": {
             "class": "DatasetH",
-            "module_path": "qlib.data.dataset",
+            "module_path": "quant_master.data.dataset",
             "kwargs": {
                 "handler": {
                     "class": "HighFreqBacktestHandler",
@@ -80,13 +80,13 @@ class HighfreqWorkflow:
         },
     }
 
-    def _init_qlib(self):
-        """initialize qlib"""
+    def _init_quant_master(self):
+        """initialize quant_master"""
         # use cn_data_1min data
         QLIB_INIT_CONFIG = {**HIGH_FREQ_CONFIG, **self.SPEC_CONF}
         provider_uri = QLIB_INIT_CONFIG.get("provider_uri")
-        GetData().qlib_data(target_dir=provider_uri, interval="1min", region=REG_CN, exists_skip=True)
-        qlib.init(**QLIB_INIT_CONFIG)
+        GetData().quant_master_data(target_dir=provider_uri, interval="1min", region=REG_CN, exists_skip=True)
+        quant_master.init(**QLIB_INIT_CONFIG)
 
     def _prepare_calender_cache(self):
         """preload the calendar for cache"""
@@ -98,7 +98,7 @@ class HighfreqWorkflow:
 
     def get_data(self):
         """use dataset to get highreq data"""
-        self._init_qlib()
+        self._init_quant_master()
         self._prepare_calender_cache()
 
         dataset = init_instance_by_config(self.task["dataset"])
@@ -113,7 +113,7 @@ class HighfreqWorkflow:
 
     def dump_and_load_dataset(self):
         """dump and load dataset state on disk"""
-        self._init_qlib()
+        self._init_quant_master()
         self._prepare_calender_cache()
         dataset = init_instance_by_config(self.task["dataset"])
         dataset_backtest = init_instance_by_config(self.task["dataset_backtest"])

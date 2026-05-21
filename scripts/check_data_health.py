@@ -6,8 +6,8 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-import qlib
-from qlib.data import D
+import quant_master
+from quant_master.data import D
 
 
 class DataHealthChecker:
@@ -21,14 +21,14 @@ class DataHealthChecker:
     def __init__(
         self,
         csv_path=None,
-        qlib_dir=None,
+        quant_master_dir=None,
         freq="day",
         large_step_threshold_price=0.5,
         large_step_threshold_volume=3,
         missing_data_num=0,
     ):
-        assert csv_path or qlib_dir, "One of csv_path or qlib_dir should be provided."
-        assert not (csv_path and qlib_dir), "Only one of csv_path or qlib_dir should be provided."
+        assert csv_path or quant_master_dir, "One of csv_path or quant_master_dir should be provided."
+        assert not (csv_path and quant_master_dir), "Only one of csv_path or quant_master_dir should be provided."
 
         self.data = {}
         self.problems = {}
@@ -36,7 +36,7 @@ class DataHealthChecker:
         self.large_step_threshold_price = large_step_threshold_price
         self.large_step_threshold_volume = large_step_threshold_volume
         self.missing_data_num = missing_data_num
-        self.qlib_dir = os.path.abspath(os.path.expanduser(qlib_dir))
+        self.quant_master_dir = os.path.abspath(os.path.expanduser(quant_master_dir))
 
         if csv_path:
             assert os.path.isdir(csv_path), f"{csv_path} should be a directory."
@@ -45,11 +45,11 @@ class DataHealthChecker:
                 df = pd.read_csv(os.path.join(csv_path, filename))
                 self.data[filename] = df
 
-        elif qlib_dir:
-            qlib.init(provider_uri=qlib_dir)
-            self.load_qlib_data()
+        elif quant_master_dir:
+            quant_master.init(provider_uri=quant_master_dir)
+            self.load_quant_master_data()
 
-    def load_qlib_data(self):
+    def load_quant_master_data(self):
         instruments = D.instruments(market="all")
         instrument_list = D.list_instruments(instruments=instruments, as_list=True, freq=self.freq)
         required_fields = ["$open", "$close", "$low", "$high", "$volume", "$factor"]
@@ -70,25 +70,25 @@ class DataHealthChecker:
         print(df)
 
     # NOTE:
-    # This check is added due to a known issue in Qlib where feature paths
+    # This check is added due to a known issue in QuantMaster where feature paths
     # are constructed using lowercased instrument names. On case-sensitive
     # file systems (e.g. Linux), uppercase directory names under `features/`
     # will cause data loading failures.
     #
-    # See: https://github.com/microsoft/qlib/issues/2053
+    # See: https://github.com/microsoft/quant_master/issues/2053
     def check_features_dir_lowercase(self) -> Optional[pd.DataFrame]:
         """
-        Check whether all subdirectories under `<qlib_dir>/features` are named in lowercase.
+        Check whether all subdirectories under `<quant_master_dir>/features` are named in lowercase.
 
         This validation helps prevent data loading issues on case-sensitive
         file systems caused by uppercase instrument directory names.
         """
-        if not self.qlib_dir:
+        if not self.quant_master_dir:
             return None
 
-        features_dir = os.path.join(self.qlib_dir, "features")
+        features_dir = os.path.join(self.quant_master_dir, "features")
         if not os.path.isdir(features_dir):
-            logger.warning(f"`features` directory not found under {self.qlib_dir}")
+            logger.warning(f"`features` directory not found under {self.quant_master_dir}")
             return None
 
         bad_dirs = []
@@ -102,7 +102,7 @@ class DataHealthChecker:
             return result_df
         else:
             logger.info(
-                f"✅ All subdirectories under `{os.path.join(self.qlib_dir, 'features')}` are named in lowercase."
+                f"✅ All subdirectories under `{os.path.join(self.quant_master_dir, 'features')}` are named in lowercase."
             )
             return None
 
@@ -239,7 +239,7 @@ class DataHealthChecker:
                 print(check_missing_factor_result)
             if isinstance(check_features_dir_case_result, pd.DataFrame):
                 logger.warning(
-                    f"Some subdirectories under `{os.path.join(self.qlib_dir, 'features')}` contain uppercase letters, please rename them to lowercase manually."
+                    f"Some subdirectories under `{os.path.join(self.quant_master_dir, 'features')}` contain uppercase letters, please rename them to lowercase manually."
                 )
                 print(check_features_dir_case_result)
 

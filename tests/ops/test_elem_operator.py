@@ -2,10 +2,10 @@ import unittest
 import numpy as np
 import pytest
 
-from qlib.data import DatasetProvider
-from qlib.data.data import ExpressionD
-from qlib.tests import TestOperatorData, TestMockData, MOCK_DF
-from qlib.config import C
+from quant_master.data import DatasetProvider
+from quant_master.data.data import ExpressionD
+from quant_master.tests import TestOperatorData, TestMockData, MOCK_DF
+from quant_master.config import C
 
 
 class TestElementOperator(TestMockData):

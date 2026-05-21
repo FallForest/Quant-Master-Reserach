@@ -2,7 +2,7 @@
 
 Tuner
 =====
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 Introduction
 ------------
@@ -29,7 +29,7 @@ Example
 
 Let's see an example,
 
-First make sure you have the latest version of `qlib` installed.
+First make sure you have the latest version of `quant_master` installed.
 
 Then, you need to provide a configuration to setup the experiment.
 We write a simple configuration example as following,
@@ -39,7 +39,7 @@ We write a simple configuration example as following,
     experiment:
         name: tuner_experiment
         tuner_class: QLibTuner
-    qlib_client:
+    quant_master_client:
         auto_mount: False
         logging_level: INFO
     optimization_criteria:
@@ -68,7 +68,7 @@ We write a simple configuration example as following,
         test_end_date: 2018-04-30
     data:
         class: ALPHA360
-        provider_uri: /data/qlib
+        provider_uri: /data/quant_master
         args:
             start_date: 2005-01-01
             end_date: 2018-04-30
@@ -79,14 +79,14 @@ We write a simple configuration example as following,
             filter_pipeline:
               -
                 class: NameDFilter
-                module_path: qlib.data.filter
+                module_path: quant_master.data.filter
                 args:
                   name_rule_re: S(?!Z3)
                   fstart_time: 2018-01-01
                   fend_time: 2018-12-11
               -
                 class: ExpressionDFilter
-                module_path: qlib.data.filter
+                module_path: quant_master.data.filter
                 args:
                   rule_expression: $open/$factor<=45
                   fstart_time: 2018-01-01
@@ -104,7 +104,7 @@ Next, we run the following command, and you can see:
 
 .. code-block:: bash
 
-    ~/v-yindzh/Qlib/cfg$ tuner -c tuner_config.yaml
+    ~/v-yindzh/QuantMaster/cfg$ tuner -c tuner_config.yaml
 
     Searching params: {'model_space': {'colsample_bytree': 0.8870905643607678, 'lambda_l1': 472.3188735122233, 'lambda_l2': 92.75390994877243, 'learning_rate': 0.09741751430635413, 'loss': 'mse', 'max_depth': 8, 'num_leaves': 160, 'num_threads': 20, 'subsample': 0.7536051584789751}, 'strategy_space': {'buffer_margin': 250, 'topk': 40}}
     ...
@@ -163,10 +163,10 @@ Also, there are some optional fields. The meaning of each field is as follows:
     The saving path, str type, the program will construct the experiment directory in this path. The default value is the path where configuration locate.
 
 - `tuner_class`
-    The class of tuner, str type, must be an already implemented model, such as `QLibTuner` in `qlib`, or a custom tuner, but it must be a subclass of `qlib.contrib.tuner.Tuner`, the default value is `QLibTuner`.
+    The class of tuner, str type, must be an already implemented model, such as `QLibTuner` in `quant_master`, or a custom tuner, but it must be a subclass of `quant_master.contrib.tuner.Tuner`, the default value is `QLibTuner`.
 
 - `tuner_module_path`
-    The module path, str type, absolute url is also supported, indicates the path of the implementation of tuner. The default value is `qlib.contrib.tuner.tuner`
+    The module path, str type, absolute url is also supported, indicates the path of the implementation of tuner. The default value is `quant_master.contrib.tuner.tuner`
 
 About the optimization criteria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -214,7 +214,7 @@ The tuner pipeline contains different tuners, and the `tuner` program will proce
             space: TopkAmountStrategySpace
         max_evals: 2
 
-Each part represents a tuner, and its modules which are to be tuned. Space in each part is the hyper-parameters' space of a certain module, you need to create your searching space and modify it in `/qlib/contrib/tuner/space.py`. We use `hyperopt` package to help us to construct the space, you can see the detail of how to use it in https://github.com/hyperopt/hyperopt/wiki/FMin .
+Each part represents a tuner, and its modules which are to be tuned. Space in each part is the hyper-parameters' space of a certain module, you need to create your searching space and modify it in `/quant_master/contrib/tuner/space.py`. We use `hyperopt` package to help us to construct the space, you can see the detail of how to use it in https://github.com/hyperopt/hyperopt/wiki/FMin .
 
 - model
     You need to provide the `class` and the `space` of the model. If the model is user's own implementation, you need to provide the `module_path`.
@@ -279,7 +279,7 @@ About the data and backtest
 
     data:
         class: ALPHA360
-        provider_uri: /data/qlib
+        provider_uri: /data/quant_master
         args:
             start_date: 2005-01-01
             end_date: 2018-04-30
@@ -291,14 +291,14 @@ About the data and backtest
             filter_pipeline:
               -
                 class: NameDFilter
-                module_path: qlib.filter
+                module_path: quant_master.filter
                 args:
                   name_rule_re: S(?!Z3)
                   fstart_time: 2018-01-01
                   fend_time: 2018-12-11
               -
                 class: ExpressionDFilter
-                module_path: qlib.filter
+                module_path: quant_master.filter
                 args:
                   rule_expression: $open/$factor<=45
                   fstart_time: 2018-01-01

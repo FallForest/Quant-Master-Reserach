@@ -1,6 +1,6 @@
 ---
 name: "\U0001F31FFeature Request"
-about: Request for a new Qlib feature
+about: Request for a new QuantMaster feature
 labels: enhancement
 
 ---

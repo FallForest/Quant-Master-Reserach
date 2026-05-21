@@ -2,8 +2,8 @@
 # Licensed under the MIT License.
 
 from arctic.arctic import Arctic
-import qlib
-from qlib.data import D
+import quant_master
+from quant_master.data import D
 import unittest
 
 
@@ -18,8 +18,8 @@ class TestClass(unittest.TestCase):
         """
         Configure for arctic
         """
-        provider_uri = "~/.qlib/qlib_data/yahoo_cn_1min"
-        qlib.init(
+        provider_uri = "~/.quant_master/quant_master_data/yahoo_cn_1min"
+        quant_master.init(
             provider_uri=provider_uri,
             mem_cache_size_limit=1024**3 * 2,
             mem_cache_type="sizeof",
@@ -27,7 +27,7 @@ class TestClass(unittest.TestCase):
             expression_provider={"class": "LocalExpressionProvider", "kwargs": {"time2idx": False}},
             feature_provider={
                 "class": "ArcticFeatureProvider",
-                "module_path": "qlib.contrib.data.data",
+                "module_path": "quant_master.contrib.data.data",
                 "kwargs": {"uri": "127.0.0.1"},
             },
             dataset_provider={

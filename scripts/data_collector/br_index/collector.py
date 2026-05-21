@@ -26,13 +26,13 @@ class IBOVIndex(IndexBase):
     def __init__(
         self,
         index_name: str,
-        qlib_dir: [str, Path] = None,
+        quant_master_dir: [str, Path] = None,
         freq: str = "day",
         request_retry: int = 5,
         retry_sleep: int = 3,
     ):
         super(IBOVIndex, self).__init__(
-            index_name=index_name, qlib_dir=qlib_dir, freq=freq, request_retry=request_retry, retry_sleep=retry_sleep
+            index_name=index_name, quant_master_dir=quant_master_dir, freq=freq, request_retry=request_retry, retry_sleep=retry_sleep
         )
 
         self.today: datetime = datetime.date.today()

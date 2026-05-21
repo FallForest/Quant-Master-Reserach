@@ -4,12 +4,12 @@
 Data Retrieval
 ==============
 
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 Introduction
 ============
 
-Users can get stock data with ``Qlib``. The following examples demonstrate the basic user interface.
+Users can get stock data with ``QuantMaster``. The following examples demonstrate the basic user interface.
 
 Examples
 ========
@@ -17,21 +17,21 @@ Examples
 
 ``QLib`` Initialization:
 
-.. note:: In order to get the data, users need to initialize ``Qlib`` with `qlib.init` first. Please refer to `initialization <initialization.html>`_.
+.. note:: In order to get the data, users need to initialize ``QuantMaster`` with `quant_master.init` first. Please refer to `initialization <initialization.html>`_.
 
-If users followed steps in `initialization <initialization.html>`_ and downloaded the data, they should use the following code to initialize qlib
+If users followed steps in `initialization <initialization.html>`_ and downloaded the data, they should use the following code to initialize quant_master
 
 .. code-block:: python
 
-    >> import qlib
-    >> qlib.init(provider_uri='~/.qlib/qlib_data/cn_data')
+    >> import quant_master
+    >> quant_master.init(provider_uri='~/.quant_master/quant_master_data/cn_data')
 
 
 Load trading calendar with given time range and frequency:
 
 .. code-block:: python
 
-   >> from qlib.data import D
+   >> from quant_master.data import D
    >> D.calendar(start_time='2010-01-01', end_time='2017-12-31', freq='day')[:2]
    [Timestamp('2010-01-04 00:00:00'), Timestamp('2010-01-05 00:00:00')]
 
@@ -39,7 +39,7 @@ Parse a given market name into a stock pool config:
 
 .. code-block:: python
 
-   >> from qlib.data import D
+   >> from quant_master.data import D
    >> D.instruments(market='all')
    {'market': 'all', 'filter_pipe': []}
 
@@ -47,7 +47,7 @@ Load instruments of certain stock pool in the given time range:
 
 .. code-block:: python
 
-   >> from qlib.data import D
+   >> from quant_master.data import D
    >> instruments = D.instruments(market='csi300')
    >> D.list_instruments(instruments=instruments, start_time='2010-01-01', end_time='2017-12-31', as_list=True)[:6]
    ['SH600036', 'SH600110', 'SH600087', 'SH600900', 'SH600089', 'SZ000912']
@@ -56,8 +56,8 @@ Load dynamic instruments from a base market according to a name filter
 
 .. code-block:: python
 
-   >> from qlib.data import D
-   >> from qlib.data.filter import NameDFilter
+   >> from quant_master.data import D
+   >> from quant_master.data.filter import NameDFilter
    >> nameDFilter = NameDFilter(name_rule_re='SH[0-9]{4}55')
    >> instruments = D.instruments(market='csi300', filter_pipe=[nameDFilter])
    >> D.list_instruments(instruments=instruments, start_time='2015-01-01', end_time='2016-02-15', as_list=True)
@@ -67,8 +67,8 @@ Load dynamic instruments from a base market according to an expression filter
 
 .. code-block:: python
 
-   >> from qlib.data import D
-   >> from qlib.data.filter import ExpressionDFilter
+   >> from quant_master.data import D
+   >> from quant_master.data.filter import ExpressionDFilter
    >> expressionDFilter = ExpressionDFilter(rule_expression='$close>2000')
    >> instruments = D.instruments(market='csi300', filter_pipe=[expressionDFilter])
    >> D.list_instruments(instruments=instruments, start_time='2015-01-01', end_time='2016-02-15', as_list=True)
@@ -80,7 +80,7 @@ Load features of certain instruments in a given time range:
 
 .. code-block:: python
 
-   >> from qlib.data import D
+   >> from quant_master.data import D
    >> instruments = ['SH600000']
    >> fields = ['$close', '$volume', 'Ref($close, 1)', 'Mean($close, 3)', '$high-$low']
    >> D.features(instruments, fields, start_time='2010-01-01', end_time='2017-12-31', freq='day').head().to_string()
@@ -94,12 +94,12 @@ Load features of certain instruments in a given time range:
 
 Load features of certain stock pool in a given time range:
 
-.. note:: With cache enabled, the qlib data server will cache data all the time for the requested stock pool and fields, it may take longer to process the request for the first time than that without cache. But after the first time, requests with the same stock pool and fields will hit the cache and be processed faster even the requested time period changes.
+.. note:: With cache enabled, the quant_master data server will cache data all the time for the requested stock pool and fields, it may take longer to process the request for the first time than that without cache. But after the first time, requests with the same stock pool and fields will hit the cache and be processed faster even the requested time period changes.
 
 .. code-block:: python
 
-   >> from qlib.data import D
-   >> from qlib.data.filter import NameDFilter, ExpressionDFilter
+   >> from quant_master.data import D
+   >> from quant_master.data.filter import NameDFilter, ExpressionDFilter
    >> nameDFilter = NameDFilter(name_rule_re='SH[0-9]{4}55')
    >> expressionDFilter = ExpressionDFilter(rule_expression='$close>Ref($close,1)')
    >> instruments = D.instruments(market='csi300', filter_pipe=[nameDFilter, expressionDFilter])
@@ -124,7 +124,7 @@ For example, it looks quite long and complicated:
 
 .. code-block:: python
 
-   >> from qlib.data import D
+   >> from quant_master.data import D
    >> data = D.features(["sh600519"], ["(($high / $close) + ($open / $close)) * (($high / $close) + ($open / $close)) / (($high / $close) + ($open / $close))"], start_time="20200101")
 
 
@@ -134,7 +134,7 @@ Here is an example which does the same thing as above examples.
 
 .. code-block:: python
 
-   >> from qlib.data.ops import *
+   >> from quant_master.data.ops import *
    >> f1 = Feature("high") / Feature("close")
    >> f2 = Feature("open") / Feature("close")
    >> f3 = f1 + f2

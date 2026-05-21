@@ -4,8 +4,8 @@
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor
 
-import qlib
-from qlib.data import D
+import quant_master
+from quant_master.data import D
 
 import fire
 import datacompy
@@ -22,7 +22,7 @@ class CheckBin:
 
     def __init__(
         self,
-        qlib_dir: str,
+        quant_master_dir: str,
         csv_path: str,
         check_fields: str = None,
         freq: str = "day",
@@ -35,12 +35,12 @@ class CheckBin:
 
         Parameters
         ----------
-        qlib_dir : str
-            qlib dir
+        quant_master_dir : str
+            quant_master dir
         csv_path : str
             origin csv path
         check_fields : str, optional
-            check fields, by default None, check qlib_dir/features/<first_dir>/*.<freq>.bin
+            check fields, by default None, check quant_master_dir/features/<first_dir>/*.<freq>.bin
         freq : str, optional
             freq, value from ["day", "1m"]
         symbol_field_name: str, optional
@@ -52,12 +52,12 @@ class CheckBin:
         max_workers: int, optional
             max workers, by default 16
         """
-        self.qlib_dir = Path(qlib_dir).expanduser()
-        bin_path_list = list(self.qlib_dir.joinpath("features").iterdir())
-        self.qlib_symbols = sorted(map(lambda x: x.name.lower(), bin_path_list))
-        qlib.init(
-            provider_uri=str(self.qlib_dir.resolve()),
-            mount_path=str(self.qlib_dir.resolve()),
+        self.quant_master_dir = Path(quant_master_dir).expanduser()
+        bin_path_list = list(self.quant_master_dir.joinpath("features").iterdir())
+        self.quant_master_symbols = sorted(map(lambda x: x.name.lower(), bin_path_list))
+        quant_master.init(
+            provider_uri=str(self.quant_master_dir.resolve()),
+            mount_path=str(self.quant_master_dir.resolve()),
             auto_mount=False,
             redis_port=-1,
         )
@@ -69,7 +69,7 @@ class CheckBin:
         else:
             check_fields = check_fields.split(",") if isinstance(check_fields, str) else check_fields
         self.check_fields = list(map(lambda x: x.strip(), check_fields))
-        self.qlib_fields = list(map(lambda x: f"${x}", self.check_fields))
+        self.quant_master_fields = list(map(lambda x: f"${x}", self.check_fields))
         self.max_workers = max_workers
         self.symbol_field_name = symbol_field_name
         self.date_field_name = date_field_name
@@ -78,23 +78,23 @@ class CheckBin:
 
     def _compare(self, file_path: Path):
         symbol = file_path.name.strip(self.file_suffix)
-        if symbol.lower() not in self.qlib_symbols:
+        if symbol.lower() not in self.quant_master_symbols:
             return self.NOT_IN_FEATURES
-        # qlib data
-        qlib_df = D.features([symbol], self.qlib_fields, freq=self.freq)
-        qlib_df.rename(columns={_c: _c.strip("$") for _c in qlib_df.columns}, inplace=True)
+        # quant_master data
+        quant_master_df = D.features([symbol], self.quant_master_fields, freq=self.freq)
+        quant_master_df.rename(columns={_c: _c.strip("$") for _c in quant_master_df.columns}, inplace=True)
         # csv data
         origin_df = pd.read_csv(file_path)
         origin_df[self.date_field_name] = pd.to_datetime(origin_df[self.date_field_name])
         if self.symbol_field_name not in origin_df.columns:
             origin_df[self.symbol_field_name] = symbol
         origin_df.set_index([self.symbol_field_name, self.date_field_name], inplace=True)
-        origin_df.index.names = qlib_df.index.names
-        origin_df = origin_df.reindex(qlib_df.index)
+        origin_df.index.names = quant_master_df.index.names
+        origin_df = origin_df.reindex(quant_master_df.index)
         try:
             compare = datacompy.Compare(
                 origin_df,
-                qlib_df,
+                quant_master_df,
                 on_index=True,
                 abs_tol=1e-08,  # Optional, defaults to 0
                 rel_tol=1e-05,  # Optional, defaults to 0

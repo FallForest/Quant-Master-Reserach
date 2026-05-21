@@ -52,10 +52,10 @@ With that reference, the index's composition can be compared quarter by quarter 
 ### Collector Data
 
 ```bash
-# parse instruments, using in qlib/instruments.
-python collector.py --index_name IBOV --qlib_dir ~/.qlib/qlib_data/br_data --method parse_instruments
+# parse instruments, using in quant_master/instruments.
+python collector.py --index_name IBOV --quant_master_dir ~/.quant_master/quant_master_data/br_data --method parse_instruments
 
 # parse new companies
-python collector.py --index_name IBOV --qlib_dir ~/.qlib/qlib_data/br_data --method save_new_companies
+python collector.py --index_name IBOV --quant_master_dir ~/.quant_master/quant_master_data/br_data --method save_new_companies
 ```
 

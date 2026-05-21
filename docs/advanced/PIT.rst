@@ -3,7 +3,7 @@
 ============================
 (P)oint-(I)n-(T)ime Database
 ============================
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 
 Introduction
@@ -21,15 +21,15 @@ Point-in-time database is designed for solving this problem to make sure user ge
 Data Preparation
 ----------------
 
-Qlib provides a crawler to help users to download financial data and then a converter to dump the data in Qlib format.
-Please follow `scripts/data_collector/pit/README.md <https://github.com/microsoft/qlib/tree/main/scripts/data_collector/pit/>`_ to download and convert data.
+QuantMaster provides a crawler to help users to download financial data and then a converter to dump the data in QuantMaster format.
+Please follow `scripts/data_collector/pit/README.md <https://github.com/microsoft/quant_master/tree/main/scripts/data_collector/pit/>`_ to download and convert data.
 Besides, you can find some additional usage examples there.
 
 
 File-based design for PIT data
 ------------------------------
 
-Qlib provides a file-based storage for PIT data.
+QuantMaster provides a file-based storage for PIT data.
 
 For each feature, it contains 4 columns, i.e. date, period, value, _next.
 Each row corresponds to a statement.
@@ -132,5 +132,5 @@ The statements are soted by the `date` in ascending order from the beginning of 
 Known limitations:
 
 - Currently, the PIT database is designed for quarterly or annually factors, which can handle fundamental data of financial reports in most markets.
-- Qlib leverage the file name to identify the type of the data. File with name like `XXX_q.data` corresponds to quarterly data. File with name like `XXX_a.data` corresponds to annual data.
+- QuantMaster leverage the file name to identify the type of the data. File with name like `XXX_q.data` corresponds to quarterly data. File with name like `XXX_a.data` corresponds to annual data.
 - The caclulation of PIT is not performed in the optimal way. There is great potential to boost the performance of PIT data calcuation.

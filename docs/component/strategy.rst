@@ -3,16 +3,16 @@
 ========================================
 Portfolio Strategy: Portfolio Management
 ========================================
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 Introduction
 ============
 
 ``Portfolio Strategy`` is designed to adopt different portfolio strategies, which means that users can adopt different algorithms to generate investment portfolios based on the prediction scores of the ``Forecast Model``. Users can use the ``Portfolio Strategy`` in an automatic workflow by ``Workflow`` module, please refer to `Workflow: Workflow Management <workflow.html>`_.
 
-Because the components in ``Qlib`` are designed in a loosely-coupled way, ``Portfolio Strategy`` can be used as an independent module also.
+Because the components in ``QuantMaster`` are designed in a loosely-coupled way, ``Portfolio Strategy`` can be used as an independent module also.
 
-``Qlib`` provides several implemented portfolio strategies. Also, ``Qlib`` supports custom strategy, users can customize strategies according to their own requirements.
+``QuantMaster`` provides several implemented portfolio strategies. Also, ``QuantMaster`` supports custom strategy, users can customize strategies according to their own requirements.
 
 After users specifying the models(forecasting signals) and strategies, running backtest will help users to check the performance of a custom model(forecasting signals)/strategy.
 
@@ -22,19 +22,19 @@ Base Class & Interface
 BaseStrategy
 ------------
 
-Qlib provides a base class ``qlib.strategy.base.BaseStrategy``. All strategy classes need to inherit the base class and implement its interface.
+QuantMaster provides a base class ``quant_master.strategy.base.BaseStrategy``. All strategy classes need to inherit the base class and implement its interface.
 
 - `generate_trade_decision`
     generate_trade_decision is a key interface that generates trade decisions in each trading bar.
     The frequency to call this method depends on the executor frequency("time_per_step"="day" by default). But the trading frequency can be decided by users' implementation.
-    For example, if the user wants to trading in weekly while the `time_per_step` is "day" in executor, user can return non-empty TradeDecision weekly(otherwise return empty like `this <https://github.com/microsoft/qlib/blob/main/qlib/contrib/strategy/signal_strategy.py#L132>`_ ).
+    For example, if the user wants to trading in weekly while the `time_per_step` is "day" in executor, user can return non-empty TradeDecision weekly(otherwise return empty like `this <https://github.com/microsoft/quant_master/blob/main/quant_master/contrib/strategy/signal_strategy.py#L132>`_ ).
 
 Users can inherit `BaseStrategy` to customize their strategy class.
 
 WeightStrategyBase
 ------------------
 
-Qlib also provides a class ``qlib.contrib.strategy.WeightStrategyBase`` that is a subclass of `BaseStrategy`.
+QuantMaster also provides a class ``quant_master.contrib.strategy.WeightStrategyBase`` that is a subclass of `BaseStrategy`.
 
 `WeightStrategyBase` only focuses on the target positions, and automatically generates an order list based on positions. It provides the `generate_target_weight_position` interface.
 
@@ -57,7 +57,7 @@ Users can inherit `WeightStrategyBase` and implement the interface `generate_tar
 Implemented Strategy
 ====================
 
-Qlib provides a implemented strategy classes named `TopkDropoutStrategy`.
+QuantMaster provides a implemented strategy classes named `TopkDropoutStrategy`.
 
 TopkDropoutStrategy
 -------------------
@@ -94,8 +94,8 @@ EnhancedIndexingStrategy
 with the aim of outperforming a benchmark index (e.g., S&P 500) in terms of portfolio return while controlling
 the risk exposure (a.k.a. tracking error).
 
-For more information, please refer to `qlib.contrib.strategy.signal_strategy.EnhancedIndexingStrategy`
-and `qlib.contrib.strategy.optimizer.enhanced_indexing.EnhancedIndexingOptimizer`.
+For more information, please refer to `quant_master.contrib.strategy.signal_strategy.EnhancedIndexingStrategy`
+and `quant_master.contrib.strategy.optimizer.enhanced_indexing.EnhancedIndexingOptimizer`.
 
 
 Usage & Example
@@ -130,7 +130,7 @@ A prediction sample is shown as follows.
 
 Normally, the prediction score is the output of the models. But some models are learned from a label with a different scale. So the scale of the prediction score may be different from your expectation(e.g. the return of instruments).
 
-Qlib didn't add a step to scale the prediction score to a unified scale due to the following reasons.
+QuantMaster didn't add a step to scale the prediction score to a unified scale due to the following reasons.
 - Because not every trading strategy cares about the scale(e.g. TopkDropoutStrategy only cares about the order).  So the strategy is responsible for rescaling the prediction score(e.g. some portfolio-optimization-based strategies may require a meaningful scale).
 - The model has the flexibility to define the target, loss, and data processing. So we don't think there is a silver bullet to rescale it back directly barely based on the model's outputs. If you want to scale it back to some meaningful values(e.g. stock returns.), an intuitive solution is to create a regression model for the model's recent outputs and your recent target values.
 
@@ -143,16 +143,16 @@ Running backtest
 
         from pprint import pprint
 
-        import qlib
+        import quant_master
         import pandas as pd
-        from qlib.utils.time import Freq
-        from qlib.utils import flatten_dict
-        from qlib.contrib.evaluate import backtest_daily
-        from qlib.contrib.evaluate import risk_analysis
-        from qlib.contrib.strategy import TopkDropoutStrategy
+        from quant_master.utils.time import Freq
+        from quant_master.utils import flatten_dict
+        from quant_master.contrib.evaluate import backtest_daily
+        from quant_master.contrib.evaluate import risk_analysis
+        from quant_master.contrib.strategy import TopkDropoutStrategy
 
-        # init qlib
-        qlib.init(provider_uri=<qlib data dir>)
+        # init quant_master
+        quant_master.init(provider_uri=<quant_master data dir>)
 
         CSI300_BENCH = "SH000300"
         STRATEGY_CONFIG = {
@@ -183,16 +183,16 @@ Running backtest
 
         from pprint import pprint
 
-        import qlib
+        import quant_master
         import pandas as pd
-        from qlib.utils.time import Freq
-        from qlib.utils import flatten_dict
-        from qlib.backtest import backtest, executor
-        from qlib.contrib.evaluate import risk_analysis
-        from qlib.contrib.strategy import TopkDropoutStrategy
+        from quant_master.utils.time import Freq
+        from quant_master.utils import flatten_dict
+        from quant_master.backtest import backtest, executor
+        from quant_master.contrib.evaluate import risk_analysis
+        from quant_master.contrib.strategy import TopkDropoutStrategy
 
-        # init qlib
-        qlib.init(provider_uri=<qlib data dir>)
+        # init quant_master
+        quant_master.init(provider_uri=<quant_master data dir>)
 
         CSI300_BENCH = "SH000300"
         # Benchmark is for calculating the excess return of your strategy.

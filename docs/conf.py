@@ -62,7 +62,7 @@ author = "Microsoft"
 # built documents.
 #
 # The short X.Y version.
-version = ver("pyqlib")
+version = ver("pyquant_master")
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -148,7 +148,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "qlibdoc"
+htmlhelp_basename = "quant_masterdoc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -172,7 +172,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "qlib.tex", "QLib Documentation", "Microsoft", "manual"),
+    (master_doc, "quant_master.tex", "QLib Documentation", "Microsoft", "manual"),
 ]
 
 
@@ -180,7 +180,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "qlib", "QLib Documentation", [author], 1)]
+man_pages = [(master_doc, "quant_master", "QLib Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------

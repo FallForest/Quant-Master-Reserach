@@ -5,13 +5,13 @@ import pytest
 import fire
 import pandas as pd
 
-import qlib
-from qlib.data import D
-from qlib.model.trainer import task_train
-from qlib.tests import TestAutoData
-from qlib.tests.config import CSI300_GBDT_TASK
-from qlib.workflow.online.utils import OnlineToolR
-from qlib.workflow.online.update import LabelUpdater
+import quant_master
+from quant_master.data import D
+from quant_master.model.trainer import task_train
+from quant_master.tests import TestAutoData
+from quant_master.tests.config import CSI300_GBDT_TASK
+from quant_master.workflow.online.utils import OnlineToolR
+from quant_master.workflow.online.update import LabelUpdater
 
 
 class TestRolling(TestAutoData):
@@ -22,7 +22,7 @@ class TestRolling(TestAutoData):
         """
         task = copy.deepcopy(CSI300_GBDT_TASK)
 
-        task["record"] = ["qlib.workflow.record_temp.SignalRecord"]
+        task["record"] = ["quant_master.workflow.record_temp.SignalRecord"]
 
         exp_name = "online_srv_test"
 
@@ -81,7 +81,7 @@ class TestRolling(TestAutoData):
 
         task["record"] = {
             "class": "SignalRecord",
-            "module_path": "qlib.workflow.record_temp",
+            "module_path": "quant_master.workflow.record_temp",
             "kwargs": {"dataset": "<DATASET>", "model": "<MODEL>"},
         }
 

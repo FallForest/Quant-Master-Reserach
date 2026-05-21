@@ -3,8 +3,8 @@
 
 import pandas as pd
 
-from qlib.data.inst_processor import InstProcessor
-from qlib.utils.resam import resam_calendar
+from quant_master.data.inst_processor import InstProcessor
+from quant_master.utils.resam import resam_calendar
 
 
 class ResampleNProcessor(InstProcessor):

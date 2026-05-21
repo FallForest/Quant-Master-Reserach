@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
-from qlib.utils.pickle_utils import restricted_pickle_load
+from quant_master.utils.pickle_utils import restricted_pickle_load
 
 for tag in ["test", "valid"]:
     files = os.listdir(os.path.join("data/orders/", tag))

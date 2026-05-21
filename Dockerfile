@@ -1,15 +1,15 @@
 FROM continuumio/miniconda3:latest
 
-WORKDIR /qlib
+WORKDIR /quant_master
 
 COPY . .
 
 RUN apt-get update && \
     apt-get install -y build-essential
 
-RUN conda create --name qlib_env python=3.8 -y
-RUN echo "conda activate qlib_env" >> ~/.bashrc
-ENV PATH /opt/conda/envs/qlib_env/bin:$PATH
+RUN conda create --name quant_master_env python=3.8 -y
+RUN echo "conda activate quant_master_env" >> ~/.bashrc
+ENV PATH /opt/conda/envs/quant_master_env/bin:$PATH
 
 RUN python -m pip install --upgrade pip
 
@@ -25,7 +25,7 @@ RUN python -m pip install pybind11 cvxpy
 ARG IS_STABLE="yes"
 
 RUN if [ "$IS_STABLE" = "yes" ]; then \
-        python -m pip install pyqlib; \
+        python -m pip install pyquant_master; \
     else \
         python setup.py install; \
     fi

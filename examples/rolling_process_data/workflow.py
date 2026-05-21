@@ -1,15 +1,15 @@
 #  Copyright (c) Microsoft Corporation.
 #  Licensed under the MIT License.
 
-import qlib
+import quant_master
 import fire
 
 from datetime import datetime
-from qlib.constant import REG_CN
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.utils import init_instance_by_config
-from qlib.utils.pickle_utils import restricted_pickle_load
-from qlib.tests.data import GetData
+from quant_master.constant import REG_CN
+from quant_master.data.dataset.handler import DataHandlerLP
+from quant_master.utils import init_instance_by_config
+from quant_master.utils.pickle_utils import restricted_pickle_load
+from quant_master.tests.data import GetData
 
 
 class RollingDataWorkflow:
@@ -18,16 +18,16 @@ class RollingDataWorkflow:
     end_time = "2019-12-31"
     rolling_cnt = 5
 
-    def _init_qlib(self):
-        """initialize qlib"""
-        provider_uri = "~/.qlib/qlib_data/cn_data"  # target_dir
-        GetData().qlib_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
-        qlib.init(provider_uri=provider_uri, region=REG_CN)
+    def _init_quant_master(self):
+        """initialize quant_master"""
+        provider_uri = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+        GetData().quant_master_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
+        quant_master.init(provider_uri=provider_uri, region=REG_CN)
 
     def _dump_pre_handler(self, path):
         handler_config = {
             "class": "Alpha158",
-            "module_path": "qlib.contrib.data.handler",
+            "module_path": "quant_master.contrib.data.handler",
             "kwargs": {
                 "start_time": self.start_time,
                 "end_time": self.end_time,
@@ -46,7 +46,7 @@ class RollingDataWorkflow:
         return pre_handler
 
     def rolling_process(self):
-        self._init_qlib()
+        self._init_quant_master()
         self._dump_pre_handler("pre_handler.pkl")
         pre_handler = self._load_pre_handler("pre_handler.pkl")
 
@@ -59,7 +59,7 @@ class RollingDataWorkflow:
 
         dataset_config = {
             "class": "DatasetH",
-            "module_path": "qlib.data.dataset",
+            "module_path": "quant_master.data.dataset",
             "kwargs": {
                 "handler": {
                     "class": "RollingDataHandler",

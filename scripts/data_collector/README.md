@@ -13,7 +13,7 @@ Scripts for data collection
 
 ## Custom Data Collection
 
-> Specific implementation reference: https://github.com/microsoft/qlib/tree/main/scripts/data_collector/yahoo
+> Specific implementation reference: https://github.com/microsoft/quant_master/tree/main/scripts/data_collector/yahoo
 
 1. Create a dataset code directory in the current directory
 2. Add `collector.py`

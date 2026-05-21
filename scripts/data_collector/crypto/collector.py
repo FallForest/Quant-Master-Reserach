@@ -22,7 +22,7 @@ import time
 _CG_CRYPTO_SYMBOLS = None
 
 
-def get_cg_crypto_symbols(qlib_data_path: [str, Path] = None) -> list:
+def get_cg_crypto_symbols(quant_master_data_path: [str, Path] = None) -> list:
     """get crypto symbols in coingecko
 
     Returns
@@ -283,7 +283,7 @@ class Run(BaseRun):
         Examples
         ---------
             # get daily data
-            $ python collector.py download_data --source_dir ~/.qlib/crypto_data/source/1d --start 2015-01-01 --end 2021-11-30 --delay 1 --interval 1d
+            $ python collector.py download_data --source_dir ~/.quant_master/crypto_data/source/1d --start 2015-01-01 --end 2021-11-30 --delay 1 --interval 1d
         """
 
         super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
@@ -300,7 +300,7 @@ class Run(BaseRun):
 
         Examples
         ---------
-            $ python collector.py normalize_data --source_dir ~/.qlib/crypto_data/source/1d --normalize_dir ~/.qlib/crypto_data/source/1d_nor --interval 1d --date_field_name date
+            $ python collector.py normalize_data --source_dir ~/.quant_master/crypto_data/source/1d --normalize_dir ~/.quant_master/crypto_data/source/1d_nor --interval 1d --date_field_name date
         """
         super(Run, self).normalize_data(date_field_name, symbol_field_name)
 

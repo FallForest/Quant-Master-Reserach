@@ -14,7 +14,7 @@ import pandas as pd
 from tqdm import tqdm
 from loguru import logger
 from joblib import Parallel, delayed
-from qlib.utils import code_to_fname
+from quant_master.utils import code_to_fname
 
 
 class BaseCollector(abc.ABC):
@@ -406,9 +406,9 @@ class BaseRun(abc.ABC):
         Examples
         ---------
             # get daily data
-            $ python collector.py download_data --source_dir ~/.qlib/instrument_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1d
+            $ python collector.py download_data --source_dir ~/.quant_master/instrument_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1d
             # get 1m data
-            $ python collector.py download_data --source_dir ~/.qlib/instrument_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1m
+            $ python collector.py download_data --source_dir ~/.quant_master/instrument_data/source --region CN --start 2020-11-01 --end 2020-11-10 --delay 0.1 --interval 1m
         """
 
         _class = getattr(self._cur_module, self.collector_class_name)  # type: Type[BaseCollector]
@@ -437,7 +437,7 @@ class BaseRun(abc.ABC):
 
         Examples
         ---------
-            $ python collector.py normalize_data --source_dir ~/.qlib/instrument_data/source --normalize_dir ~/.qlib/instrument_data/normalize --region CN --interval 1d
+            $ python collector.py normalize_data --source_dir ~/.quant_master/instrument_data/source --normalize_dir ~/.quant_master/instrument_data/normalize --region CN --interval 1d
         """
         _class = getattr(self._cur_module, self.normalize_class_name)
         yc = Normalize(

@@ -3,7 +3,7 @@
 =========================
 Building Formulaic Alphas
 =========================
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 Introduction
 ============
@@ -14,10 +14,10 @@ In quantitative trading practice, designing novel factors that can explain and p
 A formulaic alpha, as the name suggests, is a kind of alpha that can be presented as a formula or a mathematical expression.
 
 
-Building Formulaic Alphas in ``Qlib``
+Building Formulaic Alphas in ``QuantMaster``
 =====================================
 
-In ``Qlib``, users can easily build formulaic alphas.
+In ``QuantMaster``, users can easily build formulaic alphas.
 
 Example
 -------
@@ -44,13 +44,13 @@ Example
 
         DEA = EMA(DIF, 9)
 
-Users can use ``Data Handler`` to build formulaic alphas `MACD` in qlib:
+Users can use ``Data Handler`` to build formulaic alphas `MACD` in quant_master:
 
-.. note:: Users need to initialize ``Qlib`` with `qlib.init` first.  Please refer to `initialization <../start/initialization.html>`_.
+.. note:: Users need to initialize ``QuantMaster`` with `quant_master.init` first.  Please refer to `initialization <../start/initialization.html>`_.
 
 .. code-block:: python
 
-    >> from qlib.data.dataset.loader import QlibDataLoader
+    >> from quant_master.data.dataset.loader import QuantMasterDataLoader
     >> MACD_EXP = '2 * ((EMA($close, 12) - EMA($close, 26))/$close - EMA((EMA($close, 12) - EMA($close, 26))/$close, 9))'
     >> fields = [MACD_EXP] # MACD
     >> names = ['MACD']
@@ -60,7 +60,7 @@ Users can use ``Data Handler`` to build formulaic alphas `MACD` in qlib:
     ..     "feature": (fields, names),
     ..     "label": (labels, label_names)
     .. }
-    >> data_loader = QlibDataLoader(config=data_loader_config)
+    >> data_loader = QuantMasterDataLoader(config=data_loader_config)
     >> df = data_loader.load(instruments='csi300', start_time='2010-01-01', end_time='2017-12-31')
     >> print(df)
                             feature     label

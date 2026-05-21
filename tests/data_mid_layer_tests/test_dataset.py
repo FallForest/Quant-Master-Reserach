@@ -4,12 +4,12 @@
 import unittest
 import pytest
 import sys
-from qlib.tests import TestAutoData
-from qlib.data.dataset import TSDatasetH, TSDataSampler
+from quant_master.tests import TestAutoData
+from quant_master.data.dataset import TSDatasetH, TSDataSampler
 import numpy as np
 import pandas as pd
 import time
-from qlib.data.dataset.handler import DataHandlerLP
+from quant_master.data.dataset.handler import DataHandlerLP
 
 
 class TestDataset(TestAutoData):
@@ -18,7 +18,7 @@ class TestDataset(TestAutoData):
         tsdh = TSDatasetH(
             handler={
                 "class": "Alpha158",
-                "module_path": "qlib.contrib.data.handler",
+                "module_path": "quant_master.contrib.data.handler",
                 "kwargs": {
                     "start_time": "2017-01-01",
                     "end_time": "2020-08-01",
@@ -82,7 +82,7 @@ class TestDataset(TestAutoData):
             # 3) get both index and data
             # NOTE: We don't want to reply on pytorch, so this test can't be included. It is just a example
             from torch.utils.data import DataLoader
-            from qlib.model.utils import IndexSampler
+            from quant_master.model.utils import IndexSampler
 
             i = len(tsds) - 1
             idx = tsds.get_index()

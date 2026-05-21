@@ -11,13 +11,13 @@ pip install -r requirements.txt
 ## Collector Data
 
 ```bash
-# parse instruments, using in qlib/instruments.
-python future_trading_date_collector.py --qlib_dir ~/.qlib/qlib_data/cn_data --freq day
+# parse instruments, using in quant_master/instruments.
+python future_trading_date_collector.py --quant_master_dir ~/.quant_master/quant_master_data/cn_data --freq day
 ```
 
 ## Parameters
 
-- qlib_dir: qlib data directory
+- quant_master_dir: quant_master data directory
 - freq: value from [`day`, `1min`], default `day`
 
 

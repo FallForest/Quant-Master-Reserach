@@ -1,13 +1,13 @@
 .. _recorder:
 
 ====================================
-Qlib Recorder: Experiment Management
+QuantMaster Recorder: Experiment Management
 ====================================
-.. currentmodule:: qlib
+.. currentmodule:: quant_master
 
 Introduction
 ============
-``Qlib`` contains an experiment management system named ``QlibRecorder``, which is designed to help users handle experiment and analyse results in an efficient way.
+``QuantMaster`` contains an experiment management system named ``QuantMasterRecorder``, which is designed to help users handle experiment and analyse results in an efficient way.
 
 There are three components of the system:
 
@@ -39,27 +39,27 @@ This experiment management system defines a set of interface and provided a conc
 
 If users set the implementation of ``ExpManager`` to be ``MLflowExpManager``, they can use the command `mlflow ui` to visualize and check the experiment results. For more information, please refer to the related documents `here <https://www.mlflow.org/docs/latest/cli.html#mlflow-ui>`_.
 
-Qlib Recorder
+QuantMaster Recorder
 =============
-``QlibRecorder`` provides a high level API for users to use the experiment management system. The interfaces are wrapped in the variable ``R`` in ``Qlib``, and users can directly use ``R`` to interact with the system. The following command shows how to import ``R`` in Python:
+``QuantMasterRecorder`` provides a high level API for users to use the experiment management system. The interfaces are wrapped in the variable ``R`` in ``QuantMaster``, and users can directly use ``R`` to interact with the system. The following command shows how to import ``R`` in Python:
 
 .. code-block:: Python
 
-        from qlib.workflow import R
+        from quant_master.workflow import R
 
-``QlibRecorder`` includes several common API for managing `experiments` and `recorders` within a workflow. For more available APIs, please refer to the following section about `Experiment Manager`, `Experiment` and `Recorder`.
+``QuantMasterRecorder`` includes several common API for managing `experiments` and `recorders` within a workflow. For more available APIs, please refer to the following section about `Experiment Manager`, `Experiment` and `Recorder`.
 
-Here are the available interfaces of ``QlibRecorder``:
+Here are the available interfaces of ``QuantMasterRecorder``:
 
-.. autoclass:: qlib.workflow.__init__.QlibRecorder
+.. autoclass:: quant_master.workflow.__init__.QuantMasterRecorder
     :members:
 
 Experiment Manager
 ==================
 
-The ``ExpManager`` module in ``Qlib`` is responsible for managing different experiments. Most of the APIs of ``ExpManager`` are similar to ``QlibRecorder``, and the most important API will be the ``get_exp`` method. User can directly refer to the documents above for some detailed information about how to use the ``get_exp`` method.
+The ``ExpManager`` module in ``QuantMaster`` is responsible for managing different experiments. Most of the APIs of ``ExpManager`` are similar to ``QuantMasterRecorder``, and the most important API will be the ``get_exp`` method. User can directly refer to the documents above for some detailed information about how to use the ``get_exp`` method.
 
-.. autoclass:: qlib.workflow.expm.ExpManager
+.. autoclass:: quant_master.workflow.expm.ExpManager
     :members: get_exp, list_experiments
     :noindex:
 
@@ -70,22 +70,22 @@ Experiment
 
 The ``Experiment`` class is solely responsible for a single experiment, and it will handle any operations that are related to an experiment. Basic methods such as `start`, `end` an experiment are included. Besides, methods related to `recorders` are also available: such methods include `get_recorder` and `list_recorders`.
 
-.. autoclass:: qlib.workflow.exp.Experiment
+.. autoclass:: quant_master.workflow.exp.Experiment
     :members: get_recorder, list_recorders
     :noindex:
 
 For other interfaces such as `search_records`, `delete_recorder`, please refer to `Experiment API <../reference/api.html#experiment>`_.
 
-``Qlib`` also provides a default ``Experiment``, which will be created and used under certain situations when users use the APIs such as `log_metrics` or `get_exp`. If the default ``Experiment`` is used, there will be related logged information when running ``Qlib``. Users are able to change the name of the default ``Experiment`` in the config file of ``Qlib`` or during ``Qlib``'s `initialization <../start/initialization.html#parameters>`_, which is set to be '`Experiment`'.
+``QuantMaster`` also provides a default ``Experiment``, which will be created and used under certain situations when users use the APIs such as `log_metrics` or `get_exp`. If the default ``Experiment`` is used, there will be related logged information when running ``QuantMaster``. Users are able to change the name of the default ``Experiment`` in the config file of ``QuantMaster`` or during ``QuantMaster``'s `initialization <../start/initialization.html#parameters>`_, which is set to be '`Experiment`'.
 
 Recorder
 ========
 
 The ``Recorder`` class is responsible for a single recorder. It will handle some detailed operations such as ``log_metrics``, ``log_params`` of a single run. It is designed to help user to easily track results and things being generated during a run.
 
-Here are some important APIs that are not included in the ``QlibRecorder``:
+Here are some important APIs that are not included in the ``QuantMasterRecorder``:
 
-.. autoclass:: qlib.workflow.recorder.Recorder
+.. autoclass:: quant_master.workflow.recorder.Recorder
     :members: list_artifacts, list_metrics, list_params, list_tags
     :noindex:
 
@@ -103,7 +103,7 @@ Here is a simple example of what is done in ``SigAnaRecord``, which users can re
 
 .. code-block:: Python
 
-    from qlib.contrib.eva.alpha import calc_ic, calc_long_short_return
+    from quant_master.contrib.eva.alpha import calc_ic, calc_long_short_return
 
     ic, ric = calc_ic(pred.iloc[:, 0], label.iloc[:, 0])
     long_short_r, long_avg_r = calc_long_short_return(pred.iloc[:, 0], label.iloc[:, 0])
@@ -114,8 +114,8 @@ Here is a simple example of what is done in ``PortAnaRecord``, which users can r
 
 .. code-block:: Python
 
-    from qlib.contrib.strategy.strategy import TopkDropoutStrategy
-    from qlib.contrib.evaluate import (
+    from quant_master.contrib.strategy.strategy import TopkDropoutStrategy
+    from quant_master.contrib.evaluate import (
         backtest as normal_backtest,
         risk_analysis,
     )
@@ -145,7 +145,7 @@ Here is a simple example of what is done in ``PortAnaRecord``, which users can r
     analysis_df = pd.concat(analysis)  # type: pd.DataFrame
     print(analysis_df)
 
-For more information about the APIs, please refer to `Record Template API <../reference/api.html#module-qlib.workflow.record_temp>`_.
+For more information about the APIs, please refer to `Record Template API <../reference/api.html#module-quant_master.workflow.record_temp>`_.
 
 
 

@@ -22,7 +22,7 @@ for the main experiments used in the publication.
 
 import os
 
-import data_formatters.qlib_Alpha158
+import data_formatters.quant_master_Alpha158
 
 
 class ExperimentConfig:
@@ -88,7 +88,7 @@ class ExperimentConfig:
         """
 
         data_formatter_class = {
-            "Alpha158": data_formatters.qlib_Alpha158.Alpha158Formatter,
+            "Alpha158": data_formatters.quant_master_Alpha158.Alpha158Formatter,
         }
 
         return data_formatter_class[self.experiment]()

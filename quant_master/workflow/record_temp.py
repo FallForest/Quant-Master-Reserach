@@ -478,7 +478,7 @@ class PortAnaRecord(ACRecordTemp):
             self.backtest_config["end_time"] = get_date_by_shift(dt_values.max(), -1)
             warnings.warn(
                 "No explicit backtest end_time provided. "
-                "Quant-Master requires one extra calendar step to determine the right boundary of a bar. "
+                "QuantMaster requires one extra calendar step to determine the right boundary of a bar. "
                 "Therefore the end_time is shifted backward by one trading day from "
                 f"{dt_values.max()} -> {self.backtest_config['end_time']}."
             )

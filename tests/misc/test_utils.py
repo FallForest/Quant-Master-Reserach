@@ -4,12 +4,12 @@ import unittest
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from qlib import init
-from qlib.config import C
-from qlib.log import TimeInspector
-from qlib.constant import REG_CN, REG_US, REG_TW
-from qlib.utils.time import cal_sam_minute as cal_sam_minute_new, get_min_cal, CN_TIME, US_TIME, TW_TIME
-from qlib.utils.data import guess_horizon
+from quant_master import init
+from quant_master.config import C
+from quant_master.log import TimeInspector
+from quant_master.constant import REG_CN, REG_US, REG_TW
+from quant_master.utils.time import cal_sam_minute as cal_sam_minute_new, get_min_cal, CN_TIME, US_TIME, TW_TIME
+from quant_master.utils.data import guess_horizon
 
 REG_MAP = {REG_CN: CN_TIME, REG_US: US_TIME, REG_TW: TW_TIME}
 
@@ -66,7 +66,7 @@ def cal_sam_minute(x: pd.Timestamp, sam_minutes: int, region: str):
     elif 120 <= minute_index < 240:
         return mid_open_time + (minute_index - 120) * pd.Timedelta(minutes=1)
     else:
-        raise ValueError("calendar minute_index error, check `min_data_shift` in qlib.config.C")
+        raise ValueError("calendar minute_index error, check `min_data_shift` in quant_master.config.C")
 
 
 class TimeUtils(TestCase):

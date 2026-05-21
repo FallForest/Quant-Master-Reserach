@@ -1,12 +1,12 @@
 import unittest
 import time
 import numpy as np
-from qlib.data import D
-from qlib.tests import TestAutoData
+from quant_master.data import D
+from quant_master.tests import TestAutoData
 
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.contrib.data.handler import check_transform_proc
-from qlib.log import TimeInspector
+from quant_master.data.dataset.handler import DataHandlerLP
+from quant_master.contrib.data.handler import check_transform_proc
+from quant_master.log import TimeInspector
 
 
 class TestHandler(DataHandlerLP):
@@ -25,7 +25,7 @@ class TestHandler(DataHandlerLP):
         learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
 
         data_loader = {
-            "class": "QlibDataLoader",
+            "class": "QuantMasterDataLoader",
             "kwargs": {
                 "freq": "day",
                 "config": self.get_feature_config(),

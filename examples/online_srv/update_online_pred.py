@@ -10,25 +10,25 @@ Next, we will finish updating online predictions.
 
 import copy
 import fire
-import qlib
-from qlib.constant import REG_CN
-from qlib.model.trainer import task_train
-from qlib.workflow.online.utils import OnlineToolR
-from qlib.tests.config import CSI300_GBDT_TASK
+import quant_master
+from quant_master.constant import REG_CN
+from quant_master.model.trainer import task_train
+from quant_master.workflow.online.utils import OnlineToolR
+from quant_master.tests.config import CSI300_GBDT_TASK
 
 task = copy.deepcopy(CSI300_GBDT_TASK)
 
 task["record"] = {
     "class": "SignalRecord",
-    "module_path": "qlib.workflow.record_temp",
+    "module_path": "quant_master.workflow.record_temp",
 }
 
 
 class UpdatePredExample:
     def __init__(
-        self, provider_uri="~/.qlib/qlib_data/cn_data", region=REG_CN, experiment_name="online_srv", task_config=task
+        self, provider_uri="~/.quant_master/quant_master_data/cn_data", region=REG_CN, experiment_name="online_srv", task_config=task
     ):
-        qlib.init(provider_uri=provider_uri, region=region)
+        quant_master.init(provider_uri=provider_uri, region=region)
         self.experiment_name = experiment_name
         self.online_tool = OnlineToolR(self.experiment_name)
         self.task_config = task_config

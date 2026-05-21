@@ -7,13 +7,13 @@ import unittest
 import pytest
 from pathlib import Path
 
-import qlib
-from qlib.config import C
-from qlib.utils import init_instance_by_config, flatten_dict
-from qlib.workflow import R
-from qlib.workflow.record_temp import SignalRecord, SigAnaRecord, PortAnaRecord
-from qlib.tests import TestAutoData
-from qlib.tests.config import CSI300_GBDT_TASK, CSI300_BENCH
+import quant_master
+from quant_master.config import C
+from quant_master.utils import init_instance_by_config, flatten_dict
+from quant_master.workflow import R
+from quant_master.workflow.record_temp import SignalRecord, SigAnaRecord, PortAnaRecord
+from quant_master.tests import TestAutoData
+from quant_master.tests.config import CSI300_GBDT_TASK, CSI300_BENCH
 
 
 def train(uri_path: str = None):
@@ -106,7 +106,7 @@ def backtest_analysis(pred, rid, uri_path: str = None):
     port_analysis_config = {
         "executor": {
             "class": "SimulatorExecutor",
-            "module_path": "qlib.backtest.executor",
+            "module_path": "quant_master.backtest.executor",
             "kwargs": {
                 "time_per_step": "day",
                 "generate_portfolio_metrics": True,
@@ -114,7 +114,7 @@ def backtest_analysis(pred, rid, uri_path: str = None):
         },
         "strategy": {
             "class": "TopkDropoutStrategy",
-            "module_path": "qlib.contrib.strategy.signal_strategy",
+            "module_path": "quant_master.contrib.strategy.signal_strategy",
             "kwargs": {
                 "signal": (model, dataset),
                 "topk": 50,

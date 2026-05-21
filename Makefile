@@ -9,7 +9,7 @@ SHELL := /bin/bash
 # Documentation target directory, will be adapted to specific folder for readthedocs.
 PUBLIC_DIR := $(shell [ "$$READTHEDOCS" = "True" ] && echo "$$READTHEDOCS_OUTPUT/html" || echo "public")
 
-SO_DIR := qlib/data/_libs
+SO_DIR := quant_master/data/_libs
 SO_FILES := $(wildcard $(SO_DIR)/*.so)
 
 ifeq ($(OS),Windows_NT)
@@ -25,8 +25,8 @@ endif
 clean:
 	-rm -rf \
 		$(PUBLIC_DIR) \
-		qlib/data/_libs/*.cpp \
-		qlib/data/_libs/*.so \
+		quant_master/data/_libs/*.cpp \
+		quant_master/data/_libs/*.so \
 		mlruns \
 		public \
 		build \
@@ -65,7 +65,7 @@ prerequisite:
 		echo "No shared library files found, building..."; \
 		pip install --upgrade setuptools wheel; \
 		python -m pip install cython numpy; \
-		python -c "from setuptools import setup, Extension; from Cython.Build import cythonize; import numpy; extensions = [Extension('qlib.data._libs.rolling', ['qlib/data/_libs/rolling.pyx'], language='c++', include_dirs=[numpy.get_include()]), Extension('qlib.data._libs.expanding', ['qlib/data/_libs/expanding.pyx'], language='c++', include_dirs=[numpy.get_include()])]; setup(ext_modules=cythonize(extensions, language_level='3'), script_args=['build_ext', '--inplace'])"; \
+		python -c "from setuptools import setup, Extension; from Cython.Build import cythonize; import numpy; extensions = [Extension('quant_master.data._libs.rolling', ['quant_master/data/_libs/rolling.pyx'], language='c++', include_dirs=[numpy.get_include()]), Extension('quant_master.data._libs.expanding', ['quant_master/data/_libs/expanding.pyx'], language='c++', include_dirs=[numpy.get_include()])]; setup(ext_modules=cythonize(extensions, language_level='3'), script_args=['build_ext', '--inplace'])"; \
 	fi
 
 	@if [ "$(IS_WINDOWS)" = "true" ]; then \
@@ -116,7 +116,7 @@ dev: prerequisite all
 
 # Check lint with black.
 black:
-	black . -l 120 --check --diff --exclude qlib/_version.py
+	black . -l 120 --check --diff --exclude quant_master/_version.py
 
 # Check code folder with pylint.
 # TODO: These problems we will solve in the future. Important among them are: W0221, W0223, W0237, E1102
@@ -148,7 +148,7 @@ black:
 # We use sys.setrecursionlimit(2000) to make the recursion depth larger to ensure that pylint works properly (the default recursion depth is 1000).
 # References for parameters: https://github.com/PyCQA/pylint/issues/4577#issuecomment-1000245962
 pylint:
-	pylint --disable=C0104,C0114,C0115,C0116,C0301,C0302,C0411,C0413,C1802,R0401,R0801,R0902,R0903,R0911,R0912,R0913,R0914,R0915,R0917,R1720,W0105,W0123,W0201,W0511,W0613,W1113,W1514,W4904,E0401,E1121,C0103,C0209,R0402,R1705,R1710,R1725,R1730,R1735,W0102,W0212,W0221,W0223,W0231,W0237,W0612,W0621,W0622,W0703,W1309,E1102,E1136 --const-rgx='[a-z_][a-z0-9_]{2,30}' qlib --init-hook="import astroid; astroid.context.InferenceContext.max_inferred = 500; import sys; sys.setrecursionlimit(2000)"
+	pylint --disable=C0104,C0114,C0115,C0116,C0301,C0302,C0411,C0413,C1802,R0401,R0801,R0902,R0903,R0911,R0912,R0913,R0914,R0915,R0917,R1720,W0105,W0123,W0201,W0511,W0613,W1113,W1514,W4904,E0401,E1121,C0103,C0209,R0402,R1705,R1710,R1725,R1730,R1735,W0102,W0212,W0221,W0223,W0231,W0237,W0612,W0621,W0622,W0703,W1309,E1102,E1136 --const-rgx='[a-z_][a-z0-9_]{2,30}' quant_master --init-hook="import astroid; astroid.context.InferenceContext.max_inferred = 500; import sys; sys.setrecursionlimit(2000)"
 	pylint --disable=C0104,C0114,C0115,C0116,C0301,C0302,C0411,C0413,C1802,R0401,R0801,R0902,R0903,R0911,R0912,R0913,R0914,R0915,R0917,R1720,W0105,W0123,W0201,W0511,W0613,W1113,W1514,E0401,E1121,E1123,C0103,C0209,R0402,R1705,R1710,R1725,R1735,W0102,W0212,W0221,W0223,W0231,W0237,W0246,W0612,W0621,W0622,W0703,W1309,E1102,E1136 --const-rgx='[a-z_][a-z0-9_]{2,30}' scripts --init-hook="import astroid; astroid.context.InferenceContext.max_inferred = 500; import sys; sys.setrecursionlimit(2000)"
 
 # Check code with flake8.
@@ -160,9 +160,9 @@ pylint:
 # E266 too many leading '#' for block comment
 # 	Description: To make the code more readable, a lot of "#" is used.
 #         This error code appears centrally in:
-# 			qlib/backtest/executor.py
-# 			qlib/data/ops.py
-# 			qlib/utils/__init__.py
+# 			quant_master/backtest/executor.py
+# 			quant_master/data/ops.py
+# 			quant_master/utils/__init__.py
 # E402 module level import not at top of file
 # 	Description: There are times when module level import is not available at the top of the file.
 # W503 line break before binary operator
@@ -172,13 +172,13 @@ pylint:
 # E203 whitespace before ':'
 # 	Description: If there is whitespace before ":", it cannot pass the black check.
 flake8:
-	flake8 --ignore=E501,F541,E266,E402,W503,E731,E203 --per-file-ignores="__init__.py:F401,F403" qlib
+	flake8 --ignore=E501,F541,E266,E402,W503,E731,E203 --per-file-ignores="__init__.py:F401,F403" quant_master
 
 # Check code with mypy.
 # https://github.com/python/mypy/issues/10600
 mypy:
-	mypy qlib --install-types --non-interactive
-	mypy qlib --verbose
+	mypy quant_master --install-types --non-interactive
+	mypy quant_master --verbose
 
 # Check ipynb with nbqa.
 nbqa:

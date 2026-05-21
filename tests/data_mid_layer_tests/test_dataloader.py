@@ -3,28 +3,28 @@
 
 import sys
 import unittest
-import qlib
+import quant_master
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent))
-from qlib.data.dataset.loader import NestedDataLoader, QlibDataLoader
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.contrib.data.loader import Alpha158DL, Alpha360DL
-from qlib.data.dataset.processor import Fillna
-from qlib.data import D
+from quant_master.data.dataset.loader import NestedDataLoader, QuantMasterDataLoader
+from quant_master.data.dataset.handler import DataHandlerLP
+from quant_master.contrib.data.loader import Alpha158DL, Alpha360DL
+from quant_master.data.dataset.processor import Fillna
+from quant_master.data import D
 
 
 class TestDataLoader(unittest.TestCase):
 
     def test_nested_data_loader(self):
-        qlib.init(kernels=1)
+        quant_master.init(kernels=1)
         nd = NestedDataLoader(
             dataloader_l=[
                 {
-                    "class": "qlib.contrib.data.loader.Alpha158DL",
+                    "class": "quant_master.contrib.data.loader.Alpha158DL",
                 },
                 {
-                    "class": "qlib.contrib.data.loader.Alpha360DL",
+                    "class": "quant_master.contrib.data.loader.Alpha360DL",
                     "kwargs": {"config": {"label": (["Ref($close, -2)/Ref($close, -1) - 1"], ["LABEL0"])}},
                 },
             ]
@@ -61,14 +61,14 @@ class TestDataLoader(unittest.TestCase):
         nested_data_loader = NestedDataLoader(
             dataloader_l=[
                 {
-                    "class": "qlib.contrib.data.loader.Alpha158DL",
+                    "class": "quant_master.contrib.data.loader.Alpha158DL",
                     "kwargs": {"config": {"label": (["Ref($close, -2)/Ref($close, -1) - 1"], ["LABEL0"])}},
                 },
                 {
-                    "class": "qlib.contrib.data.loader.Alpha360DL",
+                    "class": "quant_master.contrib.data.loader.Alpha360DL",
                 },
                 {
-                    "class": "qlib.data.dataset.loader.StaticDataLoader",
+                    "class": "quant_master.data.dataset.loader.StaticDataLoader",
                     "kwargs": {"config": "test_df.pkl"},
                 },
             ]

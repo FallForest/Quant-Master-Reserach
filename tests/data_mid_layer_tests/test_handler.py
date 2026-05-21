@@ -1,10 +1,10 @@
 import os
 import unittest
 
-from qlib.data import D
-from qlib.data.dataset.handler import DataHandlerLP
-from qlib.tests import TestAutoData
-from qlib.utils.pickle_utils import restricted_pickle_load
+from quant_master.data import D
+from quant_master.data.dataset.handler import DataHandlerLP
+from quant_master.tests import TestAutoData
+from quant_master.utils.pickle_utils import restricted_pickle_load
 
 
 class HandlerTests(TestAutoData):

@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 from scipy.linalg import sqrtm
 
-from qlib.model.riskmodel import StructuredCovEstimator
+from quant_master.model.riskmodel import StructuredCovEstimator
 
 
 class TestStructuredCovEstimator(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestStructuredCovEstimator(unittest.TestCase):
         X = np.random.rand(NUM_OBSERVATION, NUM_VARIABLE)
 
         est_cov = estimator.predict(X, is_price=False)
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(X.T)  # While numpy assume row means variable, quant_master assume the other wise.
 
         delta = abs(est_cov - np_cov)
         if_identical = (delta < EPS).all()
@@ -38,7 +38,7 @@ class TestStructuredCovEstimator(unittest.TestCase):
         X = np.random.rand(NUM_OBSERVATION, NUM_VARIABLE)
 
         est_cov = estimator.predict(X, is_price=False)
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(X.T)  # While numpy assume row means variable, quant_master assume the other wise.
 
         delta = abs(est_cov - np_cov)
         if_identical = (delta < EPS).all()
@@ -76,7 +76,7 @@ class TestStructuredCovEstimator(unittest.TestCase):
         X = np.random.rand(NUM_OBSERVATION, NUM_VARIABLE) @ sqrt_cov
 
         est_cov = estimator.predict(X, is_price=False)
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(X.T)  # While numpy assume row means variable, quant_master assume the other wise.
 
         delta = abs(est_cov - np_cov)
         if_identical = (delta < EPS).all()
@@ -99,7 +99,7 @@ class TestStructuredCovEstimator(unittest.TestCase):
         X = (F @ B).T + U
 
         est_cov = estimator.predict(X, is_price=False)
-        np_cov = np.cov(X.T)  # While numpy assume row means variable, qlib assume the other wise.
+        np_cov = np.cov(X.T)  # While numpy assume row means variable, quant_master assume the other wise.
 
         delta = abs(est_cov - np_cov)
         if_identical = (delta < EPS).all()

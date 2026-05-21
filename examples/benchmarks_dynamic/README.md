@@ -5,12 +5,12 @@ So adapting the forecasting models/strategies to market dynamics is very importa
 The table below shows the performances of different solutions on different forecasting models.
 
 ## Alpha158 Dataset
-Here is the [crowd sourced version of qlib data](data_collector/crowd_source/README.md): https://github.com/chenditc/investment_data/releases
+Here is the [crowd sourced version of quant_master data](data_collector/crowd_source/README.md): https://github.com/chenditc/investment_data/releases
 ```bash
-wget https://github.com/chenditc/investment_data/releases/latest/download/qlib_bin.tar.gz
-mkdir -p ~/.qlib/qlib_data/cn_data
-tar -zxvf qlib_bin.tar.gz -C ~/.qlib/qlib_data/cn_data --strip-components=2
-rm -f qlib_bin.tar.gz
+wget https://github.com/chenditc/investment_data/releases/latest/download/quant_master_bin.tar.gz
+mkdir -p ~/.quant_master/quant_master_data/cn_data
+tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/cn_data --strip-components=2
+rm -f quant_master_bin.tar.gz
 ```
 
 | Model Name       | Dataset | IC | ICIR | Rank IC | Rank ICIR | Annualized Return | Information Ratio | Max Drawdown |
@@ -23,4 +23,4 @@ rm -f qlib_bin.tar.gz
 - The label horizon of the `Alpha158` dataset is set to 20.
 - The rolling time intervals are set to 20 trading days.
 - The test rolling periods are from January 2017 to August 2020.
-- The results are based on the crowd-sourced version. The Yahoo version of qlib data does not contain `VWAP`, so all related factors are missing and filled with 0, which leads to a rank-deficient matrix (a matrix does not have full rank) and makes lower-level optimization of DDG-DA can not be solved.
+- The results are based on the crowd-sourced version. The Yahoo version of quant_master data does not contain `VWAP`, so all related factors are missing and filled with 0, which leads to a rank-deficient matrix (a matrix does not have full rank) and makes lower-level optimization of DDG-DA can not be solved.

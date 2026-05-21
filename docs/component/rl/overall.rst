@@ -20,7 +20,7 @@ In contrast to supervised learning, RL learns this not from a label but from a t
 This scalar value lets us know whether the current outcome is good or bad. 
 In a word, the target of RL is to take actions to maximize reward.
 
-The Qlib Reinforcement Learning toolkit (QlibRL) is an RL platform for quantitative investment, which provides support to implement the RL algorithms in Qlib.
+The QuantMaster Reinforcement Learning toolkit (QuantMasterRL) is an RL platform for quantitative investment, which provides support to implement the RL algorithms in QuantMaster.
 
 
 Potential Application Scenarios in Quantitative Trading

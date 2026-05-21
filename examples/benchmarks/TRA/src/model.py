@@ -16,9 +16,9 @@ import torch.nn.functional as F
 
 from tqdm import tqdm
 
-from qlib.utils import get_or_create_path
-from qlib.log import get_module_logger
-from qlib.model.base import Model
+from quant_master.utils import get_or_create_path
+from quant_master.log import get_module_logger
+from quant_master.model.base import Model
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 

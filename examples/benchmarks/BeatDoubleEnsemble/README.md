@@ -34,7 +34,7 @@ The current completed baseline report is:
 
 The first runnable candidate is `DynamicMetaEnsembleModel`.
 
-It trains three native Qlib models:
+It trains three native QuantMaster models:
 
 - `DEnsembleModel`
 - `LGBModel`
@@ -106,32 +106,32 @@ Use LightGBM's internal threading to consume CPU cores. Avoid running multiple h
 Recommended local settings:
 
 - `num_threads: 20` for LightGBM and DoubleEnsemble on a 20-thread machine.
-- `kernels: 1` and `joblib_backend: threading` in `qlib_init` to avoid nested process contention.
+- `kernels: 1` and `joblib_backend: threading` in `quant_master_init` to avoid nested process contention.
 - Keep `search_step` at `0.1` for the first pass. Tighten to `0.05` only after a candidate beats the baseline.
 - Start with `turnover_boost_grid: [0.0, 0.01, 0.02, 0.03, 0.05]`; larger grids should wait until the first pass shows promise.
 
 ## Run
 
 ```powershell
-python -m qlib.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_dynamic_meta_ensemble_Alpha158_2026_local.yaml
+python -m quant_master.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_dynamic_meta_ensemble_Alpha158_2026_local.yaml
 ```
 
 Low-turnover variant:
 
 ```powershell
-python -m qlib.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_dynamic_meta_ensemble_low_turnover_Alpha158_2026_local.yaml
+python -m quant_master.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_dynamic_meta_ensemble_low_turnover_Alpha158_2026_local.yaml
 ```
 
 DoubleEnsemble residual LightGBM:
 
 ```powershell
-python -m qlib.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_residual_doubleensemble_lgb_Alpha158_2026_local.yaml
+python -m quant_master.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_residual_doubleensemble_lgb_Alpha158_2026_local.yaml
 ```
 
 Multi-seed DoubleEnsemble:
 
 ```powershell
-python -m qlib.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_multiseed_doubleensemble_Alpha158_2026_local.yaml
+python -m quant_master.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_multiseed_doubleensemble_Alpha158_2026_local.yaml
 ```
 
 Rolling DoubleEnsemble:
@@ -143,11 +143,11 @@ python examples\benchmarks\BeatDoubleEnsemble\rolling_doubleensemble.py run
 Cost-aware DoubleEnsemble:
 
 ```powershell
-python -m qlib.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_cost_aware_doubleensemble_Alpha158_2026_local.yaml
+python -m quant_master.cli.run examples\benchmarks\BeatDoubleEnsemble\workflow_config_cost_aware_doubleensemble_Alpha158_2026_local.yaml
 ```
 
 Compare both against:
 
 ```powershell
-python -m qlib.cli.run examples\benchmarks\DoubleEnsemble\workflow_config_doubleensemble_Alpha158_2026_local.yaml
+python -m quant_master.cli.run examples\benchmarks\DoubleEnsemble\workflow_config_doubleensemble_Alpha158_2026_local.yaml
 ```

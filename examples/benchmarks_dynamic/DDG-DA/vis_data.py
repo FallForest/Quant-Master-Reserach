@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from qlib.utils.pickle_utils import restricted_pickle_load
+from quant_master.utils.pickle_utils import restricted_pickle_load
 
 sns.set(color_codes=True)
 plt.rcParams["font.sans-serif"] = "SimHei"
@@ -36,10 +36,10 @@ sns.heatmap(data_sim.rolling(20).mean())
 
 # # Meta Model
 
-from qlib import auto_init
+from quant_master import auto_init
 
 auto_init()
-from qlib.workflow import R
+from quant_master.workflow import R
 
 exp = R.get_exp(experiment_name="DDG-DA")
 meta_rec = exp.list_recorders(rtype="list", max_results=1)[0]

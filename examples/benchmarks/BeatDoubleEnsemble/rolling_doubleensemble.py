@@ -6,8 +6,8 @@ from typing import Union
 
 import fire
 
-from qlib import auto_init
-from qlib.contrib.rolling.base import Rolling
+from quant_master import auto_init
+from quant_master.contrib.rolling.base import Rolling
 
 DIRNAME = Path(__file__).absolute().resolve().parent
 

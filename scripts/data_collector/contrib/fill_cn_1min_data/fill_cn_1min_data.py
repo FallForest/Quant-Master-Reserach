@@ -6,10 +6,10 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 
 import fire
-import qlib
+import quant_master
 import pandas as pd
 from tqdm import tqdm
-from qlib.data import D
+from quant_master.data import D
 from loguru import logger
 
 CUR_DIR = Path(__file__).resolve().parent
@@ -41,7 +41,7 @@ def get_symbols(data_1min_dir: Path):
 
 def fill_1min_using_1d(
     data_1min_dir: [str, Path],
-    qlib_data_1d_dir: [str, Path],
+    quant_master_data_1d_dir: [str, Path],
     max_workers: int = 16,
     date_field_name: str = "date",
     symbol_field_name: str = "symbol",
@@ -52,8 +52,8 @@ def fill_1min_using_1d(
     ----------
     data_1min_dir: str
         1min data dir
-    qlib_data_1d_dir: str
-        1d qlib data(bin data) dir, from: https://qlib.readthedocs.io/en/latest/component/data.html#converting-csv-format-into-qlib-format
+    quant_master_data_1d_dir: str
+        1d quant_master data(bin data) dir, from: https://quant_master.readthedocs.io/en/latest/component/data.html#converting-csv-format-into-quant_master-format
     max_workers: int
         ThreadPoolExecutor(max_workers), by default 16
     date_field_name: str
@@ -63,12 +63,12 @@ def fill_1min_using_1d(
 
     """
     data_1min_dir = Path(data_1min_dir).expanduser().resolve()
-    qlib_data_1d_dir = Path(qlib_data_1d_dir).expanduser().resolve()
+    quant_master_data_1d_dir = Path(quant_master_data_1d_dir).expanduser().resolve()
 
     min_date, max_date = get_date_range(data_1min_dir, max_workers, date_field_name)
     symbols_1min = get_symbols(data_1min_dir)
 
-    qlib.init(provider_uri=str(qlib_data_1d_dir))
+    quant_master.init(provider_uri=str(quant_master_data_1d_dir))
     data_1d = D.features(D.instruments("all"), ["$close"], min_date, max_date, freq="day")
 
     miss_symbols = set(data_1d.index.get_level_values(level="instrument").unique()) - set(symbols_1min)

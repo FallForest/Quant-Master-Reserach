@@ -1,17 +1,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-from qlib.workflow.record_temp import SignalRecord
+from quant_master.workflow.record_temp import SignalRecord
 import shutil
 import unittest
 import pytest
 from pathlib import Path
 
-from qlib.contrib.workflow import MultiSegRecord, SignalMseRecord
-from qlib.utils import init_instance_by_config, flatten_dict
-from qlib.workflow import R
-from qlib.tests import TestAutoData
-from qlib.tests.config import GBDT_MODEL, get_dataset_config, CSI300_MARKET
+from quant_master.contrib.workflow import MultiSegRecord, SignalMseRecord
+from quant_master.utils import init_instance_by_config, flatten_dict
+from quant_master.workflow import R
+from quant_master.tests import TestAutoData
+from quant_master.tests.config import GBDT_MODEL, get_dataset_config, CSI300_MARKET
 
 CSI300_GBDT_TASK = {
     "model": GBDT_MODEL,
