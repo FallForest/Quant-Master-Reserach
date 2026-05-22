@@ -21,13 +21,15 @@ class Collector(Serializable):
 
     pickle_backend = "dill"  # use dill to dump user method
 
-    def __init__(self, process_list=[]):
+    def __init__(self, process_list=None):
         """
         Init Collector.
 
         Args:
             process_list (list or Callable):  the list of processors or the instance of a processor to process dict.
         """
+        if process_list is None:
+            process_list = []
         if not isinstance(process_list, list):
             process_list = [process_list]
         self.process_list = process_list
@@ -50,7 +52,7 @@ class Collector(Serializable):
         raise NotImplementedError(f"Please implement the `collect` method.")
 
     @staticmethod
-    def process_collect(collected_dict, process_list=[], *args, **kwargs) -> dict:
+    def process_collect(collected_dict, process_list=None, *args, **kwargs) -> dict:
         """
         Do a series of processing to the dict returned by collect and return a dict like {key: things}
         For example, you can group and ensemble.
@@ -64,6 +66,8 @@ class Collector(Serializable):
         Returns:
             dict: the dict after processing.
         """
+        if process_list is None:
+            process_list = []
         if not isinstance(process_list, list):
             process_list = [process_list]
         result = {}

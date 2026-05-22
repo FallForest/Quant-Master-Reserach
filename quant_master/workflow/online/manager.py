@@ -346,7 +346,7 @@ class OnlineManager(Serializable):
         self.status = self.STATUS_ONLINE
         return self.get_signals()
 
-    def delay_prepare(self, model_kwargs={}, signal_kwargs={}):
+    def delay_prepare(self, model_kwargs=None, signal_kwargs=None):
         """
         Prepare all models and signals if something is waiting for preparation.
 
@@ -356,6 +356,10 @@ class OnlineManager(Serializable):
         """
         # FIXME:
         # This method is not implemented in the proper way!!!
+        if model_kwargs is None:
+            model_kwargs = {}
+        if signal_kwargs is None:
+            signal_kwargs = {}
         last_models = {}
         signals_time = D.calendar()[0]
         need_prepare = False

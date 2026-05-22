@@ -932,7 +932,7 @@ def fname_to_code(fname: str):
 
     prefix = "_quant_master_"
     if fname.startswith(prefix):
-        fname = fname.lstrip(prefix)
+        fname = fname[len(prefix) :]
     return fname
 
 
@@ -956,6 +956,5 @@ __all__ = [
     "split_module_path",
     "get_callable_kwargs",
     "get_cls_kwargs",
-    "init_instance_by_config",
     "class_casting",
 ]

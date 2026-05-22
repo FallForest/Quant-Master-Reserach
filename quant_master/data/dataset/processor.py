@@ -112,8 +112,8 @@ class DropnaLabel(DropnaProcessor):
 
 
 class DropCol(Processor):
-    def __init__(self, col_list=[]):
-        self.col_list = col_list
+    def __init__(self, col_list=None):
+        self.col_list = col_list if col_list is not None else []
 
     def __call__(self, df):
         if isinstance(df.columns, pd.MultiIndex):
@@ -127,9 +127,9 @@ class DropCol(Processor):
 
 
 class FilterCol(Processor):
-    def __init__(self, fields_group="feature", col_list=[]):
+    def __init__(self, fields_group="feature", col_list=None):
         self.fields_group = fields_group
-        self.col_list = col_list
+        self.col_list = col_list if col_list is not None else []
 
     def __call__(self, df):
         cols = get_group_columns(df, self.fields_group)

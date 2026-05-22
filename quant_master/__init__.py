@@ -166,8 +166,10 @@ def _mount_nfs_uri(provider_uri, mount_path, auto_mount: bool = False):
                     ) from e
 
                 # check nfs-common
-                command_res = os.popen("dpkg -l | grep nfs-common")
-                command_res = command_res.readlines()
+                command_res = subprocess.run(
+                    ["dpkg", "-l"], capture_output=True, text=True
+                )
+                command_res = [l for l in command_res.stdout.splitlines() if "nfs-common" in l]
                 if not command_res:
                     raise OSError("nfs-common is not found, please install it by execute: sudo apt install nfs-common")
                 # manually mount

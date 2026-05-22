@@ -389,7 +389,7 @@ class DatasetCache(BaseProviderCache):
     HDF_KEY = "df"
 
     def dataset(
-        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=[]
+        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=None
     ):
         """Get feature dataset.
 
@@ -399,6 +399,8 @@ class DatasetCache(BaseProviderCache):
             read-write conflicts will not be triggered
             but client readers are not considered.
         """
+        if inst_processors is None:
+            inst_processors = []
         if disk_cache == 0:
             # skip cache
             return self.provider.dataset(
@@ -423,17 +425,21 @@ class DatasetCache(BaseProviderCache):
         raise NotImplementedError("Implement this function to match your own cache mechanism")
 
     def _dataset(
-        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=[]
+        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=None
     ):
         """Get feature dataset using cache.
 
         Override this method to define how to get feature dataset corresponding to users' own cache mechanism.
         """
+        if inst_processors is None:
+            inst_processors = []
         raise NotImplementedError("Implement this method if you want to use dataset feature cache")
 
     def _dataset_uri(
-        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=[]
+        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=None
     ):
+        if inst_processors is None:
+            inst_processors = []
         """Get a uri of feature dataset using cache.
         specially:
             disk_cache=1 means using data set cache and return the uri of cache file.
@@ -653,7 +659,9 @@ class DiskDatasetCache(DatasetCache):
         self.remote = kwargs.get("remote", False)
 
     @staticmethod
-    def _uri(instruments, fields, start_time, end_time, freq, disk_cache=1, inst_processors=[], **kwargs):
+    def _uri(instruments, fields, start_time, end_time, freq, disk_cache=1, inst_processors=None, **kwargs):
+        if inst_processors is None:
+            inst_processors = []
         return hash_args(*DatasetCache.normalize_uri_args(instruments, fields, freq), disk_cache, inst_processors)
 
     def get_cache_dir(self, freq: str = None) -> Path:
@@ -694,8 +702,10 @@ class DiskDatasetCache(DatasetCache):
         return df
 
     def _dataset(
-        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=0, inst_processors=[]
+        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=0, inst_processors=None
     ):
+        if inst_processors is None:
+            inst_processors = []
         if disk_cache == 0:
             # In this case, data_set cache is configured but will not be used.
             return self.provider.dataset(
@@ -748,8 +758,10 @@ class DiskDatasetCache(DatasetCache):
         return features
 
     def _dataset_uri(
-        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=0, inst_processors=[]
+        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=0, inst_processors=None
     ):
+        if inst_processors is None:
+            inst_processors = []
         if disk_cache == 0:
             # In this case, server only checks the expression cache.
             # The client will load the cache data by itself.
@@ -854,7 +866,7 @@ class DiskDatasetCache(DatasetCache):
             index_data += start_index
             return index_data
 
-    def gen_dataset_cache(self, cache_path: Union[str, Path], instruments, fields, freq, inst_processors=[]):
+    def gen_dataset_cache(self, cache_path: Union[str, Path], instruments, fields, freq, inst_processors=None):
         """gen_dataset_cache
 
         .. note:: This function does not consider the cache read write lock. Please
@@ -893,6 +905,8 @@ class DiskDatasetCache(DatasetCache):
 
         :return type pd.DataFrame; The fields of the returned DataFrame are consistent with the parameters of the function.
         """
+        if inst_processors is None:
+            inst_processors = []
         # get calendar
         from .data import Cal  # pylint: disable=C0415
 
@@ -1076,15 +1090,19 @@ class SimpleDatasetCache(DatasetCache):
             f"modify the cache directory via the local_cache_path in the config"
         )
 
-    def _uri(self, instruments, fields, start_time, end_time, freq, disk_cache=1, inst_processors=[], **kwargs):
+    def _uri(self, instruments, fields, start_time, end_time, freq, disk_cache=1, inst_processors=None, **kwargs):
+        if inst_processors is None:
+            inst_processors = []
         instruments, fields, freq = self.normalize_uri_args(instruments, fields, freq)
         return hash_args(
             instruments, fields, start_time, end_time, freq, disk_cache, str(self.local_cache_path), inst_processors
         )
 
     def _dataset(
-        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=[]
+        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=1, inst_processors=None
     ):
+        if inst_processors is None:
+            inst_processors = []
         if disk_cache == 0:
             # In this case, data_set cache is configured but will not be used.
             return self.provider.dataset(instruments, fields, start_time, end_time, freq)
@@ -1118,12 +1136,16 @@ class SimpleDatasetCache(DatasetCache):
 class DatasetURICache(DatasetCache):
     """Prepared cache mechanism for server."""
 
-    def _uri(self, instruments, fields, start_time, end_time, freq, disk_cache=1, inst_processors=[], **kwargs):
+    def _uri(self, instruments, fields, start_time, end_time, freq, disk_cache=1, inst_processors=None, **kwargs):
+        if inst_processors is None:
+            inst_processors = []
         return hash_args(*self.normalize_uri_args(instruments, fields, freq), disk_cache, inst_processors)
 
     def dataset(
-        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=0, inst_processors=[]
+        self, instruments, fields, start_time=None, end_time=None, freq="day", disk_cache=0, inst_processors=None
     ):
+        if inst_processors is None:
+            inst_processors = []
         if "local" in C.dataset_provider.lower():
             # use LocalDatasetProvider
             return self.provider.dataset(

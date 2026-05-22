@@ -6,7 +6,6 @@ from __future__ import annotations
 import inspect
 import logging
 from collections import OrderedDict
-from functools import lru_cache
 from typing import Any, Callable, Dict, Iterable, List, Optional, Text, Union, cast
 
 import numpy as np
@@ -148,12 +147,25 @@ class NumpyQuote(BaseQuote):
         else:
             raise ValueError(f"{freq} is not supported in NumpyQuote")
         self.region = region
+        self._data_cache = OrderedDict()
+        self._data_cache_maxsize = 512
 
     def get_all_stock(self):
         return self.data.keys()
 
-    @lru_cache(maxsize=512)
     def get_data(self, stock_id, start_time, end_time, field, method=None):
+        cache_key = (stock_id, start_time, end_time, field, method)
+        if cache_key in self._data_cache:
+            self._data_cache.move_to_end(cache_key)
+            return self._data_cache[cache_key]
+
+        result = self._get_data_impl(stock_id, start_time, end_time, field, method)
+        self._data_cache[cache_key] = result
+        if len(self._data_cache) > self._data_cache_maxsize:
+            self._data_cache.popitem(last=False)
+        return result
+
+    def _get_data_impl(self, stock_id, start_time, end_time, field, method):
         # check stock id
         if stock_id not in self.get_all_stock():
             return None

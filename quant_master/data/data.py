@@ -450,7 +450,7 @@ class DatasetProvider(abc.ABC):
     """
 
     @abc.abstractmethod
-    def dataset(self, instruments, fields, start_time=None, end_time=None, freq="day", inst_processors=[]):
+    def dataset(self, instruments, fields, start_time=None, end_time=None, freq="day", inst_processors=None):
         """Get dataset data.
 
         Parameters
@@ -483,7 +483,7 @@ class DatasetProvider(abc.ABC):
         end_time=None,
         freq="day",
         disk_cache=1,
-        inst_processors=[],
+        inst_processors=None,
         **kwargs,
     ):
         """Get task uri, used when generating rabbitmq task in quant_master_server
@@ -505,6 +505,8 @@ class DatasetProvider(abc.ABC):
 
         """
         # TODO: quant_master-server support inst_processors
+        if inst_processors is None:
+            inst_processors = []
         return DiskDatasetCache._uri(instruments, fields, start_time, end_time, freq, disk_cache, inst_processors)
 
     @staticmethod
@@ -545,12 +547,14 @@ class DatasetProvider(abc.ABC):
         return [ExpressionD.get_expression_instance(f) for f in fields]
 
     @staticmethod
-    def dataset_processor(instruments_d, column_names, start_time, end_time, freq, inst_processors=[]):
+    def dataset_processor(instruments_d, column_names, start_time, end_time, freq, inst_processors=None):
         """
         Load and process the data, return the data set.
         - default using multi-kernel method.
 
         """
+        if inst_processors is None:
+            inst_processors = []
         normalize_column_names = normalize_cache_fields(column_names)
         # One process for one task, so that the memory will be freed quicker.
         workers = max(min(C.get_kernels(freq), len(instruments_d)), 1)
@@ -597,7 +601,7 @@ class DatasetProvider(abc.ABC):
         return data
 
     @staticmethod
-    def inst_calculator(inst, start_time, end_time, freq, column_names, spans=None, g_config=None, inst_processors=[]):
+    def inst_calculator(inst, start_time, end_time, freq, column_names, spans=None, g_config=None, inst_processors=None):
         """
         Calculate the expressions for **one** instrument, return a df result.
         If the expression has been calculated before, load from cache.
@@ -607,6 +611,8 @@ class DatasetProvider(abc.ABC):
         """
         # FIXME: Windows OS or MacOS using spawn: https://docs.python.org/3.8/library/multiprocessing.html?highlight=spawn#contexts-and-start-methods
         # NOTE: This place is compatible with windows, windows multi-process is spawn
+        if inst_processors is None:
+            inst_processors = []
         C.register_from_C(g_config)
 
         obj = dict()
@@ -640,10 +646,10 @@ class LocalCalendarProvider(CalendarProvider, ProviderBackendMixin):
     Provide calendar data from local data source.
     """
 
-    def __init__(self, remote=False, backend={}):
+    def __init__(self, remote=False, backend=None):
         super().__init__()
         self.remote = remote
-        self.backend = backend
+        self.backend = backend if backend is not None else {}
 
     def load_calendar(self, freq, future):
         """Load original calendar timestamp from file.
@@ -681,9 +687,9 @@ class LocalInstrumentProvider(InstrumentProvider, ProviderBackendMixin):
     Provide instrument data from local data source.
     """
 
-    def __init__(self, backend={}) -> None:
+    def __init__(self, backend=None) -> None:
         super().__init__()
-        self.backend = backend
+        self.backend = backend if backend is not None else {}
 
     def _load_instruments(self, market, freq):
         return self.backend_obj(market=market, freq=freq).data
@@ -729,10 +735,10 @@ class LocalFeatureProvider(FeatureProvider, ProviderBackendMixin):
     Provide feature data from local data source.
     """
 
-    def __init__(self, remote=False, backend={}):
+    def __init__(self, remote=False, backend=None):
         super().__init__()
         self.remote = remote
-        self.backend = backend
+        self.backend = backend if backend is not None else {}
 
     def feature(self, instrument, field, start_index, end_index, freq):
         # validate
@@ -906,7 +912,7 @@ class LocalDatasetProvider(DatasetProvider):
         start_time=None,
         end_time=None,
         freq="day",
-        inst_processors=[],
+        inst_processors=None,
     ):
         instruments_d = self.get_instruments_d(instruments, freq)
         column_names = self.get_column_names(fields)
@@ -1046,7 +1052,7 @@ class ClientDatasetProvider(DatasetProvider):
         freq="day",
         disk_cache=0,
         return_uri=False,
-        inst_processors=[],
+        inst_processors=None,
     ):
         if Inst.get_inst_type(instruments) == Inst.DICT:
             get_module_logger("data").warning(
@@ -1167,7 +1173,7 @@ class BaseProvider:
         end_time=None,
         freq="day",
         disk_cache=None,
-        inst_processors=[],
+        inst_processors=None,
     ):
         """
         Parameters

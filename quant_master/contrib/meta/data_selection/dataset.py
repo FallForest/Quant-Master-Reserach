@@ -26,7 +26,9 @@ class InternalData:
         self.step = step
         self.exp_name = exp_name
 
-    def setup(self, trainer=TrainerR, trainer_kwargs={}):
+    def setup(self, trainer=TrainerR, trainer_kwargs=None):
+        if trainer_kwargs is None:
+            trainer_kwargs = {}
         """
         after running this function `self.data_ic_df` will become set.
         Each col represents a data.

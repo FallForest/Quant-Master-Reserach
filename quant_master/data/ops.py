@@ -299,8 +299,8 @@ class NpPairOperator(PairOperator):
         super(NpPairOperator, self).__init__(feature_left, feature_right)
 
     def _load_internal(self, instrument, start_index, end_index, *args):
-        assert any(
-            [isinstance(self.feature_left, (Expression,)), self.feature_right, Expression]
+        assert isinstance(self.feature_left, Expression) or isinstance(
+            self.feature_right, Expression
         ), "at least one of two inputs is Expression instance"
         if isinstance(self.feature_left, (Expression,)):
             series_left = self.feature_left.load(instrument, start_index, end_index, *args)
@@ -944,7 +944,7 @@ class Kurt(Rolling):
 
     def __init__(self, feature, N):
         if N != 0 and N < 4:
-            raise ValueError("The rolling window size of Kurtosis operation should >= 5")
+            raise ValueError("The rolling window size of Kurtosis operation should >= 4")
         super(Kurt, self).__init__(feature, N, "kurt")
 
 
@@ -1413,8 +1413,8 @@ class PairRolling(ExpressionOps):
         return "{}({},{},{})".format(type(self).__name__, self.feature_left, self.feature_right, self.N)
 
     def _load_internal(self, instrument, start_index, end_index, *args):
-        assert any(
-            [isinstance(self.feature_left, Expression), self.feature_right, Expression]
+        assert isinstance(self.feature_left, Expression) or isinstance(
+            self.feature_right, Expression
         ), "at least one of two inputs is Expression instance"
 
         if isinstance(self.feature_left, Expression):

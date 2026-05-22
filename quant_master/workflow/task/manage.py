@@ -262,7 +262,7 @@ class TaskManager:
 
         return _id_list
 
-    def fetch_task(self, query={}, status=STATUS_WAITING) -> dict:
+    def fetch_task(self, query=None, status=STATUS_WAITING) -> dict:
         """
         Use query to fetch tasks.
 
@@ -273,6 +273,8 @@ class TaskManager:
         Returns:
             dict: a task(document in collection) after decoding
         """
+        if query is None:
+            query = {}
         query = query.copy()
         query = self._decode_query(query)
         query.update({"status": status})
@@ -286,7 +288,7 @@ class TaskManager:
         return self._decode_task(task)
 
     @contextmanager
-    def safe_fetch_task(self, query={}, status=STATUS_WAITING):
+    def safe_fetch_task(self, query=None, status=STATUS_WAITING):
         """
         Fetch task from task_pool using query with contextmanager
 
@@ -299,6 +301,8 @@ class TaskManager:
         -------
         dict: a task(document in collection) after decoding
         """
+        if query is None:
+            query = {}
         task = self.fetch_task(query=query, status=status)
         try:
             yield task
@@ -309,14 +313,16 @@ class TaskManager:
                 self.logger.info("Task returned")
             raise
 
-    def task_fetcher_iter(self, query={}):
+    def task_fetcher_iter(self, query=None):
+        if query is None:
+            query = {}
         while True:
             with self.safe_fetch_task(query=query) as task:
                 if task is None:
                     break
                 yield task
 
-    def query(self, query={}, decode=True):
+    def query(self, query=None, decode=True):
         """
         Query task in collection.
         This function may raise exception `pymongo.errors.CursorNotFound: cursor id not found` if it takes too long to iterate the generator
@@ -333,6 +339,8 @@ class TaskManager:
         -------
         dict: a task(document in collection) after decoding
         """
+        if query is None:
+            query = {}
         query = query.copy()
         query = self._decode_query(query)
         for t in self.task_pool.find(query):
@@ -381,7 +389,7 @@ class TaskManager:
         update_dict = {"$set": {"status": status}}
         self.task_pool.update_one({"_id": task["_id"]}, update_dict)
 
-    def remove(self, query={}):
+    def remove(self, query=None):
         """
         Remove the task using query
 
@@ -391,11 +399,13 @@ class TaskManager:
             the dict of query
 
         """
+        if query is None:
+            query = {}
         query = query.copy()
         query = self._decode_query(query)
         self.task_pool.delete_many(query)
 
-    def task_stat(self, query={}) -> dict:
+    def task_stat(self, query=None) -> dict:
         """
         Count the tasks in every status.
 
@@ -405,6 +415,8 @@ class TaskManager:
         Returns:
             dict
         """
+        if query is None:
+            query = {}
         query = query.copy()
         query = self._decode_query(query)
         tasks = self.query(query=query, decode=False)
@@ -413,13 +425,15 @@ class TaskManager:
             status_stat[t["status"]] = status_stat.get(t["status"], 0) + 1
         return status_stat
 
-    def reset_waiting(self, query={}):
+    def reset_waiting(self, query=None):
         """
         Reset all running task into waiting status. Can be used when some running task exit unexpected.
 
         Args:
             query (dict, optional): the query dict. Defaults to {}.
         """
+        if query is None:
+            query = {}
         query = query.copy()
         # default query
         if "status" not in query:
@@ -455,7 +469,7 @@ class TaskManager:
     def _get_total(self, task_stat):
         return sum(task_stat.values())
 
-    def wait(self, query={}):
+    def wait(self, query=None):
         """
         When multiprocessing, the main progress may fetch nothing from TaskManager because there are still some running tasks.
         So main progress should wait until all tasks are trained well by other progress or machines.
@@ -463,6 +477,8 @@ class TaskManager:
         Args:
             query (dict, optional): the query dict. Defaults to {}.
         """
+        if query is None:
+            query = {}
         task_stat = self.task_stat(query)
         total = self._get_total(task_stat)
         last_undone_n = self._get_undone_n(task_stat)
