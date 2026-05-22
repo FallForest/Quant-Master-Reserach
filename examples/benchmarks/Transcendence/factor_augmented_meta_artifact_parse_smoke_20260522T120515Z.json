@@ -1,0 +1,20 @@
+{
+  "weights_rows": 120,
+  "period_rows": 10,
+  "cv_rows": 10,
+  "pred_rows": 167456,
+  "summary_keys": [
+    "artifacts",
+    "costs",
+    "hard_gate",
+    "hard_gate_pass",
+    "members",
+    "metrics",
+    "protocol",
+    "reference_artifacts_read",
+    "risk_notes",
+    "task",
+    "test_period",
+    "timestamp_utc"
+  ]
+}

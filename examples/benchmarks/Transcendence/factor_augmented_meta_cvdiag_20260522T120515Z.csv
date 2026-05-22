@@ -1,0 +1,11 @@
+period_seq,period,selected_params,cv_score,cv_folds
+1,2024Q1,"{""alpha"": null, ""corr_pen"": null, ""prior_pen"": null, ""turnover_pen"": null, ""max_members"": null}",,0
+2,2024Q2,"{""alpha"": null, ""corr_pen"": null, ""prior_pen"": null, ""turnover_pen"": null, ""max_members"": null}",,0
+3,2024Q3,"{""alpha"": null, ""corr_pen"": null, ""prior_pen"": null, ""turnover_pen"": null, ""max_members"": null}",,0
+4,2024Q4,"{""alpha"": 0.5, ""corr_pen"": 0.15, ""prior_pen"": 0.2, ""turnover_pen"": 0.0, ""max_members"": 8}",10.44235137020897,1
+5,2025Q1,"{""alpha"": 8.0, ""corr_pen"": 0.0, ""prior_pen"": 0.6, ""turnover_pen"": 0.08, ""max_members"": 8}",5.918013502625534,2
+6,2025Q2,"{""alpha"": 8.0, ""corr_pen"": 0.0, ""prior_pen"": 0.2, ""turnover_pen"": 0.0, ""max_members"": 6}",5.836029684738585,3
+7,2025Q3,"{""alpha"": 8.0, ""corr_pen"": 0.0, ""prior_pen"": 0.2, ""turnover_pen"": 0.0, ""max_members"": 6}",2.6625961315933506,3
+8,2025Q4,"{""alpha"": 8.0, ""corr_pen"": 0.0, ""prior_pen"": 0.2, ""turnover_pen"": 0.08, ""max_members"": 6}",3.38954384231554,3
+9,2026Q1,"{""alpha"": 8.0, ""corr_pen"": 0.0, ""prior_pen"": 0.2, ""turnover_pen"": 0.0, ""max_members"": 6}",6.754264410539039,3
+10,2026Q2,"{""alpha"": 8.0, ""corr_pen"": 0.15, ""prior_pen"": 0.2, ""turnover_pen"": 0.0, ""max_members"": 8}",8.277793669168295,3

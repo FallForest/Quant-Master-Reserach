@@ -1,0 +1,185 @@
+{
+  "timestamp_utc": "2026-05-22T11:00:51Z",
+  "mode": "full",
+  "command": "examples/benchmarks/Transcendence/gpu_deep_stack_model.py --mode full --tracking-uri file:./mlruns --base-run-id 7406e47063e9479cb34d300b9ed03bad --start-date 2024-01-01 --end-date 2026-04-30 --open-cost 0.0005 --close-cost 0.0015 --topk 45 --n-drop 4 --output-prefix gpu_deep_stack_workerA",
+  "cwd": "C:\\Users\\15728\\Desktop\\Quant-Master-Research",
+  "environment": {
+    "python": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+    "torch_version": "2.12.0+cu130",
+    "cuda_available": true,
+    "cuda_device": "NVIDIA GeForce RTX 3070 Laptop GPU",
+    "device": "cuda"
+  },
+  "signals": [
+    {
+      "run_id": "7406e47063e9479cb34d300b9ed03bad",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "587bba6200be43e68cf02f59d1b7f890",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "3e594f3ffafb47ffa36491c3f04f2afa",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "e2300230e0994a1a9ccbbd3bc4606d97",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "773bd6d8413b4bb0b388a63a6b5b6a86",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "5ae326c0bc8d4f8da2f01349d42ae5ec",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "d4526da7854245af954fc99cf02963f0",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "1a085ff9b5a34f408a44ad74055fc5da",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "29864d9c5d00463b9fdbc065c10b0093",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "4a98f99bdb6848bab789ff6c46d0a1ff",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    },
+    {
+      "run_id": "bcbecf55a3924357ba93fc55b1140e99",
+      "pred_rows": 168600,
+      "label_rows": 168600
+    }
+  ],
+  "run_ids": [
+    "7406e47063e9479cb34d300b9ed03bad",
+    "587bba6200be43e68cf02f59d1b7f890",
+    "3e594f3ffafb47ffa36491c3f04f2afa",
+    "e2300230e0994a1a9ccbbd3bc4606d97",
+    "773bd6d8413b4bb0b388a63a6b5b6a86",
+    "5ae326c0bc8d4f8da2f01349d42ae5ec",
+    "d4526da7854245af954fc99cf02963f0",
+    "1a085ff9b5a34f408a44ad74055fc5da",
+    "29864d9c5d00463b9fdbc065c10b0093",
+    "4a98f99bdb6848bab789ff6c46d0a1ff",
+    "bcbecf55a3924357ba93fc55b1140e99"
+  ],
+  "split": {
+    "start_date": "2024-01-01",
+    "end_date": "2026-04-30",
+    "walkforward": {
+      "train_window_days": 300,
+      "valid_days": 50,
+      "min_train_days": 180,
+      "block_days": 21,
+      "fold_count": 18
+    },
+    "portfolio_eval": {
+      "full_period": [
+        "2024-01-01",
+        "2026-04-30"
+      ],
+      "ytd_2026": [
+        "2026-01-01",
+        "2026-04-30"
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "open_cost": 0.0005,
+      "close_cost": 0.0015
+    }
+  },
+  "metrics": {
+    "candidates": [
+      {
+        "candidate": "blend_base85_deep15",
+        "topk": 45,
+        "n_drop": 4,
+        "full_costed_ir": 2.1585557060354685,
+        "full_costed_annret": 0.18289572508701193,
+        "full_max_drawdown": -0.05917127419872526,
+        "full_turnover": 0.1747149292455268,
+        "full_eval_sec": 10.30319899999813,
+        "ytd2026_costed_ir": 2.267991535495857,
+        "ytd2026_costed_annret": 0.2189048989500792,
+        "passes_hard_gate": false
+      },
+      {
+        "candidate": "blend_base70_deep30",
+        "topk": 45,
+        "n_drop": 4,
+        "full_costed_ir": 1.6749496509100992,
+        "full_costed_annret": 0.14024107920700798,
+        "full_max_drawdown": -0.0709686360181154,
+        "full_turnover": 0.1736741729839558,
+        "full_eval_sec": 10.315117699999973,
+        "ytd2026_costed_ir": 1.6121492399497417,
+        "ytd2026_costed_annret": 0.15235585644261285,
+        "passes_hard_gate": false
+      },
+      {
+        "candidate": "deep_raw_rank",
+        "topk": 45,
+        "n_drop": 4,
+        "full_costed_ir": 0.5291136669303039,
+        "full_costed_annret": 0.04813143337119687,
+        "full_max_drawdown": -0.11451997322303994,
+        "full_turnover": 0.17493589831636217,
+        "full_eval_sec": 10.424571999999898,
+        "ytd2026_costed_ir": -1.2512954159967509,
+        "ytd2026_costed_annret": -0.11538551970001851,
+        "passes_hard_gate": false
+      }
+    ],
+    "best": {
+      "candidate": "blend_base85_deep15",
+      "topk": 45,
+      "n_drop": 4,
+      "full_costed_ir": 2.1585557060354685,
+      "full_costed_annret": 0.18289572508701193,
+      "full_max_drawdown": -0.05917127419872526,
+      "full_turnover": 0.1747149292455268,
+      "full_eval_sec": 10.30319899999813,
+      "ytd2026_costed_ir": 2.267991535495857,
+      "ytd2026_costed_annret": 0.2189048989500792,
+      "passes_hard_gate": false
+    },
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27
+    },
+    "hard_gate_passed": false
+  },
+  "leakage_risk": {
+    "assessment": "medium",
+    "notes": [
+      "Walk-forward uses only historical labels per fold; no future-label fitting inside each fold.",
+      "Candidate family is predefined (deep raw + fixed blends), but best-of-candidates is still selected on full 2024-01-01..2026-04-30 report.",
+      "Warmup gaps are filled with base rank signal; this reduces instability but weakens pure deep attribution."
+    ]
+  },
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\gpu_deep_stack_workerA_full_summary_20260522T110051Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\gpu_deep_stack_workerA_full_summary_20260522T110051Z.md",
+    "fold_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\gpu_deep_stack_workerA_full_folds_20260522T110051Z.csv",
+    "candidate_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\gpu_deep_stack_workerA_full_candidates_20260522T110051Z.csv",
+    "pred_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\gpu_deep_stack_workerA_full_pred_20260522T110051Z.pkl",
+    "dataset_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\gpu_deep_stack_workerA_full_dataset_20260522T110051Z.csv"
+  }
+}

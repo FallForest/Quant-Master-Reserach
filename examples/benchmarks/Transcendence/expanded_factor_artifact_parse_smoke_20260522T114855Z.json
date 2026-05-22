@@ -1,0 +1,24 @@
+{
+  "csv_rows_scan": 128,
+  "csv_rows_backtest": 152,
+  "summary_json_keys": [
+    "artifacts",
+    "available_fields_checked",
+    "backtested_signal_count",
+    "base_run_id",
+    "best_overall",
+    "combo_candidates",
+    "combos_tested_per_signal",
+    "costs",
+    "feature_window_start",
+    "hard_gate",
+    "leakage_control",
+    "passes_hard_gate",
+    "scan_time_utc",
+    "screened_signal_count",
+    "signal_count_total",
+    "test_period",
+    "top_candidates"
+  ],
+  "best_pred_rows": 167583
+}

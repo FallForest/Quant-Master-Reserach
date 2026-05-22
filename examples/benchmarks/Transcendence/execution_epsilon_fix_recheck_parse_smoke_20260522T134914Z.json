@@ -1,0 +1,9 @@
+{
+  "timestamp_utc": "2026-05-22T13:51:34Z",
+  "summary_json_exists": true,
+  "summary_md_exists": true,
+  "daily_csv_exists": true,
+  "safe_period_csv_exists": true,
+  "summary_json_parse_ok": true,
+  "daily_csv_rows": 1
+}

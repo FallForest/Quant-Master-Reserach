@@ -354,7 +354,24 @@ class Position(BasePosition):
         if stock_id not in self.position:
             raise KeyError("{} not in current position".format(stock_id))
         else:
-            if np.isclose(self.position[stock_id]["amount"], trade_amount):
+            current_amount = self.position[stock_id]["amount"]
+            if trade_amount > current_amount:
+                oversell_amount = trade_amount - current_amount
+                # Allow tiny oversell caused by floating-point drift, but never permit true oversell.
+                oversell_tolerance = min(0.1, max(1e-5, 2e-5 * abs(current_amount)))
+                if oversell_amount <= oversell_tolerance:
+                    trade_amount = current_amount
+                    trade_val = trade_amount * trade_price
+                else:
+                    raise ValueError(
+                        "only have {} {}, require {}".format(
+                            current_amount,
+                            stock_id,
+                            trade_amount,
+                        ),
+                    )
+
+            if np.isclose(current_amount, trade_amount):
                 # Selling all the stocks
                 # we use np.isclose instead of abs(<the final amount>) <= 1e-5  because `np.isclose` consider both
                 # relative amount and absolute amount
@@ -362,7 +379,7 @@ class Position(BasePosition):
                 self._del_stock(stock_id)
             else:
                 # decrease the amount of stock
-                self.position[stock_id]["amount"] -= trade_amount
+                self.position[stock_id]["amount"] = current_amount - trade_amount
                 # check if to delete
                 if self.position[stock_id]["amount"] < -1e-5:
                     raise ValueError(

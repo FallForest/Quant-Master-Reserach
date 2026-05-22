@@ -1,0 +1,8 @@
+{
+  "summary_json_exists": true,
+  "summary_md_exists": true,
+  "coverage_csv_rows": 405,
+  "metrics_csv_rows": 43,
+  "candidate_pred_rows": 166858,
+  "hard_gate_passed": false
+}

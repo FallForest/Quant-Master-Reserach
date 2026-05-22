@@ -1,0 +1,2 @@
+candidate_id,date,conversion_family,rebalance_mode,topk_normal,topk_stress,hold_buffer,threshold_normal,threshold_stress,n_drop,is_stress_day,topk_req,threshold_req,merged_names,nonnull_names,eligible_names,selected_names,tradable_eligible_names,tradable_selected_names,topk_satisfied_by_selected,topk_satisfied_by_tradable_selected,event_symbols_in_selected
+7735252674316944203,2025-01-13,convex_softmax,weekly,40,35,10,0.1,0.0,4,0,40,0.1,300,300,271,40,268,37,True,False,SH603296
