@@ -511,8 +511,10 @@ class DumpDataUpdate(DumpDataBase):
                         .to_list()
                     )
                     if _update_calendars:
+                        _existing_end = self._update_instruments[_code][self.INSTRUMENTS_END_FIELD]
                         self._update_instruments[_code][self.INSTRUMENTS_END_FIELD] = self._format_datetime(_end)
-                        futures[executor.submit(self._dump_bin, _df, _update_calendars)] = _code
+                        _new_df = _df[_df[self.date_field_name] > _existing_end]
+                        futures[executor.submit(self._dump_bin, _new_df, _update_calendars)] = _code
                 else:
                     # new stock
                     _dt_range = self._update_instruments.setdefault(_code, dict())
@@ -531,13 +533,157 @@ class DumpDataUpdate(DumpDataBase):
 
         logger.info("end of features dump.\n")
 
+    def _cleanup_stale_instruments(self):
+        """Remove instruments whose end_date is more than 180 days before the last calendar date.
+
+        Saves removed entries to instruments/all.txt.bak.YYYYMMDD for recovery.
+        Also deletes the corresponding features/<symbol>/ directories.
+        """
+        cal_path = self._calendars_dir.joinpath(f"{self.freq}.txt")
+        if not cal_path.exists():
+            return
+        cal_lines = cal_path.read_text().strip().split("\n")
+        if not cal_lines:
+            return
+        last_cal_date = pd.Timestamp(cal_lines[-1].strip())
+        cutoff = last_cal_date - pd.Timedelta(days=180)
+
+        removed = {}
+        for _code, _info in list(self._update_instruments.items()):
+            end_dt = pd.Timestamp(_info[self.INSTRUMENTS_END_FIELD])
+            if end_dt < cutoff:
+                removed[_code] = self._update_instruments.pop(_code)
+
+        if removed:
+            # Save backup of removed entries
+            bak_path = self._instruments_dir.joinpath(
+                f"all.txt.bak.{pd.Timestamp.now().strftime('%Y%m%d')}"
+            )
+            lines = [
+                f"{code}\t{info[self.INSTRUMENTS_START_FIELD]}\t{info[self.INSTRUMENTS_END_FIELD]}"
+                for code, info in removed.items()
+            ]
+            bak_path.write_text("\n".join(lines) + "\n")
+
+            # Remove orphaned feature directories
+            removed_dirs = 0
+            for _code in removed:
+                feat_dir = self._features_dir / code_to_fname(_code).lower()
+                if feat_dir.exists():
+                    shutil.rmtree(feat_dir)
+                    removed_dirs += 1
+
+            logger.info(
+                f"Removed {len(removed)} stale instruments "
+                f"({removed_dirs} feature dirs deleted, backup: {bak_path.name})."
+            )
+        else:
+            logger.info("No stale instruments found.")
+
     def dump(self):
         self.save_calendars(self._new_calendar_list)
         self._dump_features()
+        self._cleanup_stale_instruments()
         df = pd.DataFrame.from_dict(self._update_instruments, orient="index")
         df.index.names = [self.symbol_field_name]
         self.save_instruments(df.reset_index())
 
 
+def verify_dump(quant_master_dir: str, expected_end_date: str = None) -> bool:
+    """Verify quant_master data integrity after a dump operation.
+
+    Parameters
+    ----------
+    quant_master_dir : str
+        Path to the quant_master data directory.
+    expected_end_date : str, optional
+        If given, verify the last calendar date matches this date.
+
+    Returns
+    -------
+    bool
+        True if all checks pass.
+    """
+    import random
+
+    qm_dir = Path(quant_master_dir).expanduser().resolve()
+    all_pass = True
+
+    # 1. Calendar check
+    cal_path = qm_dir / "calendars" / "day.txt"
+    if not cal_path.exists():
+        logger.error("verify: calendars/day.txt does not exist")
+        return False
+    cal_lines = cal_path.read_text().strip().split("\n")
+    last_cal_date = cal_lines[-1].strip() if cal_lines else ""
+    if expected_end_date and last_cal_date != expected_end_date:
+        logger.error(f"verify: last calendar date {last_cal_date} != expected {expected_end_date}")
+        all_pass = False
+    else:
+        logger.info(f"verify: calendar OK (last date: {last_cal_date})")
+
+    # 2. Instruments staleness check
+    inst_path = qm_dir / "instruments" / "all.txt"
+    if not inst_path.exists():
+        logger.error("verify: instruments/all.txt does not exist")
+        return False
+    last_cal_ts = pd.Timestamp(last_cal_date)
+    stale_cutoff = last_cal_ts - pd.Timedelta(days=365)
+    stale_count = 0
+    total_count = 0
+    with open(inst_path) as f:
+        for line in f:
+            parts = line.strip().split("\t")
+            if len(parts) < 3:
+                continue
+            total_count += 1
+            end_dt = pd.Timestamp(parts[2])
+            if end_dt < stale_cutoff:
+                stale_count += 1
+    if stale_count > 0:
+        logger.warning(f"verify: {stale_count}/{total_count} instruments have end_date > 1 year old")
+    else:
+        logger.info(f"verify: instruments OK ({total_count} entries, no stale)")
+
+    # 3. Spot-check feature dirs
+    features_dir = qm_dir / "features"
+    if features_dir.exists():
+        all_dirs = [d for d in features_dir.iterdir() if d.is_dir()]
+        sample_size = min(10, len(all_dirs))
+        sample_dirs = random.sample(all_dirs, sample_size) if all_dirs else []
+        bad_dirs = 0
+        for d in sample_dirs:
+            bin_files = list(d.glob("*.day.bin"))
+            if not bin_files:
+                logger.warning(f"verify: {d.name} has no .day.bin files")
+                bad_dirs += 1
+                continue
+            # Check first bin file for all-NaN
+            try:
+                data = np.fromfile(str(bin_files[0]), dtype="<f4")
+                if len(data) < 2:
+                    logger.warning(f"verify: {d.name}/{bin_files[0].name} too short ({len(data)} values)")
+                    bad_dirs += 1
+                elif np.all(np.isnan(data[1:])):
+                    logger.warning(f"verify: {d.name}/{bin_files[0].name} is all NaN")
+                    bad_dirs += 1
+            except Exception as e:
+                logger.warning(f"verify: {d.name}/{bin_files[0].name} read error: {e}")
+                bad_dirs += 1
+        if bad_dirs > 0:
+            logger.warning(f"verify: {bad_dirs}/{sample_size} sampled feature dirs have issues")
+            all_pass = False
+        else:
+            logger.info(f"verify: feature dirs OK ({sample_size} sampled, all good)")
+    else:
+        logger.warning("verify: features directory does not exist")
+
+    if all_pass:
+        logger.info("verify: ALL CHECKS PASSED")
+    else:
+        logger.warning("verify: SOME CHECKS FAILED — review warnings above")
+    return all_pass
+
+
 if __name__ == "__main__":
-    fire.Fire({"dump_all": DumpDataAll, "dump_fix": DumpDataFix, "dump_update": DumpDataUpdate})
+    fire.Fire({"dump_all": DumpDataAll, "dump_fix": DumpDataFix, "dump_update": DumpDataUpdate, "verify_dump": verify_dump})

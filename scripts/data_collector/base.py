@@ -171,6 +171,7 @@ class BaseCollector(abc.ABC):
         if instrument_path.exists():
             _old_df = pd.read_csv(instrument_path)
             df = pd.concat([_old_df, df], sort=False)
+        df = df.drop_duplicates(subset=[self.date_field_name], keep="last").sort_values(self.date_field_name)
         df.to_csv(instrument_path, index=False)
 
     def cache_small_data(self, symbol, df):
@@ -244,6 +245,23 @@ class BaseNormalize(abc.ABC):
         raise NotImplementedError("")
 
 
+# Module-level state for worker processes.
+# ProcessPoolExecutor pickles the bound method self._executor for every call,
+# which serializes the full Normalize instance (~2 MB _latest_map) 5208 times.
+# Using initializer+initargs passes the state once per worker, not once per file.
+_worker_norm = None
+
+
+def _worker_init(norm_instance):
+    global _worker_norm
+    _worker_norm = norm_instance
+
+
+def _worker_executor(file_path):
+    global _worker_norm
+    return _worker_norm._executor(file_path)
+
+
 class Normalize:
     def __init__(
         self,
@@ -280,7 +298,7 @@ class Normalize:
         self._date_field_name = date_field_name
         self._symbol_field_name = symbol_field_name
         self._end_date = kwargs.get("end_date", None)
-        resolved_workers = 8 if max_workers is None else max(int(max_workers), 8)
+        resolved_workers = 4 if max_workers is None else max(int(max_workers), 4)
         self._max_workers = resolved_workers
         self.interval = kwargs.get("interval", "1d")
 
@@ -290,10 +308,13 @@ class Normalize:
 
     def format_data(self, df: pd.DataFrame):
         if self.interval == "1d":
-            try:
-                pd.to_datetime(df.iloc[-1]["date"], format="%Y-%m-%d", errors="raise")
-            except Exception:
-                df = df.iloc[:-1]
+            parsed_dates = pd.to_datetime(df["date"], format="mixed", utc=True, errors="coerce")
+            if not parsed_dates.empty and pd.isna(parsed_dates.iloc[-1]):
+                df = df.iloc[:-1].copy()
+                parsed_dates = parsed_dates.iloc[:-1]
+            if not df.empty:
+                df = df.copy()
+                df["date"] = parsed_dates.dt.strftime("%Y-%m-%d")
         return df
 
     def _executor(self, file_path: Path):
@@ -301,21 +322,27 @@ class Normalize:
 
         # some symbol_field values such as TRUE, NA are decoded as True(bool), NaN(np.float) by pandas default csv parsing.
         # manually defines dtype and na_values of the symbol_field.
-        default_na = pd._libs.parsers.STR_NA_VALUES  # pylint: disable=I1101
-        symbol_na = default_na.copy()
-        symbol_na.remove("NA")
-        columns = pd.read_csv(file_path, nrows=0).columns
+        # Single-pass read; keep_default_na=False prevents pandas from converting
+        # string "NA" to NaN (relevant when symbol field may contain "NA").
         df = pd.read_csv(
             file_path,
             dtype={self._symbol_field_name: str},
             keep_default_na=False,
-            na_values={col: symbol_na if col == self._symbol_field_name else default_na for col in columns},
         )
+        # Drop unnamed/index artifact columns that appear in some CSVs.
+        df.drop(columns=[c for c in df.columns if c.lower().startswith("unnamed")], inplace=True, errors="ignore")
+        # Coerce numeric columns — some source CSVs have string values in OHLCV fields.
+        for col in ["open", "high", "low", "close", "volume", "adjclose"]:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
         df = self.format_data(df=df)
 
         if not df.empty:
-            # NOTE: It has been reported that there may be some problems here, and the specific issues will be dealt with when they are identified.
-            df = self._normalize_obj.normalize(df)
+            try:
+                df = self._normalize_obj.normalize(df)
+            except Exception:
+                logger.warning(f"{file_path.stem} normalize failed — may contain bad data; skipping.")
+                return
             if df is not None and not df.empty:
                 if self._end_date is not None:
                     _mask = pd.to_datetime(df[self._date_field_name]) <= pd.Timestamp(self._end_date)
@@ -327,10 +354,14 @@ class Normalize:
     def normalize(self):
         logger.info("normalize data......")
 
-        with ProcessPoolExecutor(max_workers=self._max_workers) as worker:
+        with ProcessPoolExecutor(
+            max_workers=self._max_workers,
+            initializer=_worker_init,
+            initargs=(self,),
+        ) as worker:
             file_list = list(self._source_dir.glob("*.csv"))
             with tqdm(total=len(file_list)) as p_bar:
-                for _ in worker.map(self._executor, file_list):
+                for _ in worker.map(_worker_executor, file_list):
                     p_bar.update()
 
 

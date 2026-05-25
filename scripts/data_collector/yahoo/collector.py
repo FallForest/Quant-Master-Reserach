@@ -29,7 +29,7 @@ from quant_master.constant import REG_CN as REGION_CN
 CUR_DIR = Path(__file__).resolve().parent
 sys.path.append(str(CUR_DIR.parent.parent))
 
-from dump_bin import DumpDataUpdate
+from dump_bin import DumpDataUpdate, verify_dump
 from data_collector.base import BaseCollector, BaseNormalize, BaseRun, Normalize
 from data_collector.utils import (
     deco_retry,
@@ -148,7 +148,10 @@ class YahooCollector(BaseCollector):
             data = yahoo_fetch(url)
         except urllib.error.HTTPError as e:
             if e.code == 404:
-                logger.warning(f"symbol not found (404): {symbol}")
+                # Delisted or non-existent symbol — no point retrying.
+                # Return an empty DataFrame so the caller can distinguish
+                # "permanent 404" from a transient network error (None).
+                return pd.DataFrame(columns=["symbol", "date", "open", "high", "low", "close", "volume", "adjclose"])
             else:
                 logger.warning(f"get data error: {symbol}--{start}--{end}: HTTP {e.code}")
             return None
@@ -201,10 +204,14 @@ class YahooCollector(BaseCollector):
                 start=start_,
                 end=end_,
             )
-            if resp is None or resp.empty:
+            if resp is None:
                 raise ValueError(
-                    f"get data error: {symbol}--{start_}--{end_}" + "The stock may be delisted, please check"
+                    f"get data error: {symbol}--{start_}--{end_}"
+                    + " Your data request fails. This may be caused by your firewall (e.g. GFW)."
                 )
+            if resp.empty:
+                # Delisted / 404 — no data, but not worth retrying.
+                return resp
             return resp
 
         _result = None
@@ -276,7 +283,7 @@ class YahooCollectorCN1d(YahooCollectorCN):
                 logger.warning(f"get {_index_name} error: {e}")
                 continue
             df.columns = ["date", "open", "close", "high", "low", "volume", "money", "change"]
-            df["date"] = pd.to_datetime(df["date"])
+            df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
             df = df.astype(float, errors="ignore")
             df["adjclose"] = df["close"]
             df["symbol"] = f"{_index_code}.SS"
@@ -543,40 +550,65 @@ class YahooNormalize1dExtend(YahooNormalize1d):
     def __init__(
         self, old_quant_master_data_dir: [str, Path], date_field_name: str = "date", symbol_field_name: str = "symbol", **kwargs
     ):
-        """
-
-        Parameters
-        ----------
-        old_quant_master_data_dir: str, Path
-            the quant_master data to be updated for yahoo, usually from: https://github.com/microsoft/quant_master/tree/main/scripts#download-cn-data
-        date_field_name: str
-            date field name, default is date
-        symbol_field_name: str
-            symbol field name, default is symbol
-        """
         super(YahooNormalize1dExtend, self).__init__(date_field_name, symbol_field_name)
         self.column_list = ["open", "high", "low", "close", "volume", "factor", "change"]
-        self.old_quant_master_data = self._get_old_data(old_quant_master_data_dir)
+        # Build a compact lookup table: {symbol: (latest_date, row_series)}
+        # instead of loading the entire multi-GB old dataset into every worker.
+        self._latest_map = self._build_latest_map(old_quant_master_data_dir)
 
-    def _get_old_data(self, quant_master_data_dir: [str, Path]):
+    def _build_latest_map(self, quant_master_data_dir: [str, Path]):
+        import pickle
+
         quant_master_data_dir = str(Path(quant_master_data_dir).expanduser().resolve())
+        cal_path = Path(quant_master_data_dir) / "calendars" / "day.txt"
+        cache_path = Path(quant_master_data_dir) / "_latest_map_cache.pkl"
+
+        # Composite cache key: last date + file size + line count
+        # More robust than mtime alone (which can change on touch/copy).
+        cal_lines = cal_path.read_text().strip().split("\n") if cal_path.exists() else []
+        cal_key = (cal_lines[-1].strip() if cal_lines else "", cal_path.stat().st_size if cal_path.exists() else 0, len(cal_lines))
+
+        if cache_path.exists():
+            try:
+                cached = pickle.loads(cache_path.read_bytes())
+                if cached.get("cal_key") == cal_key:
+                    logger.info("Using cached _latest_map (calendar unchanged).")
+                    return cached["map"]
+            except Exception:
+                cache_path.unlink(missing_ok=True)
+
+        logger.info("Building _latest_map from binary data (this takes ~40s for 6000 stocks)...")
         quant_master.init(provider_uri=quant_master_data_dir, expression_cache=None, dataset_cache=None)
         df = D.features(D.instruments("all"), ["$" + col for col in self.column_list])
         df.columns = self.column_list
-        return df
+        # Keep only the last row per instrument.
+        df = df.groupby(level="instrument").tail(1)
+        # Build a small dict keyed by uppercase symbol → (index_date, row_series).
+        latest_map = {
+            str(idx).upper(): (idx_date, row)
+            for idx, (idx_date, row) in zip(df.index.get_level_values("instrument"), df.iterrows())
+        }
+
+        try:
+            cache_path.write_bytes(pickle.dumps({"cal_key": cal_key, "map": latest_map}))
+            logger.info("_latest_map cached for next run.")
+        except Exception:
+            pass
+
+        return latest_map
 
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
         df = super(YahooNormalize1dExtend, self).normalize(df)
         df.set_index(self._date_field_name, inplace=True)
-        symbol_name = df[self._symbol_field_name].iloc[0]
-        old_symbol_list = self.old_quant_master_data.index.get_level_values("instrument").unique().to_list()
-        if str(symbol_name).upper() not in old_symbol_list:
+        symbol_name = str(df[self._symbol_field_name].iloc[0]).upper()
+        entry = self._latest_map.get(symbol_name)
+        if entry is None:
             return df.reset_index()
-        old_df = self.old_quant_master_data.loc[str(symbol_name).upper()]
-        latest_date = old_df.index[-1]
+        latest_date, old_latest_data = entry
+        if latest_date not in df.index:
+            return df.reset_index()
         df = df.loc[latest_date:]
         new_latest_data = df.iloc[0]
-        old_latest_data = old_df.loc[latest_date]
         for col in self.column_list[:-1]:
             if col == "volume":
                 df[col] = df[col] / (new_latest_data[col] / old_latest_data[col])
@@ -876,6 +908,23 @@ class Run(BaseRun):
             date_field_name, symbol_field_name, end_date=end_date, quant_master_data_1d_dir=quant_master_data_1d_dir
         )
 
+    def _cleanup_intermediate_files(self):
+        """Remove source and normalize CSVs after a successful dump+verify."""
+        import shutil
+
+        for label, d in [("source", self.source_dir), ("normalize", self.normalize_dir)]:
+            if not d.exists():
+                continue
+            count = 0
+            for f in d.iterdir():
+                if f.is_file():
+                    f.unlink()
+                    count += 1
+                elif f.is_dir():
+                    shutil.rmtree(f)
+                    count += 1
+            logger.info(f"Cleaned {count} items from {label} dir ({d})")
+
     def update_data_to_bin(
         self,
         quant_master_data_1d_dir: str,
@@ -914,8 +963,11 @@ class Run(BaseRun):
         if self.interval.lower() != "1d":
             raise ValueError(f"update_data_to_bin only supports 1d data, got interval={self.interval}")
 
-        # download quant_master 1d data
         quant_master_data_1d_dir = str(Path(quant_master_data_1d_dir).expanduser().resolve())
+        # Clean residuals from previous runs (source_dir/normalize_dir set by BaseRun defaults)
+        self._cleanup_intermediate_files()
+
+        # download quant_master 1d data
         if not exists_quant_master_data(quant_master_data_1d_dir):
             GetData().quant_master_data(
                 target_dir=quant_master_data_1d_dir, interval=self.interval, region=self.region, exists_skip=exists_skip
@@ -928,14 +980,23 @@ class Run(BaseRun):
         if end_date is None:
             end_date = (pd.Timestamp(trading_date) + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
 
-        # download data from yahoo
-        self.max_workers = 4
-        self.download_data(delay=delay, start=trading_date, end=end_date, check_data_length=check_data_length)
-        # Keep the whole incremental update path at a minimum concurrency of 8 workers.
+        # Download data using the caller-requested concurrency.
+        download_workers = self.max_workers
+        # Use a generous max_collector_count so the download phase is not the bottleneck.
+        # Floor it at 4, and cap at max_workers (with a sensible upper limit for Yahoo).
+        _mc = min(max(download_workers, 4), 12)
+        self.download_data(
+            max_collector_count=_mc,
+            delay=delay,
+            start=trading_date,
+            end=end_date,
+            check_data_length=check_data_length,
+        )
+        # Keep normalize/dump at the requested concurrency, with a sensible floor.
         self.max_workers = (
-            max(multiprocessing.cpu_count() - 2, 8)
-            if self.max_workers is None or self.max_workers <= 0
-            else max(self.max_workers, 8)
+            max(multiprocessing.cpu_count() - 2, 4)
+            if download_workers is None or download_workers <= 0
+            else max(download_workers, 4)
         )
         # normalize data against the existing quant_master dataset so the overlap trading day can be removed safely
         _class = getattr(self._cur_module, f"{self.normalize_class_name}Extend")
@@ -958,6 +1019,12 @@ class Run(BaseRun):
             max_workers=self.max_workers,
         )
         _dump.dump()
+
+        # verify dump integrity
+        verify_dump(quant_master_data_1d_dir, expected_end_date=end_date)
+
+        # clean up intermediate CSVs
+        self._cleanup_intermediate_files()
 
         # parse index
         _region = self.region.lower()

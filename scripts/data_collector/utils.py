@@ -328,8 +328,9 @@ def get_hs_stock_symbols() -> list:
             time.sleep(3)
 
         symbol_cache_path.parent.mkdir(parents=True, exist_ok=True)
-        if cache_symbols:
-            symbols |= cache_symbols
+        # Only persist the live symbols so delisted stocks are cleaned on the next run.
+        # The cache_symbol fallback is *only* for the in-memory merge above when the
+        # upstream API is unreachable — do NOT union it back here.
         with symbol_cache_path.open("wb") as fp:
             pickle.dump(symbols, fp)
 
