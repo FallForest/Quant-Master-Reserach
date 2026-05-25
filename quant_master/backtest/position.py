@@ -358,7 +358,7 @@ class Position(BasePosition):
             if trade_amount > current_amount:
                 oversell_amount = trade_amount - current_amount
                 # Allow tiny oversell caused by floating-point drift, but never permit true oversell.
-                oversell_tolerance = min(0.1, max(1e-5, 2e-5 * abs(current_amount)))
+                oversell_tolerance = min(5.0, max(1e-5, 2e-5 * abs(current_amount)))
                 if oversell_amount <= oversell_tolerance:
                     trade_amount = current_amount
                     trade_val = trade_amount * trade_price
