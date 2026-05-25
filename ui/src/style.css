@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Fira Sans', system-ui, sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  --color-brand-50: #EFF6FF;
+  --color-brand-100: #DBEAFE;
+  --color-brand-200: #BFDBFE;
+  --color-brand-400: #60A5FA;
+  --color-brand-500: #3B82F6;
+  --color-brand-600: #2563EB;
+  --color-brand-700: #1D4ED8;
+  --color-brand-800: #1E40AF;
+  --color-brand-900: #1E3A8A;
+  --color-brand-950: #172554;
+
+  --color-surface-0: #F8FAFC;
+  --color-surface-1: #FFFFFF;
+  --color-surface-2: #F1F5F9;
+  --color-surface-3: #E2E8F0;
+
+  --color-cta: #F59E0B;
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warn: #F59E0B;
+  --color-bull: #EF4444;
+  --color-bear: #10B981;
+}
+
+/* ===== Base ===== */
+* { box-sizing: border-box; }
+
+/* ===== Animations ===== */
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+
+@keyframes slide-in { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.animate-slide-in { animation: slide-in 0.3s ease-out; }
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ===== Sidebar ===== */
+.sidebar { transition: width 0.25s ease, transform 0.25s ease; }
+.sidebar-collapsed { width: 64px; }
+.sidebar-expanded { width: 240px; }
+.sidebar-collapsed .sidebar-label { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; }
+.sidebar-expanded .sidebar-label { opacity: 1; width: auto; }
+.sidebar-label { transition: opacity 0.2s ease, width 0.2s ease; }
+
+/* ===== Log scrollbar ===== */
+.log-scroll::-webkit-scrollbar { width: 6px; }
+.log-scroll::-webkit-scrollbar-track { background: #172554; }
+.log-scroll::-webkit-scrollbar-thumb { background: #3B82F6; border-radius: 3px; }
+
+/* ===== Chart canvas ===== */
+.chart-container { position: relative; }
+.chart-container canvas { display: block; width: 100%; }
+.chart-crosshair-label {
+  position: absolute;
+  pointer-events: none;
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+/* ===== Stock table hover ===== */
+.stock-row:hover { background: rgba(30,64,175,0.04); }
+.stock-row.selected { background: rgba(30,64,175,0.08); }
+
+/* ===== K-line period buttons ===== */
+.period-btn { transition: all 0.15s ease; }
+.period-btn.active { background: #1E40AF; color: #fff; }
+
+/* ===== Cursor ===== */
+.cursor-pointer { cursor: pointer; }
