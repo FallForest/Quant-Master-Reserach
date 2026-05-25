@@ -1,0 +1,22 @@
+# Market-State Conditional Target (20260525T073021Z)
+
+- status: `full_hard_gate_failed`
+- verdict: `NO_GO`
+- mode: `full`
+- smoke_no_2024_2026_load_or_eval: `False`
+- selected_candidate: `ridge_mstate_mstate_bull10_bear_dd10_vol_def_trainfit_rank_wtrend_a10`
+- selected_rule: `topk=40, n_drop=2`
+- 2023 costed IR / AnnRet / turnover: `2.821698` / `0.192039` / `0.102407`
+- 2024-2026 costed IR / AnnRet / turnover: `0.098760` / `0.009667` / `0.099321`
+- 2024-2026 max_drawdown: `-0.159245`
+- 2024-2026 finite_rows: `562` / `562`
+- 2024-2026 nonfinite_rows: `0` / `0`
+- 2024-2026 hard-gate thresholds (IR, AnnRet, |MDD|): `> 2.9` / `> 0.27` / `<= 0.25`
+- full_hard_gate_passed: `False`
+- finite_rows: `242` / `242`
+- validation_nonfinite_rows: `0`
+- fail_closed_finite_gate_passed: `True`
+- investigate_gate: `IR >= 2.0`
+- promotion_gate: `IR >= 2.3, AnnRet >= 0.16`
+- runtime_sec: `103.052`
+- summary_json: `C:\Users\15728\Desktop\Quant-Master-Research\examples\benchmarks\Transcendence\support\market_state_target_pre2024_summary_20260525T073021Z.json`

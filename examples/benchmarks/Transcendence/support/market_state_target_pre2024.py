@@ -5,6 +5,7 @@ import argparse
 import copy
 import csv
 import json
+import pickle
 import sys
 import time
 from dataclasses import asdict, dataclass
@@ -30,7 +31,7 @@ from quant_master.contrib.evaluate import risk_analysis
 from quant_master.contrib.strategy.signal_strategy import TopkDropoutStrategy
 
 
-EXPERIMENT_NAME = "style-neutral residual return target"
+EXPERIMENT_NAME = "market-state conditional target"
 RAW_START = "2019-01-01"
 TRAIN_START = "2020-01-01"
 TRAIN_END = "2022-12-31"
@@ -40,10 +41,11 @@ TEST_START = "2024-01-01"
 TEST_END = "2026-04-30"
 BASE_FIELDS = ("open", "high", "low", "close", "volume", "amount", "vwap", "factor", "change")
 INVESTIGATE_IR = 2.0
-PROMOTE_IR = 2.3
+PROMOTE_IR = 2.30
 PROMOTE_ANNRET = 0.16
 FULL_HARD_IR = 2.9
 FULL_HARD_ANNRET = 0.27
+FULL_HARD_MAX_DRAWDOWN_ABS = 0.25
 
 
 @dataclass(frozen=True)
@@ -51,8 +53,13 @@ class CandidateMetric:
     candidate_id: str
     model_family: str
     target_mode: str
+    state_policy: str
     alpha: float
+    bull_weight: float
+    bear_weight: float
+    volatile_weight: float
     feature_count: int
+    train_sample_count: int
     fit_sec: float
     train_rank_ic: float
     train_rank_ic_ir: float
@@ -152,18 +159,6 @@ def _count_calendar_rows(provider_uri: Path, start: str, end: str) -> int:
     return int(((idx >= pd.Timestamp(start)) & (idx <= pd.Timestamp(end))).sum())
 
 
-def _active_sample_mask(index: pd.MultiIndex, start: str, end: str, horizon: int) -> pd.Series:
-    dates = pd.DatetimeIndex(sorted(pd.unique(index.get_level_values(0))))
-    exit_map: Dict[pd.Timestamp, pd.Timestamp] = {}
-    for i, dt in enumerate(dates):
-        exit_pos = i + int(horizon)
-        if exit_pos < len(dates):
-            exit_map[pd.Timestamp(dt)] = pd.Timestamp(dates[exit_pos])
-    date_level = pd.to_datetime(index.get_level_values(0))
-    exit_dates = pd.Series(date_level.map(exit_map), index=index)
-    return (date_level >= pd.Timestamp(start)) & (date_level <= pd.Timestamp(end)) & (exit_dates <= pd.Timestamp(end))
-
-
 def _fit_ridge(x: np.ndarray, y: np.ndarray, alpha: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     t0 = time.perf_counter()
     mu = np.nanmean(x, axis=0)
@@ -176,99 +171,240 @@ def _fit_ridge(x: np.ndarray, y: np.ndarray, alpha: float) -> Tuple[np.ndarray, 
     return coef.astype(np.float64), mu.astype(np.float64), sd.astype(np.float64), float(time.perf_counter() - t0)
 
 
+def _fit_weighted_ridge(x: np.ndarray, y: np.ndarray, sample_weight: np.ndarray, alpha: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    t0 = time.perf_counter()
+    w = np.nan_to_num(sample_weight.astype(np.float64), nan=1.0, posinf=1.0, neginf=1.0).clip(0.05, 10.0)
+    w = w / (float(np.nanmean(w)) + 1e-12)
+    mu = np.average(np.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0), axis=0, weights=w)
+    centered = np.nan_to_num(x - mu, nan=0.0, posinf=0.0, neginf=0.0)
+    sd = np.sqrt(np.average(centered * centered, axis=0, weights=w))
+    sd[sd < 1e-8] = 1.0
+    xz = centered / sd
+    y_clean = np.nan_to_num(y.astype(np.float64), nan=0.0, posinf=0.0, neginf=0.0)
+    yz = y_clean - float(np.average(y_clean, weights=w))
+    xw = xz * np.sqrt(w)[:, None]
+    yw = yz * np.sqrt(w)
+    xtx = xw.T @ xw
+    coef = np.linalg.solve(xtx + np.eye(xtx.shape[0], dtype=np.float64) * float(alpha), xw.T @ yw)
+    return coef.astype(np.float64), mu.astype(np.float64), sd.astype(np.float64), float(time.perf_counter() - t0)
+
+
 def _predict_ridge(x: np.ndarray, coef: np.ndarray, mu: np.ndarray, sd: np.ndarray) -> np.ndarray:
     xz = np.nan_to_num((x - mu) / sd, nan=0.0, posinf=0.0, neginf=0.0)
     return xz @ coef
 
 
-def _fit_neutralizer(
-    y: pd.Series,
-    exposures: pd.DataFrame,
-    train_mask: pd.Series,
-    target_name: str,
-) -> Tuple[pd.Series, Dict[str, Any]]:
-    joined = pd.concat([y.rename("y"), exposures], axis=1).replace([np.inf, -np.inf], np.nan)
-    train = joined.loc[train_mask].dropna()
-    if train.empty:
-        raise RuntimeError(f"empty neutralizer train sample for {target_name}")
-    x_train = np.column_stack([np.ones(len(train), dtype=np.float64), train[list(exposures.columns)].to_numpy(np.float64)])
-    y_train = train["y"].to_numpy(np.float64)
-    coef = np.linalg.lstsq(x_train, y_train, rcond=None)[0].astype(np.float64)
-
-    all_x = joined[list(exposures.columns)].fillna(0.0).to_numpy(np.float64)
-    fitted = coef[0] + all_x @ coef[1:]
-    residual = pd.Series(joined["y"].to_numpy(np.float64) - fitted, index=joined.index, name=target_name)
-    residual[joined["y"].isna()] = np.nan
-    target = (_cs_rank_pct(residual) - 0.5) * 2.0
-    meta = {
-        "exposures": list(exposures.columns),
-        "intercept": float(coef[0]),
-        "coefficients": {col: float(coef[i + 1]) for i, col in enumerate(exposures.columns)},
-        "train_sample_count": int(len(train)),
-        "fit_window": [TRAIN_START, TRAIN_END],
-        "fit_rule": "OLS coefficients fit once on train labels/exposures only; reused unchanged for 2023 validation labels",
-    }
-    return target.rename(target_name), meta
+def _daily_rank_ic_series(pred: pd.Series, label: pd.Series) -> pd.Series:
+    panel = pd.concat([pred.rename("pred"), label.rename("label")], axis=1).dropna()
+    vals: List[Tuple[pd.Timestamp, float]] = []
+    for dt, g in panel.groupby(level=0, sort=False):
+        if len(g) < 20:
+            continue
+        corr = g["pred"].corr(g["label"], method="spearman")
+        if pd.notna(corr):
+            vals.append((pd.Timestamp(dt), float(corr)))
+    if not vals:
+        return pd.Series(dtype=float)
+    return pd.Series({dt: val for dt, val in vals}, dtype=float).sort_index()
 
 
-def _build_style_neutral_labels(
+def _mean_and_ir(s: pd.Series) -> Tuple[float, float]:
+    s = s.replace([np.inf, -np.inf], np.nan).dropna()
+    if len(s) < 2:
+        return float("nan"), float("nan")
+    mean = float(s.mean())
+    std = float(s.std(ddof=1))
+    return mean, float(mean / (std + 1e-12) * np.sqrt(252.0))
+
+
+def _resolve_workflow_config(path_text: str) -> Path:
+    path = Path(path_text).expanduser()
+    if path.is_absolute():
+        return path.resolve()
+
+    search_roots = [Path.cwd(), THIS_DIR, *THIS_DIR.parents]
+    seen = set()
+    for root in search_roots:
+        root_resolved = root.resolve()
+        if root_resolved in seen:
+            continue
+        seen.add(root_resolved)
+        candidate = root_resolved / path
+        if candidate.exists():
+            return candidate.resolve()
+    return (THIS_DIR.parent / path).resolve()
+
+
+def _active_sample_mask(index: pd.MultiIndex, start: str, end: str, horizon: int) -> pd.Series:
+    dates = pd.DatetimeIndex(sorted(pd.unique(index.get_level_values(0))))
+    exit_map: Dict[pd.Timestamp, pd.Timestamp] = {}
+    for i, dt in enumerate(dates):
+        exit_pos = i + int(horizon)
+        if exit_pos < len(dates):
+            exit_map[pd.Timestamp(dt)] = pd.Timestamp(dates[exit_pos])
+    date_level = pd.to_datetime(index.get_level_values(0))
+    exit_dates = pd.Series(date_level.map(exit_map), index=index)
+    return (date_level >= pd.Timestamp(start)) & (date_level <= pd.Timestamp(end)) & (exit_dates <= pd.Timestamp(end))
+
+
+def _build_market_state_table(
     panel_raw: pd.DataFrame,
-    feature_df: pd.DataFrame,
-    horizon: int,
-) -> Tuple[pd.DataFrame, Dict[str, Any], pd.Series]:
+    feature_index: pd.MultiIndex,
+) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     p = panel_raw.copy()
     for col in BASE_FIELDS:
         p[col] = pd.to_numeric(p[col], errors="coerce").astype(float)
     factor = p["factor"].replace(0.0, np.nan).fillna(1.0)
-    close = (p["close"] * factor).replace([np.inf, -np.inf], np.nan)
-    fwd = close.groupby(level=1, sort=False).shift(-int(horizon)) / (close.groupby(level=1, sort=False).shift(-1) + 1e-12) - 1.0
-    fwd = pd.to_numeric(fwd, errors="coerce").replace([np.inf, -np.inf], np.nan).reindex(feature_df.index)
-    market_rel = (fwd - fwd.groupby(level=0, sort=False).transform("mean")).rename("market_relative_forward_return")
-
-    exposure_candidates = {
-        "beta_60": feature_df["mn_excess_ret20__z"].reindex(feature_df.index),
-        "vol_20": feature_df["vol20__z"].reindex(feature_df.index),
-        "liquidity_amount": feature_df["liq_amount_z20__z"].reindex(feature_df.index),
-        "reversal_5": feature_df["rev_5__z"].reindex(feature_df.index),
+    close = (p["close"] * factor).replace([np.inf, -np.inf], np.nan).sort_index()
+    ret1 = close.groupby(level=1, sort=False).pct_change()
+    daily_mean = ret1.groupby(level=0, sort=False).mean()
+    daily_width = (ret1.groupby(level=0, sort=False).apply(lambda s: float((s > 0).mean())) - 0.5) * 2.0
+    state_raw = pd.DataFrame(
+        {
+            "mkt_ret20": daily_mean.rolling(20, min_periods=10).sum(),
+            "mkt_ret60": daily_mean.rolling(60, min_periods=20).sum(),
+            "mkt_vol20": daily_mean.rolling(20, min_periods=10).std(),
+            "mkt_width20": daily_width.rolling(20, min_periods=10).mean(),
+        }
+    ).shift(1)
+    train_state = state_raw.loc[(state_raw.index >= pd.Timestamp(TRAIN_START)) & (state_raw.index <= pd.Timestamp(TRAIN_END))]
+    thresholds = {
+        "ret20_q60": float(train_state["mkt_ret20"].quantile(0.60)),
+        "ret20_q40": float(train_state["mkt_ret20"].quantile(0.40)),
+        "ret60_q60": float(train_state["mkt_ret60"].quantile(0.60)),
+        "width_q60": float(train_state["mkt_width20"].quantile(0.60)),
+        "width_q40": float(train_state["mkt_width20"].quantile(0.40)),
+        "vol_q70": float(train_state["mkt_vol20"].quantile(0.70)),
     }
-    exposures = pd.DataFrame(exposure_candidates, index=feature_df.index).replace([np.inf, -np.inf], np.nan).fillna(0.0)
-    train_mask = _active_sample_mask(feature_df.index, TRAIN_START, TRAIN_END, int(horizon))
-    active_mask = _active_sample_mask(feature_df.index, TRAIN_START, VALID_END, int(horizon))
+    state_raw["bull"] = (
+        (state_raw["mkt_ret20"] >= thresholds["ret20_q60"])
+        & (state_raw["mkt_ret60"] >= thresholds["ret60_q60"])
+        & (state_raw["mkt_width20"] >= thresholds["width_q60"])
+    ).astype(float)
+    state_raw["bear"] = (
+        (state_raw["mkt_ret20"] <= thresholds["ret20_q40"])
+        & (state_raw["mkt_width20"] <= thresholds["width_q40"])
+    ).astype(float)
+    state_raw["volatile"] = (state_raw["mkt_vol20"] >= thresholds["vol_q70"]).astype(float)
+    state_by_sample = pd.DataFrame(index=feature_index)
+    sample_dates = pd.DatetimeIndex(feature_index.get_level_values(0))
+    for col in state_raw.columns:
+        state_by_sample[f"state_{col}"] = state_raw[col].reindex(sample_dates).to_numpy(dtype=float)
+    meta = {
+        "definition": "daily universe mean return, breadth, 20/60-day return and volatility shifted by one trading day",
+        "shift_rule": "all state variables use shift(1), so sample t only sees information available before t",
+        "threshold_fit_window": [TRAIN_START, TRAIN_END],
+        "thresholds": thresholds,
+        "state_columns": list(state_by_sample.columns),
+    }
+    return state_by_sample.replace([np.inf, -np.inf], np.nan), meta
 
-    labels = pd.DataFrame(index=feature_df.index)
+
+def _forward_return(
+    close: pd.Series,
+    horizon: int,
+    open_cost: float,
+    close_cost: float,
+) -> pd.Series:
+    entry = close.groupby(level=1, sort=False).shift(-1)
+    exit_ = close.groupby(level=1, sort=False).shift(-int(horizon))
+    return exit_ / (entry + 1e-12) - 1.0 - float(open_cost) - float(close_cost)
+
+
+def _build_market_state_targets(
+    panel_raw: pd.DataFrame,
+    feature_index: pd.MultiIndex,
+    state_df: pd.DataFrame,
+    policies: Sequence[str],
+    open_cost: float,
+    close_cost: float,
+) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+    p = panel_raw.copy()
+    for col in BASE_FIELDS:
+        p[col] = pd.to_numeric(p[col], errors="coerce").astype(float)
+    factor = p["factor"].replace(0.0, np.nan).fillna(1.0)
+    close = (p["close"] * factor).replace([np.inf, -np.inf], np.nan).sort_index()
+    labels = pd.DataFrame(index=feature_index)
     meta: Dict[str, Any] = {}
-    labels["market_relative_fwd_return_rank"] = (_cs_rank_pct(market_rel) - 0.5) * 2.0
-    labels.loc[~active_mask, "market_relative_fwd_return_rank"] = np.nan
-    meta["market_relative_fwd_return_rank"] = {
-        "definition": "cross-sectional rank of forward return minus same-day market mean",
-        "horizon_days": int(horizon),
-        "neutralizer_fit": "none; cross-sectional market mean removed per day",
-        "train_exit_guard": f"training samples require horizon exit <= {TRAIN_END}",
-        "smoke_future_guard": f"smoke panel ends at {VALID_END}; late-2023 labels without in-window exits are NaN",
-    }
+    ret5 = _forward_return(close, 5, open_cost, close_cost).reindex(feature_index)
+    ret10 = _forward_return(close, 10, open_cost, close_cost).reindex(feature_index)
+    ret20 = _forward_return(close, 20, open_cost, close_cost).reindex(feature_index)
+    market_ret5 = ret5.groupby(level=0, sort=False).transform("mean")
+    market_ret10 = ret10.groupby(level=0, sort=False).transform("mean")
+    market_ret20 = ret20.groupby(level=0, sort=False).transform("mean")
+    rel5 = ret5 - market_ret5
+    rel10 = ret10 - market_ret10
+    rel20 = ret20 - market_ret20
+    entry = close.groupby(level=1, sort=False).shift(-1)
+    path_returns_10 = pd.concat(
+        [close.groupby(level=1, sort=False).shift(-step) / (entry + 1e-12) - 1.0 for step in range(1, 11)],
+        axis=1,
+    )
+    adverse_dd10 = (-path_returns_10.min(axis=1, skipna=False)).clip(lower=0.0).reindex(feature_index)
+    dd_quality10 = (rel10 - 0.5 * adverse_dd10).replace([np.inf, -np.inf], np.nan)
+    defensive = (0.70 * rel5 + 0.30 * _cs_rank_pct(-pd.Series(state_df["state_volatile"].to_numpy(), index=feature_index)).fillna(0.5)).replace(
+        [np.inf, -np.inf], np.nan
+    )
 
-    target_specs = {
-        "beta_vol_residual_fwd_return_rank": ["beta_60", "vol_20"],
-        "beta_liquidity_reversal_residual_fwd_return_rank": ["beta_60", "liquidity_amount", "reversal_5"],
-        "beta_vol_liquidity_reversal_residual_fwd_return_rank": [
-            "beta_60",
-            "vol_20",
-            "liquidity_amount",
-            "reversal_5",
-        ],
-    }
-    for target_name, cols in target_specs.items():
-        target, fit_meta = _fit_neutralizer(market_rel, exposures[cols], train_mask, target_name)
-        labels[target_name] = target
-        labels.loc[~active_mask, target_name] = np.nan
-        meta[target_name] = {
-            "definition": "cross-sectional rank of train-fit style residual forward market-relative return",
-            "horizon_days": int(horizon),
-            "neutralizer": fit_meta,
+    for policy in policies:
+        if policy == "bull20_bear5_vol_def":
+            raw = rel10.copy()
+            raw = raw.where(state_df["state_bull"] < 0.5, rel20)
+            raw = raw.where(state_df["state_bear"] < 0.5, rel5)
+            raw = raw.where(state_df["state_volatile"] < 0.5, defensive)
+            horizon_guard = 20
+            formula = "neutral 10d excess; bull state switches to 20d excess; bear state switches to 5d excess; volatile state uses defensive 5d/state target"
+        elif policy == "bull10_bear_def_vol5":
+            raw = rel10.copy()
+            raw = raw.where(state_df["state_bull"] < 0.5, ret10 - market_ret10)
+            raw = raw.where(state_df["state_bear"] < 0.5, defensive)
+            raw = raw.where(state_df["state_volatile"] < 0.5, rel5)
+            horizon_guard = 10
+            formula = "neutral/bull 10d excess; bear state defensive; volatile state 5d excess"
+        elif policy == "bull20_bear_dd10_vol_dd10":
+            raw = rel10.copy()
+            raw = raw.where(state_df["state_bull"] < 0.5, rel20)
+            raw = raw.where(state_df["state_bear"] < 0.5, dd_quality10)
+            raw = raw.where(state_df["state_volatile"] < 0.5, dd_quality10)
+            horizon_guard = 20
+            formula = "neutral 10d excess; bull state 20d excess; bear/volatile states use 10d excess minus 0.5x adverse path drawdown"
+        elif policy == "bull10_bear_dd10_vol_def":
+            raw = rel10.copy()
+            raw = raw.where(state_df["state_bull"] < 0.5, rel10)
+            raw = raw.where(state_df["state_bear"] < 0.5, dd_quality10)
+            raw = raw.where(state_df["state_volatile"] < 0.5, defensive)
+            horizon_guard = 10
+            formula = "neutral/bull 10d excess; bear state 10d path-risk quality; volatile state defensive 5d/state target"
+        else:
+            raise ValueError(f"unknown market-state policy: {policy}")
+
+        train_mask = _active_sample_mask(feature_index, TRAIN_START, TRAIN_END, horizon_guard)
+        active_mask = _active_sample_mask(feature_index, TRAIN_START, VALID_END, horizon_guard)
+        train_vals = raw.loc[train_mask].dropna()
+        if train_vals.empty:
+            raise RuntimeError(f"no train values for market-state target {policy}")
+        q25, q50, q75 = train_vals.quantile([0.25, 0.50, 0.75]).astype(float).tolist()
+        scale = float((q75 - q25) / 1.349)
+        if not np.isfinite(scale) or scale < 1e-6:
+            scale = float(train_vals.std(ddof=1))
+        if not np.isfinite(scale) or scale < 1e-6:
+            scale = 1.0
+        target_col = f"mstate_{policy}_trainfit_rank"
+        normalized = np.tanh((raw - float(q50)) / scale)
+        labels[target_col] = (_cs_rank_pct(pd.Series(normalized, index=feature_index)) - 0.5) * 2.0
+        labels.loc[~active_mask, target_col] = np.nan
+        meta[target_col] = {
+            "policy": policy,
+            "max_horizon_days": int(horizon_guard),
+            "train_median_threshold": float(q50),
+            "train_iqr_scale": float(scale),
+            "train_sample_count": int(len(train_vals)),
+            "label_formula": formula,
+            "state_input_rule": "state columns are pre-shifted by one trading day and thresholds are fit on train only",
             "train_exit_guard": f"training samples require horizon exit <= {TRAIN_END}",
             "smoke_future_guard": f"smoke panel ends at {VALID_END}; late-2023 labels without in-window exits are NaN",
         }
-    return labels.replace([np.inf, -np.inf], np.nan), meta, exposures
+    return labels.replace([np.inf, -np.inf], np.nan), meta
 
 
 def _select_feature_cols(feature_cols: Sequence[str]) -> List[str]:
@@ -300,29 +436,6 @@ def _select_feature_cols(feature_cols: Sequence[str]) -> List[str]:
     return [c for c in feature_cols if c.endswith("__rank")][:24]
 
 
-def _daily_rank_ic_series(pred: pd.Series, label: pd.Series) -> pd.Series:
-    panel = pd.concat([pred.rename("pred"), label.rename("label")], axis=1).dropna()
-    vals: List[Tuple[pd.Timestamp, float]] = []
-    for dt, g in panel.groupby(level=0, sort=False):
-        if len(g) < 20:
-            continue
-        corr = g["pred"].corr(g["label"], method="spearman")
-        if pd.notna(corr):
-            vals.append((pd.Timestamp(dt), float(corr)))
-    if not vals:
-        return pd.Series(dtype=float)
-    return pd.Series({dt: val for dt, val in vals}, dtype=float).sort_index()
-
-
-def _mean_and_ir(s: pd.Series) -> Tuple[float, float]:
-    s = s.replace([np.inf, -np.inf], np.nan).dropna()
-    if len(s) < 2:
-        return float("nan"), float("nan")
-    mean = float(s.mean())
-    std = float(s.std(ddof=1))
-    return mean, float(mean / (std + 1e-12) * np.sqrt(252.0))
-
-
 def _make_predictions(
     dataset: pd.DataFrame,
     train_mask_by_target: Dict[str, pd.Series],
@@ -331,6 +444,8 @@ def _make_predictions(
     feature_cols: Sequence[str],
     target_modes: Sequence[str],
     alpha_grid: Sequence[float],
+    weight_grid: Sequence[str],
+    target_meta: Dict[str, Any],
 ) -> Tuple[List[Dict[str, Any]], Dict[str, Dict[str, pd.Series]]]:
     valid_df = dataset.loc[valid_mask]
     x_valid = valid_df[list(feature_cols)].astype(np.float64).values
@@ -346,40 +461,70 @@ def _make_predictions(
         x_train = train_df[list(feature_cols)].astype(np.float64).values
         y_train = train_df[target].astype(np.float64).values
         for alpha in alpha_grid:
-            candidate_id = f"ridge_styleneutral_{target}_a{float(alpha):g}"
-            coef, mu, sd, fit_sec = _fit_ridge(x_train, y_train, float(alpha))
-            pred_train = _cs_z(pd.Series(_predict_ridge(x_train, coef, mu, sd), index=train_df.index, name="score"))
-            pred_valid = _cs_z(pd.Series(_predict_ridge(x_valid, coef, mu, sd), index=valid_df.index, name="score"))
-            pred_test = (
-                _cs_z(pd.Series(_predict_ridge(x_test, coef, mu, sd), index=test_df.index, name="score"))
-                if test_df is not None and x_test is not None
-                else None
-            )
-            train_ic_s = _daily_rank_ic_series(pred_train, train_df[target])
-            valid_ic_s = _daily_rank_ic_series(pred_valid, valid_df[target])
-            train_ic, train_ic_ir = _mean_and_ir(train_ic_s)
-            valid_ic, valid_ic_ir = _mean_and_ir(valid_ic_s)
-            candidate_rows.append(
-                asdict(
-                    CandidateMetric(
-                        candidate_id=candidate_id,
-                        model_family="closed_form_ridge",
-                        target_mode=target,
-                        alpha=float(alpha),
-                        feature_count=int(len(feature_cols)),
-                        fit_sec=fit_sec,
-                        train_rank_ic=train_ic,
-                        train_rank_ic_ir=train_ic_ir,
-                        valid_rank_ic=valid_ic,
-                        valid_rank_ic_ir=valid_ic_ir,
+            for weight_mode in weight_grid:
+                weights = _sample_weights(train_df, weight_mode)
+                candidate_id = f"ridge_mstate_{target}_w{weight_mode}_a{float(alpha):g}"
+                coef, mu, sd, fit_sec = _fit_weighted_ridge(x_train, y_train, weights, float(alpha))
+                pred_train = _cs_z(pd.Series(_predict_ridge(x_train, coef, mu, sd), index=train_df.index, name="score"))
+                pred_valid = _cs_z(pd.Series(_predict_ridge(x_valid, coef, mu, sd), index=valid_df.index, name="score"))
+                pred_test = (
+                    _cs_z(pd.Series(_predict_ridge(x_test, coef, mu, sd), index=test_df.index, name="score"))
+                    if x_test is not None and test_df is not None
+                    else None
+                )
+                train_ic_s = _daily_rank_ic_series(pred_train, train_df[target])
+                valid_ic_s = _daily_rank_ic_series(pred_valid, valid_df[target])
+                train_ic, train_ic_ir = _mean_and_ir(train_ic_s)
+                valid_ic, valid_ic_ir = _mean_and_ir(valid_ic_s)
+                w_meta = _weight_meta(weight_mode)
+                candidate_rows.append(
+                    asdict(
+                        CandidateMetric(
+                            candidate_id=candidate_id,
+                            model_family="closed_form_weighted_ridge",
+                            target_mode=target,
+                            state_policy=str(target_meta[target]["policy"]),
+                            alpha=float(alpha),
+                            bull_weight=float(w_meta["bull_weight"]),
+                            bear_weight=float(w_meta["bear_weight"]),
+                            volatile_weight=float(w_meta["volatile_weight"]),
+                            feature_count=int(len(feature_cols)),
+                            train_sample_count=int(len(train_df)),
+                            fit_sec=fit_sec,
+                            train_rank_ic=train_ic,
+                            train_rank_ic_ir=train_ic_ir,
+                            valid_rank_ic=valid_ic,
+                            valid_rank_ic_ir=valid_ic_ir,
+                        )
                     )
                 )
-            )
-            pred_map: Dict[str, pd.Series] = {"train": pred_train, "valid": pred_valid}
-            if pred_test is not None:
-                pred_map["test"] = pred_test
-            predictions[candidate_id] = pred_map
+                pred_map: Dict[str, pd.Series] = {"train": pred_train, "valid": pred_valid}
+                if pred_test is not None:
+                    pred_map["test"] = pred_test
+                predictions[candidate_id] = pred_map
     return candidate_rows, predictions
+
+
+def _weight_meta(weight_mode: str) -> Dict[str, float]:
+    if weight_mode == "flat":
+        return {"bull_weight": 1.0, "bear_weight": 1.0, "volatile_weight": 1.0}
+    if weight_mode == "defensive":
+        return {"bull_weight": 0.85, "bear_weight": 1.35, "volatile_weight": 1.25}
+    if weight_mode == "trend":
+        return {"bull_weight": 1.25, "bear_weight": 0.90, "volatile_weight": 1.10}
+    raise ValueError(f"unknown weight_mode: {weight_mode}")
+
+
+def _sample_weights(df: pd.DataFrame, weight_mode: str) -> np.ndarray:
+    meta = _weight_meta(weight_mode)
+    w = np.ones(len(df), dtype=np.float64)
+    if "state_bull" in df:
+        w *= np.where(df["state_bull"].to_numpy(dtype=float) >= 0.5, float(meta["bull_weight"]), 1.0)
+    if "state_bear" in df:
+        w *= np.where(df["state_bear"].to_numpy(dtype=float) >= 0.5, float(meta["bear_weight"]), 1.0)
+    if "state_volatile" in df:
+        w *= np.where(df["state_volatile"].to_numpy(dtype=float) >= 0.5, float(meta["volatile_weight"]), 1.0)
+    return w
 
 
 def _get_report_for_day_freq(portfolio_metric_dict: Dict[str, Any]) -> pd.DataFrame:
@@ -562,87 +707,8 @@ def _run_backtest_with_report(
         return metric, pd.DataFrame()
 
 
-def _style_concentration_diagnostic(
-    report: pd.DataFrame,
-    signal: pd.DataFrame,
-    exposures: pd.DataFrame,
-    topk: int,
-) -> Dict[str, Any]:
-    daily_excess = (report["return"].astype(float) - report["bench"].astype(float) - report["cost"].astype(float)).rename("excess")
-    signal_s = signal["score"].sort_index()
-    rows: List[Dict[str, Any]] = []
-    for style_name, exposure_s in exposures.items():
-        style_r = (_cs_rank_pct(exposure_s.reindex(signal_s.index)) - 0.5) * 2.0
-        bucket_rows: List[Tuple[pd.Timestamp, float, float, float]] = []
-        for dt, g in pd.concat([signal_s.rename("score"), style_r.rename("style")], axis=1).dropna().groupby(level=0, sort=False):
-            picks = g.sort_values("score", ascending=False).head(int(topk))
-            if len(picks) < max(5, int(topk) // 2):
-                continue
-            low = float((picks["style"] <= -1.0 / 3.0).mean())
-            mid = float(((picks["style"] > -1.0 / 3.0) & (picks["style"] < 1.0 / 3.0)).mean())
-            high = float((picks["style"] >= 1.0 / 3.0).mean())
-            bucket_rows.append((pd.Timestamp(dt), low, mid, high))
-        if not bucket_rows:
-            rows.append({"style_bucket": style_name, "dominance_share": float("nan"), "days": 0})
-            continue
-        bucket_df = pd.DataFrame(bucket_rows, columns=["datetime", "low", "mid", "high"]).set_index("datetime").sort_index()
-        aligned = pd.concat([daily_excess, bucket_df], axis=1).dropna()
-        if aligned.empty:
-            rows.append({"style_bucket": style_name, "dominance_share": float("nan"), "days": 0})
-            continue
-        bucket_contrib = {
-            "low": float((aligned["excess"] * aligned["low"]).sum()),
-            "mid": float((aligned["excess"] * aligned["mid"]).sum()),
-            "high": float((aligned["excess"] * aligned["high"]).sum()),
-        }
-        abs_contrib = {k: abs(v) for k, v in bucket_contrib.items()}
-        total = float(sum(abs_contrib.values()))
-        dominant_bucket = max(abs_contrib, key=abs_contrib.get) if abs_contrib else ""
-        dominance = float(max(abs_contrib.values()) / total) if total > 1e-12 else 0.0
-        rows.append(
-            {
-                "style_bucket": style_name,
-                "dominance_share": dominance,
-                "dominant_bucket": dominant_bucket,
-                "days": int(len(aligned)),
-                "mean_low_weight": float(aligned["low"].mean()),
-                "mean_mid_weight": float(aligned["mid"].mean()),
-                "mean_high_weight": float(aligned["high"].mean()),
-                "bucket_net_contribution": bucket_contrib,
-            }
-        )
-    worst = max((_safe_float(r["dominance_share"]) for r in rows if np.isfinite(_safe_float(r["dominance_share"]))), default=float("nan"))
-    return {
-        "implemented": True,
-        "method": "proxy: selected top-k names are bucketed low/mid/high by predeclared style rank; daily net excess is allocated by selected bucket weights",
-        "threshold": 0.50,
-        "passed": bool(np.isfinite(worst) and worst <= 0.50),
-        "max_bucket_dominance": worst,
-        "buckets": rows,
-        "caveat": "Proxy diagnostic uses selected scores and style exposure signs, not exact portfolio holdings/attribution.",
-    }
-
-
-def _resolve_workflow_config(path_text: str) -> Path:
-    path = Path(path_text).expanduser()
-    if path.is_absolute():
-        return path.resolve()
-
-    search_roots = [Path.cwd(), THIS_DIR, *THIS_DIR.parents]
-    seen = set()
-    for root in search_roots:
-        root_resolved = root.resolve()
-        if root_resolved in seen:
-            continue
-        seen.add(root_resolved)
-        candidate = root_resolved / path
-        if candidate.exists():
-            return candidate.resolve()
-    return (THIS_DIR.parent / path).resolve()
-
-
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="Style-neutral residual return target quick-smoke / strict full eval.")
+    p = argparse.ArgumentParser(description="Market-state conditional target quick-smoke / strict full eval.")
     p.add_argument("--mode", choices=["smoke", "full"], default="smoke")
     p.add_argument("--provider-uri", default=".qmData/cn_data")
     p.add_argument("--market", default="csi300")
@@ -652,12 +718,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--open-cost", type=float, default=0.0005)
     p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--policy-grid", default="bull20_bear5_vol_def,bull10_bear_def_vol5,bull20_bear_dd10_vol_dd10,bull10_bear_dd10_vol_def")
+    p.add_argument("--weight-grid", default="flat,defensive,trend")
     p.add_argument("--alpha-grid", default="10")
-    p.add_argument("--topk-grid", default="35,40")
+    p.add_argument("--topk-grid", default="40")
     p.add_argument("--ndrop-grid", default="2,3")
     p.add_argument("--min-names-per-day", type=int, default=40)
-    p.add_argument("--horizon", type=int, default=2)
-    p.add_argument("--output-prefix", default="style_neutral_label_pre2024")
+    p.add_argument("--output-prefix", default="market_state_target_pre2024")
     return p
 
 
@@ -730,12 +797,22 @@ def main() -> int:
         panel_raw, _coverage_df = base._build_panel(provider_uri, str(args.market), RAW_START, data_end, BASE_FIELDS)
         feature_df, all_feature_cols = base._build_features_and_targets(panel_raw)
         feature_cols = _select_feature_cols(all_feature_cols)
-        labels_df, label_meta, exposures = _build_style_neutral_labels(panel_raw, feature_df, int(args.horizon))
-        dataset = pd.concat([feature_df[feature_cols], labels_df], axis=1).replace([np.inf, -np.inf], np.nan)
+        policy_grid = [x.strip() for x in str(args.policy_grid).split(",") if x.strip()]
+        weight_grid = [x.strip() for x in str(args.weight_grid).split(",") if x.strip()]
+        state_df, state_meta = _build_market_state_table(panel_raw, feature_df.index)
+        labels_df, label_meta = _build_market_state_targets(
+            panel_raw,
+            feature_df.index,
+            state_df=state_df,
+            policies=policy_grid,
+            open_cost=float(args.open_cost),
+            close_cost=float(args.close_cost),
+        )
+        state_cols = list(state_df.columns)
+        dataset = pd.concat([feature_df[feature_cols], state_df, labels_df], axis=1).replace([np.inf, -np.inf], np.nan)
         day_counts = dataset.groupby(level=0)[feature_cols[0]].count()
         good_days = day_counts[day_counts >= int(args.min_names_per_day)].index
         dataset = dataset.loc[dataset.index.get_level_values(0).isin(good_days)].copy()
-        exposures = exposures.reindex(dataset.index)
 
         dt_idx = pd.to_datetime(dataset.index.get_level_values(0))
         valid_mask = _mask(dt_idx, VALID_START, VALID_END)
@@ -744,9 +821,9 @@ def main() -> int:
             raise RuntimeError("empty 2023 validation split")
         if mode == "full" and (test_mask is None or not test_mask.any()):
             raise RuntimeError("empty 2024-2026 test split")
-        target_modes = list(label_meta)
+        target_modes = [c for c in label_meta]
         train_mask_by_target = {
-            target: _active_sample_mask(dataset.index, TRAIN_START, TRAIN_END, int(args.horizon)) & dataset[target].notna()
+            target: _active_sample_mask(dataset.index, TRAIN_START, TRAIN_END, int(label_meta[target]["max_horizon_days"]))
             for target in target_modes
         }
         alpha_grid = [float(x) for x in str(args.alpha_grid).split(",") if x.strip()]
@@ -764,6 +841,8 @@ def main() -> int:
             feature_cols=feature_cols,
             target_modes=target_modes,
             alpha_grid=alpha_grid,
+            weight_grid=weight_grid,
+            target_meta=label_meta,
         )
         expected_valid_rows = _count_calendar_rows(provider_uri, VALID_START, VALID_END)
         exchange_cache: Dict[Tuple[str, str, float, float, float, str], Any] = {}
@@ -814,12 +893,6 @@ def main() -> int:
         selected_key = (str(selected["candidate_id"]), int(selected["topk"]), int(selected["n_drop"]))
         selected_report = valid_reports[selected_key]
         selected_signal = predictions[str(selected["candidate_id"])]["valid"].rename("score").to_frame("score").sort_index()
-        style_diag = _style_concentration_diagnostic(
-            selected_report,
-            selected_signal,
-            exposures,
-            int(selected["topk"]),
-        )
 
         _write_csv(paths["candidates_csv"], candidate_rows)
         _write_csv(paths["validation_backtests_csv"], valid_bt_rows)
@@ -866,7 +939,11 @@ def main() -> int:
                 )
 
         finite_gate_pass = bool(not finite_gate_errors)
-        status, verdict = _selection_status(_safe_float(selected["ir"]), _safe_float(selected["annret"]), finite_gate_pass)
+        status, verdict = _selection_status(
+            _safe_float(selected["ir"]),
+            _safe_float(selected["annret"]),
+            finite_gate_pass,
+        )
         full_hard_gate = None
         if mode == "full":
             if test_metric is None:
@@ -875,6 +952,7 @@ def main() -> int:
                 not test_finite_gate_errors
                 and _safe_float(test_metric["ir"]) > FULL_HARD_IR
                 and _safe_float(test_metric["annret"]) > FULL_HARD_ANNRET
+                and abs(_safe_float(test_metric["max_drawdown"])) <= FULL_HARD_MAX_DRAWDOWN_ABS
                 and int(test_metric["finite_rows"]) == int(expected_test_rows)
                 and int(test_metric["nonfinite_rows"]) == 0
             )
@@ -888,6 +966,8 @@ def main() -> int:
                 "costed_ir_actual": test_metric["ir"],
                 "costed_annret_required_gt": FULL_HARD_ANNRET,
                 "costed_annret_actual": test_metric["annret"],
+                "max_drawdown_abs_required_lte": FULL_HARD_MAX_DRAWDOWN_ABS,
+                "max_drawdown_actual": test_metric["max_drawdown"],
                 "selection_locked_from_validation_only": True,
                 "selection_candidate_id": str(selected["candidate_id"]),
                 "selection_topk": int(selected["topk"]),
@@ -914,10 +994,14 @@ def main() -> int:
                     "full_mode": "locked one-shot final test only" if mode == "full" else "available via --mode full",
                     "test_window_if_full": [TEST_START, TEST_END],
                     "full_does_not_tune_using_2024_2026": True,
-                    "model": "closed-form ridge only",
+                    "model": "closed-form weighted ridge",
+                    "market_state": state_meta,
                     "candidate_targets": label_meta,
                     "feature_count": int(len(feature_cols)),
                     "features": list(feature_cols),
+                    "state_columns": state_cols,
+                    "policy_grid": policy_grid,
+                    "weight_grid": weight_grid,
                     "alpha_grid": alpha_grid,
                     "portfolio_grid": [{"topk": topk, "n_drop": ndrop} for topk, ndrop in combos],
                     "selection_rule": "2023 net-cost information ratio, tie by annualized return",
@@ -926,19 +1010,15 @@ def main() -> int:
                         "promotion_costed_ir_min": PROMOTE_IR,
                         "promotion_annret_min": PROMOTE_ANNRET,
                     },
+                    "promotion_gate": {
+                        "costed_ir_min": PROMOTE_IR,
+                        "costed_annret_min": PROMOTE_ANNRET,
+                    },
                 },
                 "selected_candidate": {
                     **selected_candidate,
                     "topk": int(selected["topk"]),
                     "n_drop": int(selected["n_drop"]),
-                },
-                "dataset_shape": {
-                    "rows_after_good_day_filter": int(len(dataset)),
-                    "good_days": int(len(good_days)),
-                },
-                "candidate_counts": {
-                    "total": int(len(candidate_rows)),
-                    "validation_backtests": int(len(valid_bt_rows)),
                 },
                 "validation_metrics": {
                     "costed_ir": selected["ir"],
@@ -971,7 +1051,6 @@ def main() -> int:
                     "fail_closed_errors": finite_gate_errors,
                     "rule": "every validation report must have row_count == finite_rows == validation trading rows",
                 },
-                "style_concentration_diagnostic": style_diag,
                 "runtime_sec_total": float(time.perf_counter() - t0_all),
             }
         )
@@ -979,7 +1058,7 @@ def main() -> int:
         paths["summary_md"].write_text(
             "\n".join(
                 [
-                    f"# Style-Neutral Residual Return Target ({stamp})",
+                    f"# Market-State Conditional Target ({stamp})",
                     "",
                     f"- status: `{status}`",
                     f"- verdict: `{verdict}`",
@@ -994,7 +1073,7 @@ def main() -> int:
                             f"- 2024-2026 max_drawdown: `{_safe_float(test_metric['max_drawdown']):.6f}`",
                             f"- 2024-2026 finite_rows: `{int(test_metric['finite_rows'])}` / `{expected_test_rows}`",
                             f"- 2024-2026 nonfinite_rows: `{int(test_metric['nonfinite_rows'])}` / `0`",
-                            f"- 2024-2026 hard-gate thresholds (IR, AnnRet): `> {FULL_HARD_IR}` / `> {FULL_HARD_ANNRET}`",
+                            f"- 2024-2026 hard-gate thresholds (IR, AnnRet, |MDD|): `> {FULL_HARD_IR}` / `> {FULL_HARD_ANNRET}` / `<= {FULL_HARD_MAX_DRAWDOWN_ABS}`",
                             f"- full_hard_gate_passed: `{bool(full_hard_gate and full_hard_gate['passed'])}`",
                         ]
                         if mode == "full" and test_metric is not None
@@ -1003,8 +1082,6 @@ def main() -> int:
                     f"- finite_rows: `{int(selected['finite_rows'])}` / `{expected_valid_rows}`",
                     f"- validation_nonfinite_rows: `{int(selected['nonfinite_rows'])}`",
                     f"- fail_closed_finite_gate_passed: `{finite_gate_pass}`",
-                    f"- style_concentration_max_bucket: `{_safe_float(style_diag.get('max_bucket_dominance')):.6f}`",
-                    f"- style_concentration_passed: `{style_diag.get('passed')}`",
                     f"- investigate_gate: `IR >= {INVESTIGATE_IR}`",
                     f"- promotion_gate: `IR >= {PROMOTE_IR}, AnnRet >= {PROMOTE_ANNRET}`",
                     f"- runtime_sec: `{summary['runtime_sec_total']:.3f}`",
@@ -1015,7 +1092,7 @@ def main() -> int:
         )
         if mode == "full":
             return 0 if verdict == "FULL_HARD_GATE_PASS" else 2
-        return 0 if verdict in {"PROMOTE", "INVESTIGATE"} else 2
+        return 0 if verdict == "PROMOTE" else 2
     except Exception as exc:  # noqa: BLE001
         summary.update(
             {
@@ -1029,7 +1106,7 @@ def main() -> int:
         paths["summary_md"].write_text(
             "\n".join(
                 [
-                    f"# Style-Neutral Residual Return Target ({stamp})",
+                    f"# Market-State Conditional Target ({stamp})",
                     "",
                     "- status: `failed`",
                     "- verdict: `NO_GO`",

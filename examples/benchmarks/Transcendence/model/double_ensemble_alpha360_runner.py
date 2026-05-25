@@ -15,8 +15,19 @@ import numpy as np
 import pandas as pd
 from ruamel.yaml import YAML
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-THIS_DIR = Path(__file__).resolve().parent
+THIS_FILE = Path(__file__).resolve()
+THIS_DIR = THIS_FILE.parent
+BENCHMARK_ROOT = THIS_DIR.parent
+
+
+def _find_repo_root(start: Path) -> Path:
+    for path in [start, *start.parents]:
+        if (path / "quant_master").is_dir() and (path / "examples").is_dir():
+            return path
+    raise RuntimeError(f"cannot locate Quant-Master-Research repo root from {start}")
+
+
+REPO_ROOT = _find_repo_root(THIS_FILE)
 ARTIFACT_DIR = REPO_ROOT / "artifacts" / "hard_gate_pass"
 LOCAL_PROVIDER = (REPO_ROOT / ".qmData" / "cn_data").resolve()
 
@@ -38,9 +49,9 @@ CONFIGS = {
     / "benchmarks"
     / "BeatDoubleEnsemble"
     / "workflow_config_cost_aware_doubleensemble_Alpha158_2026_local.yaml",
-    "alpha158_regime_de_only": THIS_DIR
+    "alpha158_regime_de_only": BENCHMARK_ROOT
     / "workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_windowC_2016_2022_valid2023_Alpha158_2026_csi300.yaml",
-    "alpha360_de_only": THIS_DIR
+    "alpha360_de_only": BENCHMARK_ROOT
     / "workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_universe_Alpha360_2026_csi300.yaml",
 }
 

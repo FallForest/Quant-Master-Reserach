@@ -1,0 +1,22 @@
+# Drawdown-Conditional Path-Risk Label (20260525T070734Z)
+
+- status: `full_hard_gate_failed`
+- verdict: `NO_GO`
+- mode: `full`
+- smoke_no_2024_2026_load_or_eval: `False`
+- selected_candidate: `ridge_ddcond_ddcond_10d_lam0p5_trainfit_rank_a10`
+- selected_rule: `topk=40, n_drop=2`
+- 2023 costed IR / AnnRet / turnover: `2.482617` / `0.191759` / `0.100617`
+- 2024-2026 costed IR / AnnRet / turnover: `0.113301` / `0.012299` / `0.100222`
+- 2024-2026 max_drawdown: `-0.181248`
+- 2024-2026 finite_rows: `562` / `562`
+- 2024-2026 nonfinite_rows: `0` / `0`
+- 2024-2026 hard-gate thresholds (IR, AnnRet): `> 2.9` / `> 0.27`
+- full_hard_gate_passed: `False`
+- finite_rows: `242` / `242`
+- validation_nonfinite_rows: `0`
+- fail_closed_finite_gate_passed: `True`
+- investigate_gate: `IR >= 2.0`
+- promotion_gate: `IR >= 2.3, AnnRet >= 0.16, turnover <= 0.16`
+- runtime_sec: `119.504`
+- summary_json: `C:\Users\15728\Desktop\Quant-Master-Research\examples\benchmarks\Transcendence\support\drawdown_conditional_label_pre2024_summary_20260525T070734Z.json`
