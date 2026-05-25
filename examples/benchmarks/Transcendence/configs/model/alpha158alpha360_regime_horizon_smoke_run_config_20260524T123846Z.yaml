@@ -1,0 +1,143 @@
+quant_master_init:
+  provider_uri: C:\Users\15728\Desktop\Quant-Master-Research\.qmData\cn_data
+  region: cn
+  kernels: 1
+  joblib_backend: threading
+market: csi300
+benchmark: SH000300
+data_handler_config: &id001
+  start_time: '2019-01-01'
+  end_time: '2026-04-30'
+  fit_start_time: '2020-01-01'
+  fit_end_time: '2022-12-31'
+  instruments: csi300
+port_analysis_config: &id002
+  strategy:
+    class: TopkDropoutStrategy
+    module_path: quant_master.contrib.strategy
+    kwargs:
+      signal: <PRED>
+      topk: 20
+      n_drop: 1
+  backtest:
+    start_time: '2024-01-01'
+    end_time: '2024-03-31'
+    account: 100000000
+    benchmark: SH000300
+    exchange_kwargs:
+      limit_threshold: 0.095
+      deal_price: close
+      open_cost: 0.0005
+      close_cost: 0.0015
+      min_cost: 5
+task:
+  model:
+    class: RegimeHorizonCostEnsembleModel
+    module_path: quant_master.contrib.model.regime_horizon_cost_ensemble
+    kwargs:
+      horizon_model_specs:
+      - name: de_h1
+        model_type: double_ensemble
+        horizon: 1
+        model_kwargs:
+          base_model: gbm
+          loss: mse
+          num_models: 1
+          enable_sr: false
+          enable_fs: false
+          alpha1: 1
+          alpha2: 1
+          bins_sr: 10
+          bins_fs: 5
+          decay: 0.5
+          sample_ratios:
+          - 0.8
+          - 0.7
+          - 0.6
+          - 0.5
+          - 0.4
+          sub_weights:
+          - 1
+          - 1
+          - 1
+          epochs: 4
+          colsample_bytree: 0.8879
+          learning_rate: 0.2
+          subsample: 0.8789
+          lambda_l1: 205.6999
+          lambda_l2: 580.9768
+          max_depth: 8
+          num_leaves: 210
+          num_threads: 4
+          verbosity: -1
+          random_state: 42
+      - name: lgb_h5
+        model_type: lightgbm
+        horizon: 5
+        model_kwargs:
+          loss: mse
+          early_stopping_rounds: 20
+          num_boost_round: 80
+          colsample_bytree: 0.8879
+          learning_rate: 0.03
+          subsample: 0.8789
+          lambda_l1: 10.0
+          lambda_l2: 120.0
+          max_depth: 8
+          min_data_in_leaf: 120
+          num_leaves: 255
+          num_threads: 4
+          seed: 42
+          feature_fraction_seed: 42
+          bagging_seed: 42
+          data_random_seed: 42
+      topk: 30
+      search_step: 0.5
+      turnover_penalty: 0.00025
+      risk_penalty: 0.08
+      memory_boost_grid:
+      - 0.0
+      use_rank_score: true
+      zscore_clip: 2.8
+      neutralize_daily_mean: true
+      enforce_horizon_monotonic: true
+      monotonic_direction: decreasing
+      regime_consensus_quantiles:
+      - 0.5
+      regime_disagreement_quantiles:
+      - 0.5
+      min_regime_samples: 120
+      random_state: 42
+  dataset:
+    class: DatasetH
+    module_path: quant_master.data.dataset
+    kwargs:
+      handler:
+        class: Alpha158
+        module_path: quant_master.contrib.data.handler
+        kwargs: *id001
+      segments:
+        train:
+        - '2020-01-01'
+        - '2022-12-31'
+        valid:
+        - '2023-01-01'
+        - '2023-12-31'
+        test:
+        - '2024-01-01'
+        - '2024-03-31'
+  record:
+  - class: SignalRecord
+    module_path: quant_master.workflow.record_temp
+    kwargs:
+      model: <MODEL>
+      dataset: <DATASET>
+  - class: SigAnaRecord
+    module_path: quant_master.workflow.record_temp
+    kwargs:
+      ana_long_short: false
+      ann_scaler: 252
+  - class: PortAnaRecord
+    module_path: quant_master.workflow.record_temp
+    kwargs:
+      config: *id002

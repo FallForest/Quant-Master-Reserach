@@ -1,0 +1,151 @@
+{
+  "timestamp_utc": "2026-05-24T04:57:40Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache.py",
+  "tracking_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns",
+  "test_period": {
+    "start": "2024-01-01",
+    "end": "2026-04-30"
+  },
+  "costs": {
+    "open": 0.0005,
+    "close": 0.0015
+  },
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "windows": [
+    {
+      "name": "full",
+      "start": "2024-01-01",
+      "end": "2026-04-30"
+    }
+  ],
+  "results": [
+    {
+      "action": "base40",
+      "status": "ok",
+      "start": "2024-01-01",
+      "end": "2026-04-30",
+      "freq": "1day",
+      "strategy": "TopkDropoutStrategy",
+      "strategy_kwargs": {
+        "topk": 40,
+        "n_drop": 2
+      },
+      "source_paths": [
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\pred.pkl"
+      ],
+      "signal_rows": 168600,
+      "signal_days": 562,
+      "metrics": {
+        "annret": 0.2704249361319419,
+        "ir": 2.806380274751091,
+        "max_drawdown": -0.05202813673085516,
+        "turnover": 0.10151452046087941,
+        "rows": 562,
+        "elapsed_sec": 3.909598200000005
+      },
+      "hard_gate_pass": false,
+      "artifacts": {
+        "report_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\base40_20240101_20260430_report.pkl",
+        "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\base40_20240101_20260430_report.csv",
+        "positions_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\base40_20240101_20260430_positions.pkl",
+        "positions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\base40_20240101_20260430_positions.csv",
+        "indicator_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\base40_20240101_20260430_indicators.pkl"
+      },
+      "notes": "base run 7406e470 TopkDropoutStrategy topk=40 n_drop=2",
+      "window": "full"
+    },
+    {
+      "action": "gru45",
+      "status": "ok",
+      "start": "2024-01-01",
+      "end": "2026-04-30",
+      "freq": "1day",
+      "strategy": "TopkDropoutStrategy",
+      "strategy_kwargs": {
+        "topk": 45,
+        "n_drop": 4
+      },
+      "source_paths": [
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\pred.pkl",
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1a085ff9b5a34f408a44ad74055fc5da\\artifacts\\pred.pkl",
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\773bd6d8413b4bb0b388a63a6b5b6a86\\artifacts\\pred.pkl"
+      ],
+      "signal_rows": 168600,
+      "signal_days": 562,
+      "metrics": {
+        "annret": 0.24462956122955587,
+        "ir": 2.9447364812322685,
+        "max_drawdown": -0.05335155599542862,
+        "turnover": 0.1751598812361867,
+        "rows": 562,
+        "elapsed_sec": 4.482089599999995
+      },
+      "hard_gate_pass": false,
+      "artifacts": {
+        "report_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\gru45_20240101_20260430_report.pkl",
+        "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\gru45_20240101_20260430_report.csv",
+        "positions_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\gru45_20240101_20260430_positions.pkl",
+        "positions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\gru45_20240101_20260430_positions.csv",
+        "indicator_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\gru45_20240101_20260430_indicators.pkl"
+      },
+      "notes": "rank ensemble 7406e470/1a085ff9/773bd6d weights=0.4/0.2/0.4 topk=45 n_drop=4",
+      "window": "full"
+    },
+    {
+      "action": "factor_augmented_meta",
+      "status": "ok",
+      "start": "2024-01-01",
+      "end": "2026-04-30",
+      "freq": "1day",
+      "strategy": "BufferedTopkWeightStrategy",
+      "strategy_kwargs": {
+        "topk": 55,
+        "hold_topk": 85,
+        "weight_mode": "equal",
+        "rebalance_mode": "weekly",
+        "rebalance_interval": 1
+      },
+      "source_paths": [
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_candidate_pred_20260522T120515Z.pkl",
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_summary_20260522T120515Z.json"
+      ],
+      "signal_rows": 167456,
+      "signal_days": 562,
+      "metrics": {
+        "annret": 0.3386261002570884,
+        "ir": 2.8208783790760923,
+        "max_drawdown": -0.04089447967616616,
+        "turnover": 0.2522513294744337,
+        "rows": 562,
+        "elapsed_sec": 3.1569096999999147
+      },
+      "hard_gate_pass": false,
+      "artifacts": {
+        "report_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\factor_augmented_meta_20240101_20260430_report.pkl",
+        "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\factor_augmented_meta_20240101_20260430_report.csv",
+        "positions_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\factor_augmented_meta_20240101_20260430_positions.pkl",
+        "positions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\factor_augmented_meta_20240101_20260430_positions.csv",
+        "indicator_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\factor_augmented_meta_20240101_20260430_indicators.pkl"
+      },
+      "notes": "candidate_pred_pkl and strategy_execution loaded from factor_augmented_meta_summary_20260522T120515Z.json",
+      "window": "full"
+    }
+  ],
+  "errors": [],
+  "load_meta": {
+    "run_dirs": {
+      "7406e470": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad",
+      "1a085ff9": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1a085ff9b5a34f408a44ad74055fc5da",
+      "773bd6d": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\773bd6d8413b4bb0b388a63a6b5b6a86"
+    },
+    "factor_summary_path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_summary_20260522T120515Z.json"
+  },
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\replay_action_reports_cache_summary_20260524T045740Z.json",
+    "metrics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z\\replay_action_reports_cache_metrics_20260524T045740Z.csv",
+    "out_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\replay_action_reports_cache_20260524T045740Z"
+  }
+}

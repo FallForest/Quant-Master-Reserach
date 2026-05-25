@@ -1,0 +1,218 @@
+{
+  "timestamp_utc": "2026-05-24T06:32:36Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\regime_switch_strategy_replay_probe.py",
+  "objective": "continuous trade-level replay of date-switched cached action signals; no report splicing",
+  "tracking_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns",
+  "test_period": {
+    "start": "2024-01-01",
+    "end": "2026-04-30"
+  },
+  "costs": {
+    "open": 0.0005,
+    "close": 0.0015
+  },
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "hard_gate_pass": false,
+  "freq": "1day",
+  "transition_policy": {
+    "transition_cash_days": 1,
+    "liquidate_on_switch": true,
+    "cash_windows": [
+      {
+        "start": "2024-09-09",
+        "end": "2024-10-07"
+      }
+    ],
+    "note": "Transition uses real SELL orders for inherited holdings; exchange tradability, deal prices, rounding, and close_cost remain active. It does not mutate positions directly.",
+    "events": [
+      {
+        "date": "2024-07-01",
+        "from_action": "base40",
+        "to_action": "factor_augmented_meta",
+        "transition_cash_days": 1
+      }
+    ],
+    "cash_window_events": [
+      {
+        "date": "2024-09-09",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-10",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-11",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-12",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-13",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-18",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-19",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-20",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-23",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-24",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-25",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-26",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-27",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      },
+      {
+        "date": "2024-09-30",
+        "start": "2024-09-09",
+        "end": "2024-10-07",
+        "scheduled_action": "factor_augmented_meta"
+      }
+    ],
+    "transition_decision_count": 15,
+    "sell_order_count": 108,
+    "sell_order_amount_requested": 132305798.09937902
+  },
+  "schedule": [
+    {
+      "action": "base40",
+      "start": "2024-01-01",
+      "end": "2024-06-30"
+    },
+    {
+      "action": "factor_augmented_meta",
+      "start": "2024-07-01",
+      "end": "2026-04-30"
+    }
+  ],
+  "decision_counts": {
+    "factor_augmented_meta": 430,
+    "base40": 117
+  },
+  "action_specs": {
+    "base40": {
+      "strategy": "TopkDropoutStrategy",
+      "strategy_kwargs": {
+        "topk": 40,
+        "n_drop": 2
+      },
+      "source_paths": [
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\pred.pkl"
+      ],
+      "notes": "base run 7406e470 TopkDropoutStrategy topk=40 n_drop=2"
+    },
+    "factor_augmented_meta": {
+      "strategy": "BufferedTopkWeightStrategy",
+      "strategy_kwargs": {
+        "topk": 55,
+        "hold_topk": 85,
+        "weight_mode": "equal",
+        "rebalance_mode": "weekly",
+        "rebalance_interval": 1
+      },
+      "source_paths": [
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_candidate_pred_20260522T120515Z.pkl",
+        "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_summary_20260522T120515Z.json"
+      ],
+      "notes": "candidate_pred_pkl and strategy_execution loaded from factor_augmented_meta_summary_20260522T120515Z.json"
+    }
+  },
+  "load_meta": {
+    "run_dirs": {
+      "7406e470": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad",
+      "1a085ff9": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1a085ff9b5a34f408a44ad74055fc5da",
+      "773bd6d": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\773bd6d8413b4bb0b388a63a6b5b6a86"
+    },
+    "factor_summary_path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_summary_20260522T120515Z.json"
+  },
+  "metrics": {
+    "annret": -0.025570920697948134,
+    "ir": -0.16362007495764622,
+    "max_drawdown": -0.3060206174850464,
+    "turnover": 0.18024123362469346,
+    "rows": 562,
+    "elapsed_sec": 4.433319400000073
+  },
+  "window_metrics": [
+    {
+      "action": "base40",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "annret": 0.3114535731194424,
+      "ir": 2.9503560119575547,
+      "max_drawdown": -0.04814207314335963,
+      "turnover": 0.1073890710141374,
+      "rows": 117
+    },
+    {
+      "action": "factor_augmented_meta",
+      "start": "2024-07-01",
+      "end": "2026-04-30",
+      "annret": -0.20728458787137988,
+      "ir": -1.172178921716713,
+      "max_drawdown": -0.3060206174850464,
+      "turnover": 0.21934078878723964,
+      "rows": 445
+    }
+  ],
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_20260524T063130Z\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_summary_20260524T063130Z.json",
+    "report_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_20260524T063130Z\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_report_20260524T063130Z.pkl",
+    "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_20260524T063130Z\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_report_20260524T063130Z.csv",
+    "positions_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_20260524T063130Z\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_positions_20260524T063130Z.pkl",
+    "indicators_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_20260524T063130Z\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_indicators_20260524T063130Z.pkl",
+    "out_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\regime_switch_strategy_replay_probe_base40_factor_liq1_cashgap_20260524T063130Z"
+  }
+}
