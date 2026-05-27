@@ -1,0 +1,168 @@
+{
+  "timestamp_utc": "2026-05-27T06:01:52Z",
+  "task_id": "Q-LONG-HISTORY-OOS-PANEL-FEASIBILITY",
+  "repo_root": "C:\\Users\\15728\\Desktop\\Quant-Master-Research",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_long_history_oos_panel_feasibility.py",
+  "verdict": "NO_GO",
+  "gate_pass": false,
+  "panel_generation_feasible_now": false,
+  "panel_generated": false,
+  "panel_path": null,
+  "no_2024_plus_data_loaded_or_evaluated": true,
+  "run_policy": {
+    "action": "NO_RUN_TRAINING_NO_PANEL",
+    "reason": "Existing interfaces require large training/backtest work or unsafe full prediction artifact loads.",
+    "time_limit_for_this_audit": "static audit only; expected < 5 seconds",
+    "memory_limit_for_this_audit": "small text/json/csv metadata only; no prediction panels loaded"
+  },
+  "available_entrypoints": [
+    {
+      "name": "long_history_model_retrain",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\long_history_model_retrain.py",
+      "available": true,
+      "can_generate_2020_2021_oos_now": false,
+      "action": "NO_RUN",
+      "blockers": [
+        "Hard-coded TEST_START=2024-01-01; candidate_pred is generated only for the 2024-2026 test split.",
+        "Hard-coded TEST_END=2026-04-30; _build_long_history_panel reads feature bins through 2026-04-30.",
+        "Entrypoint trains a LightGBMRegressor before prediction; no load-pretrained or predict-only mode is present.",
+        "Training uses n_jobs=8 and defaults to n_estimators=800 / num_leaves=127, which is not a bounded smoke job.",
+        "Entrypoint runs validation and 2024-2026 test backtests after fitting."
+      ],
+      "required_changes": [
+        "Add CLI split overrides for train/valid/apply windows and raw end date, with an enforce-pre2024 guard.",
+        "Add predict-panel-only output mode that skips portfolio backtests and never opens 2024+ windows.",
+        "Add smoke limits such as max instruments, max dates, n_estimators <= 20, n_jobs <= 2, and a wall-clock budget.",
+        "Optionally add a train-before-2020/apply-2020 or train-before-2021/apply-2021 OOS fold definition."
+      ],
+      "estimated_runtime": "Current defaults are a large local LightGBM + backtest run; prior artifact took long enough to produce multi-MB outputs, not an approved smoke.",
+      "estimated_memory": "Unbounded by CLI; constructs csi300 multi-year panel and dense float32 matrices for train/valid/test."
+    },
+    {
+      "name": "long_history_second_order_ensemble",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\long_history_second_order_ensemble.py",
+      "available": true,
+      "can_generate_2020_2021_oos_now": false,
+      "action": "NO_RUN",
+      "blockers": [
+        "Uses fixed published factor_meta and long_history candidate prediction files, not a generator for new 2020-2021 OOS panels.",
+        "Loads full prediction pickle artifacts before slicing, which is not acceptable for a strict no-2024+ feasibility run.",
+        "Runs same-window portfolio backtests after creating the ensemble signal."
+      ],
+      "required_changes": [
+        "Refactor loading so CSV rows can be date-filtered before any score panel is materialized, or require pre-filtered pre-2024 artifacts.",
+        "Parameterize candidate signal paths and require their declared coverage to be pre-2024 only.",
+        "Add a no-backtest panel-export mode for 2020-2021 OOS only."
+      ],
+      "estimated_runtime": "Static blend itself is modest, but current entrypoint loads full post-2023 pkl panels and runs backtests; not safe under this task.",
+      "estimated_memory": "Depends on full published pkl panel size; not bounded before load."
+    }
+  ],
+  "related_config": {
+    "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml",
+    "available": true,
+    "contains_2024_2026_windows": true,
+    "contains_heavy_double_ensemble_defaults": true,
+    "audit_note": "Config is useful for port_analysis defaults only; its task dataset/test windows and model defaults are not a light 2020-2021 OOS generator."
+  },
+  "coverage_smoke": {
+    "available": true,
+    "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_second_order_coverage_smoke_summary_20260527T054849Z.json",
+    "gate_pass": false,
+    "eligible_complete_signal_count": 0,
+    "verdict": "NO_GO",
+    "legal_pre2024_selection_possible": false,
+    "no_2024_plus_used_for_gate": true,
+    "next_step_recommendation": "Do not continue to weight selection: no two distinct compliant signals with complete 2020-2023 coverage and pairwise rank correlation below 0.85 were found. Generate a low-cost csi300 2020-2021 OOS panel only if the lead approves a bounded prediction job."
+  },
+  "artifact_inventory": [
+    {
+      "name": "factor_augmented_meta_candidate_pred_20260522T120515Z.csv",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_candidate_pred_20260522T120515Z.csv",
+      "exists": true,
+      "bytes": 6847364,
+      "policy": "not_loaded",
+      "note": "Prediction artifacts were intentionally not opened; existing coverage smoke reports no complete 2020-2023 compliant signal."
+    },
+    {
+      "name": "factor_augmented_meta_candidate_pred_20260522T120515Z.pkl",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_candidate_pred_20260522T120515Z.pkl",
+      "exists": true,
+      "bytes": 2045635,
+      "policy": "not_loaded",
+      "note": "Prediction artifacts were intentionally not opened; existing coverage smoke reports no complete 2020-2023 compliant signal."
+    },
+    {
+      "name": "long_history_retrain_candidate_pred_20260522T134241Z.csv",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\long_history_retrain_candidate_pred_20260522T134241Z.csv",
+      "exists": true,
+      "bytes": 6828328,
+      "policy": "not_loaded",
+      "note": "Prediction artifacts were intentionally not opened; existing coverage smoke reports no complete 2020-2023 compliant signal."
+    },
+    {
+      "name": "long_history_retrain_candidate_pred_20260522T134241Z.pkl",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\long_history_retrain_candidate_pred_20260522T134241Z.pkl",
+      "exists": true,
+      "bytes": 2022244,
+      "policy": "not_loaded",
+      "note": "Prediction artifacts were intentionally not opened; existing coverage smoke reports no complete 2020-2023 compliant signal."
+    },
+    {
+      "name": "long_history_second_order_candidate_pred_20260522T153041Z.csv",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\long_history_second_order_candidate_pred_20260522T153041Z.csv",
+      "exists": true,
+      "bytes": 3807753,
+      "policy": "not_loaded",
+      "note": "Prediction artifacts were intentionally not opened; existing coverage smoke reports no complete 2020-2023 compliant signal."
+    },
+    {
+      "name": "long_history_second_order_candidate_pred_20260522T153041Z.pkl",
+      "path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\long_history_second_order_candidate_pred_20260522T153041Z.pkl",
+      "exists": true,
+      "bytes": 1177039,
+      "policy": "not_loaded",
+      "note": "Prediction artifacts were intentionally not opened; existing coverage smoke reports no complete 2020-2023 compliant signal."
+    }
+  ],
+  "required_changes": {
+    "minimum_to_make_feasible": [
+      "Add an explicit pre-2024 OOS panel mode to long_history_model_retrain.",
+      "Make train/valid/apply windows CLI-controlled with a hard assert max_date < 2024-01-01.",
+      "Add smoke bounds: max instruments/days, n_estimators <= 20, n_jobs <= 2, skip backtests, and write only candidate_pred CSV/summary.",
+      "Use one legal fold such as train <= 2019-12-31 and apply 2020, or train <= 2020-12-31 and apply 2021, depending on available data."
+    ],
+    "not_required_for_feasibility": [
+      "Do not run 2024-2026 backtests.",
+      "Do not run full double ensemble / GPU / multi-model training.",
+      "Do not load full post-2023 prediction pickle artifacts."
+    ]
+  },
+  "estimated_runtime_memory": {
+    "this_audit": {
+      "runtime": "< 5 seconds",
+      "memory": "< 100 MB"
+    },
+    "current_retrain_entrypoint": {
+      "runtime": "NO-GO estimate: unbounded large LightGBM/backtest job under defaults",
+      "memory": "NO-GO estimate: csi300 multi-year feature panel plus dense train/valid/test arrays"
+    },
+    "hypothetical_bounded_smoke_after_changes": {
+      "runtime": "target <= 5-10 minutes with <=20 estimators, <=2 jobs, one year apply, no backtest",
+      "memory": "target <= 2 GB with instrument/date caps and no full 2024+ materialization"
+    }
+  },
+  "no_go_reasons": [
+    "No existing audited entrypoint can generate a bounded 2020-2021 OOS panel without code changes.",
+    "Current long_history_model_retrain hard-codes 2024-2026 test generation and performs full LightGBM training/backtests.",
+    "Current long_history_second_order_ensemble consumes fixed post-2023 prediction pickle artifacts and backtests the eval window.",
+    "Existing pre-2024 coverage smoke found zero complete compliant signals for legal weight selection."
+  ],
+  "next_step_recommendation": "Do not generate a panel through current interfaces. If lead approves code changes, add a bounded pre-2024 panel-export mode to long_history_model_retrain and run a single csi300 2020 or 2021 fold.",
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_long_history_oos_panel_feasibility_summary_20260527T060152Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_long_history_oos_panel_feasibility_summary_20260527T060152Z.md",
+    "entrypoints_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_long_history_oos_panel_feasibility_entrypoints_20260527T060152Z.csv",
+    "artifacts_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_long_history_oos_panel_feasibility_artifacts_20260527T060152Z.csv"
+  }
+}

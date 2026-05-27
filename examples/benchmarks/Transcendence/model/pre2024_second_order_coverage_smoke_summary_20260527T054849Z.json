@@ -1,0 +1,45 @@
+{
+  "timestamp_utc": "2026-05-27T05:48:49Z",
+  "task_id": "Q-LONG-HISTORY-PRE2024-COVERAGE-SMOKE",
+  "artifact_root": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence",
+  "verdict": "NO_GO",
+  "gate_pass": false,
+  "legal_pre2024_selection_possible": false,
+  "no_2024_plus_used_for_gate": true,
+  "selection_window": {
+    "start": "2020-01-01",
+    "end_exclusive": "2024-01-01"
+  },
+  "gate": {
+    "required_complete_signal_count": 2,
+    "required_years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "pairwise_abs_rank_corr_lt": 0.85
+  },
+  "artifact_count": 11,
+  "eligible_complete_signal_count": 0,
+  "eligible_complete_signals": [],
+  "pairwise_correlation_count": 0,
+  "max_abs_pairwise_corr": null,
+  "paths": {
+    "coverage_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_second_order_coverage_smoke_coverage_20260527T054849Z.csv",
+    "correlations_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_second_order_coverage_smoke_correlations_20260527T054849Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_second_order_coverage_smoke_summary_20260527T054849Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\pre2024_second_order_coverage_smoke_summary_20260527T054849Z.md"
+  },
+  "next_step_recommendation": "Do not continue to weight selection: no two distinct compliant signals with complete 2020-2023 coverage and pairwise rank correlation below 0.85 were found. Generate a low-cost csi300 2020-2021 OOS panel only if the lead approves a bounded prediction job.",
+  "audit_safety": {
+    "pkl_only_policy": "skipped because pkl cannot be filtered before loading",
+    "csv_policy": "scan only pre-2024 rows and stop at first 2024+ row",
+    "entry_scripts_reviewed": [
+      "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\long_history_model_retrain.py",
+      "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\long_history_second_order_ensemble.py",
+      "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\factor_augmented_meta_ensemble.py"
+    ],
+    "entry_script_risk": "reviewed scripts target 2024-2026 or high-cost ensemble/backtest paths; smoke did not run them"
+  }
+}

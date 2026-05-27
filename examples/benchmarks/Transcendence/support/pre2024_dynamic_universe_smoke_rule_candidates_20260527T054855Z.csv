@@ -1,0 +1,2 @@
+rule_id,market,data_end,definition,uses_2024_plus,trains_model,runs_backtest
+pre2024_amount_volume_change_factor_liquid_topk,csiall,2023-12-31,"For each pre-2024 year, require >=90% tradable days on amount>0, volume>0, finite change, factor>0; keep instruments above yearly amount q0.60, capped by 2020-2023 mean amount top 1000.",False,False,False

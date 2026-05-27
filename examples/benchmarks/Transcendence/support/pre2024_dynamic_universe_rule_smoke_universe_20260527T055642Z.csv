@@ -1,0 +1,5 @@
+year,market,active_candidates,dynamic_pool_size,liquidity_threshold_amount,year_to_year_pool_turnover_proxy,uses_2024_plus
+2020,csiall,3538,803,144215.7625,,False
+2021,csiall,4045,871,137959.20625000002,0.15027624309392262,False
+2022,csiall,4455,901,130572.37656250001,0.1228813559322034,False
+2023,csiall,4817,935,114420.55937499998,0.1454545454545455,False
