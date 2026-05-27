@@ -1,0 +1,107 @@
+{
+  "scan_time_utc": "2026-05-27T05:19:47Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_fixed_rule_stability_eval.py",
+  "experiment_name": "pre-2024 fixed execution rule stability audit",
+  "status": "completed",
+  "verdict": "NO_GO",
+  "blocker": "",
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_fixed_rule_stability_eval_lowmem_smoke_summary_20260527T051947Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_fixed_rule_stability_eval_lowmem_smoke_summary_20260527T051947Z.md",
+    "rules_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_fixed_rule_stability_eval_lowmem_smoke_rules_20260527T051947Z.csv",
+    "year_metrics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_fixed_rule_stability_eval_lowmem_smoke_year_metrics_20260527T051947Z.csv",
+    "candidate_pool_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_fixed_rule_stability_eval_lowmem_smoke_candidate_pool_20260527T051947Z.csv"
+  },
+  "config": {
+    "provider_uri": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\.qmData\\cn_data",
+    "market": "csi300",
+    "benchmark": "SH000300",
+    "families": [
+      "market_state"
+    ],
+    "years": [
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "topk_grid": [
+      40
+    ],
+    "ndrop_grid": [
+      2
+    ],
+    "max_candidates_per_family": 1,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "workers": 1,
+    "low_memory": true
+  },
+  "gate_thresholds": {
+    "combined_2020_2023_ir": ">= 1.8",
+    "each_year_ir": "> 0.0",
+    "year_ir_gt_1_count": ">= 3/4",
+    "combined_mdd": ">= -0.12",
+    "combined_turnover": "<= 0.16",
+    "finite_rows": "each annual and combined report row finite and complete; nonfinite=0"
+  },
+  "leakage_guardrails": {
+    "raw_lookback_start": "2019-01-01",
+    "train_window": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "audit_window": [
+      "2020-01-01",
+      "2023-12-31"
+    ],
+    "load_end": "2023-12-31",
+    "loads_or_evaluates_2024_2026": false,
+    "guard": "years > 2023 are rejected and raw panel end_date is hard-coded to 2023-12-31"
+  },
+  "low_memory_controls": {
+    "thread_env_defaults": {
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    },
+    "quant_master_kernels": 1,
+    "joblib_backend": "threading",
+    "artifact_mode": "streaming_csv_rows; summary keeps top/pass rows only"
+  },
+  "rule_count": 1,
+  "candidate_pool_count": 12,
+  "selected_candidate_count": 1,
+  "gate_pass_count": 0,
+  "family_candidate_counts": {
+    "market_state": 12
+  },
+  "family_selected_counts": {
+    "market_state": 1
+  },
+  "coverage_instruments": 405,
+  "feature_count": 20,
+  "elapsed_sec": 182.7246194999998,
+  "top_rules": [
+    {
+      "family": "market_state",
+      "candidate_id": "ridge_mstate_mstate_bull20_bear_dd10_vol_dd10_trainfit_rank_wdefensive_a10",
+      "topk": 40,
+      "n_drop": 2,
+      "combined_ir": 1.3663285739939983,
+      "combined_annret": 0.1412096728033923,
+      "combined_mdd": -0.23890716091683795,
+      "combined_turnover": 0.09836506737038306,
+      "year_ir_gt_1_count": 3,
+      "gate_pass": false,
+      "fail_reasons": [
+        "year_ir_not_positive=2020",
+        "combined_ir=1.36633<1.8",
+        "combined_mdd=-0.238907<-0.12"
+      ]
+    }
+  ],
+  "gate_pass_rules": []
+}
