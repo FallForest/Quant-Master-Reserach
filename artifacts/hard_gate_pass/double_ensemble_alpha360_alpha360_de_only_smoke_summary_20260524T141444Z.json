@@ -1,0 +1,70 @@
+{
+  "timestamp_utc": "2026-05-24T14:14:44Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\double_ensemble_alpha360_runner.py",
+  "command": "examples/benchmarks/Transcendence/double_ensemble_alpha360_runner.py --mode smoke --candidate alpha360_de_only",
+  "candidate": "alpha360_de_only",
+  "mode": "smoke",
+  "status": "ok",
+  "blocker": "",
+  "workflow_config_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_universe_Alpha360_2026_csi300.yaml",
+  "artifacts": {
+    "run_config_yaml": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_smoke_run_config_20260524T141444Z.yaml",
+    "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_smoke_report_20260524T141444Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_smoke_summary_20260524T141444Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_smoke_summary_20260524T141444Z.md",
+    "hard_gate_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_smoke_hard_gate_20260524T141444Z.json"
+  },
+  "protocol": {
+    "train": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "valid_select": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "smoke_test": [
+      "2024-01-01",
+      "2024-03-31"
+    ],
+    "local_provider": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\.qmData\\cn_data",
+    "no_2024_2026_tuning": true,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27,
+      "finite_rows_eq": 562
+    }
+  },
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "mlflow": {
+    "experiment_id": "582781085518054612",
+    "recorder_id": "8f31310da82844a3bfb83021249c4165",
+    "artifact_uri": "file:C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns/582781085518054612/8f31310da82844a3bfb83021249c4165/artifacts"
+  },
+  "validation_metrics": {
+    "rank_ic": 0.01782596335344752,
+    "rank_ic_ir": 2.0858375164278278,
+    "rank_ic_days": 58
+  },
+  "test_metrics": {
+    "costed_annret": 0.6508470648483081,
+    "costed_ir": 2.5797371099836317,
+    "max_drawdown": -0.08789284617126975,
+    "turnover": 0.10382878335008995,
+    "rows": 58,
+    "finite_rows": 58,
+    "nonfinite_rows": 0,
+    "start": "2024-01-02",
+    "end": "2024-03-29",
+    "note": "smoke mode uses a bounded test range and reduced model settings; not hard-gate eligible"
+  },
+  "split_metrics": [],
+  "runtime_sec": 412.9471044999991
+}

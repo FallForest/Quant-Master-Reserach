@@ -1,0 +1,47 @@
+{
+  "timestamp_utc": "2026-05-25T06:25:54Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\double_ensemble_alpha360_runner.py",
+  "command": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\double_ensemble_alpha360_runner.py --mode full --candidate alpha360_de_only --output-prefix double_ensemble_alpha360_alpha360_de_only_rerun",
+  "candidate": "alpha360_de_only",
+  "mode": "full",
+  "status": "failed",
+  "blocker": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\15728\\\\Desktop\\\\Quant-Master-Research\\\\examples\\\\benchmarks\\\\Transcendence\\\\model\\\\workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_universe_Alpha360_2026_csi300.yaml'",
+  "workflow_config_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_universe_Alpha360_2026_csi300.yaml",
+  "artifacts": {
+    "run_config_yaml": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_rerun_alpha360_de_only_full_run_config_20260525T062554Z.yaml",
+    "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_rerun_alpha360_de_only_full_report_20260525T062554Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_rerun_alpha360_de_only_full_summary_20260525T062554Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_rerun_alpha360_de_only_full_summary_20260525T062554Z.md",
+    "hard_gate_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_rerun_alpha360_de_only_full_hard_gate_20260525T062554Z.json"
+  },
+  "protocol": {
+    "train": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "valid_select": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "smoke_test": [
+      "2024-01-01",
+      "2024-03-31"
+    ],
+    "local_provider": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\.qmData\\cn_data",
+    "no_2024_2026_tuning": true,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27,
+      "finite_rows_eq": 562
+    }
+  },
+  "verdict": "ERROR",
+  "hard_gate_pass": false,
+  "runtime_sec": 0.0012843999993492616
+}

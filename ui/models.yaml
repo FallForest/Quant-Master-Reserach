@@ -1,0 +1,338 @@
+# ============================================================
+#  模型注册表 — 加模型只需在此追加条目，重启后端即可生效
+# ============================================================
+#  id:            唯一标识符（前端下拉框的 value）
+#  label:         显示名称
+#  category:      分组（树模型 / 集成模型 / 简单模型 / 神经网络 / 自定义）
+#  desc:          描述文字
+#  handler:       默认数据处理器 (alpha158 / alpha360)
+#  import_path:   模块路径
+#  class_name:    类名
+#  default_params: 构造函数默认参数（可为空 {}）
+
+# ---- Handlers ----
+handlers:
+  alpha158:
+    label: Alpha158 (158 特征)
+    import_path: quant_master.contrib.data.handler
+    class_name: Alpha158
+  alpha360:
+    label: Alpha360 (360 特征)
+    import_path: quant_master.contrib.data.handler
+    class_name: Alpha360
+
+# ---- Models ----
+models:
+  # === 树模型 ===
+  lgb:
+    label: LightGBM
+    category: 树模型
+    desc: 梯度提升树，训练快、效果好，推荐首选
+    handler: alpha158
+    import_path: quant_master.contrib.model.gbdt
+    class_name: LGBModel
+    default_params:
+      loss: mse
+      colsample_bytree: 0.8879
+      learning_rate: 0.2
+      subsample: 0.8789
+      lambda_l1: 205.6999
+      lambda_l2: 580.9768
+      max_depth: 8
+      num_leaves: 210
+      num_threads: 20
+      verbosity: -1
+
+  # === 集成模型 ===
+  double_ensemble:
+    label: Double Ensemble
+    category: 集成模型
+    desc: 样本重加权 + 特征选择的迭代集成，效果最稳
+    handler: alpha158
+    import_path: quant_master.contrib.model.double_ensemble
+    class_name: DEnsembleModel
+    default_params:
+      base_model: gbm
+      loss: mse
+      num_models: 3
+      enable_sr: true
+      enable_fs: true
+      alpha1: 1
+      alpha2: 1
+      bins_sr: 10
+      bins_fs: 5
+      decay: 0.5
+      sample_ratios: [0.8, 0.7, 0.6, 0.5, 0.4]
+      sub_weights: [1, 1, 1]
+      epochs: 20
+      colsample_bytree: 0.8879
+      learning_rate: 0.2
+      subsample: 0.8789
+      lambda_l1: 205.6999
+      lambda_l2: 580.9768
+      max_depth: 8
+      num_leaves: 210
+      num_threads: 20
+      verbosity: -1
+
+  multiseed_de:
+    label: Multi-Seed DE
+    category: 集成模型
+    desc: 多随机种子 Double Ensemble，降低方差
+    handler: alpha158
+    import_path: quant_master.contrib.model.multiseed_double_ensemble
+    class_name: MultiSeedDEnsembleModel
+    default_params: { loss: mse, num_models: 3, epochs: 20 }
+
+  cost_aware_de:
+    label: Cost-Aware DE
+    category: 集成模型
+    desc: 考虑交易成本的 Double Ensemble
+    handler: alpha158
+    import_path: quant_master.contrib.model.cost_aware_double_ensemble
+    class_name: CostAwareDEnsembleModel
+    default_params: { loss: mse, num_models: 3, epochs: 20 }
+
+  low_turnover_de:
+    label: Low Turnover DE
+    category: 集成模型
+    desc: 低换手 Double Ensemble，减少调仓频率
+    handler: alpha158
+    import_path: quant_master.contrib.model.low_turnover_double_ensemble
+    class_name: LowTurnoverDEnsembleModel
+    default_params: { loss: mse, num_models: 3, epochs: 20 }
+
+  residual_de:
+    label: Residual DE
+    category: 集成模型
+    desc: 残差学习 Double Ensemble
+    handler: alpha158
+    import_path: quant_master.contrib.model.residual_double_ensemble_lgb
+    class_name: ResidualDEnsembleLGBModel
+    default_params: { loss: mse, num_models: 3, epochs: 20 }
+
+  adaptive_ensemble:
+    label: Adaptive Ensemble
+    category: 集成模型
+    desc: 自适应加权集成，动态选择子模型
+    handler: alpha158
+    import_path: quant_master.contrib.model.adaptive_ensemble
+    class_name: AdaptiveEnsembleModel
+    default_params: { loss: mse }
+
+  meta_ensemble:
+    label: Meta Ensemble
+    category: 集成模型
+    desc: 元学习集成，自动选择最优模型组合
+    handler: alpha158
+    import_path: quant_master.contrib.model.meta_ensemble
+    class_name: MetaEnsembleModel
+    default_params: { loss: mse }
+
+  dynamic_meta_ensemble:
+    label: Dynamic Meta Ensemble
+    category: 集成模型
+    desc: 动态元集成，根据市场状态切换策略
+    handler: alpha158
+    import_path: quant_master.contrib.model.dynamic_meta_ensemble
+    class_name: DynamicMetaEnsembleModel
+    default_params: { loss: mse }
+
+  de_residual_lstm:
+    label: DE + Residual LSTM
+    category: 集成模型
+    desc: 树模型 + LSTM 残差混合
+    handler: alpha158
+    import_path: quant_master.contrib.model.double_ensemble_residual_cn_lstm
+    class_name: DoubleEnsembleResidualCnLstmModel
+    default_params: { loss: mse, num_models: 3, epochs: 20 }
+
+  tree_cn_lstm_rl:
+    label: Tree+CNN+LSTM+RL
+    category: 集成模型
+    desc: 树模型 + CNN + LSTM + 强化学习混合
+    handler: alpha158
+    import_path: quant_master.contrib.model.tree_cn_lstm_rl
+    class_name: TreeCnLstmRLModel
+    default_params: {}
+
+  # === 简单模型 ===
+  linear:
+    label: 线性模型
+    category: 简单模型
+    desc: OLS 回归，速度最快，适合基线对比
+    handler: alpha158
+    import_path: quant_master.contrib.model.linear
+    class_name: LinearModel
+    default_params: { estimator: ols }
+
+  pretrained_signal:
+    label: Pretrained Signal
+    category: 简单模型
+    desc: 加载已有信号，适合信号组合场景
+    handler: alpha158
+    import_path: quant_master.contrib.model.pretrained_signal
+    class_name: PretrainedSignalModel
+    default_params: {}
+
+  # === 神经网络 ===
+  lstm:
+    label: LSTM
+    category: 神经网络
+    desc: 长短期记忆网络，捕捉时序依赖
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_lstm
+    class_name: LSTM
+    default_params:
+      d_feat: 6
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.0
+      n_epochs: 200
+      lr: 0.001
+      GPU: 0
+      seed: 0
+      metric: mse
+      save_path: model/lstm
+
+  gru:
+    label: GRU
+    category: 神经网络
+    desc: 门控循环单元，比 LSTM 更轻量
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_gru
+    class_name: GRU
+    default_params:
+      d_feat: 6
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.0
+      n_epochs: 200
+      lr: 0.001
+      GPU: 0
+      seed: 0
+      metric: mse
+      save_path: model/gru
+
+  alstm:
+    label: Attention LSTM
+    category: 神经网络
+    desc: 带注意力机制的 LSTM
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_alstm
+    class_name: ALSTM
+    default_params:
+      d_feat: 6
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.0
+      n_epochs: 200
+      lr: 0.001
+      GPU: 0
+      seed: 0
+      metric: mse
+      save_path: model/alstm
+
+  transformer:
+    label: Transformer
+    category: 神经网络
+    desc: 自注意力编码器，并行处理全局依赖
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_transformer
+    class_name: Transformer
+    default_params:
+      d_feat: 6
+      d_model: 64
+      n_heads: 2
+      d_ff: 128
+      n_layers: 2
+      dropout: 0.0
+      n_epochs: 200
+      lr: 0.0001
+      GPU: 0
+      seed: 0
+      metric: mse
+      save_path: model/transformer
+
+  tcn:
+    label: TCN
+    category: 神经网络
+    desc: 时序卷积网络，因果膨胀卷积
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_tcn
+    class_name: TCN
+    default_params:
+      d_feat: 6
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.0
+      n_epochs: 200
+      lr: 0.001
+      GPU: 0
+      seed: 0
+      metric: mse
+      save_path: model/tcn
+
+  gats:
+    label: GATs
+    category: 神经网络
+    desc: 图注意力网络，建模股票间关系
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_gats
+    class_name: GATs
+    default_params:
+      d_feat: 6
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.0
+      n_epochs: 200
+      lr: 0.001
+      GPU: 0
+      seed: 0
+      metric: mse
+      save_path: model/gats
+
+  tft:
+    label: TFT
+    category: 神经网络
+    desc: 时序融合 Transformer，多变量预测
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_tft
+    class_name: TFTModel
+    default_params: { n_epochs: 200, lr: 0.001, GPU: 0, seed: 0 }
+
+  tabnet:
+    label: TabNet
+    category: 神经网络
+    desc: 注意力特征选择的表格数据网络
+    handler: alpha158
+    import_path: quant_master.contrib.model.pytorch_tabnet
+    class_name: TabnetModel
+    default_params: { n_epochs: 200, lr: 0.001, GPU: 0, seed: 0 }
+
+  sfm:
+    label: SFM
+    category: 神经网络
+    desc: 状态频率记忆，频域特征提取
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_sfm
+    class_name: SFM_Model
+    default_params: { n_epochs: 200, lr: 0.001, GPU: 0, seed: 0 }
+
+  add:
+    label: ADD
+    category: 神经网络
+    desc: 对抗性数据增强 + 深度学习
+    handler: alpha360
+    import_path: quant_master.contrib.model.pytorch_add
+    class_name: ADD
+    default_params: { n_epochs: 200, lr: 0.001, GPU: 0, seed: 0 }
+
+  dnn:
+    label: DNN
+    category: 神经网络
+    desc: 全连接深度神经网络
+    handler: alpha158
+    import_path: quant_master.contrib.model.pytorch_nn
+    class_name: DNNModelPytorch
+    default_params: { n_epochs: 200, lr: 0.001, GPU: 0, seed: 0 }

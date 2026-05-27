@@ -1,0 +1,977 @@
+{
+  "app_state": "login_window",
+  "details": {
+    "host": {
+      "platform": "Windows-10-10.0.19045-SP0",
+      "python": "3.12.3"
+    },
+    "login_attempt": {
+      "after_selected_window": "0x30ec0",
+      "after_state": "login_window",
+      "after_window_count": 3,
+      "after_window_summary": {
+        "login_fields": {
+          "login_account": {
+            "class_name": "Edit",
+            "ctrl_id": 1001,
+            "enabled": false,
+            "text": {
+              "empty": true,
+              "length": 0,
+              "masked": true,
+              "preview": "[hidden]"
+            },
+            "visible": true
+          },
+          "login_button": {
+            "class_name": "Button",
+            "ctrl_id": 1006,
+            "enabled": true,
+            "text": "委  托  登  录",
+            "visible": true
+          },
+          "login_cert_password": {
+            "class_name": "Edit",
+            "ctrl_id": 3401,
+            "enabled": false,
+            "text": {
+              "empty": true,
+              "length": 0,
+              "masked": true,
+              "preview": "[hidden]"
+            },
+            "visible": true
+          },
+          "login_mode": {
+            "class_name": "Static",
+            "ctrl_id": 3006,
+            "enabled": true,
+            "text": "登录模式",
+            "visible": true
+          },
+          "login_password": {
+            "class_name": "Edit",
+            "ctrl_id": 1012,
+            "enabled": true,
+            "text": {
+              "empty": true,
+              "length": 0,
+              "masked": true,
+              "preview": "[hidden]"
+            },
+            "visible": true
+          }
+        },
+        "title": "用户登录",
+        "window_kind": "login"
+      },
+      "before_state": "login_window",
+      "before_window_summary": {
+        "login_fields": {
+          "login_account": {
+            "class_name": "Edit",
+            "ctrl_id": 1001,
+            "enabled": false,
+            "text": {
+              "empty": true,
+              "length": 0,
+              "masked": true,
+              "preview": "[hidden]"
+            },
+            "visible": true
+          },
+          "login_button": {
+            "class_name": "Button",
+            "ctrl_id": 1006,
+            "enabled": true,
+            "text": "委  托  登  录",
+            "visible": true
+          },
+          "login_cert_password": {
+            "class_name": "Edit",
+            "ctrl_id": 3401,
+            "enabled": false,
+            "text": {
+              "empty": true,
+              "length": 0,
+              "masked": true,
+              "preview": "[hidden]"
+            },
+            "visible": true
+          },
+          "login_mode": {
+            "class_name": "Static",
+            "ctrl_id": 3006,
+            "enabled": true,
+            "text": "登录模式",
+            "visible": true
+          },
+          "login_password": {
+            "class_name": "Edit",
+            "ctrl_id": 1012,
+            "enabled": true,
+            "text": {
+              "empty": true,
+              "length": 0,
+              "masked": true,
+              "preview": "[hidden]"
+            },
+            "visible": true
+          }
+        },
+        "title": "用户登录",
+        "window_kind": "login"
+      },
+      "clicked_login": false,
+      "entered_trading_main_window": false,
+      "error": "",
+      "mutation": {
+        "changes": [
+          {
+            "attempted_methods": [
+              "wm_settext"
+            ],
+            "changed": true,
+            "ctrl_id": 1011,
+            "env": "XIADAN_LOGIN_ACCOUNT",
+            "method": "wm_settext",
+            "role": "login_account",
+            "value_length": 11
+          },
+          {
+            "attempted_methods": [
+              "wm_settext",
+              "keyboard_fallback"
+            ],
+            "changed": true,
+            "ctrl_id": 1012,
+            "env": "XIADAN_LOGIN_PASSWORD",
+            "method": "keyboard_fallback",
+            "role": "login_password",
+            "value_length": 6
+          },
+          {
+            "changed": false,
+            "env": "XIADAN_LOGIN_CERT_PASSWORD",
+            "method": "failed",
+            "reason": "env_missing",
+            "role": "login_cert_password"
+          }
+        ],
+        "field_outcomes": {
+          "login_account": {
+            "attempted_methods": [
+              "wm_settext"
+            ],
+            "changed": true,
+            "ctrl_id": 1011,
+            "method": "wm_settext",
+            "reason": "",
+            "value_length": 11
+          },
+          "login_cert_password": {
+            "attempted_methods": [],
+            "changed": false,
+            "ctrl_id": 0,
+            "method": "failed",
+            "reason": "env_missing",
+            "value_length": 0
+          },
+          "login_password": {
+            "attempted_methods": [
+              "wm_settext",
+              "keyboard_fallback"
+            ],
+            "changed": true,
+            "ctrl_id": 1012,
+            "method": "keyboard_fallback",
+            "reason": "",
+            "value_length": 6
+          }
+        },
+        "mutated": true
+      },
+      "popup_summaries": [],
+      "still_in_login_window": true,
+      "used_password_keyboard_fallback": true,
+      "wait_seconds": 8.0
+    },
+    "mutation": {
+      "changes": [
+        {
+          "attempted_methods": [
+            "wm_settext"
+          ],
+          "changed": true,
+          "ctrl_id": 1011,
+          "env": "XIADAN_LOGIN_ACCOUNT",
+          "method": "wm_settext",
+          "role": "login_account",
+          "value_length": 11
+        },
+        {
+          "attempted_methods": [
+            "wm_settext",
+            "keyboard_fallback"
+          ],
+          "changed": true,
+          "ctrl_id": 1012,
+          "env": "XIADAN_LOGIN_PASSWORD",
+          "method": "keyboard_fallback",
+          "role": "login_password",
+          "value_length": 6
+        },
+        {
+          "changed": false,
+          "env": "XIADAN_LOGIN_CERT_PASSWORD",
+          "method": "failed",
+          "reason": "env_missing",
+          "role": "login_cert_password"
+        }
+      ],
+      "field_outcomes": {
+        "login_account": {
+          "attempted_methods": [
+            "wm_settext"
+          ],
+          "changed": true,
+          "ctrl_id": 1011,
+          "method": "wm_settext",
+          "reason": "",
+          "value_length": 11
+        },
+        "login_cert_password": {
+          "attempted_methods": [],
+          "changed": false,
+          "ctrl_id": 0,
+          "method": "failed",
+          "reason": "env_missing",
+          "value_length": 0
+        },
+        "login_password": {
+          "attempted_methods": [
+            "wm_settext",
+            "keyboard_fallback"
+          ],
+          "changed": true,
+          "ctrl_id": 1012,
+          "method": "keyboard_fallback",
+          "reason": "",
+          "value_length": 6
+        }
+      },
+      "mutated": true
+    },
+    "requested_buy_fill": {
+      "code": "000676",
+      "price": "5.50",
+      "qty": "100"
+    },
+    "window_summary": {
+      "login_fields": {
+        "login_account": {
+          "class_name": "Edit",
+          "ctrl_id": 1001,
+          "enabled": false,
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        "login_button": {
+          "class_name": "Button",
+          "ctrl_id": 1006,
+          "enabled": true,
+          "text": "委  托  登  录",
+          "visible": true
+        },
+        "login_cert_password": {
+          "class_name": "Edit",
+          "ctrl_id": 3401,
+          "enabled": false,
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        "login_mode": {
+          "class_name": "Static",
+          "ctrl_id": 3006,
+          "enabled": true,
+          "text": "登录模式",
+          "visible": true
+        },
+        "login_password": {
+          "class_name": "Edit",
+          "ctrl_id": 1012,
+          "enabled": true,
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        }
+      },
+      "title": "用户登录",
+      "window_kind": "login"
+    }
+  },
+  "error": "",
+  "ok": true,
+  "route_viable": true,
+  "safety": {
+    "clicked_buy_button": false,
+    "clicked_login_button": false,
+    "confirm_fill_only": true,
+    "confirm_live_login": true,
+    "confirmed_order_dialog": false,
+    "credential_output_written": false,
+    "default_read_only": false,
+    "login_env_names": [
+      "XIADAN_LOGIN_ACCOUNT",
+      "XIADAN_LOGIN_PASSWORD",
+      "XIADAN_LOGIN_CERT_PASSWORD"
+    ],
+    "mode": "attempt_login",
+    "navigation_attempted": false,
+    "notes": "Status mode is read-only. Fill modes only write visible controls after explicit confirmation. Login attempts require an extra live-login confirmation. This script never clicks buy and never submits an order.",
+    "submitted_order": false,
+    "write_control_attempted": true,
+    "write_control_succeeded": true
+  },
+  "selected_window": "0x30ec0",
+  "windows": [
+    {
+      "class_name": "#32770",
+      "controls": [
+        {
+          "class_name": "Button",
+          "ctrl_id": 2,
+          "enabled": true,
+          "hwnd": "0x40e1a",
+          "parent": "0x40e1e",
+          "rect": {
+            "bottom": 545,
+            "height": 24,
+            "left": 817,
+            "right": 877,
+            "top": 521,
+            "width": 60
+          },
+          "role": "generic",
+          "text": "确定",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1004,
+          "enabled": true,
+          "hwnd": "0x40dd0",
+          "parent": "0x40e1e",
+          "rect": {
+            "bottom": 514,
+            "height": 119,
+            "left": 689,
+            "right": 1006,
+            "top": 395,
+            "width": 317
+          },
+          "role": "password_label",
+          "text": "-980023096[-980023096]客户密码错误或账号密码不匹配。",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1365,
+          "enabled": true,
+          "hwnd": "0x40e2a",
+          "parent": "0x40e1e",
+          "rect": {
+            "bottom": 386,
+            "height": 15,
+            "left": 701,
+            "right": 996,
+            "top": 371,
+            "width": 295
+          },
+          "role": "generic",
+          "text": "提示",
+          "visible": true
+        }
+      ],
+      "enabled": true,
+      "hwnd": "0x40e1e",
+      "kind": "unknown",
+      "pid": 22572,
+      "process_path": "C:\\silkriver\\xiadan\\xiadan.exe",
+      "rect": {
+        "bottom": 556,
+        "height": 191,
+        "left": 676,
+        "right": 1031,
+        "top": 365,
+        "width": 355
+      },
+      "title": "",
+      "visible": true
+    },
+    {
+      "class_name": "#32770",
+      "controls": [
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 1011,
+          "enabled": true,
+          "hwnd": "0x30ec2",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 544,
+            "height": 24,
+            "left": 745,
+            "right": 970,
+            "top": 520,
+            "width": 225
+          },
+          "role": "login_account",
+          "text": {
+            "empty": false,
+            "length": 11,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 1001,
+          "enabled": true,
+          "hwnd": "0x30eb0",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 542,
+            "height": 20,
+            "left": 747,
+            "right": 951,
+            "top": 522,
+            "width": 204
+          },
+          "role": "login_account",
+          "text": {
+            "empty": false,
+            "length": 11,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 1012,
+          "enabled": true,
+          "hwnd": "0x30ea2",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 580,
+            "height": 24,
+            "left": 745,
+            "right": 937,
+            "top": 556,
+            "width": 192
+          },
+          "role": "login_password",
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 1001,
+          "enabled": false,
+          "hwnd": "0x30ea4",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 749,
+            "height": 24,
+            "left": 637,
+            "right": 850,
+            "top": 725,
+            "width": 213
+          },
+          "role": "login_account",
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 3401,
+          "enabled": false,
+          "hwnd": "0x8097e",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 615,
+            "height": 24,
+            "left": 745,
+            "right": 958,
+            "top": 591,
+            "width": 213
+          },
+          "role": "login_cert_password",
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1006,
+          "enabled": true,
+          "hwnd": "0xb0948",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 666,
+            "height": 38,
+            "left": 711,
+            "right": 965,
+            "top": 628,
+            "width": 254
+          },
+          "role": "login_button",
+          "text": "委  托  登  录",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1326,
+          "enabled": true,
+          "hwnd": "0x8095a",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 534,
+            "height": 15,
+            "left": 1001,
+            "right": 1073,
+            "top": 519,
+            "width": 72
+          },
+          "role": "generic",
+          "text": "隐藏账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1337,
+          "enabled": true,
+          "hwnd": "0x70a6a",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 560,
+            "height": 15,
+            "left": 1001,
+            "right": 1073,
+            "top": 545,
+            "width": 72
+          },
+          "role": "generic",
+          "text": "保存账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1544,
+          "enabled": true,
+          "hwnd": "0xe0ac8",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 506,
+            "height": 15,
+            "left": 1001,
+            "right": 1103,
+            "top": 491,
+            "width": 102
+          },
+          "role": "generic",
+          "text": "连最快站点",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1675,
+          "enabled": true,
+          "hwnd": "0xf0aba",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 612,
+            "height": 23,
+            "left": 606,
+            "right": 696,
+            "top": 589,
+            "width": 90
+          },
+          "role": "generic",
+          "text": " SSL加密",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1487,
+          "enabled": true,
+          "hwnd": "0x43057c",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 582,
+            "height": 28,
+            "left": 937,
+            "right": 968,
+            "top": 554,
+            "width": 31
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 1237,
+          "enabled": true,
+          "hwnd": "0x210a68",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 510,
+            "height": 25,
+            "left": 711,
+            "right": 970,
+            "top": 485,
+            "width": 259
+          },
+          "role": "generic",
+          "text": "客户号",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1374,
+          "enabled": true,
+          "hwnd": "0x60d56",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 543,
+            "height": 18,
+            "left": 613,
+            "right": 688,
+            "top": 525,
+            "width": 75
+          },
+          "role": "generic",
+          "text": "客 户 号",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1108,
+          "enabled": true,
+          "hwnd": "0x907ee",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 748,
+            "height": 12,
+            "left": 583,
+            "right": 658,
+            "top": 736,
+            "width": 75
+          },
+          "role": "password_label",
+          "text": "通讯密码(&K):",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1008,
+          "enabled": true,
+          "hwnd": "0x30e72",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 267,
+            "height": 18,
+            "left": 1077,
+            "right": 1095,
+            "top": 249,
+            "width": 18
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1916,
+          "enabled": true,
+          "hwnd": "0x30e62",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 852,
+            "height": 21,
+            "left": 981,
+            "right": 1071,
+            "top": 831,
+            "width": 90
+          },
+          "role": "password_label",
+          "text": "重置通讯密码",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1178,
+          "enabled": true,
+          "hwnd": "0x30fec",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 473,
+            "height": 12,
+            "left": 695,
+            "right": 710,
+            "top": 461,
+            "width": 15
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 2317,
+          "enabled": true,
+          "hwnd": "0x30ff0",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 475,
+            "height": 24,
+            "left": 709,
+            "right": 830,
+            "top": 451,
+            "width": 121
+          },
+          "role": "generic",
+          "text": "普通账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1176,
+          "enabled": true,
+          "hwnd": "0x30ff8",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 473,
+            "height": 12,
+            "left": 833,
+            "right": 848,
+            "top": 461,
+            "width": 15
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 2318,
+          "enabled": true,
+          "hwnd": "0x31000",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 475,
+            "height": 24,
+            "left": 849,
+            "right": 970,
+            "top": 451,
+            "width": 121
+          },
+          "role": "generic",
+          "text": "信用账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 2344,
+          "enabled": true,
+          "hwnd": "0x3103a",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 267,
+            "height": 18,
+            "left": 1050,
+            "right": 1068,
+            "top": 249,
+            "width": 18
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 3451,
+          "enabled": true,
+          "hwnd": "0x31042",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 1008,
+            "height": 25,
+            "left": 839,
+            "right": 976,
+            "top": 983,
+            "width": 137
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 3006,
+          "enabled": true,
+          "hwnd": "0x1910c8",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 813,
+            "height": 12,
+            "left": 769,
+            "right": 818,
+            "top": 801,
+            "width": 49
+          },
+          "role": "login_mode",
+          "text": "登录模式",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 3551,
+          "enabled": true,
+          "hwnd": "0xa0d14",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 586,
+            "height": 15,
+            "left": 1001,
+            "right": 1097,
+            "top": 571,
+            "width": 96
+          },
+          "role": "password_label",
+          "text": "默认证书密码",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 3003,
+          "enabled": true,
+          "hwnd": "0x50d44",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 863,
+            "height": 18,
+            "left": 738,
+            "right": 813,
+            "top": 845,
+            "width": 75
+          },
+          "role": "password_label",
+          "text": "证书密码",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 3509,
+          "enabled": true,
+          "hwnd": "0x60d40",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 617,
+            "height": 25,
+            "left": 977,
+            "right": 1037,
+            "top": 592,
+            "width": 60
+          },
+          "role": "generic",
+          "text": "证书申请",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1375,
+          "enabled": true,
+          "hwnd": "0x20092e",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 579,
+            "height": 18,
+            "left": 613,
+            "right": 688,
+            "top": 561,
+            "width": 75
+          },
+          "role": "password_label",
+          "text": "交易密码",
+          "visible": true
+        }
+      ],
+      "enabled": true,
+      "hwnd": "0x30ec0",
+      "kind": "login",
+      "pid": 22572,
+      "process_path": "C:\\silkriver\\xiadan\\xiadan.exe",
+      "rect": {
+        "bottom": 682,
+        "height": 444,
+        "left": 582,
+        "right": 1125,
+        "top": 238,
+        "width": 543
+      },
+      "title": "用户登录",
+      "visible": true
+    },
+    {
+      "class_name": "Internet Explorer_Hidden",
+      "controls": [],
+      "enabled": true,
+      "hwnd": "0x6905c4",
+      "kind": "unknown",
+      "pid": 22572,
+      "process_path": "C:\\silkriver\\xiadan\\xiadan.exe",
+      "rect": {
+        "bottom": 0,
+        "height": 0,
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "width": 0
+      },
+      "title": "",
+      "visible": true
+    }
+  ]
+}

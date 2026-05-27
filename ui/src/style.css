@@ -75,8 +75,7 @@
 .stock-row.selected { background: rgba(30,64,175,0.08); }
 
 /* ===== K-line period buttons ===== */
-.period-btn { transition: all 0.15s ease; }
-.period-btn.active { background: #1E40AF; color: #fff; }
+.period-btn { transition: all 0.2s ease; }
 
 /* ===== Cursor ===== */
 .cursor-pointer { cursor: pointer; }

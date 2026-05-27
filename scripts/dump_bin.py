@@ -589,7 +589,7 @@ class DumpDataUpdate(DumpDataBase):
         self.save_instruments(df.reset_index())
 
 
-def verify_dump(quant_master_dir: str, expected_end_date: str = None) -> bool:
+def verify_dump(quant_master_dir: str, expected_end_date: str = None, freq: str = "day") -> bool:
     """Verify quant_master data integrity after a dump operation.
 
     Parameters
@@ -598,6 +598,8 @@ def verify_dump(quant_master_dir: str, expected_end_date: str = None) -> bool:
         Path to the quant_master data directory.
     expected_end_date : str, optional
         If given, verify the last calendar date matches this date.
+    freq : str
+        Data frequency, default "day". Determines which calendar and bin files to check.
 
     Returns
     -------
@@ -610,9 +612,9 @@ def verify_dump(quant_master_dir: str, expected_end_date: str = None) -> bool:
     all_pass = True
 
     # 1. Calendar check
-    cal_path = qm_dir / "calendars" / "day.txt"
+    cal_path = qm_dir / "calendars" / f"{freq}.txt"
     if not cal_path.exists():
-        logger.error("verify: calendars/day.txt does not exist")
+        logger.error(f"verify: calendars/{freq}.txt does not exist")
         return False
     cal_lines = cal_path.read_text().strip().split("\n")
     last_cal_date = cal_lines[-1].strip() if cal_lines else ""
@@ -653,9 +655,9 @@ def verify_dump(quant_master_dir: str, expected_end_date: str = None) -> bool:
         sample_dirs = random.sample(all_dirs, sample_size) if all_dirs else []
         bad_dirs = 0
         for d in sample_dirs:
-            bin_files = list(d.glob("*.day.bin"))
+            bin_files = list(d.glob(f"*.{freq}.bin"))
             if not bin_files:
-                logger.warning(f"verify: {d.name} has no .day.bin files")
+                logger.warning(f"verify: {d.name} has no .{freq}.bin files")
                 bad_dirs += 1
                 continue
             # Check first bin file for all-NaN

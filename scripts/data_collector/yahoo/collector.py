@@ -38,6 +38,7 @@ from data_collector.utils import (
     get_us_stock_symbols,
     get_in_stock_symbols,
     get_br_stock_symbols,
+    get_stock_names,
     generate_minutes_calendar_from_daily,
     calc_adjusted_price,
     yahoo_fetch,
@@ -1025,6 +1026,19 @@ class Run(BaseRun):
 
         # clean up intermediate CSVs
         self._cleanup_intermediate_files()
+
+        # fetch and write stock names
+        _region = self.region.lower()
+        if _region == "cn":
+            try:
+                names = get_stock_names()
+                names_path = Path(quant_master_data_1d_dir) / "instruments" / "names.txt"
+                with open(names_path, "w", encoding="utf-8") as f:
+                    for code, name in sorted(names.items()):
+                        f.write(f"{code}\t{name}\n")
+                logger.info(f"Wrote {len(names)} stock names to {names_path}")
+            except Exception as e:
+                logger.warning(f"Failed to fetch stock names (non-fatal): {e}")
 
         # parse index
         _region = self.region.lower()

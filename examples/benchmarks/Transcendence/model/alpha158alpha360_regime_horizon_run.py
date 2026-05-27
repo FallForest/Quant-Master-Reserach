@@ -15,8 +15,18 @@ import numpy as np
 import pandas as pd
 from ruamel.yaml import YAML
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-THIS_DIR = Path(__file__).resolve().parent
+THIS_FILE = Path(__file__).resolve()
+THIS_DIR = THIS_FILE.parent
+
+
+def _find_repo_root(start: Path) -> Path:
+    for path in [start, *start.parents]:
+        if (path / "quant_master").is_dir() and (path / "examples").is_dir():
+            return path
+    raise RuntimeError(f"cannot locate Quant-Master-Research repo root from {start}")
+
+
+REPO_ROOT = _find_repo_root(THIS_FILE)
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -187,21 +197,72 @@ def _signal_metrics(recorder: Any) -> Dict[str, Any]:
     panel = pd.concat([pred_s.rename("pred"), label_s.rename("label")], axis=1).dropna()
     if panel.empty or not isinstance(panel.index, pd.MultiIndex):
         return {"error": "empty or non-panel pred/label"}
-    vals: List[float] = []
+    ic_vals: List[float] = []
+    rank_ic_vals: List[float] = []
     for _, g in panel.groupby(level=0, sort=False):
         if len(g) < 20:
             continue
-        corr = g["pred"].corr(g["label"], method="spearman")
-        if pd.notna(corr) and np.isfinite(corr):
-            vals.append(float(corr))
-    if len(vals) < 2:
-        return {"error": "insufficient rank_ic days", "rank_ic_days": len(vals)}
-    s = pd.Series(vals, dtype=float)
-    return {
-        "rank_ic": float(s.mean()),
-        "rank_ic_ir": float(s.mean() / (s.std(ddof=1) + 1e-12) * np.sqrt(252.0)),
-        "rank_ic_days": int(len(s)),
+        ic = g["pred"].corr(g["label"])
+        if pd.notna(ic) and np.isfinite(ic):
+            ic_vals.append(float(ic))
+        rank_ic = g["pred"].corr(g["label"], method="spearman")
+        if pd.notna(rank_ic) and np.isfinite(rank_ic):
+            rank_ic_vals.append(float(rank_ic))
+
+    result: Dict[str, Any] = {
+        "ic_days": len(ic_vals),
+        "rank_ic_days": len(rank_ic_vals),
     }
+    if len(ic_vals) >= 2:
+        ic_s = pd.Series(ic_vals, dtype=float)
+        result.update(
+            {
+                "ic": float(ic_s.mean()),
+                "ic_ir": float(ic_s.mean() / (ic_s.std(ddof=1) + 1e-12) * np.sqrt(252.0)),
+            }
+        )
+    else:
+        result["ic_missing_reason"] = f"insufficient ic days: {len(ic_vals)}"
+    if len(rank_ic_vals) >= 2:
+        rank_ic_s = pd.Series(rank_ic_vals, dtype=float)
+        result.update(
+            {
+                "rank_ic": float(rank_ic_s.mean()),
+                "rank_ic_ir": float(rank_ic_s.mean() / (rank_ic_s.std(ddof=1) + 1e-12) * np.sqrt(252.0)),
+            }
+        )
+    else:
+        result["rank_ic_missing_reason"] = f"insufficient rank_ic days: {len(rank_ic_vals)}"
+    if "ic" not in result or "rank_ic" not in result:
+        result["error"] = "; ".join(
+            str(result[key]) for key in ["ic_missing_reason", "rank_ic_missing_reason"] if key in result
+        )
+    return result
+
+
+def _finite_metric(metrics: Dict[str, Any], key: str) -> Any:
+    value = _safe_float(metrics.get(key))
+    return value if math.isfinite(value) else None
+
+
+def _metric_missing_reason(metrics: Dict[str, Any], key: str) -> str:
+    reason_key = f"{key}_missing_reason"
+    if metrics.get(reason_key):
+        return str(metrics[reason_key])
+    if metrics.get("error"):
+        return str(metrics["error"])
+    if key not in metrics:
+        return f"{key} not produced by signal validation metrics"
+    return f"{key} is non-finite"
+
+
+def _apply_validation_metrics(summary: Dict[str, Any], metrics: Dict[str, Any]) -> None:
+    summary["validation_metrics"] = metrics
+    for key in ["ic", "rank_ic"]:
+        value = _finite_metric(metrics, key)
+        summary[key] = value
+        if value is None:
+            summary[f"{key}_missing_reason"] = _metric_missing_reason(metrics, key)
 
 
 def _split_report(report: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
@@ -309,12 +370,12 @@ def main() -> int:
                     "recorder_id": getattr(recorder, "id", getattr(recorder, "info", {}).get("id", "")),
                     "artifact_uri": recorder.get_artifact_uri(),
                 },
-                "validation_metrics": signal_metrics,
                 "test_metrics": full_test_metrics,
                 "split_metrics": split_metrics,
                 "runtime_sec": float(time.perf_counter() - started),
             }
         )
+        _apply_validation_metrics(summary, signal_metrics)
         if hard_gate_pass and args.mode == "full":
             summary["verification_required"] = "run --mode verify with the same script"
     except Exception as exc:  # noqa: BLE001

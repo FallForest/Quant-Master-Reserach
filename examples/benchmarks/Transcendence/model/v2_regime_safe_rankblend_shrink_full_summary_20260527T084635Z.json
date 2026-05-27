@@ -1,0 +1,107 @@
+{
+  "timestamp_utc": "2026-05-27T08:46:35Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\alpha158alpha360_regime_horizon_run.py",
+  "command": "examples/benchmarks/Transcendence/model/alpha158alpha360_regime_horizon_run.py --mode full --workflow-config examples/benchmarks/Transcendence/workflow_config_regime_horizon_adaptive_model_v2_safe_rankblend_shrink_Alpha158_2026_csi300.yaml --output-prefix v2_regime_safe_rankblend_shrink --experiment-name v2_regime_safe_rankblend_shrink_full",
+  "mode": "full",
+  "status": "ok",
+  "blocker": "",
+  "workflow_config_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\workflow_config_regime_horizon_adaptive_model_v2_safe_rankblend_shrink_Alpha158_2026_csi300.yaml",
+  "artifacts": {
+    "run_config_yaml": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\v2_regime_safe_rankblend_shrink_full_run_config_20260527T084635Z.yaml",
+    "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\v2_regime_safe_rankblend_shrink_full_report_20260527T084635Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\v2_regime_safe_rankblend_shrink_full_summary_20260527T084635Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\v2_regime_safe_rankblend_shrink_full_summary_20260527T084635Z.md",
+    "artifact_parse_smoke_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\v2_regime_safe_rankblend_shrink_full_artifact_parse_smoke_20260527T084635Z.json"
+  },
+  "protocol": {
+    "model_path": "quant_master.contrib.model.regime_horizon_cost_ensemble.RegimeHorizonCostEnsembleModel",
+    "train": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "valid_select": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "no_2024_2026_tuning": true,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27,
+      "finite_rows_eq": 562
+    },
+    "wrapper_guard": "full/verify set min_regime_samples=0 to avoid empty 2023 validation regime weights"
+  },
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "mlflow": {
+    "experiment_id": "577595527166589752",
+    "recorder_id": "cb5bc2c1e55e40dd92e5917d407c9b5c",
+    "artifact_uri": "file:C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns/577595527166589752/cb5bc2c1e55e40dd92e5917d407c9b5c/artifacts"
+  },
+  "test_metrics": {
+    "costed_annret": 0.15526493638349687,
+    "costed_ir": 1.2634336237615258,
+    "max_drawdown": -0.07376256114871718,
+    "turnover": 0.17378782602185716,
+    "rows": 562,
+    "finite_rows": 562,
+    "nonfinite_rows": 0,
+    "start": "2024-01-02",
+    "end": "2026-04-30"
+  },
+  "split_metrics": [
+    {
+      "split": "2024",
+      "costed_annret": 0.08371599271204005,
+      "costed_ir": 0.8033158375437481,
+      "max_drawdown": -0.05864698838102243,
+      "turnover": 0.17282981641682613,
+      "rows": 242,
+      "finite_rows": 242,
+      "nonfinite_rows": 0,
+      "start": "2024-01-02",
+      "end": "2024-12-31"
+    },
+    {
+      "split": "2025",
+      "costed_annret": 0.2400584233432908,
+      "costed_ir": 1.6644694142909333,
+      "max_drawdown": -0.07376256114871717,
+      "turnover": 0.1750951050901321,
+      "rows": 243,
+      "finite_rows": 243,
+      "nonfinite_rows": 0,
+      "start": "2025-01-02",
+      "end": "2025-12-31"
+    },
+    {
+      "split": "2026_ytd",
+      "costed_annret": 0.11253801478950509,
+      "costed_ir": 1.0913977222057394,
+      "max_drawdown": -0.05013142044671072,
+      "turnover": 0.17267314434428171,
+      "rows": 77,
+      "finite_rows": 77,
+      "nonfinite_rows": 0,
+      "start": "2026-01-05",
+      "end": "2026-04-30"
+    }
+  ],
+  "runtime_sec": 232.9702348000028,
+  "validation_metrics": {
+    "ic_days": 562,
+    "rank_ic_days": 562,
+    "ic": 0.01593133372091886,
+    "ic_ir": 2.0550685416773824,
+    "rank_ic": 0.008626629950482911,
+    "rank_ic_ir": 1.066670570903974
+  },
+  "ic": 0.01593133372091886,
+  "rank_ic": 0.008626629950482911
+}

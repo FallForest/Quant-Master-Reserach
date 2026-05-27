@@ -1,0 +1,39 @@
+{
+  "error": "no visible xiadan window matched title/process keywords",
+  "generated_at_utc": "2026-05-27T07:56:29+00:00",
+  "host": {
+    "platform": "Windows-10-10.0.19045-SP0",
+    "python": "3.12.3"
+  },
+  "match": {
+    "process_keywords": [
+      "xiadan.exe"
+    ],
+    "title_keywords": [
+      "用户登录",
+      "网上股票交易系统",
+      "股票交易系统",
+      "xiadan",
+      "下单"
+    ]
+  },
+  "ok": false,
+  "safety": {
+    "click_attempted": false,
+    "keyboard_attempted": false,
+    "live_enabled": false,
+    "mode": "read-only-window-enumeration",
+    "navigation_attempted": false,
+    "notes": "Only reads window/control metadata and text. It never clicks, focuses, types, or submits.",
+    "order_attempted": false,
+    "write_control_attempted": false
+  },
+  "schema_version": 1,
+  "summary": {
+    "hint_counts": {},
+    "page_roles": [],
+    "visible_control_count": 0,
+    "window_count": 0
+  },
+  "windows": []
+}

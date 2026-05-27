@@ -1,0 +1,29 @@
+{
+  "passed": false,
+  "status": "ok",
+  "verdict": "NO_GO",
+  "candidate": "alpha158_baseline",
+  "mode": "smoke",
+  "metrics": {
+    "costed_annret": 0.2710122410910564,
+    "costed_ir": 1.6372468342043027,
+    "max_drawdown": -0.07299083687204655,
+    "turnover": 0.10913272022998623,
+    "rows": 58,
+    "finite_rows": 58,
+    "nonfinite_rows": 0,
+    "start": "2024-01-02",
+    "end": "2024-03-29",
+    "note": "smoke mode uses a bounded test range and reduced model settings; not hard-gate eligible"
+  },
+  "gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27,
+    "finite_rows_eq": 562
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha158_baseline_smoke_summary_20260524T140542Z.json"
+}

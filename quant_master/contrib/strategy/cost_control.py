@@ -3,6 +3,7 @@
 
 from .order_generator import OrderGenWInteract
 from .signal_strategy import WeightStrategyBase
+from .topk_cost_aware import select_buffered_topk
 
 
 class SoftTopkStrategy(WeightStrategyBase):
@@ -14,6 +15,7 @@ class SoftTopkStrategy(WeightStrategyBase):
         order_generator_cls_or_obj=OrderGenWInteract,
         max_sold_weight=1.0,
         trade_impact_limit=None,
+        selection_rank_buffer=0,
         risk_degree=0.95,
         buy_method="first_fill",
         **kwargs,
@@ -29,6 +31,10 @@ class SoftTopkStrategy(WeightStrategyBase):
             Maximum weight change for each stock in one trade. If None, fallback to max_sold_weight.
         max_sold_weight : float
             Backward-compatible alias for trade_impact_limit. Use 1.0 to effectively disable the limit.
+        selection_rank_buffer : int
+            Past-only top-k buffer. Previously held names are retained while
+            their current rank stays within topk + selection_rank_buffer.
+            Defaults to 0, which preserves the original score top-k behavior.
         risk_degree : float
             The target percentage of total value to be invested.
         """
@@ -38,6 +44,7 @@ class SoftTopkStrategy(WeightStrategyBase):
 
         self.topk = topk
         self.trade_impact_limit = trade_impact_limit if trade_impact_limit is not None else max_sold_weight
+        self.selection_rank_buffer = selection_rank_buffer
         self.risk_degree = risk_degree
         self.buy_method = buy_method
 
@@ -56,10 +63,15 @@ class SoftTopkStrategy(WeightStrategyBase):
         def apply_impact_limit(weight):
             return weight if self.trade_impact_limit is None else min(weight, self.trade_impact_limit)
 
-        ideal_per_stock = self.risk_degree / self.topk
-        ideal_list = score.sort_values(ascending=False).iloc[: self.topk].index.tolist()
-
         cur_weights = current.get_stock_weight_dict(only_stock=True)
+        rank_buffer = getattr(self, "selection_rank_buffer", 0)
+        ideal_per_stock = self.risk_degree / self.topk
+        ideal_list = select_buffered_topk(
+            score,
+            topk=self.topk,
+            previous_holdings=cur_weights,
+            rank_buffer=rank_buffer,
+        ).tolist()
         initial_total_weight = sum(cur_weights.values())
 
         # --- Case A: Cold Start ---

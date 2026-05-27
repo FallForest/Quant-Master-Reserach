@@ -1,0 +1,1404 @@
+{
+  "app_state": "trading_main_window",
+  "details": {
+    "host": {
+      "platform": "Windows-10-10.0.19045-SP0",
+      "python": "3.12.3"
+    },
+    "login_attempt": {},
+    "mutation": {
+      "changes": [],
+      "mutated": false
+    },
+    "requested_buy_fill": {
+      "code": "000676",
+      "price": "5.50",
+      "qty": "100"
+    },
+    "window_summary": {
+      "buy_fields": {
+        "available_cash": {
+          "class_name": "Button",
+          "ctrl_id": 1016,
+          "enabled": true,
+          "text": "n",
+          "visible": true
+        },
+        "available_qty": {
+          "class_name": "Button",
+          "ctrl_id": 1018,
+          "enabled": true,
+          "text": "q",
+          "visible": true
+        },
+        "buy_button": {
+          "class_name": "Button",
+          "ctrl_id": 1006,
+          "enabled": true,
+          "text": "2",
+          "visible": true
+        },
+        "buy_price": {
+          "class_name": "Button",
+          "ctrl_id": 1033,
+          "enabled": true,
+          "text": "o",
+          "visible": true
+        },
+        "buy_qty": {
+          "class_name": "Button",
+          "ctrl_id": 1034,
+          "enabled": true,
+          "text": "u",
+          "visible": true
+        },
+        "buy_stock_code": {
+          "class_name": "Button",
+          "ctrl_id": 1032,
+          "enabled": true,
+          "text": "g",
+          "visible": true
+        },
+        "market_value": {
+          "class_name": "Button",
+          "ctrl_id": 1014,
+          "enabled": true,
+          "text": "f",
+          "visible": true
+        },
+        "stock_name": {
+          "class_name": "Button",
+          "ctrl_id": 1036,
+          "enabled": true,
+          "text": "大写",
+          "visible": true
+        },
+        "total_assets": {
+          "class_name": "Button",
+          "ctrl_id": 1015,
+          "enabled": true,
+          "text": "j",
+          "visible": true
+        }
+      },
+      "title": "",
+      "window_kind": "trading"
+    }
+  },
+  "error": "",
+  "ok": true,
+  "route_viable": true,
+  "safety": {
+    "clicked_buy_button": false,
+    "clicked_login_button": false,
+    "confirm_fill_only": false,
+    "confirm_live_login": false,
+    "confirmed_order_dialog": false,
+    "credential_output_written": false,
+    "default_read_only": true,
+    "login_env_names": [
+      "XIADAN_LOGIN_ACCOUNT",
+      "XIADAN_LOGIN_PASSWORD",
+      "XIADAN_LOGIN_CERT_PASSWORD"
+    ],
+    "mode": "status",
+    "navigation_attempted": false,
+    "notes": "Status mode is read-only. Fill modes only write visible controls after explicit confirmation. Login attempts require an extra live-login confirmation. This script never clicks buy and never submits an order.",
+    "submitted_order": false,
+    "write_control_attempted": false,
+    "write_control_succeeded": false
+  },
+  "selected_window": "0x2d07fe",
+  "windows": [
+    {
+      "class_name": "#32770",
+      "controls": [
+        {
+          "class_name": "Button",
+          "ctrl_id": 1000,
+          "enabled": true,
+          "hwnd": "0x2e09ba",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 607,
+            "height": 22,
+            "left": 937,
+            "right": 960,
+            "top": 585,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "4",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1001,
+          "enabled": true,
+          "hwnd": "0x50e26",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 607,
+            "height": 22,
+            "left": 961,
+            "right": 984,
+            "top": 585,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "3",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1002,
+          "enabled": true,
+          "hwnd": "0x50e22",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 607,
+            "height": 22,
+            "left": 984,
+            "right": 1007,
+            "top": 585,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "7",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1003,
+          "enabled": true,
+          "hwnd": "0x50e2a",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 607,
+            "height": 22,
+            "left": 1007,
+            "right": 1030,
+            "top": 585,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "8",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1004,
+          "enabled": true,
+          "hwnd": "0x50dd0",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 607,
+            "height": 22,
+            "left": 1031,
+            "right": 1054,
+            "top": 585,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "1",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1005,
+          "enabled": true,
+          "hwnd": "0x60dbe",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 607,
+            "height": 22,
+            "left": 1054,
+            "right": 1077,
+            "top": 585,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "0",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1006,
+          "enabled": true,
+          "hwnd": "0x50e1a",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 629,
+            "height": 22,
+            "left": 937,
+            "right": 960,
+            "top": 607,
+            "width": 23
+          },
+          "role": "buy_button",
+          "text": "2",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1007,
+          "enabled": true,
+          "hwnd": "0x20086c",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 629,
+            "height": 22,
+            "left": 961,
+            "right": 984,
+            "top": 607,
+            "width": 23
+          },
+          "role": "reset_button",
+          "text": "9",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1008,
+          "enabled": true,
+          "hwnd": "0x35104c",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 629,
+            "height": 22,
+            "left": 984,
+            "right": 1007,
+            "top": 607,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "5",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1009,
+          "enabled": true,
+          "hwnd": "0x3f04bc",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 629,
+            "height": 22,
+            "left": 1007,
+            "right": 1030,
+            "top": 607,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "6",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1010,
+          "enabled": true,
+          "hwnd": "0x4e071c",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 629,
+            "height": 22,
+            "left": 1031,
+            "right": 1054,
+            "top": 607,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "i",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1011,
+          "enabled": true,
+          "hwnd": "0x3a049c",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 629,
+            "height": 22,
+            "left": 1054,
+            "right": 1077,
+            "top": 607,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "l",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1012,
+          "enabled": true,
+          "hwnd": "0x420fce",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 651,
+            "height": 22,
+            "left": 937,
+            "right": 960,
+            "top": 629,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "c",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1013,
+          "enabled": true,
+          "hwnd": "0x2c0438",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 651,
+            "height": 22,
+            "left": 961,
+            "right": 984,
+            "top": 629,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "a",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1014,
+          "enabled": true,
+          "hwnd": "0x14049a",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 651,
+            "height": 22,
+            "left": 984,
+            "right": 1007,
+            "top": 629,
+            "width": 23
+          },
+          "role": "market_value",
+          "text": "f",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1015,
+          "enabled": true,
+          "hwnd": "0x3f0cbe",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 651,
+            "height": 22,
+            "left": 1007,
+            "right": 1030,
+            "top": 629,
+            "width": 23
+          },
+          "role": "total_assets",
+          "text": "j",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1016,
+          "enabled": true,
+          "hwnd": "0xd04b6",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 651,
+            "height": 22,
+            "left": 1031,
+            "right": 1054,
+            "top": 629,
+            "width": 23
+          },
+          "role": "available_cash",
+          "text": "n",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1017,
+          "enabled": true,
+          "hwnd": "0xc04fe",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 651,
+            "height": 22,
+            "left": 1054,
+            "right": 1077,
+            "top": 629,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "k",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1018,
+          "enabled": true,
+          "hwnd": "0x904f4",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 673,
+            "height": 22,
+            "left": 937,
+            "right": 960,
+            "top": 651,
+            "width": 23
+          },
+          "role": "available_qty",
+          "text": "q",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1019,
+          "enabled": true,
+          "hwnd": "0x8e0084",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 673,
+            "height": 22,
+            "left": 961,
+            "right": 984,
+            "top": 651,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "s",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1020,
+          "enabled": true,
+          "hwnd": "0x2003fa",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 673,
+            "height": 22,
+            "left": 984,
+            "right": 1007,
+            "top": 651,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "t",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1021,
+          "enabled": true,
+          "hwnd": "0x40492",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 673,
+            "height": 22,
+            "left": 1007,
+            "right": 1030,
+            "top": 651,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "v",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1022,
+          "enabled": true,
+          "hwnd": "0xf0536",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 673,
+            "height": 22,
+            "left": 1031,
+            "right": 1054,
+            "top": 651,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "e",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1023,
+          "enabled": true,
+          "hwnd": "0x504c2",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 673,
+            "height": 22,
+            "left": 1054,
+            "right": 1077,
+            "top": 651,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "x",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1024,
+          "enabled": true,
+          "hwnd": "0xd04e8",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 694,
+            "height": 22,
+            "left": 937,
+            "right": 960,
+            "top": 672,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "m",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1025,
+          "enabled": true,
+          "hwnd": "0x190224",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 694,
+            "height": 22,
+            "left": 961,
+            "right": 984,
+            "top": 672,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "z",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1026,
+          "enabled": true,
+          "hwnd": "0xc04a6",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 694,
+            "height": 22,
+            "left": 984,
+            "right": 1007,
+            "top": 672,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "b",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1027,
+          "enabled": true,
+          "hwnd": "0x50494",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 694,
+            "height": 22,
+            "left": 1007,
+            "right": 1030,
+            "top": 672,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "r",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1028,
+          "enabled": true,
+          "hwnd": "0x5049e",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 694,
+            "height": 22,
+            "left": 1031,
+            "right": 1054,
+            "top": 672,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "h",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1029,
+          "enabled": true,
+          "hwnd": "0x703c2",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 694,
+            "height": 22,
+            "left": 1054,
+            "right": 1077,
+            "top": 672,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "y",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1030,
+          "enabled": true,
+          "hwnd": "0x504dc",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 716,
+            "height": 22,
+            "left": 937,
+            "right": 960,
+            "top": 694,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "p",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1031,
+          "enabled": true,
+          "hwnd": "0x120092",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 716,
+            "height": 22,
+            "left": 961,
+            "right": 984,
+            "top": 694,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "d",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1032,
+          "enabled": true,
+          "hwnd": "0x604cc",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 716,
+            "height": 22,
+            "left": 984,
+            "right": 1007,
+            "top": 694,
+            "width": 23
+          },
+          "role": "buy_stock_code",
+          "text": "g",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1033,
+          "enabled": true,
+          "hwnd": "0x1a0316",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 716,
+            "height": 22,
+            "left": 1007,
+            "right": 1030,
+            "top": 694,
+            "width": 23
+          },
+          "role": "buy_price",
+          "text": "o",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1034,
+          "enabled": true,
+          "hwnd": "0xb0086",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 716,
+            "height": 22,
+            "left": 1031,
+            "right": 1054,
+            "top": 694,
+            "width": 23
+          },
+          "role": "buy_qty",
+          "text": "u",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1035,
+          "enabled": true,
+          "hwnd": "0x1501d6",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 716,
+            "height": 22,
+            "left": 1054,
+            "right": 1077,
+            "top": 694,
+            "width": 23
+          },
+          "role": "generic",
+          "text": "w",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1038,
+          "enabled": true,
+          "hwnd": "0xc01e6",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 617,
+            "height": 32,
+            "left": 1077,
+            "right": 1114,
+            "top": 585,
+            "width": 37
+          },
+          "role": "generic",
+          "text": "退格",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1036,
+          "enabled": true,
+          "hwnd": "0xb02c0",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 683,
+            "height": 32,
+            "left": 1077,
+            "right": 1114,
+            "top": 651,
+            "width": 37
+          },
+          "role": "stock_name",
+          "text": "大写",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1037,
+          "enabled": true,
+          "hwnd": "0xb03ae",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 649,
+            "height": 32,
+            "left": 1077,
+            "right": 1114,
+            "top": 617,
+            "width": 37
+          },
+          "role": "generic",
+          "text": "清除",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1,
+          "enabled": true,
+          "hwnd": "0x490448",
+          "parent": "0x2d07fe",
+          "rect": {
+            "bottom": 715,
+            "height": 33,
+            "left": 1077,
+            "right": 1114,
+            "top": 682,
+            "width": 37
+          },
+          "role": "generic",
+          "text": "关闭",
+          "visible": true
+        }
+      ],
+      "enabled": false,
+      "hwnd": "0x2d07fe",
+      "kind": "trading",
+      "pid": 22572,
+      "process_path": "C:\\silkriver\\xiadan\\xiadan.exe",
+      "rect": {
+        "bottom": 715,
+        "height": 130,
+        "left": 937,
+        "right": 1114,
+        "top": 585,
+        "width": 177
+      },
+      "title": "",
+      "visible": true
+    },
+    {
+      "class_name": "#32770",
+      "controls": [
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 1011,
+          "enabled": true,
+          "hwnd": "0x30ec2",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 544,
+            "height": 24,
+            "left": 745,
+            "right": 970,
+            "top": 520,
+            "width": 225
+          },
+          "role": "login_account",
+          "text": {
+            "empty": false,
+            "length": 11,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 1001,
+          "enabled": true,
+          "hwnd": "0x30eb0",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 542,
+            "height": 20,
+            "left": 747,
+            "right": 951,
+            "top": 522,
+            "width": 204
+          },
+          "role": "login_account",
+          "text": {
+            "empty": false,
+            "length": 11,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 1012,
+          "enabled": true,
+          "hwnd": "0x30ea2",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 580,
+            "height": 24,
+            "left": 745,
+            "right": 937,
+            "top": 556,
+            "width": 192
+          },
+          "role": "login_password",
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 1001,
+          "enabled": false,
+          "hwnd": "0x30ea4",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 749,
+            "height": 24,
+            "left": 637,
+            "right": 850,
+            "top": 725,
+            "width": 213
+          },
+          "role": "login_account",
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Edit",
+          "ctrl_id": 3401,
+          "enabled": false,
+          "hwnd": "0x8097e",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 615,
+            "height": 24,
+            "left": 745,
+            "right": 958,
+            "top": 591,
+            "width": 213
+          },
+          "role": "login_cert_password",
+          "text": {
+            "empty": true,
+            "length": 0,
+            "masked": true,
+            "preview": "[hidden]"
+          },
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1006,
+          "enabled": true,
+          "hwnd": "0xb0948",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 666,
+            "height": 38,
+            "left": 711,
+            "right": 965,
+            "top": 628,
+            "width": 254
+          },
+          "role": "login_button",
+          "text": "委  托  登  录",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1326,
+          "enabled": true,
+          "hwnd": "0x8095a",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 534,
+            "height": 15,
+            "left": 1001,
+            "right": 1073,
+            "top": 519,
+            "width": 72
+          },
+          "role": "generic",
+          "text": "隐藏账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1337,
+          "enabled": true,
+          "hwnd": "0x70a6a",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 560,
+            "height": 15,
+            "left": 1001,
+            "right": 1073,
+            "top": 545,
+            "width": 72
+          },
+          "role": "generic",
+          "text": "保存账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1544,
+          "enabled": true,
+          "hwnd": "0xe0ac8",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 506,
+            "height": 15,
+            "left": 1001,
+            "right": 1103,
+            "top": 491,
+            "width": 102
+          },
+          "role": "generic",
+          "text": "连最快站点",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1675,
+          "enabled": true,
+          "hwnd": "0xf0aba",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 612,
+            "height": 23,
+            "left": 606,
+            "right": 696,
+            "top": 589,
+            "width": 90
+          },
+          "role": "generic",
+          "text": " SSL加密",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1487,
+          "enabled": true,
+          "hwnd": "0x43057c",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 582,
+            "height": 28,
+            "left": 937,
+            "right": 968,
+            "top": 554,
+            "width": 31
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 1237,
+          "enabled": true,
+          "hwnd": "0x210a68",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 510,
+            "height": 25,
+            "left": 711,
+            "right": 970,
+            "top": 485,
+            "width": 259
+          },
+          "role": "login_mode_selector",
+          "text": "客户号",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1374,
+          "enabled": true,
+          "hwnd": "0x60d56",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 543,
+            "height": 18,
+            "left": 613,
+            "right": 688,
+            "top": 525,
+            "width": 75
+          },
+          "role": "generic",
+          "text": "客 户 号",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1108,
+          "enabled": true,
+          "hwnd": "0x907ee",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 748,
+            "height": 12,
+            "left": 583,
+            "right": 658,
+            "top": 736,
+            "width": 75
+          },
+          "role": "password_label",
+          "text": "通讯密码(&K):",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1008,
+          "enabled": true,
+          "hwnd": "0x30e72",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 267,
+            "height": 18,
+            "left": 1077,
+            "right": 1095,
+            "top": 249,
+            "width": 18
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1916,
+          "enabled": true,
+          "hwnd": "0x30e62",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 852,
+            "height": 21,
+            "left": 981,
+            "right": 1071,
+            "top": 831,
+            "width": 90
+          },
+          "role": "password_label",
+          "text": "重置通讯密码",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1178,
+          "enabled": true,
+          "hwnd": "0x30fec",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 473,
+            "height": 12,
+            "left": 695,
+            "right": 710,
+            "top": 461,
+            "width": 15
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 2317,
+          "enabled": true,
+          "hwnd": "0x30ff0",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 475,
+            "height": 24,
+            "left": 709,
+            "right": 830,
+            "top": 451,
+            "width": 121
+          },
+          "role": "login_mode_label",
+          "text": "普通账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 1176,
+          "enabled": true,
+          "hwnd": "0x30ff8",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 473,
+            "height": 12,
+            "left": 833,
+            "right": 848,
+            "top": 461,
+            "width": 15
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 2318,
+          "enabled": true,
+          "hwnd": "0x31000",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 475,
+            "height": 24,
+            "left": 849,
+            "right": 970,
+            "top": 451,
+            "width": 121
+          },
+          "role": "login_mode_current_text",
+          "text": "信用账户",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 2344,
+          "enabled": true,
+          "hwnd": "0x3103a",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 267,
+            "height": 18,
+            "left": 1050,
+            "right": 1068,
+            "top": 249,
+            "width": 18
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "ComboBox",
+          "ctrl_id": 3451,
+          "enabled": true,
+          "hwnd": "0x31042",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 1008,
+            "height": 25,
+            "left": 839,
+            "right": 976,
+            "top": 983,
+            "width": 137
+          },
+          "role": "generic",
+          "text": "",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 3006,
+          "enabled": true,
+          "hwnd": "0x1910c8",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 813,
+            "height": 12,
+            "left": 769,
+            "right": 818,
+            "top": 801,
+            "width": 49
+          },
+          "role": "login_mode",
+          "text": "登录模式",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 3551,
+          "enabled": true,
+          "hwnd": "0xa0d14",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 586,
+            "height": 15,
+            "left": 1001,
+            "right": 1097,
+            "top": 571,
+            "width": 96
+          },
+          "role": "password_label",
+          "text": "默认证书密码",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 3003,
+          "enabled": true,
+          "hwnd": "0x50d44",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 863,
+            "height": 18,
+            "left": 738,
+            "right": 813,
+            "top": 845,
+            "width": 75
+          },
+          "role": "password_label",
+          "text": "证书密码",
+          "visible": true
+        },
+        {
+          "class_name": "Button",
+          "ctrl_id": 3509,
+          "enabled": true,
+          "hwnd": "0x60d40",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 617,
+            "height": 25,
+            "left": 977,
+            "right": 1037,
+            "top": 592,
+            "width": 60
+          },
+          "role": "generic",
+          "text": "证书申请",
+          "visible": true
+        },
+        {
+          "class_name": "Static",
+          "ctrl_id": 1375,
+          "enabled": true,
+          "hwnd": "0x20092e",
+          "parent": "0x30ec0",
+          "rect": {
+            "bottom": 579,
+            "height": 18,
+            "left": 613,
+            "right": 688,
+            "top": 561,
+            "width": 75
+          },
+          "role": "password_label",
+          "text": "交易密码",
+          "visible": true
+        }
+      ],
+      "enabled": true,
+      "hwnd": "0x30ec0",
+      "kind": "login",
+      "pid": 22572,
+      "process_path": "C:\\silkriver\\xiadan\\xiadan.exe",
+      "rect": {
+        "bottom": 682,
+        "height": 444,
+        "left": 582,
+        "right": 1125,
+        "top": 238,
+        "width": 543
+      },
+      "title": "用户登录",
+      "visible": true
+    },
+    {
+      "class_name": "Internet Explorer_Hidden",
+      "controls": [],
+      "enabled": true,
+      "hwnd": "0x6905c4",
+      "kind": "unknown",
+      "pid": 22572,
+      "process_path": "C:\\silkriver\\xiadan\\xiadan.exe",
+      "rect": {
+        "bottom": 0,
+        "height": 0,
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "width": 0
+      },
+      "title": "",
+      "visible": true
+    }
+  ]
+}

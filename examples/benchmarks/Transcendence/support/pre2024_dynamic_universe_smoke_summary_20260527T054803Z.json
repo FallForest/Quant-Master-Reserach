@@ -1,0 +1,200 @@
+{
+  "task_id": "Q-DYNAMIC-UNIVERSE-PRE2024-SMOKE",
+  "created_at": "2026-05-27T05:48:23Z",
+  "status": "completed",
+  "provider_uri": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\.qmData\\cn_data",
+  "data_window": "2020-01-01..2023-12-31",
+  "uses_2024_plus": false,
+  "trains_model": false,
+  "runs_backtest": false,
+  "diagnostic_market": "csi800",
+  "diagnostic_meta": {
+    "diagnostic_market": "csi800",
+    "instrument_count": 1234,
+    "dynamic_topk": 1000
+  },
+  "gate_pass": false,
+  "gate_reasons": [
+    "2020_dynamic_pool_size=346<800",
+    "2021_dynamic_pool_size=348<800",
+    "2022_dynamic_pool_size=348<800",
+    "2023_dynamic_pool_size=353<800"
+  ],
+  "gate_thresholds": {
+    "min_pool_size_per_year": 800,
+    "max_missing_rate": 0.1
+  },
+  "universe_coverage": [
+    {
+      "market": "csi300",
+      "instrument_count_file": 377,
+      "covered_2020_2023_any": 377,
+      "covered_2020": 353,
+      "covered_2021": 342,
+      "covered_2022": 300,
+      "covered_2023": 300,
+      "min_year_covered": 300,
+      "uses_2024_plus": false
+    },
+    {
+      "market": "csi500",
+      "instrument_count_file": 992,
+      "covered_2020_2023_any": 845,
+      "covered_2020": 601,
+      "covered_2021": 603,
+      "covered_2022": 596,
+      "covered_2023": 597,
+      "min_year_covered": 596,
+      "uses_2024_plus": false
+    },
+    {
+      "market": "csi800",
+      "instrument_count_file": 1234,
+      "covered_2020_2023_any": 1105,
+      "covered_2020": 896,
+      "covered_2021": 893,
+      "covered_2022": 887,
+      "covered_2023": 892,
+      "min_year_covered": 887,
+      "uses_2024_plus": false
+    },
+    {
+      "market": "csi1000",
+      "instrument_count_file": 2054,
+      "covered_2020_2023_any": 1764,
+      "covered_2020": 1209,
+      "covered_2021": 1205,
+      "covered_2022": 1200,
+      "covered_2023": 1202,
+      "min_year_covered": 1200,
+      "uses_2024_plus": false
+    },
+    {
+      "market": "csiall",
+      "instrument_count_file": 5625,
+      "covered_2020_2023_any": 5079,
+      "covered_2020": 3695,
+      "covered_2021": 4171,
+      "covered_2022": 4555,
+      "covered_2023": 4960,
+      "min_year_covered": 3695,
+      "uses_2024_plus": false
+    },
+    {
+      "market": "all",
+      "instrument_count_file": 5533,
+      "covered_2020_2023_any": 5021,
+      "covered_2020": 3957,
+      "covered_2021": 4440,
+      "covered_2022": 4785,
+      "covered_2023": 5021,
+      "min_year_covered": 3957,
+      "uses_2024_plus": false
+    }
+  ],
+  "key_year_counts": [
+    {
+      "market": "csi800",
+      "year": 2020,
+      "trade_days": 243,
+      "avg_active_instruments_per_day": 800.0,
+      "max_active_instruments_per_day": 800,
+      "avg_tradable_instruments_per_day": 772.201646090535,
+      "max_tradable_instruments_per_day": 776,
+      "missing_rate_active_fieldset": 0.03474794238683127,
+      "zero_or_missing_volume_rate": 0.03474794238683127,
+      "limit_or_extreme_change_proxy_rate": 0.017608024691358026,
+      "amount_p10": 49431.41171875,
+      "amount_p25": 100808.59375,
+      "amount_p50": 238772.734375,
+      "amount_p75": 567585.5,
+      "amount_p90": 1256194.9000000001,
+      "dynamic_pool_size": 346,
+      "dynamic_pool_turnover_proxy": null,
+      "liquidity_threshold_amount": 393845.66874999984
+    },
+    {
+      "market": "csi800",
+      "year": 2021,
+      "trade_days": 243,
+      "avg_active_instruments_per_day": 800.0,
+      "max_active_instruments_per_day": 800,
+      "avg_tradable_instruments_per_day": 778.5720164609054,
+      "max_tradable_instruments_per_day": 784,
+      "missing_rate_active_fieldset": 0.026784979423868312,
+      "zero_or_missing_volume_rate": 0.026784979423868312,
+      "limit_or_extreme_change_proxy_rate": 0.016522633744855967,
+      "amount_p10": 59519.9640625,
+      "amount_p25": 125347.78125,
+      "amount_p50": 295865.09375,
+      "amount_p75": 711875.1875,
+      "amount_p90": 1624354.5250000001,
+      "dynamic_pool_size": 348,
+      "dynamic_pool_turnover_proxy": 0.4880174291938998,
+      "liquidity_threshold_amount": 474929.21875
+    },
+    {
+      "market": "csi800",
+      "year": 2022,
+      "trade_days": 242,
+      "avg_active_instruments_per_day": 800.0,
+      "max_active_instruments_per_day": 800,
+      "avg_tradable_instruments_per_day": 785.1776859504132,
+      "max_tradable_instruments_per_day": 788,
+      "missing_rate_active_fieldset": 0.01852789256198347,
+      "zero_or_missing_volume_rate": 0.01852789256198347,
+      "limit_or_extreme_change_proxy_rate": 0.010113636363636363,
+      "amount_p10": 62788.034375,
+      "amount_p25": 115018.9375,
+      "amount_p50": 244830.140625,
+      "amount_p75": 554984.875,
+      "amount_p90": 1135869.05,
+      "dynamic_pool_size": 348,
+      "dynamic_pool_turnover_proxy": 0.410958904109589,
+      "liquidity_threshold_amount": 368410.11874999997
+    },
+    {
+      "market": "csi800",
+      "year": 2023,
+      "trade_days": 242,
+      "avg_active_instruments_per_day": 800.0,
+      "max_active_instruments_per_day": 800,
+      "avg_tradable_instruments_per_day": 791.7603305785124,
+      "max_tradable_instruments_per_day": 795,
+      "missing_rate_active_fieldset": 0.010299586776859503,
+      "zero_or_missing_volume_rate": 0.010299586776859503,
+      "limit_or_extreme_change_proxy_rate": 0.005614669421487604,
+      "amount_p10": 61112.76171875,
+      "amount_p25": 107093.642578125,
+      "amount_p50": 210667.2734375,
+      "amount_p75": 456770.4765625,
+      "amount_p90": 977907.4375,
+      "dynamic_pool_size": 353,
+      "dynamic_pool_turnover_proxy": 0.45594713656387664,
+      "liquidity_threshold_amount": 312076.875
+    }
+  ],
+  "rule_candidates": [
+    {
+      "rule_id": "pre2024_amount_volume_change_factor_liquid_topk",
+      "market": "csi800",
+      "data_end": "2023-12-31",
+      "definition": "For each pre-2024 year, require >=90% tradable days on amount>0, volume>0, finite change, factor>0; keep instruments above yearly amount q0.60, capped by 2020-2023 mean amount top 1000.",
+      "uses_2024_plus": false,
+      "trains_model": false,
+      "runs_backtest": false
+    }
+  ],
+  "risks": [
+    "Dynamic pool turnover is a year-to-year membership proxy, not an executed portfolio turnover.",
+    "Extreme change proxy uses abs(change)>=9.5%; this approximates limit/abnormal days without exchange status flags.",
+    "amount units follow local qlib bins and are not normalized across data vendors."
+  ],
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_dynamic_universe_smoke_summary_20260527T054803Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_dynamic_universe_smoke_summary_20260527T054803Z.md",
+    "universe_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_dynamic_universe_smoke_universe_coverage_20260527T054803Z.csv",
+    "year_metrics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_dynamic_universe_smoke_year_metrics_20260527T054803Z.csv",
+    "rule_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\pre2024_dynamic_universe_smoke_rule_candidates_20260527T054803Z.csv"
+  }
+}

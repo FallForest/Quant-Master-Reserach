@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { api } from '../utils/api'
+import { useToast } from '../utils/toast'
+
+const toast = useToast()
 
 const running = ref(false)
 const progress = ref(0)
@@ -125,6 +128,8 @@ function pollRun(runId) {
       setProgress(100)
       appendLog(status.success ? 'success' : 'error',
         status.success ? '更新完成!' : '更新失败: ' + (status.error || '未知错误'))
+      if (status.success) toast.success('数据更新完成')
+      else toast.error('更新失败: ' + (status.error || '未知错误'))
       recordRun(status.success, status.error)
       running.value = false
     }
@@ -143,7 +148,7 @@ function simulateRun() {
   ]
   let i = 0
   pollTimer = setInterval(() => {
-    if (i >= steps.length) { clearInterval(pollTimer); recordRun(true); running.value = false; return }
+    if (i >= steps.length) { clearInterval(pollTimer); recordRun(true); running.value = false; toast.success('数据更新完成'); return }
     const s = steps[i]
     setProgress(s.pct)
     stepText.value = s.step

@@ -1,0 +1,47 @@
+{
+  "timestamp_utc": "2026-05-24T14:22:11Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\double_ensemble_alpha360_runner.py",
+  "command": "examples/benchmarks/Transcendence/double_ensemble_alpha360_runner.py --mode full --candidate alpha360_de_only",
+  "candidate": "alpha360_de_only",
+  "mode": "full",
+  "status": "failed",
+  "blocker": "OSError: [Errno 22] Invalid argument",
+  "workflow_config_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_universe_Alpha360_2026_csi300.yaml",
+  "artifacts": {
+    "run_config_yaml": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_full_run_config_20260524T142211Z.yaml",
+    "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_full_report_20260524T142211Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_full_summary_20260524T142211Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_full_summary_20260524T142211Z.md",
+    "hard_gate_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\hard_gate_pass\\double_ensemble_alpha360_alpha360_de_only_full_hard_gate_20260524T142211Z.json"
+  },
+  "protocol": {
+    "train": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "valid_select": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "smoke_test": [
+      "2024-01-01",
+      "2024-03-31"
+    ],
+    "local_provider": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\.qmData\\cn_data",
+    "no_2024_2026_tuning": true,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27,
+      "finite_rows_eq": 562
+    }
+  },
+  "verdict": "ERROR",
+  "hard_gate_pass": false,
+  "runtime_sec": 340.51411670000016
+}

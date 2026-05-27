@@ -114,6 +114,24 @@ export default class CandlestickChart {
     return chartX + ratio * chartW
   }
 
+  /** 1min 数据聚合为 N 分钟 */
+  _aggregateMinute(data, interval) {
+    if (!data.length || interval <= 1) return data
+    const result = []
+    for (let i = 0; i < data.length; i += interval) {
+      const group = data.slice(i, Math.min(i + interval, data.length))
+      result.push({
+        date: group[0].date,
+        open: group[0].open,
+        high: Math.max(...group.map(d => d.high)),
+        low: Math.min(...group.map(d => d.low)),
+        close: group[group.length - 1].close,
+        volume: group.reduce((s, d) => s + d.volume, 0),
+      })
+    }
+    return result
+  }
+
   _computeMA() {
     const d = this.data
     ;[5, 10, 20].forEach(n => {
@@ -228,7 +246,6 @@ export default class CandlestickChart {
     if (!count) return
 
     const minuteTimes = visible.map(d => this._parseMinuteTime(d.date))
-    const candleW = Math.max(2, (chartW / SESSION_TOTAL) * 0.7)
     const timeToX = (ratio) => this._timeToX(ratio, left, chartW)
     const minuteToX = (min) => {
       const r = this._minuteRatio(min)
@@ -262,39 +279,42 @@ export default class CandlestickChart {
       ctx.stroke()
     })
 
-    // 蜡烛
+    // 分时线 + 渐变填充
+    const lineColor = '#3B82F6'
+    const points = []
     visible.forEach((d, i) => {
       const x = minuteToX(minuteTimes[i])
       if (x < 0) return
-      const bullish = d.close >= d.open
-      const color = bullish ? this.theme.bull : this.theme.bear
-
-      ctx.strokeStyle = color
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.moveTo(x, yScale(d.high))
-      ctx.lineTo(x, yScale(d.low))
-      ctx.stroke()
-
-      const yOpen = yScale(d.open)
-      const yClose = yScale(d.close)
-      const bodyTop = Math.min(yOpen, yClose)
-      const bodyH = Math.max(1, Math.abs(yClose - yOpen))
-
-      if (bullish) {
-        ctx.fillStyle = '#FFF'
-        ctx.strokeStyle = color
-        ctx.lineWidth = 1
-        ctx.strokeRect(x - candleW / 2, bodyTop, candleW, bodyH)
-        ctx.fillRect(x - candleW / 2, bodyTop, candleW, bodyH)
-      } else {
-        ctx.fillStyle = color
-        ctx.fillRect(x - candleW / 2, bodyTop, candleW, bodyH)
-      }
+      points.push({ x, y: yScale(d.close) })
     })
 
-    // 成交量
-    this._drawVolume(visible, (i) => minuteToX(minuteTimes[i]), candleW, maxV)
+    if (points.length >= 2) {
+      // 填充区域
+      const grad = ctx.createLinearGradient(0, top, 0, top + chartH)
+      grad.addColorStop(0, 'rgba(59,130,246,0.15)')
+      grad.addColorStop(1, 'rgba(59,130,246,0)')
+      ctx.beginPath()
+      ctx.moveTo(points[0].x, top + chartH)
+      points.forEach(p => ctx.lineTo(p.x, p.y))
+      ctx.lineTo(points[points.length - 1].x, top + chartH)
+      ctx.closePath()
+      ctx.fillStyle = grad
+      ctx.fill()
+
+      // 折线
+      ctx.beginPath()
+      ctx.moveTo(points[0].x, points[0].y)
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y)
+      }
+      ctx.strokeStyle = lineColor
+      ctx.lineWidth = 1.5
+      ctx.stroke()
+    }
+
+    // 成交量柱
+    const barW = Math.max(2, (chartW / SESSION_TOTAL) * 0.6)
+    this._drawVolume(visible, (i) => minuteToX(minuteTimes[i]), barW, maxV)
 
     // 十字线
     if (this.hoverIdx >= 0 && this.hoverIdx < count) {

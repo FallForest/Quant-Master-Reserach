@@ -1,0 +1,2 @@
+[2026-05-26 18:51:27.437][23420][ALARM][log4z.cpp:1748] -----------------  log4z thread started!   ----------------------------
+[2026-05-26 18:51:27.438][23420][ALARM][log4z.cpp:1758] logger id=0 key=Main name=Main path=./data/log/ level=1 display=true

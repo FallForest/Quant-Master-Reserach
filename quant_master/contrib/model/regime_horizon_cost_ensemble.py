@@ -40,6 +40,8 @@ class RegimeHorizonCostEnsembleModel(Model):
     4) Monotonic/risk controls: enforce horizon monotonic weights and score clipping.
     """
 
+    _FINAL_CONTROL_EPS = 1e-12
+
     def __init__(
         self,
         horizon_model_specs: Optional[Sequence[Dict]] = None,
@@ -58,6 +60,10 @@ class RegimeHorizonCostEnsembleModel(Model):
         use_rank_score: bool = True,
         zscore_clip: float = 3.0,
         neutralize_daily_mean: bool = True,
+        robust_rank_blend: Optional[float] = None,
+        robust_rank_blend_grid: Optional[Sequence[float]] = None,
+        prediction_shrinkage: Optional[float] = None,
+        prediction_shrinkage_grid: Optional[Sequence[float]] = None,
         enforce_horizon_monotonic: bool = True,
         monotonic_direction: str = "decreasing",
         regime_consensus_quantiles: Optional[Sequence[float]] = None,
@@ -128,6 +134,26 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.use_rank_score = use_rank_score
         self.zscore_clip = zscore_clip
         self.neutralize_daily_mean = neutralize_daily_mean
+        self._final_score_control_grid_opt_in = (
+            robust_rank_blend is not None
+            or robust_rank_blend_grid is not None
+            or prediction_shrinkage is not None
+            or prediction_shrinkage_grid is not None
+        )
+        rank_blend_values = robust_rank_blend_grid
+        if rank_blend_values is None:
+            rank_blend_values = [0.0 if robust_rank_blend is None else robust_rank_blend]
+        self.robust_rank_blend_grid = self._normalize_bounded_float_grid(
+            rank_blend_values, "robust_rank_blend_grid", lower=0.0, upper=1.0
+        )
+        shrinkage_values = prediction_shrinkage_grid
+        if shrinkage_values is None:
+            shrinkage_values = [1.0 if prediction_shrinkage is None else prediction_shrinkage]
+        self.prediction_shrinkage_grid = self._normalize_bounded_float_grid(
+            shrinkage_values, "prediction_shrinkage_grid", lower=0.0, upper=1.0
+        )
+        self.robust_rank_blend = self.robust_rank_blend_grid[0]
+        self.prediction_shrinkage = self.prediction_shrinkage_grid[0]
         self.enforce_horizon_monotonic = enforce_horizon_monotonic
         self.monotonic_direction = monotonic_direction
         if regime_count_grid and (regime_consensus_quantiles is None and regime_disagreement_quantiles is None):
@@ -245,6 +271,11 @@ class RegimeHorizonCostEnsembleModel(Model):
             self.turnover_penalty,
             self.risk_penalty,
         )
+        self.logger.info(
+            "Final score controls: robust_rank_blend=%s, prediction_shrinkage=%s",
+            self.robust_rank_blend,
+            self.prediction_shrinkage,
+        )
         self.logger.info("Memory boost: %s", self.memory_boost)
         self.fitted = True
 
@@ -257,18 +288,20 @@ class RegimeHorizonCostEnsembleModel(Model):
             regime_weights = self._learn_regime_weights(valid_pred, valid_label, regimes)
             blended = self._blend_by_regime_with_weights(valid_pred, regimes, regime_weights, global_weights)
             blended = self._apply_risk_controls(blended)
-            memory_boost = self._learn_memory_boost(blended, valid_label)
-            adjusted = self._apply_turnover_boost(blended, memory_boost) if memory_boost > 0 else blended
-            objective = self._topk_cost_objective(adjusted, valid_label)
+            selected_control = self._select_final_score_control(blended, valid_label)
 
-            if best_state is None or objective > best_state["objective"]:
+            if self._is_better_penalty_state(selected_control, best_state):
                 best_state = {
-                    "objective": float(objective),
+                    "objective": float(selected_control["objective"]),
+                    "rank_ic": float(selected_control["rank_ic"]),
+                    "is_identity_control": bool(selected_control["is_identity_control"]),
                     "turnover_penalty": float(turnover_penalty),
                     "risk_penalty": float(risk_penalty),
                     "global_weights": global_weights,
                     "regime_weights": regime_weights,
-                    "memory_boost": float(memory_boost),
+                    "memory_boost": float(selected_control["memory_boost"]),
+                    "robust_rank_blend": float(selected_control["robust_rank_blend"]),
+                    "prediction_shrinkage": float(selected_control["prediction_shrinkage"]),
                 }
 
         if best_state is None:
@@ -278,6 +311,8 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.global_weights = best_state["global_weights"]
         self.regime_weights = best_state["regime_weights"]
         self.memory_boost = best_state["memory_boost"]
+        self.robust_rank_blend = best_state["robust_rank_blend"]
+        self.prediction_shrinkage = best_state["prediction_shrinkage"]
 
     def _objective_valid_horizon(self) -> int:
         if not self.model_specs:
@@ -306,6 +341,115 @@ class RegimeHorizonCostEnsembleModel(Model):
             for risk_penalty in risk_grid:
                 yield float(turnover_penalty), float(risk_penalty)
 
+    def _select_final_score_control(self, score: pd.Series, label: pd.Series) -> Dict[str, float]:
+        baseline = self._evaluate_final_score_control(
+            score,
+            label,
+            robust_rank_blend=0.0,
+            prediction_shrinkage=1.0,
+        )
+        best = dict(baseline)
+        for rank_blend, prediction_shrinkage in self._iter_final_score_controls():
+            candidate = self._evaluate_final_score_control(
+                score,
+                label,
+                robust_rank_blend=rank_blend,
+                prediction_shrinkage=prediction_shrinkage,
+            )
+            if self._final_score_control_beats(candidate, best, baseline):
+                best = candidate
+        return best
+
+    def _evaluate_final_score_control(
+        self,
+        score: pd.Series,
+        label: pd.Series,
+        robust_rank_blend: float,
+        prediction_shrinkage: float,
+    ) -> Dict[str, float]:
+        controlled = self._apply_final_score_controls(
+            score,
+            robust_rank_blend=robust_rank_blend,
+            prediction_shrinkage=prediction_shrinkage,
+        )
+        memory_boost = self._learn_memory_boost(controlled, label)
+        adjusted = self._apply_turnover_boost(controlled, memory_boost) if memory_boost > 0 else controlled
+        objective = self._topk_cost_objective(adjusted, label)
+        return {
+            "objective": float(objective),
+            "rank_ic": float(self._daily_rank_ic(controlled, label)),
+            "memory_boost": float(memory_boost),
+            "robust_rank_blend": float(robust_rank_blend),
+            "prediction_shrinkage": float(prediction_shrinkage),
+            "is_identity_control": self._is_identity_final_score_control(
+                robust_rank_blend,
+                prediction_shrinkage,
+            ),
+        }
+
+    def _final_score_control_beats(self, candidate: Dict[str, float], current: Dict[str, float], baseline: Dict[str, float]) -> bool:
+        if not self._final_control_passes_baseline_floor(candidate, baseline):
+            return False
+        if self._final_control_objective_margin(candidate, baseline) <= self._FINAL_CONTROL_EPS:
+            return False
+
+        objective_delta = candidate["objective"] - current["objective"]
+        if objective_delta > self._FINAL_CONTROL_EPS:
+            return True
+        if abs(objective_delta) > self._FINAL_CONTROL_EPS:
+            return False
+
+        rank_ic_delta = candidate["rank_ic"] - current["rank_ic"]
+        if rank_ic_delta > self._FINAL_CONTROL_EPS:
+            return True
+        if abs(rank_ic_delta) > self._FINAL_CONTROL_EPS:
+            return False
+        return self._final_control_tiebreak_key(candidate) > self._final_control_tiebreak_key(current)
+
+    def _final_control_passes_baseline_floor(self, candidate: Dict[str, float], baseline: Dict[str, float]) -> bool:
+        if not np.isfinite(candidate["objective"]):
+            return False
+        if not self._final_control_grid_has_identity():
+            return True
+        if candidate["is_identity_control"]:
+            return True
+        return candidate["rank_ic"] >= baseline["rank_ic"] - self._FINAL_CONTROL_EPS
+
+    def _final_control_objective_margin(self, candidate: Dict[str, float], baseline: Dict[str, float]) -> float:
+        if candidate["is_identity_control"]:
+            return candidate["objective"] - baseline["objective"]
+        if not self._final_score_control_grid_opt_in:
+            return 0.0
+        return candidate["objective"] - baseline["objective"]
+
+    def _is_better_penalty_state(self, candidate: Dict[str, float], current: Optional[Dict[str, float]]) -> bool:
+        if current is None:
+            return True
+        objective_delta = candidate["objective"] - current["objective"]
+        if objective_delta > self._FINAL_CONTROL_EPS:
+            return True
+        if abs(objective_delta) > self._FINAL_CONTROL_EPS:
+            return False
+
+        identity_delta = int(candidate["is_identity_control"]) - int(current.get("is_identity_control", False))
+        if identity_delta != 0:
+            return identity_delta > 0
+
+        rank_ic_delta = candidate["rank_ic"] - current.get("rank_ic", float("-inf"))
+        if rank_ic_delta > self._FINAL_CONTROL_EPS:
+            return True
+        if abs(rank_ic_delta) > self._FINAL_CONTROL_EPS:
+            return False
+        return self._final_control_tiebreak_key(candidate) > self._final_control_tiebreak_key(current)
+
+    @classmethod
+    def _final_control_tiebreak_key(cls, state: Dict[str, float]):
+        return (
+            1 if state["is_identity_control"] else 0,
+            -abs(float(state["robust_rank_blend"])),
+            -abs(float(state["prediction_shrinkage"]) - 1.0),
+        )
+
     def predict(self, dataset: DatasetH, segment: Union[Text, slice] = "test"):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
@@ -314,6 +458,7 @@ class RegimeHorizonCostEnsembleModel(Model):
         regimes = self._assign_row_regimes(pred_raw)
         blended = self._blend_by_regime(pred_scores, regimes)
         blended = self._apply_risk_controls(blended)
+        blended = self._apply_final_score_controls(blended)
         return self._apply_cost_aware_transform(
             blended,
             memory_boost=self.memory_boost,
@@ -585,6 +730,68 @@ class RegimeHorizonCostEnsembleModel(Model):
         zscore = self._cross_sectional_zscore(score)
         return zscore.clip(-self.zscore_clip, self.zscore_clip).fillna(0.0)
 
+    def _apply_final_score_controls(
+        self,
+        score: pd.Series,
+        robust_rank_blend: Optional[float] = None,
+        prediction_shrinkage: Optional[float] = None,
+    ) -> pd.Series:
+        rank_blend = self.robust_rank_blend if robust_rank_blend is None else float(robust_rank_blend)
+        shrinkage = self.prediction_shrinkage if prediction_shrinkage is None else float(prediction_shrinkage)
+        if not 0.0 <= rank_blend <= 1.0:
+            raise ValueError("robust_rank_blend must be in [0, 1].")
+        if not 0.0 <= shrinkage <= 1.0:
+            raise ValueError("prediction_shrinkage must be in [0, 1].")
+
+        controlled = score.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+        if rank_blend > 0:
+            rank_score = self._rank_preserving_score(controlled)
+            controlled = (1.0 - rank_blend) * controlled + rank_blend * rank_score
+        if shrinkage < 1.0:
+            controlled = controlled * shrinkage
+        return controlled.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+
+    def _rank_preserving_score(self, score: pd.Series) -> pd.Series:
+        rank_score = self._cross_sectional_rank_score(score.astype(float))
+        return self._cross_sectional_zscore(rank_score).reindex(score.index).fillna(0.0)
+
+    def _iter_final_score_controls(self):
+        yielded_identity = False
+        for rank_blend in self.robust_rank_blend_grid:
+            for shrinkage in self.prediction_shrinkage_grid:
+                yielded_identity = yielded_identity or self._is_identity_final_score_control(rank_blend, shrinkage)
+                yield float(rank_blend), float(shrinkage)
+        if self._final_score_control_grid_opt_in and not yielded_identity:
+            yield 0.0, 1.0
+
+    def _final_control_grid_has_identity(self) -> bool:
+        return bool(self._final_score_control_grid_opt_in)
+
+    @staticmethod
+    def _is_identity_final_score_control(robust_rank_blend: float, prediction_shrinkage: float) -> bool:
+        return abs(float(robust_rank_blend)) <= 1e-12 and abs(float(prediction_shrinkage) - 1.0) <= 1e-12
+
+    def _daily_rank_ic(self, score: pd.Series, label: pd.Series) -> float:
+        common_index = score.index.intersection(label.index)
+        if len(common_index) == 0 or not isinstance(score.index, pd.MultiIndex):
+            return float("-inf")
+
+        score = score.loc[common_index].replace([np.inf, -np.inf], np.nan)
+        label = label.loc[common_index].replace([np.inf, -np.inf], np.nan)
+        date_level = self._date_level(score.index)
+        daily_ic = []
+        for _, daily_score in score.groupby(level=date_level, sort=True):
+            daily_label = label.loc[daily_score.index]
+            valid_mask = daily_score.notna() & daily_label.notna()
+            if int(valid_mask.sum()) < 2:
+                continue
+            ic = daily_score.loc[valid_mask].rank(pct=True).corr(daily_label.loc[valid_mask].rank(pct=True))
+            if np.isfinite(ic):
+                daily_ic.append(float(ic))
+        if not daily_ic:
+            return float("-inf")
+        return float(np.mean(daily_ic))
+
     def _apply_turnover_boost(self, score: pd.Series, boost: float) -> pd.Series:
         if boost <= 0:
             return score
@@ -730,6 +937,17 @@ class RegimeHorizonCostEnsembleModel(Model):
         if values is None:
             return []
         return [float(v) for v in values]
+
+    @staticmethod
+    def _normalize_bounded_float_grid(
+        values: Sequence[float], name: str, lower: float, upper: float
+    ) -> List[float]:
+        grid = [float(v) for v in values]
+        if not grid:
+            raise ValueError(f"{name} must not be empty.")
+        if any(not np.isfinite(v) or v < lower or v > upper for v in grid):
+            raise ValueError(f"{name} values must be finite and in [{lower}, {upper}].")
+        return grid
 
     @staticmethod
     def _uniform_quantiles(num_regimes: int) -> List[float]:

@@ -5,6 +5,7 @@ const routes = [
   { path: '/pipeline',   name: 'pipeline', component: () => import('../views/Pipeline.vue'),  meta: { title: '数据管道' } },
   { path: '/browser',    name: 'browser',  component: () => import('../views/Browser.vue'),   meta: { title: '数据浏览' } },
   { path: '/factor',     name: 'factor',   component: () => import('../views/FactorAnalysis.vue'), meta: { title: '因子分析' } },
+  { path: '/stock-select', name: 'stock-select', component: () => import('../views/StockSelection.vue'), meta: { title: '模型选股' } },
 ]
 
 export default createRouter({

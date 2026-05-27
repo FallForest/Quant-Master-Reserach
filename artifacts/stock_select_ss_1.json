@@ -1,0 +1,201 @@
+{
+  "config": {
+    "model_id": "linear",
+    "handler_id": "alpha158",
+    "universe": "300",
+    "test_date": "2026-05-22",
+    "train_start": "2018-01-01",
+    "train_end": "2023-12-31",
+    "valid_start": "2024-01-01",
+    "valid_end": "2025-06-30",
+    "top_n": 20
+  },
+  "results": {
+    "top": [
+      {
+        "rank": 1,
+        "symbol": "SH600193",
+        "name": "*ST创兴",
+        "score": 384183146905600.0
+      },
+      {
+        "rank": 2,
+        "symbol": "SH600082",
+        "name": "ST海泰",
+        "score": 0.064251
+      },
+      {
+        "rank": 3,
+        "symbol": "SH600067",
+        "name": "冠城新材",
+        "score": 0.042277
+      },
+      {
+        "rank": 4,
+        "symbol": "SH600273",
+        "name": "XD嘉化能",
+        "score": 0.042048
+      },
+      {
+        "rank": 5,
+        "symbol": "SH600015",
+        "name": "华夏银行",
+        "score": 0.041453
+      },
+      {
+        "rank": 6,
+        "symbol": "SH600064",
+        "name": "南京高科",
+        "score": 0.039486
+      },
+      {
+        "rank": 7,
+        "symbol": "SH600335",
+        "name": "国机汽车",
+        "score": 0.038133
+      },
+      {
+        "rank": 8,
+        "symbol": "SH600125",
+        "name": "铁龙物流",
+        "score": 0.036831
+      },
+      {
+        "rank": 9,
+        "symbol": "SH600051",
+        "name": "宁波联合",
+        "score": 0.03645
+      },
+      {
+        "rank": 10,
+        "symbol": "SH600363",
+        "name": "联创光电",
+        "score": 0.035912
+      },
+      {
+        "rank": 11,
+        "symbol": "SH600235",
+        "name": "民丰特纸",
+        "score": 0.035773
+      },
+      {
+        "rank": 12,
+        "symbol": "SH600261",
+        "name": "阳光照明",
+        "score": 0.035492
+      },
+      {
+        "rank": 13,
+        "symbol": "SH600238",
+        "name": "*ST椰岛",
+        "score": 0.03517
+      },
+      {
+        "rank": 14,
+        "symbol": "SH600097",
+        "name": "开创国际",
+        "score": 0.034371
+      },
+      {
+        "rank": 15,
+        "symbol": "SH600265",
+        "name": "*ST景谷",
+        "score": 0.033868
+      },
+      {
+        "rank": 16,
+        "symbol": "SH600323",
+        "name": "瀚蓝环境",
+        "score": 0.033316
+      },
+      {
+        "rank": 17,
+        "symbol": "SH600138",
+        "name": "中青旅",
+        "score": 0.03327
+      },
+      {
+        "rank": 18,
+        "symbol": "SH600022",
+        "name": "山东钢铁",
+        "score": 0.033071
+      },
+      {
+        "rank": 19,
+        "symbol": "SH600271",
+        "name": "航天信息",
+        "score": 0.033024
+      },
+      {
+        "rank": 20,
+        "symbol": "SH600262",
+        "name": "北方股份",
+        "score": 0.032098
+      }
+    ],
+    "bottom": [
+      {
+        "rank": 291,
+        "symbol": "SH600050",
+        "name": "中国联通",
+        "score": -0.042173
+      },
+      {
+        "rank": 292,
+        "symbol": "SH600172",
+        "name": "黄河旋风",
+        "score": -0.04337
+      },
+      {
+        "rank": 293,
+        "symbol": "SH600219",
+        "name": "南山铝业",
+        "score": -0.043513
+      },
+      {
+        "rank": 294,
+        "symbol": "SH600301",
+        "name": "华锡有色",
+        "score": -0.051844
+      },
+      {
+        "rank": 295,
+        "symbol": "SH600226",
+        "name": "亨通股份",
+        "score": -0.052266
+      },
+      {
+        "rank": 296,
+        "symbol": "SH600376",
+        "name": "首开股份",
+        "score": -0.054235
+      },
+      {
+        "rank": 297,
+        "symbol": "SH600255",
+        "name": "鑫科材料",
+        "score": -0.061503
+      },
+      {
+        "rank": 298,
+        "symbol": "SH600110",
+        "name": "诺德股份",
+        "score": -0.063289
+      },
+      {
+        "rank": 299,
+        "symbol": "SH600303",
+        "name": "曙光股份",
+        "score": -0.067951
+      },
+      {
+        "rank": 300,
+        "symbol": "SH600203",
+        "name": "福日电子",
+        "score": -0.086586
+      }
+    ],
+    "total": 300
+  },
+  "timestamp": 1779809211.6136029
+}

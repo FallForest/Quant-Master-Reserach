@@ -1,0 +1,41 @@
+{
+  "scan_time_utc": "2026-05-25T06:03:04Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024.py",
+  "experiment_name": "style-neutral residual return target",
+  "mode": "full",
+  "status": "failed",
+  "verdict": "NO_GO",
+  "blocker": "MemoryError: Unable to allocate 18.8 MiB for an array with shape (9, 546993) and data type float32",
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_summary_20260525T060304Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_summary_20260525T060304Z.md",
+    "candidates_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_candidates_20260525T060304Z.csv",
+    "validation_backtests_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_validation_backtests_20260525T060304Z.csv",
+    "selected_valid_report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_selected_valid_report_20260525T060304Z.csv",
+    "selected_valid_signal_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_selected_valid_signal_20260525T060304Z.csv",
+    "selected_test_report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_selected_test_report_20260525T060304Z.csv",
+    "selected_test_signal_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_selected_test_signal_20260525T060304Z.csv",
+    "test_slices_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\support\\style_neutral_label_pre2024_test_slices_20260525T060304Z.csv"
+  },
+  "leakage_guardrails": {
+    "raw_lookback_start": "2019-01-01",
+    "train_window": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "selection_window": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "smoke_load_end": "2023-12-31",
+    "smoke_evaluates_2024_2026": false,
+    "full_mode_available": true,
+    "full_test_window": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "full_selection_uses_test_metrics": false,
+    "full_mode_guard": "candidate and portfolio selection are locked from 2023 validation only; 2024-2026 is evaluated once after selection"
+  },
+  "runtime_sec_total": 4.370355799999743
+}

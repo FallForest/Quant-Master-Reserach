@@ -339,6 +339,62 @@ def get_hs_stock_symbols() -> list:
     return _HS_SYMBOLS
 
 
+def get_stock_names() -> dict:
+    """get SH/SZ stock code -> name mapping from East Money
+
+    Returns
+    -------
+        dict: {code: name}, e.g. {"600519": "贵州茅台", "000001": "平安银行"}
+    """
+    base_url = "http://99.push2.eastmoney.com/api/qt/clist/get"
+    params = {
+        "pn": 1,
+        "pz": 5000,
+        "po": 1,
+        "np": 1,
+        "fs": "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23,m:0+t:81+s:2048",
+        "fields": "f12,f14",
+    }
+
+    names = {}
+    page = 1
+
+    while True:
+        params["pn"] = page
+        for attempt in range(1, 6):
+            try:
+                resp = requests.get(base_url, params=params, timeout=None)
+                resp.raise_for_status()
+                data = resp.json()
+                break
+            except Exception as e:
+                if attempt == 5:
+                    logger.error(f"Failed to fetch stock names after 5 attempts: {e}")
+                    raise
+                logger.warning(f"Retry page {page} (attempt {attempt}): {e}")
+                time.sleep(3)
+
+        if not data or "data" not in data or not data["data"] or "diff" not in data["data"]:
+            break
+
+        items = data["data"]["diff"]
+        if not items:
+            break
+
+        for item in items:
+            code = item.get("f12", "")
+            name = item.get("f14", "")
+            if code and name:
+                names[code] = name
+
+        logger.info(f"Names page {page}: fetched {len(items)} entries")
+        page += 1
+        time.sleep(0.1)
+
+    logger.info(f"Total stock names fetched: {len(names)}")
+    return names
+
+
 def get_us_stock_symbols(quant_master_data_path: [str, Path] = None) -> list:
     """get US stock symbols
 

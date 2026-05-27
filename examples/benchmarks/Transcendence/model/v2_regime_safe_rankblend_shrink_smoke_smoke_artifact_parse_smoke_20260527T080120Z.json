@@ -1,0 +1,26 @@
+{
+  "summary_json_exists": true,
+  "summary_json_parse_ok": true,
+  "summary_keys": [
+    "artifacts",
+    "blocker",
+    "command",
+    "hard_gate_pass",
+    "ic",
+    "mlflow",
+    "mode",
+    "protocol",
+    "rank_ic",
+    "runtime_sec",
+    "script",
+    "split_metrics",
+    "status",
+    "test_metrics",
+    "timestamp_utc",
+    "validation_metrics",
+    "verdict",
+    "workflow_config_source"
+  ],
+  "hard_gate_pass": false,
+  "finite_rows": 58
+}

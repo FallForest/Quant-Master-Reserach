@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import Iterable, Mapping, Optional, Union
 
+import numpy as np
 import pandas as pd
 
 
@@ -95,6 +96,100 @@ def transform_scores_for_cost(
         base = base - float(volatility_penalty) * vol_rank
 
     return base.astype(float)
+
+
+def select_buffered_topk(
+    scores: pd.Series,
+    topk: int,
+    previous_holdings: HoldingsLike = None,
+    *,
+    rank_buffer: int = 0,
+) -> pd.Index:
+    """
+    Select top-k names with a past-only turnover buffer.
+
+    Previously held instruments are retained when their current score rank is
+    within ``topk + rank_buffer``. This keeps the original score order inside
+    retained and replacement buckets, and uses only current scores plus
+    previous holdings available at decision time.
+    """
+    if not isinstance(scores, pd.Series):
+        raise TypeError("scores must be a pandas Series")
+    if topk <= 0:
+        raise ValueError("topk must be positive")
+    if rank_buffer < 0:
+        raise ValueError("rank_buffer must be non-negative")
+
+    ranked = _finite_scores(scores).sort_values(ascending=False, kind="mergesort")
+    if ranked.empty:
+        return pd.Index([])
+
+    topk = min(int(topk), len(ranked))
+    if rank_buffer == 0 or previous_holdings is None:
+        return pd.Index(ranked.iloc[:topk].index)
+
+    holding_signal = _holding_signal(previous_holdings, ranked.index, use_holding_weight=False)
+    rank_limit = min(len(ranked), topk + int(rank_buffer))
+
+    selected = []
+    selected_set = set()
+    for instrument in ranked.iloc[:rank_limit].index:
+        if holding_signal.get(instrument, 0.0) <= 0 or instrument in selected_set:
+            continue
+        selected.append(instrument)
+        selected_set.add(instrument)
+        if len(selected) >= topk:
+            break
+
+    for instrument in ranked.index:
+        if len(selected) >= topk:
+            break
+        if instrument in selected_set:
+            continue
+        selected.append(instrument)
+        selected_set.add(instrument)
+
+    return pd.Index([instrument for instrument in ranked.index if instrument in selected_set][:topk])
+
+
+def transform_scores_with_rank_buffer(
+    scores: pd.Series,
+    previous_holdings: HoldingsLike = None,
+    *,
+    topk: int,
+    rank_buffer: int = 0,
+) -> pd.Series:
+    """
+    Return finite rank scores after applying ``select_buffered_topk``.
+
+    The output preserves the input index and converts the buffered selection
+    into rank-like scores: selected names rank above non-selected names, while
+    original score order is preserved inside each bucket. With
+    ``rank_buffer=0``, the full cross-sectional rank order is unchanged.
+    """
+    if not isinstance(scores, pd.Series):
+        raise TypeError("scores must be a pandas Series")
+
+    clean = _finite_scores(scores)
+    if clean.empty:
+        return clean.astype(float)
+
+    ranked = clean.sort_values(ascending=False, kind="mergesort")
+    selected = select_buffered_topk(
+        clean,
+        topk=topk,
+        previous_holdings=previous_holdings,
+        rank_buffer=rank_buffer,
+    )
+    selected_set = set(selected.tolist())
+    selected_order = [instrument for instrument in ranked.index if instrument in selected_set]
+    other_order = [instrument for instrument in ranked.index if instrument not in selected_set]
+    buffered_order = selected_order + other_order
+
+    adjusted = pd.Series(index=clean.index, dtype=float)
+    for rank, instrument in enumerate(buffered_order):
+        adjusted.loc[instrument] = float(len(buffered_order) - rank)
+    return adjusted.astype(float)
 
 
 def rerank_topk_with_turnover_limit(
@@ -189,7 +284,17 @@ def _to_numeric_series(values: pd.Series) -> pd.Series:
         values = values.iloc[:, 0]
     if not isinstance(values, pd.Series):
         values = pd.Series(values)
-    return pd.to_numeric(values, errors="coerce")
+    numeric = pd.to_numeric(values, errors="coerce")
+    return numeric.where(np.isfinite(numeric), pd.NA)
+
+
+def _finite_scores(values: pd.Series) -> pd.Series:
+    clean = _to_numeric_series(values).copy()
+    if clean.empty:
+        return clean.astype(float)
+    if clean.isna().all():
+        return pd.Series(0.0, index=clean.index, dtype=float)
+    return clean.fillna(float(clean.min(skipna=True))).astype(float)
 
 
 def _cross_section_rank(values: pd.Series) -> pd.Series:

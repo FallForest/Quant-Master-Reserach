@@ -52,5 +52,27 @@ def test_soft_topk_logic():
     assert abs(res_c["D"] - 0.475) < 1e-8
 
 
+def test_soft_topk_selection_rank_buffer_is_opt_in():
+    scores = pd.Series({"A": 0.99, "B": 0.98, "C": 0.97, "D": 0.1})
+    current_pos = MockPosition({"C": 0.5, "D": 0.5})
+
+    default_strat = SoftTopkStrategy.__new__(SoftTopkStrategy)
+    default_strat.topk = 2
+    default_strat.risk_degree = 1.0
+    default_strat.trade_impact_limit = 1.0
+    default_res = default_strat.generate_target_weight_position(scores, current_pos, None, None)
+
+    buffered_strat = SoftTopkStrategy.__new__(SoftTopkStrategy)
+    buffered_strat.topk = 2
+    buffered_strat.risk_degree = 1.0
+    buffered_strat.trade_impact_limit = 1.0
+    buffered_strat.selection_rank_buffer = 1
+    buffered_res = buffered_strat.generate_target_weight_position(scores, current_pos, None, None)
+
+    assert set(default_res) == {"A", "B"}
+    assert set(buffered_res) == {"A", "C"}
+    assert abs(buffered_res["C"] - 0.5) < 1e-8
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
