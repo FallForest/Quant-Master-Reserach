@@ -1,0 +1,9 @@
+py.exe : [18172:MainThread](2026-05-28 13:28:49,243) INFO - quant_master.qrun - [run.py:78] - Render the template with 
+the context: {}
+At line:11 char:3
++   & py -3 -m quant_master.cli.run examples/benchmarks/Transcendence/w ...
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([18172:MainThre...the context: {}:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+

@@ -31,6 +31,22 @@
 /* ===== Base ===== */
 * { box-sizing: border-box; }
 
+/* ===== Focus States (Accessibility) ===== */
+*:focus-visible {
+  outline: 2px solid var(--color-brand-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ===== Reduced Motion (Accessibility) ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* ===== Animations ===== */
 @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
@@ -41,6 +57,24 @@
 @keyframes page-enter {
   from { opacity: 0; transform: translateX(12px); }
   to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ===== Skeleton Loading ===== */
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+  background-size: 200% 100%;
 }
 
 /* ===== Sidebar ===== */
@@ -79,3 +113,75 @@
 
 /* ===== Cursor ===== */
 .cursor-pointer { cursor: pointer; }
+
+/* ===== Dark Mode ===== */
+.dark {
+  --color-surface-0: #0F172A;
+  --color-surface-1: #1E293B;
+  --color-surface-2: #334155;
+  --color-surface-3: #475569;
+}
+
+/* Dark mode overrides for Tailwind utility patterns used in templates */
+.dark .bg-white { background-color: var(--color-surface-1) !important; }
+.dark .bg-surface-0 { background-color: var(--color-surface-0) !important; }
+.dark .bg-surface-2 { background-color: var(--color-surface-2) !important; }
+.dark .bg-surface-2\/50 { background-color: rgba(51,65,85,0.5) !important; }
+.dark .bg-surface-2\/60 { background-color: rgba(51,65,85,0.6) !important; }
+.dark .bg-surface-2\/40 { background-color: rgba(51,65,85,0.4) !important; }
+.dark .bg-slate-50 { background-color: var(--color-surface-2) !important; }
+.dark .bg-slate-50\/30 { background-color: rgba(51,65,85,0.3) !important; }
+.dark .bg-slate-50\/50 { background-color: rgba(51,65,85,0.5) !important; }
+.dark .bg-slate-100 { background-color: var(--color-surface-2) !important; }
+
+.dark .border-surface-3 { border-color: var(--color-surface-3) !important; }
+.dark .border-slate-200 { border-color: var(--color-surface-3) !important; }
+.dark .border-slate-200\/80 { border-color: rgba(71,85,105,0.8) !important; }
+.dark .border-slate-100 { border-color: var(--color-surface-3) !important; }
+.dark .border-white\/10 { border-color: rgba(255,255,255,0.1) !important; }
+
+.dark .text-slate-800 { color: #F1F5F9 !important; }
+.dark .text-slate-700 { color: #E2E8F0 !important; }
+.dark .text-slate-600 { color: #CBD5E1 !important; }
+.dark .text-slate-500 { color: #94A3B8 !important; }
+.dark .text-slate-400 { color: #64748B !important; }
+.dark .text-slate-300 { color: #475569 !important; }
+.dark .text-brand-900 { color: var(--color-brand-200) !important; }
+
+.dark .text-brand-600 { color: var(--color-brand-400) !important; }
+.dark .text-brand-500 { color: var(--color-brand-400) !important; }
+
+.dark .hover\:bg-surface-2\/40:hover { background-color: rgba(51,65,85,0.4) !important; }
+.dark .hover\:bg-slate-50:hover { background-color: var(--color-surface-2) !important; }
+.dark .hover\:bg-brand-50:hover { background-color: rgba(30,64,175,0.2) !important; }
+.dark .hover\:bg-brand-50\/50:hover { background-color: rgba(30,64,175,0.15) !important; }
+.dark .hover\:text-slate-600:hover { color: #CBD5E1 !important; }
+.dark .hover\:text-slate-700:hover { color: #E2E8F0 !important; }
+
+.dark .bg-brand-50 { background-color: rgba(30,64,175,0.2) !important; }
+.dark .bg-brand-50\/50 { background-color: rgba(30,64,175,0.15) !important; }
+.dark .bg-brand-50\/70 { background-color: rgba(30,64,175,0.2) !important; }
+.dark .bg-brand-100 { background-color: rgba(30,64,175,0.25) !important; }
+.dark .bg-red-50 { background-color: rgba(127,29,29,0.3) !important; }
+.dark .bg-emerald-50 { background-color: rgba(6,78,59,0.3) !important; }
+.dark .bg-amber-50 { background-color: rgba(120,53,15,0.3) !important; }
+.dark .bg-cta\/10 { background-color: rgba(245,158,11,0.15) !important; }
+
+.dark .text-red-500 { color: #F87171 !important; }
+.dark .text-red-600 { color: #F87171 !important; }
+.dark .text-red-400 { color: #FCA5A5 !important; }
+.dark .text-emerald-500 { color: #34D399 !important; }
+.dark .text-emerald-600 { color: #34D399 !important; }
+.dark .text-emerald-400 { color: #6EE7B7 !important; }
+.dark .text-amber-400 { color: #FBBF24 !important; }
+.dark .text-amber-600 { color: #FBBF24 !important; }
+
+.dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important; }
+.dark .shadow-lg { box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important; }
+.dark .shadow-xl { box-shadow: 0 20px 40px rgba(0,0,0,0.5) !important; }
+
+/* Dark mode for ECharts tooltip backgrounds — handled per-chart, but container bg */
+.dark .log-scroll::-webkit-scrollbar-track { background: #0F172A; }
+
+/* Dark mode body/page background */
+body.dark { background-color: #0F172A; color: #E2E8F0; }

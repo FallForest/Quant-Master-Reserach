@@ -7,9 +7,7 @@ import threading
 import time
 from pathlib import Path
 
-import yaml
-
-_MODELS_FILE = Path(__file__).resolve().parent.parent / "models.yaml"
+from .model_catalog import get_models as _get_models, get_handlers as _get_handlers
 
 # 运行状态
 _runs = {}
@@ -17,22 +15,12 @@ _counter = 0
 _qm_lock = threading.Lock()
 
 
-def load_registry():
-    """从 models.yaml 加载模型和处理器注册表。"""
-    with open(_MODELS_FILE, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    return data.get("models", {}), data.get("handlers", {})
-
-
-_MODEL_REGISTRY, _HANDLER_REGISTRY = load_registry()
-
-
 def get_model_registry():
-    return _MODEL_REGISTRY
+    return _get_models()
 
 
 def get_handler_registry():
-    return _HANDLER_REGISTRY
+    return _get_handlers()
 
 
 def get_runs():
@@ -97,8 +85,8 @@ def run_stock_selection(run_id, config, data_obj=None):
         _set_progress(15, "构建数据集")
         model_id = config.get("model_id", "lgb")
         handler_id = config.get("handler_id", "alpha158")
-        model_spec = _MODEL_REGISTRY[model_id]
-        handler_spec = _HANDLER_REGISTRY[handler_id]
+        model_spec = get_model_registry()[model_id]
+        handler_spec = get_handler_registry()[handler_id]
 
         handler_mod = importlib.import_module(handler_spec["import_path"])
         HandlerCls = getattr(handler_mod, handler_spec["class_name"])

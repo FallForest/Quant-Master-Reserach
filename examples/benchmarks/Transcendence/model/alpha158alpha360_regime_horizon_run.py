@@ -7,7 +7,7 @@ import json
 import math
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -45,6 +45,12 @@ CLOSE_COST = 0.0015
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 HARD_GATE_ROWS = 562
+MEDIUM_SELECTION_GRID_KEYS = (
+    "search_step",
+    "memory_boost_grid",
+    "turnover_penalty_grid",
+    "risk_penalty_grid",
+)
 
 
 def _stamp() -> str:
@@ -63,13 +69,21 @@ def _safe_float(x: Any) -> float:
 
 
 def _jsonable(x: Any) -> Any:
+    if x is pd.NaT:
+        return None
+    if isinstance(x, (pd.Timestamp, date, datetime)):
+        return x.isoformat()
+    if isinstance(x, (np.bool_,)):
+        return bool(x)
     if isinstance(x, (np.integer,)):
         return int(x)
     if isinstance(x, (np.floating,)):
         val = float(x)
         return val if math.isfinite(val) else None
-    if isinstance(x, (pd.Timestamp,)):
-        return x.isoformat()
+    if isinstance(x, (np.generic,)):
+        return _jsonable(x.item())
+    if isinstance(x, float):
+        return x if math.isfinite(x) else None
     if isinstance(x, dict):
         return {str(k): _jsonable(v) for k, v in x.items()}
     if isinstance(x, (list, tuple)):
@@ -99,64 +113,333 @@ def _find_port_config(config: Dict[str, Any]) -> Dict[str, Any]:
     raise KeyError("cannot find port_analysis_config or PortAnaRecord config")
 
 
-def _apply_common_overrides(config: Dict[str, Any], mode: str) -> Dict[str, Any]:
+def _test_range_for_mode(mode: str) -> List[str]:
+    return list(SMOKE_TEST_RANGE if mode == "smoke" else TEST_RANGE)
+
+
+def _configured_segments(config: Dict[str, Any]) -> Dict[str, List[str]]:
+    segments = config["task"]["dataset"]["kwargs"].get("segments", {})
+    return {
+        "train": list(segments.get("train", TRAIN_RANGE)),
+        "valid": list(segments.get("valid", VALID_RANGE)),
+        "test": list(segments.get("test", TEST_RANGE)),
+    }
+
+
+def _record_override(changes: List[Dict[str, Any]], path: str, old_value: Any, new_value: Any) -> None:
+    if old_value != new_value:
+        changes.append({"path": path, "old": copy.deepcopy(old_value), "new": copy.deepcopy(new_value)})
+
+
+def _set_with_record(changes: List[Dict[str, Any]], target: Dict[str, Any], key: str, value: Any, path: str) -> None:
+    old_value = target.get(key)
+    _record_override(changes, path, old_value, value)
+    target[key] = value
+
+
+def _record_selection_grid_decision(
+    changes: List[Dict[str, Any]],
+    model_kwargs: Dict[str, Any],
+    key: str,
+    action: str,
+    reason: str,
+    old_value: Any = None,
+    new_value: Any = None,
+) -> None:
+    entry = {
+        "path": f"task.model.kwargs.{key}",
+        "key": key,
+        "action": action,
+        "reason": reason,
+    }
+    if action == "preserved":
+        entry["value"] = copy.deepcopy(model_kwargs.get(key))
+    else:
+        entry["old"] = copy.deepcopy(old_value)
+        entry["new"] = copy.deepcopy(new_value)
+    changes.append(entry)
+
+
+def _set_grid_with_decision(
+    budget_overrides: List[Dict[str, Any]],
+    selection_grid_decisions: List[Dict[str, Any]],
+    model_kwargs: Dict[str, Any],
+    key: str,
+    value: Any,
+    reason: str,
+) -> None:
+    old_value = model_kwargs.get(key)
+    _set_with_record(budget_overrides, model_kwargs, key, value, f"task.model.kwargs.{key}")
+    _record_selection_grid_decision(selection_grid_decisions, model_kwargs, key, "overridden", reason, old_value, value)
+
+
+def _preserve_medium_selection_grids(
+    selection_grid_decisions: List[Dict[str, Any]],
+    model_kwargs: Dict[str, Any],
+    keys: tuple[str, ...] = MEDIUM_SELECTION_GRID_KEYS,
+) -> None:
+    for key in keys:
+        if key in model_kwargs:
+            _record_selection_grid_decision(
+                selection_grid_decisions,
+                model_kwargs,
+                key,
+                "preserved",
+                "medium preserve_config_windows keeps YAML candidate selection grids",
+            )
+
+
+def _apply_budget_overrides(
+    config: Dict[str, Any],
+    mode: str,
+    preserve_config_windows: bool = False,
+) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    budget_overrides: List[Dict[str, Any]] = []
+    selection_grid_decisions: List[Dict[str, Any]] = []
+    model_kwargs = config["task"]["model"]["kwargs"]
+    port_cfg = _find_port_config(config)
+
+    if mode == "smoke":
+        original_specs = model_kwargs.get("horizon_model_specs", [])
+        smoke_specs = original_specs[:2]
+        _record_override(
+            budget_overrides,
+            "task.model.kwargs.horizon_model_specs",
+            original_specs,
+            smoke_specs,
+        )
+        model_kwargs["horizon_model_specs"] = smoke_specs
+        _set_grid_with_decision(
+            budget_overrides,
+            selection_grid_decisions,
+            model_kwargs,
+            "search_step",
+            0.5,
+            "smoke uses quick default candidate search budget",
+        )
+        _set_grid_with_decision(
+            budget_overrides,
+            selection_grid_decisions,
+            model_kwargs,
+            "memory_boost_grid",
+            [0.0],
+            "smoke uses quick default candidate search budget",
+        )
+        _set_with_record(
+            budget_overrides,
+            model_kwargs,
+            "regime_consensus_quantiles",
+            [0.5],
+            "task.model.kwargs.regime_consensus_quantiles",
+        )
+        _set_with_record(
+            budget_overrides,
+            model_kwargs,
+            "regime_disagreement_quantiles",
+            [0.5],
+            "task.model.kwargs.regime_disagreement_quantiles",
+        )
+        _set_with_record(
+            budget_overrides,
+            model_kwargs,
+            "min_regime_samples",
+            120,
+            "task.model.kwargs.min_regime_samples",
+        )
+        max_epochs = 4
+        lgb_rounds = 80
+    elif mode == "medium":
+        if preserve_config_windows:
+            _preserve_medium_selection_grids(selection_grid_decisions, model_kwargs)
+        else:
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                model_kwargs,
+                "search_step",
+                0.5,
+                "medium without preserve_config_windows uses quick default candidate search budget",
+            )
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                model_kwargs,
+                "memory_boost_grid",
+                [0.0],
+                "medium without preserve_config_windows uses quick default candidate search budget",
+            )
+            _preserve_medium_selection_grids(
+                selection_grid_decisions,
+                model_kwargs,
+                ("turnover_penalty_grid", "risk_penalty_grid"),
+            )
+        _set_with_record(
+            budget_overrides,
+            model_kwargs,
+            "regime_consensus_quantiles",
+            [0.5],
+            "task.model.kwargs.regime_consensus_quantiles",
+        )
+        _set_with_record(
+            budget_overrides,
+            model_kwargs,
+            "regime_disagreement_quantiles",
+            [0.5],
+            "task.model.kwargs.regime_disagreement_quantiles",
+        )
+        # Keep the full test/backtest window, but cap model-side work for quick candidate checks.
+        _set_with_record(
+            budget_overrides,
+            model_kwargs,
+            "min_regime_samples",
+            0,
+            "task.model.kwargs.min_regime_samples",
+        )
+        max_epochs = 8
+        lgb_rounds = 120
+    else:
+        # With the mandated 2023-only validation split, some predeclared regimes can be sparse.
+        # Learning every regime avoids empty fallback weights without using 2024-2026 data.
+        _set_with_record(
+            budget_overrides,
+            model_kwargs,
+            "min_regime_samples",
+            0,
+            "task.model.kwargs.min_regime_samples",
+        )
+        return budget_overrides, selection_grid_decisions
+
+    for spec_index, spec in enumerate(model_kwargs.get("horizon_model_specs", [])):
+        mk = spec.get("model_kwargs", {})
+        path = f"task.model.kwargs.horizon_model_specs[{spec_index}].model_kwargs"
+        if spec.get("model_type") == "double_ensemble":
+            num_models = min(int(mk.get("num_models", 2)), 1)
+            _set_with_record(budget_overrides, mk, "num_models", num_models, f"{path}.num_models")
+            _set_with_record(budget_overrides, mk, "epochs", min(int(mk.get("epochs", max_epochs)), max_epochs), f"{path}.epochs")
+            _set_with_record(
+                budget_overrides,
+                mk,
+                "sub_weights",
+                list(mk.get("sub_weights", [1]))[:num_models],
+                f"{path}.sub_weights",
+            )
+            _set_with_record(budget_overrides, mk, "enable_sr", False, f"{path}.enable_sr")
+            _set_with_record(budget_overrides, mk, "enable_fs", False, f"{path}.enable_fs")
+            _set_with_record(
+                budget_overrides,
+                mk,
+                "num_threads",
+                min(int(mk.get("num_threads", 8)), 4),
+                f"{path}.num_threads",
+            )
+        if spec.get("model_type") in {"lightgbm", "lgb", "lgbm"}:
+            _set_with_record(
+                budget_overrides,
+                mk,
+                "num_boost_round",
+                min(int(mk.get("num_boost_round", 200)), lgb_rounds),
+                f"{path}.num_boost_round",
+            )
+            _set_with_record(
+                budget_overrides,
+                mk,
+                "early_stopping_rounds",
+                min(int(mk.get("early_stopping_rounds", 30)), 20),
+                f"{path}.early_stopping_rounds",
+            )
+            _set_with_record(
+                budget_overrides,
+                mk,
+                "num_threads",
+                min(int(mk.get("num_threads", 8)), 4),
+                f"{path}.num_threads",
+            )
+
+    if mode == "smoke":
+        strategy_kwargs = port_cfg["strategy"]["kwargs"]
+        _set_with_record(
+            budget_overrides,
+            strategy_kwargs,
+            "topk",
+            min(int(strategy_kwargs.get("topk", 30)), 20),
+            "port_analysis_config.strategy.kwargs.topk",
+        )
+        _set_with_record(
+            budget_overrides,
+            strategy_kwargs,
+            "n_drop",
+            min(int(strategy_kwargs.get("n_drop", 3)), 1),
+            "port_analysis_config.strategy.kwargs.n_drop",
+        )
+    return budget_overrides, selection_grid_decisions
+
+
+def _apply_common_overrides(config: Dict[str, Any], mode: str, preserve_config_windows: bool = False) -> Dict[str, Any]:
     cfg = copy.deepcopy(config)
+    window_overrides: List[Dict[str, Any]] = []
     provider_uri = Path(str(cfg["quant_master_init"]["provider_uri"])).expanduser()
     if not provider_uri.is_absolute():
         provider_uri = (REPO_ROOT / provider_uri).resolve()
     cfg["quant_master_init"]["provider_uri"] = str(provider_uri)
 
     handler_cfg = cfg["task"]["dataset"]["kwargs"]["handler"]["kwargs"]
-    handler_cfg.update(
-        {
-            "start_time": "2019-01-01",
-            "end_time": TEST_RANGE[1],
-            "fit_start_time": TRAIN_RANGE[0],
-            "fit_end_time": TRAIN_RANGE[1],
+    if preserve_config_windows:
+        actual_segments = _configured_segments(cfg)
+    else:
+        actual_segments = {
+            "train": list(TRAIN_RANGE),
+            "valid": list(VALID_RANGE),
+            "test": _test_range_for_mode(mode),
         }
-    )
-    if "data_handler_config" in cfg:
-        cfg["data_handler_config"].update(handler_cfg)
+        handler_overrides = {
+            "start_time": "2019-01-01",
+            "end_time": actual_segments["test"][1],
+            "fit_start_time": actual_segments["train"][0],
+            "fit_end_time": actual_segments["train"][1],
+        }
+        for key, value in handler_overrides.items():
+            _set_with_record(window_overrides, handler_cfg, key, value, f"task.dataset.kwargs.handler.kwargs.{key}")
+        if "data_handler_config" in cfg:
+            cfg["data_handler_config"].update(handler_cfg)
 
-    cfg["task"]["dataset"]["kwargs"]["segments"] = {
-        "train": list(TRAIN_RANGE),
-        "valid": list(VALID_RANGE),
-        "test": list(TEST_RANGE if mode != "smoke" else SMOKE_TEST_RANGE),
-    }
+        _record_override(
+            window_overrides,
+            "task.dataset.kwargs.segments",
+            cfg["task"]["dataset"]["kwargs"].get("segments"),
+            actual_segments,
+        )
+        cfg["task"]["dataset"]["kwargs"]["segments"] = copy.deepcopy(actual_segments)
 
     port_cfg = _find_port_config(cfg)
-    port_cfg["backtest"]["start_time"] = TEST_RANGE[0] if mode != "smoke" else SMOKE_TEST_RANGE[0]
-    port_cfg["backtest"]["end_time"] = TEST_RANGE[1] if mode != "smoke" else SMOKE_TEST_RANGE[1]
+    _set_with_record(
+        window_overrides,
+        port_cfg["backtest"],
+        "start_time",
+        actual_segments["test"][0],
+        "port_analysis_config.backtest.start_time",
+    )
+    _set_with_record(
+        window_overrides,
+        port_cfg["backtest"],
+        "end_time",
+        actual_segments["test"][1],
+        "port_analysis_config.backtest.end_time",
+    )
     port_cfg["backtest"]["exchange_kwargs"]["open_cost"] = OPEN_COST
     port_cfg["backtest"]["exchange_kwargs"]["close_cost"] = CLOSE_COST
 
-    if mode == "smoke":
-        model_kwargs = cfg["task"]["model"]["kwargs"]
-        model_kwargs["horizon_model_specs"] = model_kwargs.get("horizon_model_specs", [])[:2]
-        model_kwargs["search_step"] = 0.5
-        model_kwargs["memory_boost_grid"] = [0.0]
-        model_kwargs["regime_consensus_quantiles"] = [0.5]
-        model_kwargs["regime_disagreement_quantiles"] = [0.5]
-        model_kwargs["min_regime_samples"] = 120
-        for spec in model_kwargs["horizon_model_specs"]:
-            mk = spec.get("model_kwargs", {})
-            if spec.get("model_type") == "double_ensemble":
-                mk["num_models"] = min(int(mk.get("num_models", 2)), 1)
-                mk["epochs"] = min(int(mk.get("epochs", 8)), 4)
-                mk["sub_weights"] = list(mk.get("sub_weights", [1]))[: int(mk["num_models"])]
-                mk["enable_sr"] = False
-                mk["enable_fs"] = False
-                mk["num_threads"] = min(int(mk.get("num_threads", 8)), 4)
-            if spec.get("model_type") in {"lightgbm", "lgb", "lgbm"}:
-                mk["num_boost_round"] = min(int(mk.get("num_boost_round", 200)), 80)
-                mk["early_stopping_rounds"] = min(int(mk.get("early_stopping_rounds", 30)), 20)
-                mk["num_threads"] = min(int(mk.get("num_threads", 8)), 4)
-        port_cfg["strategy"]["kwargs"]["topk"] = min(int(port_cfg["strategy"]["kwargs"].get("topk", 30)), 20)
-        port_cfg["strategy"]["kwargs"]["n_drop"] = min(int(port_cfg["strategy"]["kwargs"].get("n_drop", 3)), 1)
-    else:
-        # With the mandated 2023-only validation split, some predeclared regimes can be sparse.
-        # Learning every regime avoids empty fallback weights without using 2024-2026 data.
-        cfg["task"]["model"]["kwargs"]["min_regime_samples"] = 0
+    budget_overrides, selection_grid_decisions = _apply_budget_overrides(cfg, mode, preserve_config_windows)
+    cfg["runner_metadata"] = {
+        "mode": mode,
+        "preserve_config_windows": bool(preserve_config_windows),
+        "actual_segments": copy.deepcopy(actual_segments),
+        "actual_train": list(actual_segments["train"]),
+        "actual_valid": list(actual_segments["valid"]),
+        "actual_test": list(actual_segments["test"]),
+        "window_overrides": window_overrides,
+        "budget_overrides": budget_overrides,
+        "selection_grid_decisions": selection_grid_decisions,
+    }
     return cfg
 
 
@@ -288,7 +571,12 @@ def _artifact_paths(prefix: str, stamp: str) -> Dict[str, Path]:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Alpha158Alpha360 regime-horizon cost ensemble gate runner.")
-    p.add_argument("--mode", choices=["smoke", "full", "verify"], default="smoke")
+    p.add_argument("--mode", choices=["smoke", "medium", "full", "verify"], default="smoke")
+    p.add_argument(
+        "--preserve-config-windows",
+        action="store_true",
+        help="Keep train/valid/test windows from the workflow YAML instead of forcing the default protocol windows.",
+    )
     p.add_argument("--workflow-config", default=str(TARGET_CONFIG))
     p.add_argument("--output-prefix", default="alpha158alpha360_regime_horizon")
     p.add_argument("--experiment-name", default="")
@@ -309,6 +597,7 @@ def main() -> int:
         "script": str(Path(__file__).resolve()),
         "command": command,
         "mode": args.mode,
+        "preserve_config_windows": bool(args.preserve_config_windows),
         "status": "started",
         "blocker": "",
         "workflow_config_source": str(Path(args.workflow_config).resolve()),
@@ -328,7 +617,19 @@ def main() -> int:
 
     try:
         base_config = _load_config(Path(args.workflow_config).resolve())
-        run_config = _apply_common_overrides(base_config, args.mode)
+        run_config = _apply_common_overrides(base_config, args.mode, args.preserve_config_windows)
+        runner_metadata = copy.deepcopy(run_config.get("runner_metadata", {}))
+        summary.update(
+            {
+                "actual_segments": runner_metadata.get("actual_segments", {}),
+                "actual_train": runner_metadata.get("actual_train", []),
+                "actual_valid": runner_metadata.get("actual_valid", []),
+                "actual_test": runner_metadata.get("actual_test", []),
+                "window_overrides": runner_metadata.get("window_overrides", []),
+                "budget_overrides": runner_metadata.get("budget_overrides", []),
+                "selection_grid_decisions": runner_metadata.get("selection_grid_decisions", []),
+            }
+        )
         _dump_config(run_config, paths["run_config_yaml"])
         experiment = args.experiment_name or f"alpha158alpha360_regime_horizon_{args.mode}_{stamp}"
         recorder = _run_workflow(run_config, experiment, args.uri_folder)

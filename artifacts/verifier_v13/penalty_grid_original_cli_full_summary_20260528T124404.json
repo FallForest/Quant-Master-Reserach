@@ -1,0 +1,135 @@
+{
+  "task_id": "V13 Penalty Grid Original CLI Full Gate",
+  "verifier_role": "verifier_worker_original_cli_no_source_edits",
+  "command": "py -3 -m quant_master.cli.run examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_penalty_grid_lockstep_Alpha158_2026_csi300.yaml",
+  "workflow_config": "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_penalty_grid_lockstep_Alpha158_2026_csi300.yaml",
+  "run_id": "1153eed77c0243d49e241430e602469e",
+  "experiment_id": "984329077332834218",
+  "artifact_uri": "file:C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts",
+  "runtime_sec": 615.414,
+  "mlflow_runtime_sec": 610.849,
+  "exit_code": 0,
+  "started_at": "2026-05-28T12:44:04.3729383+08:00",
+  "ended_at": "2026-05-28T12:54:19.7872170+08:00",
+  "selected_params": {
+    "turnover_penalty": 0.0,
+    "risk_penalty": 0.0,
+    "memory_boost": 0.01,
+    "min_regime_samples": 600,
+    "topk": 45,
+    "search_step": 0.1,
+    "global_weights": {
+      "de_h1": 1.0
+    },
+    "regime_weights": {
+      "0": {},
+      "1": {
+        "de_h1": 1.0
+      },
+      "2": {},
+      "3": {
+        "de_h1": 1.0
+      },
+      "4": {},
+      "5": {
+        "de_h1": 1.0
+      }
+    },
+    "regime_consensus_thresholds": [
+      0.9999999999898943,
+      0.999999999991204
+    ],
+    "regime_disagreement_thresholds": [
+      0.0
+    ]
+  },
+  "selection_grids": {
+    "turnover_penalty_grid": [
+      0.0,
+      2.5e-05,
+      5e-05,
+      0.0001
+    ],
+    "risk_penalty_grid": [
+      0.0,
+      0.02,
+      0.05
+    ],
+    "memory_boost_grid": [
+      0.0,
+      0.0025,
+      0.005,
+      0.01
+    ]
+  },
+  "ic": 0.02234694453353519,
+  "rank_ic": 0.02131081366242075,
+  "icir": 0.1616932385392321,
+  "rank_icir": 0.14835265206864154,
+  "costed_annret": 0.16566017800381297,
+  "costed_ir": 1.8893525645152238,
+  "max_drawdown": -0.05374516420058112,
+  "turnover": 0.1751759939577235,
+  "finite_rows": 562,
+  "nonfinite_rows": 0,
+  "leakage_check": "pass",
+  "test_metrics": {
+    "ic": 0.02234694453353519,
+    "rank_ic": 0.02131081366242075,
+    "costed_annret": 0.16566017800381297,
+    "costed_ir": 1.8893525645152238,
+    "max_drawdown": -0.05374516420058112,
+    "turnover": 0.1751759939577235,
+    "rows": 562,
+    "finite_rows": 562,
+    "nonfinite_rows": 0,
+    "start": "2024-01-02",
+    "end": "2026-04-30"
+  },
+  "data_quality_diagnostics": {
+    "pred_rows": 168600,
+    "pred_finite_rows": 168600,
+    "pred_nonfinite_rows": 0,
+    "label_rows": 168600,
+    "label_finite_rows": 167456,
+    "label_nonfinite_rows": 1144,
+    "ic_days": 562,
+    "ic_nonfinite_days": 0,
+    "rank_ic_days": 562,
+    "rank_ic_nonfinite_days": 0,
+    "portfolio_report_rows": 562,
+    "portfolio_report_finite_rows": 562,
+    "portfolio_report_nonfinite_rows": 0
+  },
+  "baseline_7406": {
+    "costed_ir": 2.7999836767,
+    "costed_annret": 0.2446646361,
+    "ic": 0.0239212214,
+    "rank_ic": 0.0212250393
+  },
+  "deltas_vs_baseline_7406": {
+    "costed_ir": -0.9106311121847763,
+    "costed_annret": -0.07900445809618703,
+    "ic": -0.0015742768664648125,
+    "rank_ic": 8.577436242074993e-05
+  },
+  "artifact_paths": {
+    "run_root": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e",
+    "pred": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts\\pred.pkl",
+    "label": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts\\label.pkl",
+    "sig_ic": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts\\sig_analysis\\ic.pkl",
+    "sig_rank_ic": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts\\sig_analysis\\ric.pkl",
+    "portfolio_report": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts\\portfolio_analysis\\report_normal_1day.pkl",
+    "portfolio_analysis": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts\\portfolio_analysis\\port_analysis_1day.pkl",
+    "params": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1153eed77c0243d49e241430e602469e\\artifacts\\params.pkl",
+    "console_log": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\verifier_v13\\original_cli_full_20260528T124404.combined.log"
+  },
+  "field_sources": {
+    "selected_params": "artifacts/params.pkl; confirmed by console log Selected penalties / Memory boost",
+    "selection_grids": "artifacts/params.pkl and mlflow params/model.kwargs.*_grid",
+    "ic_rank_ic": "mlruns metrics plus artifacts/sig_analysis/ic.pkl and ric.pkl",
+    "portfolio_metrics": "mlruns metrics plus artifacts/portfolio_analysis/port_analysis_1day.pkl and report_normal_1day.pkl",
+    "finite_rows_nonfinite_rows": "artifacts/portfolio_analysis/report_normal_1day.pkl numeric row finite check, matching existing hard-gate row semantics",
+    "leakage_check": "original CLI consumed fixed train/valid/test YAML segments; verifier extracted only post-run artifacts and did not edit source/config"
+  }
+}

@@ -5,6 +5,7 @@ import { api, fmtNum } from '../utils/api'
 import * as echarts from 'echarts'
 
 const router = useRouter()
+const loading = ref(true)
 
 const stats = ref([
   { label: '股票总数', value: '--', unit: '只', color: 'text-brand-600', trend: [] },
@@ -17,6 +18,9 @@ const quickActions = [
   { route: '/pipeline', label: '更新数据', icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
   { route: '/browser', label: '浏览数据', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
   { route: '/factor',  label: '因子分析', icon: 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z' },
+  { route: '/model-lab', label: '模型工坊', icon: 'M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9' },
+  { route: '/backtest', label: '策略回测', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+  { route: '/experiments', label: '实验管理', icon: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z' },
 ]
 
 // 数据分布
@@ -43,6 +47,7 @@ onMounted(async () => {
     }
   })
 
+  loading.value = false
   await nextTick()
   renderSparklines()
   renderCompletenessChart()
@@ -142,16 +147,25 @@ function renderCompletenessChart() {
 
 <template>
   <div class="p-4 sm:p-6 space-y-5 animate-slide-in">
-    <!-- 统计卡片 -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- 统计卡片 (含骨架屏) -->
+    <div v-if="loading" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div v-for="i in 4" :key="i" class="bg-white rounded-xl border border-surface-3 p-4">
+        <div class="skeleton h-3 w-20 mb-2"></div>
+        <div class="flex items-baseline gap-1">
+          <div class="skeleton h-7 w-16"></div>
+          <div class="skeleton h-4 w-6"></div>
+        </div>
+      </div>
+    </div>
+    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div v-for="(s, i) in stats" :key="s.label"
            class="bg-white rounded-xl border border-surface-3 p-4 hover:shadow-sm transition group">
         <div class="flex items-start justify-between">
           <div>
-            <div class="text-xs text-slate-400 mb-1">{{ s.label }}</div>
+            <div class="text-xs text-slate-500 mb-1">{{ s.label }}</div>
             <div class="flex items-baseline gap-1">
               <span :class="['text-2xl font-bold font-mono', s.color]">{{ s.value }}</span>
-              <span class="text-sm text-slate-400">{{ s.unit }}</span>
+              <span class="text-sm text-slate-500">{{ s.unit }}</span>
             </div>
           </div>
           <div :id="`sparkline-${i}`" class="w-20 h-8 opacity-60 group-hover:opacity-100 transition"></div>
@@ -165,6 +179,7 @@ function renderCompletenessChart() {
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <button v-for="a in quickActions" :key="a.route"
                 @click="router.push(a.route)"
+                :aria-label="a.label"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg border border-surface-3
                        hover:border-brand-400 hover:bg-brand-50 transition cursor-pointer group">
           <svg class="w-5 h-5 text-brand-500 group-hover:text-brand-700 flex-shrink-0" fill="none"
@@ -179,7 +194,8 @@ function renderCompletenessChart() {
     <!-- 数据完整度热力图 -->
     <div class="bg-white rounded-xl border border-surface-3 p-5">
       <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">数据完整度</h2>
-      <div id="completeness-chart" class="w-full h-[200px]"></div>
+      <div v-if="loading" class="w-full h-[200px]"><div class="skeleton w-full h-full rounded-lg"></div></div>
+      <div v-else id="completeness-chart" class="w-full h-[200px]"></div>
     </div>
   </div>
 </template>

@@ -172,7 +172,7 @@ const logColor = {
     <div class="bg-white rounded-xl border border-surface-3 p-5">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div class="text-xs text-slate-400 mb-1">数据状态</div>
+          <div class="text-xs text-slate-500 mb-1">数据状态</div>
           <div class="flex items-center gap-2">
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-success pulse-dot"></span>
             <span class="text-lg font-semibold text-slate-800">数据就绪</span>
@@ -281,7 +281,7 @@ const logColor = {
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-left text-xs text-slate-400 border-b border-surface-3">
+            <tr class="text-left text-xs text-slate-500 border-b border-surface-3">
               <th class="pb-2 pr-4">时间</th>
               <th class="pb-2 pr-4">数据源</th>
               <th class="pb-2 pr-4">状态</th>
@@ -291,7 +291,7 @@ const logColor = {
           </thead>
           <tbody class="text-slate-600">
             <tr v-if="!history.length">
-              <td colspan="5" class="py-6 text-center text-slate-400">暂无运行记录</td>
+              <td colspan="5" class="py-6 text-center text-slate-500">暂无运行记录</td>
             </tr>
             <tr v-for="(h, i) in history" :key="i" class="border-b border-surface-2/60">
               <td class="py-2.5 pr-4 whitespace-nowrap">{{ h.time }}</td>
@@ -302,7 +302,7 @@ const logColor = {
                 </span>
               </td>
               <td class="py-2.5 pr-4 font-mono">{{ h.elapsed }}</td>
-              <td class="py-2.5 text-slate-400">{{ h.error || '--' }}</td>
+              <td class="py-2.5 text-slate-500">{{ h.error || '--' }}</td>
             </tr>
           </tbody>
         </table>

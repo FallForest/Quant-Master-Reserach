@@ -25,3 +25,5 @@ def test_alpha158alpha360_runner_direct_execution_discovers_repo_root(tmp_path: 
 
     assert completed.returncode == 0
     assert "Alpha158Alpha360 regime-horizon cost ensemble gate runner." in completed.stdout
+    assert "{smoke,medium,full,verify}" in completed.stdout
+    assert "--preserve-config-windows" in completed.stdout

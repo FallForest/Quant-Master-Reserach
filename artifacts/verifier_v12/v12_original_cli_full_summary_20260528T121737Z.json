@@ -1,0 +1,80 @@
+﻿{
+    "timestamp_utc":  "2026-05-28T04:26:58Z",
+    "task_id":  "V12 Memory Boost Original CLI Full Gate",
+    "command":  "py -3 -m quant_master.cli.run examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_memory_boost_lockstep_Alpha158_2026_csi300.yaml",
+    "workflow_config":  "examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_memory_boost_lockstep_Alpha158_2026_csi300.yaml",
+    "status":  "ok",
+    "exit_code":  0,
+    "mlflow":  {
+                   "experiment_id":  "984329077332834218",
+                   "run_id":  "1fa51d90b8be48999785dacb823a9b7f",
+                   "artifact_uri":  "file:C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns/984329077332834218/1fa51d90b8be48999785dacb823a9b7f/artifacts",
+                   "run_dir":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f"
+               },
+    "artifacts":  {
+                      "summary_json":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\verifier_v12\\v12_original_cli_full_summary_20260528T121737Z.json",
+                      "cli_log":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\verifier_v12\\v12_original_cli_full_20260528T121737.log",
+                      "pred":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\pred.pkl",
+                      "sig_analysis_ic":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\sig_analysis\\ic.pkl",
+                      "sig_analysis_ric":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\sig_analysis\\ric.pkl",
+                      "portfolio_report":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\portfolio_analysis\\report_normal_1day.pkl",
+                      "portfolio_analysis":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\portfolio_analysis\\port_analysis_1day.pkl",
+                      "logged_task":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\task",
+                      "logged_config":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\config"
+                  },
+    "selected":  {
+                     "memory_boost":  0.01,
+                     "turnover_penalty":  null,
+                     "risk_penalty":  null
+                 },
+    "test_metrics":  {
+                         "ic":  0.023059263979715753,
+                         "rank_ic":  0.020921699839353436,
+                         "icir":  0.16561739479757365,
+                         "rank_icir":  0.1442289436555726,
+                         "costed_annret":  0.19183548202051717,
+                         "costed_ir":  2.246793631134407,
+                         "max_drawdown":  -0.0527144097517996,
+                         "turnover":  0.1750382368684256,
+                         "rows":  562,
+                         "finite_rows":  562,
+                         "nonfinite_rows":  0,
+                         "start":  "2024-01-02 00:00:00",
+                         "end":  "2026-04-30 00:00:00"
+                     },
+    "baseline_7406":  {
+                          "costed_ir":  2.7999836767,
+                          "costed_annret":  0.2446646361,
+                          "ic":  0.0239212214,
+                          "rank_ic":  0.0212250393
+                      },
+    "protocol":  {
+                     "entrypoint":  "original_cli",
+                     "logged_segments_source":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\1fa51d90b8be48999785dacb823a9b7f\\artifacts\\task",
+                     "no_2024_2026_tuning":  true,
+                     "test_window":  [
+                                         "2024-01-01",
+                                         "2026-04-30"
+                                     ],
+                     "leakage_check_basis":  "original CLI run used logged train/valid/test segments from task artifact; verifier only extracted artifacts after run completion"
+                 },
+    "leakage_check":  "pass",
+    "runtime_sec":  389.459,
+    "mlflow_runtime_sec":  389.459,
+    "sources":  {
+                    "ic_rankic":  "mlflow metrics and sig_analysis artifacts",
+                    "portfolio":  "portfolio_analysis/port_analysis_1day.pkl and report_normal_1day.pkl",
+                    "finite_rows":  "portfolio_analysis/report_normal_1day.pkl finite return/bench/cost/turnover rows",
+                    "selected_memory_boost":  "artifacts/verifier_v12/v12_original_cli_full_20260528T121737.log line containing: Memory boost: 0.01",
+                    "leakage_check":  "logged task/config artifacts plus post-run-only verifier protocol"
+                },
+    "ic":  0.023059263979715753,
+    "rank_ic":  0.020921699839353436,
+    "costed_annret":  0.19183548202051717,
+    "costed_ir":  2.246793631134407,
+    "max_drawdown":  -0.0527144097517996,
+    "turnover":  0.1750382368684256,
+    "finite_rows":  562,
+    "nonfinite_rows":  0,
+    "verdict_vs_strict_7406":  "NO_GO"
+}

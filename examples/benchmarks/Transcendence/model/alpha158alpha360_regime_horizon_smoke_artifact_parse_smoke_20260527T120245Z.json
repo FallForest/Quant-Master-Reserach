@@ -1,0 +1,21 @@
+{
+  "summary_json_exists": true,
+  "summary_json_parse_ok": true,
+  "summary_keys": [
+    "artifacts",
+    "blocker",
+    "command",
+    "hard_gate_pass",
+    "mode",
+    "preserve_config_windows",
+    "protocol",
+    "runtime_sec",
+    "script",
+    "status",
+    "timestamp_utc",
+    "verdict",
+    "workflow_config_source"
+  ],
+  "hard_gate_pass": false,
+  "finite_rows": null
+}

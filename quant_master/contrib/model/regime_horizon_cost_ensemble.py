@@ -99,6 +99,7 @@ class RegimeHorizonCostEnsembleModel(Model):
         objective_decile: float = 0.1,
         objective_decile_scale: float = 0.0,
         objective_clip: Optional[float] = None,
+        weight_constraints: Optional[Dict] = None,
         **kwargs,
     ):
         if topk <= 0:
@@ -195,6 +196,7 @@ class RegimeHorizonCostEnsembleModel(Model):
                 linear_kwargs=linear_kwargs,
             )
         )
+        self.weight_constraints = self._normalize_weight_constraints(weight_constraints)
         self.models: Dict[str, Model] = {}
         self.global_weights: Dict[str, float] = {}
         self.regime_weights: Dict[int, Dict[str, float]] = {}
@@ -285,7 +287,7 @@ class RegimeHorizonCostEnsembleModel(Model):
             self.turnover_penalty = turnover_penalty
             self.risk_penalty = risk_penalty
             global_weights = self._learn_weights(valid_pred, valid_label)
-            regime_weights = self._learn_regime_weights(valid_pred, valid_label, regimes)
+            regime_weights = self._learn_regime_weights(valid_pred, valid_label, regimes, global_weights)
             blended = self._blend_by_regime_with_weights(valid_pred, regimes, regime_weights, global_weights)
             blended = self._apply_risk_controls(blended)
             selected_control = self._select_final_score_control(blended, valid_label)
@@ -591,13 +593,18 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.num_regimes = (len(self.regime_consensus_thresholds) + 1) * (len(self.regime_disagreement_thresholds) + 1)
 
     def _learn_regime_weights(
-        self, pred_frame: pd.DataFrame, label: pd.Series, regimes: pd.Series
+        self,
+        pred_frame: pd.DataFrame,
+        label: pd.Series,
+        regimes: pd.Series,
+        fallback_weights: Optional[Dict[str, float]] = None,
     ) -> Dict[int, Dict[str, float]]:
         result = {}
+        safe_fallback = dict(fallback_weights or self.global_weights or self._equal_weights())
         for regime_id in range(self.num_regimes):
             mask = regimes == regime_id
             if int(mask.sum()) < self.min_regime_samples:
-                result[regime_id] = dict(self.global_weights)
+                result[regime_id] = dict(safe_fallback)
                 continue
             weights = self._learn_weights(pred_frame.loc[mask], label.loc[mask])
             result[regime_id] = weights
@@ -605,12 +612,14 @@ class RegimeHorizonCostEnsembleModel(Model):
 
     def _learn_weights(self, pred_frame: pd.DataFrame, label: pd.Series) -> Dict[str, float]:
         if pred_frame.empty:
-            return self._equal_weights()
+            return self._default_feasible_weights()
 
         best_score = None
         best_weights = None
         for weights in self._weight_grid(len(self.model_specs)):
             if not self._check_monotonic_constraint(weights):
+                continue
+            if not self._check_weight_constraints(weights):
                 continue
             score = pd.Series(pred_frame.values @ weights, index=pred_frame.index)
             score = self._apply_risk_controls(score)
@@ -620,6 +629,8 @@ class RegimeHorizonCostEnsembleModel(Model):
                 best_weights = weights
 
         if best_weights is None:
+            if self.weight_constraints:
+                raise ValueError("No feasible ensemble weights found for weight_constraints and monotonic constraints.")
             return self._equal_weights()
         best_weights = np.clip(best_weights, 1e-12, None)
         best_weights = best_weights / best_weights.sum()
@@ -883,6 +894,30 @@ class RegimeHorizonCostEnsembleModel(Model):
             return all(values[i] >= values[i + 1] - 1e-12 for i in range(len(values) - 1))
         return all(values[i] <= values[i + 1] + 1e-12 for i in range(len(values) - 1))
 
+    def _check_weight_constraints(self, weights: Union[np.ndarray, Dict[str, float]]) -> bool:
+        if not self.weight_constraints:
+            return True
+        weight_by_name = self._weight_map(weights)
+        eps = 1e-12
+
+        anchor_model = self.weight_constraints.get("anchor_model")
+        if anchor_model is not None:
+            min_anchor_weight = self.weight_constraints.get("min_anchor_weight")
+            if min_anchor_weight is not None and weight_by_name[anchor_model] < float(min_anchor_weight) - eps:
+                return False
+
+        max_aux_weight = self.weight_constraints.get("max_aux_weight")
+        if max_aux_weight is not None:
+            anchor_weight = weight_by_name[anchor_model] if anchor_model is not None else 0.0
+            aux_weight = float(sum(weight_by_name.values())) - float(anchor_weight)
+            if aux_weight > float(max_aux_weight) + eps:
+                return False
+
+        for model_name, max_weight in self.weight_constraints.get("model_max_weights", {}).items():
+            if weight_by_name[model_name] > float(max_weight) + eps:
+                return False
+        return True
+
     def _weight_grid(self, n_models: int):
         grid = np.arange(0.0, 1.0 + 1e-9, self.search_step)
         if n_models == 1:
@@ -913,6 +948,37 @@ class RegimeHorizonCostEnsembleModel(Model):
     def _equal_weights(self) -> Dict[str, float]:
         w = 1.0 / len(self.model_specs)
         return {spec.name: w for spec in self.model_specs}
+
+    def _default_feasible_weights(self) -> Dict[str, float]:
+        equal_weights = self._equal_weights()
+        if self._check_weight_constraints(equal_weights):
+            return equal_weights
+        if not self.weight_constraints:
+            return equal_weights
+
+        weights = {spec.name: 0.0 for spec in self.model_specs}
+        anchor_model = self.weight_constraints.get("anchor_model")
+        min_anchor_weight = float(self.weight_constraints.get("min_anchor_weight", 0.0))
+        max_aux_weight = self.weight_constraints.get("max_aux_weight")
+        if anchor_model is not None and max_aux_weight is not None:
+            min_anchor_weight = max(min_anchor_weight, 1.0 - float(max_aux_weight))
+        if anchor_model is not None:
+            weights[anchor_model] = min_anchor_weight
+
+        remaining = max(0.0, 1.0 - sum(weights.values()))
+        model_max_weights = self.weight_constraints.get("model_max_weights", {})
+        for spec in self.model_specs:
+            if remaining <= 1e-12:
+                break
+            room = float(model_max_weights.get(spec.name, 1.0)) - weights[spec.name]
+            add_weight = min(remaining, max(room, 0.0))
+            weights[spec.name] += add_weight
+            remaining -= add_weight
+
+        if remaining > 1e-9 or not self._check_weight_constraints(weights):
+            raise ValueError("No feasible default ensemble weights found for weight_constraints.")
+        total = sum(weights.values())
+        return {name: float(weight / total) for name, weight in weights.items()}
 
     def _topk_index(self, score: pd.Series) -> pd.Index:
         if len(score) <= self.topk:
@@ -948,6 +1014,80 @@ class RegimeHorizonCostEnsembleModel(Model):
         if any(not np.isfinite(v) or v < lower or v > upper for v in grid):
             raise ValueError(f"{name} values must be finite and in [{lower}, {upper}].")
         return grid
+
+    def _normalize_weight_constraints(self, constraints: Optional[Dict]) -> Dict:
+        if constraints is None:
+            return {}
+        if not isinstance(constraints, dict):
+            raise ValueError("weight_constraints must be a mapping.")
+
+        allowed_keys = {"anchor_model", "min_anchor_weight", "max_aux_weight", "model_max_weights"}
+        unknown_keys = sorted(set(constraints) - allowed_keys)
+        if unknown_keys:
+            raise ValueError(f"Unsupported weight_constraints keys: {unknown_keys}")
+
+        model_names = {spec.name for spec in self.model_specs}
+        normalized = {}
+
+        anchor_model = constraints.get("anchor_model")
+        if anchor_model is not None:
+            anchor_model = str(anchor_model)
+            if anchor_model not in model_names:
+                raise ValueError(f"weight_constraints anchor_model '{anchor_model}' is not in model_specs.")
+            normalized["anchor_model"] = anchor_model
+
+        for key in ("min_anchor_weight", "max_aux_weight"):
+            if key not in constraints or constraints.get(key) is None:
+                continue
+            value = float(constraints[key])
+            if not np.isfinite(value) or value < 0.0 or value > 1.0:
+                raise ValueError(f"weight_constraints {key} must be finite and in [0, 1].")
+            normalized[key] = value
+
+        if "min_anchor_weight" in normalized and "anchor_model" not in normalized:
+            raise ValueError("weight_constraints min_anchor_weight requires anchor_model.")
+        if "max_aux_weight" in normalized and "anchor_model" not in normalized:
+            raise ValueError("weight_constraints max_aux_weight requires anchor_model.")
+
+        raw_model_max_weights = constraints.get("model_max_weights") or {}
+        if not isinstance(raw_model_max_weights, dict):
+            raise ValueError("weight_constraints model_max_weights must be a mapping.")
+        model_max_weights = {}
+        for model_name, max_weight in raw_model_max_weights.items():
+            model_name = str(model_name)
+            if model_name not in model_names:
+                raise ValueError(f"weight_constraints model_max_weights key '{model_name}' is not in model_specs.")
+            value = float(max_weight)
+            if not np.isfinite(value) or value < 0.0 or value > 1.0:
+                raise ValueError("weight_constraints model_max_weights values must be finite and in [0, 1].")
+            model_max_weights[model_name] = value
+        if model_max_weights:
+            normalized["model_max_weights"] = model_max_weights
+
+        if normalized and not self._constraints_have_feasible_simplex_solution(normalized):
+            raise ValueError(f"weight_constraints are infeasible for model_specs: {normalized}")
+        return normalized
+
+    def _constraints_have_feasible_simplex_solution(self, constraints: Dict) -> bool:
+        lower_bounds = {spec.name: 0.0 for spec in self.model_specs}
+        upper_bounds = {spec.name: 1.0 for spec in self.model_specs}
+
+        anchor_model = constraints.get("anchor_model")
+        if anchor_model is not None and "min_anchor_weight" in constraints:
+            lower_bounds[anchor_model] = max(lower_bounds[anchor_model], float(constraints["min_anchor_weight"]))
+        for model_name, max_weight in constraints.get("model_max_weights", {}).items():
+            upper_bounds[model_name] = min(upper_bounds[model_name], float(max_weight))
+        if anchor_model is not None and "max_aux_weight" in constraints:
+            lower_bounds[anchor_model] = max(lower_bounds[anchor_model], 1.0 - float(constraints["max_aux_weight"]))
+
+        if any(lower_bounds[name] > upper_bounds[name] + 1e-12 for name in lower_bounds):
+            return False
+        return sum(lower_bounds.values()) <= 1.0 + 1e-12 and sum(upper_bounds.values()) >= 1.0 - 1e-12
+
+    def _weight_map(self, weights: Union[np.ndarray, Dict[str, float]]) -> Dict[str, float]:
+        if isinstance(weights, dict):
+            return {spec.name: float(weights[spec.name]) for spec in self.model_specs}
+        return {spec.name: float(weight) for spec, weight in zip(self.model_specs, weights)}
 
     @staticmethod
     def _uniform_quantiles(num_regimes: int) -> List[float]:

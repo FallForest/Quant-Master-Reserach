@@ -404,11 +404,19 @@ function maxScore(items) {
           </svg>
           导出 CSV
         </button>
+        <router-link to="/backtest"
+          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-brand-600
+                 rounded-lg hover:bg-brand-700 transition cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          回测选股结果
+        </router-link>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-left text-xs text-slate-400 border-b border-surface-3">
+            <tr class="text-left text-xs text-slate-500 border-b border-surface-3">
               <th class="px-5 py-2.5 w-16">排名</th>
               <th class="py-2.5 pr-4">股票代码</th>
               <th class="py-2.5 pr-4">股票名称</th>
@@ -465,7 +473,7 @@ function maxScore(items) {
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="text-left text-xs text-slate-400 border-b border-surface-3">
+            <tr class="text-left text-xs text-slate-500 border-b border-surface-3">
               <th class="pb-2 pr-4">时间</th>
               <th class="pb-2 pr-4">模型</th>
               <th class="pb-2 pr-4">目标日期</th>
@@ -477,7 +485,7 @@ function maxScore(items) {
           </thead>
           <tbody class="text-slate-600">
             <tr v-if="!history.length">
-              <td colspan="7" class="py-6 text-center text-slate-400">暂无运行记录</td>
+              <td colspan="7" class="py-6 text-center text-slate-500">暂无运行记录</td>
             </tr>
             <tr v-for="(h, i) in history" :key="i" class="border-b border-surface-2/60">
               <td class="py-2.5 pr-4 whitespace-nowrap">{{ h.time }}</td>
@@ -490,7 +498,7 @@ function maxScore(items) {
                 </span>
               </td>
               <td class="py-2.5 pr-4 font-mono">{{ h.elapsed }}</td>
-              <td class="py-2.5 text-slate-400">{{ h.error || '--' }}</td>
+              <td class="py-2.5 text-slate-500">{{ h.error || '--' }}</td>
             </tr>
           </tbody>
         </table>

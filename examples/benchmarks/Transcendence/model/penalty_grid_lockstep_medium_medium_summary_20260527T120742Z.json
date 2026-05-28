@@ -1,0 +1,209 @@
+{
+  "timestamp_utc": "2026-05-27T12:07:42Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\alpha158alpha360_regime_horizon_run.py",
+  "command": "examples/benchmarks/Transcendence/model/alpha158alpha360_regime_horizon_run.py --mode medium --preserve-config-windows --workflow-config examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_penalty_grid_lockstep_Alpha158_2026_csi300.yaml --output-prefix penalty_grid_lockstep_medium",
+  "mode": "medium",
+  "preserve_config_windows": true,
+  "status": "ok",
+  "blocker": "",
+  "workflow_config_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\workflow_config_regime_horizon_de_only_penalty_grid_lockstep_Alpha158_2026_csi300.yaml",
+  "artifacts": {
+    "run_config_yaml": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_medium_medium_run_config_20260527T120742Z.yaml",
+    "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_medium_medium_report_20260527T120742Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_medium_medium_summary_20260527T120742Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_medium_medium_summary_20260527T120742Z.md",
+    "artifact_parse_smoke_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_medium_medium_artifact_parse_smoke_20260527T120742Z.json"
+  },
+  "protocol": {
+    "model_path": "quant_master.contrib.model.regime_horizon_cost_ensemble.RegimeHorizonCostEnsembleModel",
+    "train": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "valid_select": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "no_2024_2026_tuning": true,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27,
+      "finite_rows_eq": 562
+    },
+    "wrapper_guard": "full/verify set min_regime_samples=0 to avoid empty 2023 validation regime weights"
+  },
+  "actual_segments": {
+    "train": [
+      "2012-01-01",
+      "2020-12-31"
+    ],
+    "valid": [
+      "2021-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ]
+  },
+  "actual_train": [
+    "2012-01-01",
+    "2020-12-31"
+  ],
+  "actual_valid": [
+    "2021-01-01",
+    "2023-12-31"
+  ],
+  "actual_test": [
+    "2024-01-01",
+    "2026-04-30"
+  ],
+  "window_overrides": [],
+  "budget_overrides": [
+    {
+      "path": "task.model.kwargs.search_step",
+      "old": 0.1,
+      "new": 0.5
+    },
+    {
+      "path": "task.model.kwargs.memory_boost_grid",
+      "old": [
+        0.0,
+        0.0025,
+        0.005,
+        0.01
+      ],
+      "new": [
+        0.0
+      ]
+    },
+    {
+      "path": "task.model.kwargs.regime_consensus_quantiles",
+      "old": null,
+      "new": [
+        0.5
+      ]
+    },
+    {
+      "path": "task.model.kwargs.regime_disagreement_quantiles",
+      "old": null,
+      "new": [
+        0.5
+      ]
+    },
+    {
+      "path": "task.model.kwargs.min_regime_samples",
+      "old": null,
+      "new": 0
+    },
+    {
+      "path": "task.model.kwargs.horizon_model_specs[0].model_kwargs.num_models",
+      "old": 3,
+      "new": 1
+    },
+    {
+      "path": "task.model.kwargs.horizon_model_specs[0].model_kwargs.epochs",
+      "old": 28,
+      "new": 8
+    },
+    {
+      "path": "task.model.kwargs.horizon_model_specs[0].model_kwargs.sub_weights",
+      "old": [
+        1,
+        1,
+        1
+      ],
+      "new": [
+        1
+      ]
+    },
+    {
+      "path": "task.model.kwargs.horizon_model_specs[0].model_kwargs.enable_sr",
+      "old": true,
+      "new": false
+    },
+    {
+      "path": "task.model.kwargs.horizon_model_specs[0].model_kwargs.enable_fs",
+      "old": true,
+      "new": false
+    },
+    {
+      "path": "task.model.kwargs.horizon_model_specs[0].model_kwargs.num_threads",
+      "old": 20,
+      "new": 4
+    }
+  ],
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "mlflow": {
+    "experiment_id": "542307671706767423",
+    "recorder_id": "6f287ccffce44f2b9613d4fc75b0e593",
+    "artifact_uri": "file:C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns/542307671706767423/6f287ccffce44f2b9613d4fc75b0e593/artifacts"
+  },
+  "test_metrics": {
+    "costed_annret": 0.16723260664957892,
+    "costed_ir": 1.6864066387237626,
+    "max_drawdown": -0.0704706626774415,
+    "turnover": 0.17721246764233992,
+    "rows": 562,
+    "finite_rows": 562,
+    "nonfinite_rows": 0,
+    "start": "2024-01-02",
+    "end": "2026-04-30"
+  },
+  "split_metrics": [
+    {
+      "split": "2024",
+      "costed_annret": 0.15796618890116162,
+      "costed_ir": 1.5913741011750013,
+      "max_drawdown": -0.0704706626774415,
+      "turnover": 0.17854775109897997,
+      "rows": 242,
+      "finite_rows": 242,
+      "nonfinite_rows": 0,
+      "start": "2024-01-02",
+      "end": "2024-12-31"
+    },
+    {
+      "split": "2025",
+      "costed_annret": 0.1915855650111622,
+      "costed_ir": 1.952533193843648,
+      "max_drawdown": -0.0675160425986395,
+      "turnover": 0.17497042128168003,
+      "rows": 243,
+      "finite_rows": 243,
+      "nonfinite_rows": 0,
+      "start": "2025-01-02",
+      "end": "2025-12-31"
+    },
+    {
+      "split": "2026_ytd",
+      "costed_annret": 0.1195014925359716,
+      "costed_ir": 1.1570533066875692,
+      "max_drawdown": -0.061491574775023386,
+      "turnover": 0.18009141139732018,
+      "rows": 77,
+      "finite_rows": 77,
+      "nonfinite_rows": 0,
+      "start": "2026-01-05",
+      "end": "2026-04-30"
+    }
+  ],
+  "runtime_sec": 273.4060644000001,
+  "validation_metrics": {
+    "ic_days": 562,
+    "rank_ic_days": 562,
+    "ic": 0.021913779635443994,
+    "ic_ir": 2.435497103633082,
+    "rank_ic": 0.02050106931640337,
+    "rank_ic_ir": 2.2655015397153884
+  },
+  "ic": 0.021913779635443994,
+  "rank_ic": 0.02050106931640337
+}

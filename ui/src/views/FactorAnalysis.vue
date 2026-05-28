@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import { api, fmtNum } from '../utils/api'
+import { api } from '../utils/api'
 import * as echarts from 'echarts'
 
 // ---- 状态 ----
@@ -50,12 +50,14 @@ function handleResize() {
 }
 
 watch(selectedFactor, async () => {
+  loading.value = true
   const data = await api(`/api/factor/analysis?factor=${selectedFactor.value}`)
   if (data) {
     applyData(data)
   } else {
     applyData(generateDemoData())
   }
+  loading.value = false
   await nextTick()
   renderAllCharts()
 })
@@ -399,42 +401,54 @@ function renderHeatmap() {
       </select>
     </div>
 
-    <!-- KPI 指标卡片 -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <!-- KPI 指标卡片 (含骨架屏) -->
+    <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div v-for="i in 6" :key="i" class="bg-white rounded-xl border border-surface-3 p-3.5">
+        <div class="skeleton h-3 w-16 mb-2"></div>
+        <div class="skeleton h-6 w-20 mb-1"></div>
+        <div class="skeleton h-2.5 w-24"></div>
+      </div>
+    </div>
+    <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       <div v-for="m in metrics" :key="m.label"
            class="bg-white rounded-xl border border-surface-3 p-3.5 hover:shadow-sm transition">
-        <div class="text-[11px] text-slate-400 mb-1">{{ m.label }}</div>
+        <div class="text-[11px] text-slate-500 mb-1">{{ m.label }}</div>
         <div :class="['text-xl font-bold font-mono', m.color]">{{ m.value }}</div>
-        <div class="text-[10px] text-slate-300 mt-0.5">{{ m.desc }}</div>
+        <div class="text-[10px] text-slate-500 mt-0.5">{{ m.desc }}</div>
       </div>
     </div>
 
     <!-- IC 时序图 -->
     <div class="bg-white rounded-xl border border-surface-3 p-4">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <h3 class="text-sm font-semibold text-slate-600">IC 时序走势</h3>
-          <span class="text-[10px] px-2 py-0.5 rounded-full"
-                :class="icQuality(metrics[0].value).cls">
-            {{ icQuality(metrics[0].value).text }}
-          </span>
-        </div>
-        <div class="flex items-center gap-3 text-[10px] text-slate-400">
-          <span class="flex items-center gap-1">
-            <span class="inline-block w-3 h-2 rounded-sm" style="background:rgba(239,68,68,0.7)"></span> 正IC
-          </span>
-          <span class="flex items-center gap-1">
-            <span class="inline-block w-3 h-2 rounded-sm" style="background:rgba(16,185,129,0.7)"></span> 负IC
-          </span>
-          <span class="flex items-center gap-1">
-            <span class="inline-block w-3 h-0.5 rounded" style="background:#F59E0B"></span> MA20
-          </span>
-          <span class="flex items-center gap-1">
-            <span class="inline-block w-3 h-0.5 rounded border-t border-dashed" style="border-color:#3B82F6"></span> 均值
-          </span>
-        </div>
+      <div v-if="loading" class="h-[260px] flex items-center justify-center">
+        <div class="skeleton w-full h-full rounded-lg"></div>
       </div>
-      <div id="ic-trend-chart" class="w-full h-[260px]"></div>
+      <template v-else>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-slate-600">IC 时序走势</h3>
+            <span class="text-[10px] px-2 py-0.5 rounded-full"
+                  :class="icQuality(metrics[0].value).cls">
+              {{ icQuality(metrics[0].value).text }}
+            </span>
+          </div>
+          <div class="flex items-center gap-3 text-[10px] text-slate-500">
+            <span class="flex items-center gap-1">
+              <span class="inline-block w-3 h-2 rounded-sm" style="background:rgba(239,68,68,0.7)"></span> 正IC
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="inline-block w-3 h-2 rounded-sm" style="background:rgba(16,185,129,0.7)"></span> 负IC
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="inline-block w-3 h-0.5 rounded" style="background:#F59E0B"></span> MA20
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="inline-block w-3 h-0.5 rounded border-t border-dashed" style="border-color:#3B82F6"></span> 均值
+            </span>
+          </div>
+        </div>
+        <div id="ic-trend-chart" class="w-full h-[260px]"></div>
+      </template>
     </div>
 
     <!-- 分组收益 + 因子相关性 -->
@@ -442,38 +456,17 @@ function renderHeatmap() {
       <!-- 分组累计收益 -->
       <div class="bg-white rounded-xl border border-surface-3 p-4">
         <h3 class="text-sm font-semibold text-slate-600 mb-3">分组累计收益</h3>
-        <p class="text-[10px] text-slate-400 mb-2">按因子值排序等分5组，Q1=最低，Q5=最高</p>
-        <div id="group-returns-chart" class="w-full h-[280px]"></div>
+        <p class="text-[10px] text-slate-500 mb-2">按因子值排序等分5组，Q1=最低，Q5=最高</p>
+        <div v-if="loading" class="h-[280px]"><div class="skeleton w-full h-full rounded-lg"></div></div>
+        <div v-else id="group-returns-chart" class="w-full h-[280px]"></div>
       </div>
 
       <!-- 因子相关性热力图 -->
       <div class="bg-white rounded-xl border border-surface-3 p-4">
         <h3 class="text-sm font-semibold text-slate-600 mb-3">因子相关性矩阵</h3>
-        <p class="text-[10px] text-slate-400 mb-2">Pearson 相关系数，越接近 ±1 相关性越强</p>
-        <div id="factor-corr-chart" class="w-full h-[280px]"></div>
-      </div>
-    </div>
-
-    <!-- 因子 IC 分布 -->
-    <div class="bg-white rounded-xl border border-surface-3 p-4">
-      <h3 class="text-sm font-semibold text-slate-600 mb-3">IC 分布统计</h3>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="text-center p-3 bg-surface-2/50 rounded-lg">
-          <div class="text-[10px] text-slate-400 mb-1">IC 均值</div>
-          <div class="text-lg font-bold font-mono text-brand-600">{{ metrics[0].value }}</div>
-        </div>
-        <div class="text-center p-3 bg-surface-2/50 rounded-lg">
-          <div class="text-[10px] text-slate-400 mb-1">IC 标准差</div>
-          <div class="text-lg font-bold font-mono text-warn">{{ metrics[1].value }}</div>
-        </div>
-        <div class="text-center p-3 bg-surface-2/50 rounded-lg">
-          <div class="text-[10px] text-slate-400 mb-1">ICIR</div>
-          <div class="text-lg font-bold font-mono text-brand-600">{{ metrics[2].value }}</div>
-        </div>
-        <div class="text-center p-3 bg-surface-2/50 rounded-lg">
-          <div class="text-[10px] text-slate-400 mb-1">正 IC 占比</div>
-          <div class="text-lg font-bold font-mono text-success">{{ metrics[4].value }}</div>
-        </div>
+        <p class="text-[10px] text-slate-500 mb-2">Pearson 相关系数，越接近 ±1 相关性越强</p>
+        <div v-if="loading" class="h-[280px]"><div class="skeleton w-full h-full rounded-lg"></div></div>
+        <div v-else id="factor-corr-chart" class="w-full h-[280px]"></div>
       </div>
     </div>
   </div>

@@ -1,0 +1,141 @@
+[12144:MainThread](2026-05-28 13:29:35,127) INFO - quant_master.qrun - [run.py:78] - Render the template with the context: {}
+[12144:MainThread](2026-05-28 13:29:35,142) INFO - quant_master.Initialization - [config.py:453] - default_conf: client.
+[12144:MainThread](2026-05-28 13:29:35,142) INFO - quant_master.Initialization - [__init__.py:82] - quant_master successfully initialized based on client settings.
+[12144:MainThread](2026-05-28 13:29:35,142) INFO - quant_master.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': WindowsPath('C:/Users/15728/Desktop/Quant-Master-Research/.qmData/cn_data')}
+C:\Users\15728\AppData\Roaming\Python\Python312\site-packages\mlflow\tracking\_tracking_service\utils.py:184: FutureWarning: The filesystem tracking backend (e.g., './mlruns') is deprecated as of February 2026. Consider transitioning to a database backend (e.g., 'sqlite:///mlflow.db') to take advantage of the latest MLflow features. See https://mlflow.org/docs/latest/self-hosting/migrate-from-file-store for migration guidance.
+  return FileStore(store_uri, store_uri)
+[12144:MainThread](2026-05-28 13:29:35,174) INFO - quant_master.workflow - [exp.py:258] - Experiment 984329077332834218 starts running ...
+[12144:MainThread](2026-05-28 13:29:35,643) INFO - quant_master.workflow - [recorder.py:345] - Recorder 4658aa077bf44b71a1607bffcb67a307 starts running under Experiment 984329077332834218 ...
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/alpha158alpha360_regime_horizon_run.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_transcendence_runner_paths.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/test_transcendence_runner_summary.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/models.yaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/package-lock.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/routes.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/stock_select.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/App.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/components/HeaderBar.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/components/Sidebar.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/router/index.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/style.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/Browser.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/FactorAnalysis.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/Overview.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/Pipeline.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/StockSelection.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/vite.config.js', LF will be replaced by CRLF the next time Git touches it
+ModuleNotFoundError. CatBoostModel are skipped. (optional: maybe installing CatBoostModel can fix it.)
+ModuleNotFoundError. XGBModel is skipped(optional: maybe installing xgboost can fix it).
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[12144:MainThread](2026-05-28 13:31:12,293) INFO - quant_master.timer - [log.py:127] - Time cost: 94.023s | Loading data Done
+[12144:MainThread](2026-05-28 13:31:12,906) INFO - quant_master.timer - [log.py:127] - Time cost: 0.213s | DropnaLabel Done
+[12144:MainThread](2026-05-28 13:31:14,631) INFO - quant_master.timer - [log.py:127] - Time cost: 1.725s | CSZScoreNorm Done
+[12144:MainThread](2026-05-28 13:31:14,680) INFO - quant_master.timer - [log.py:127] - Time cost: 2.384s | fit & process data Done
+[12144:MainThread](2026-05-28 13:31:14,680) INFO - quant_master.timer - [log.py:127] - Time cost: 96.410s | Init data Done
+[12144:MainThread](2026-05-28 13:31:14,682) WARNING - quant_master.utils - [__init__.py:849] - The parameter `reweighter` with value `None` is ignored.
+[12144:MainThread](2026-05-28 13:31:14,682) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:239] - Training de_h1 with horizon=1
+[12144:MainThread](2026-05-28 13:31:14,682) INFO - quant_master.DEnsembleModel - [double_ensemble.py:58] - Double Ensemble Model...
+[12144:MainThread](2026-05-28 13:31:15,898) INFO - quant_master.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (1/3)
+[20]	train's l2: 0.982699	valid's l2: 0.997515
+[12144:MainThread](2026-05-28 13:31:19,256) INFO - quant_master.DEnsembleModel - [double_ensemble.py:91] - Retrieving loss curve and loss values...
+[12144:MainThread](2026-05-28 13:31:21,663) INFO - quant_master.DEnsembleModel - [double_ensemble.py:101] - Sample re-weighting...
+[12144:MainThread](2026-05-28 13:31:24,745) INFO - quant_master.DEnsembleModel - [double_ensemble.py:105] - Feature selection...
+C:\Users\15728\Desktop\Quant-Master-Research\quant_master\contrib\model\double_ensemble.py:210: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
+
+For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
+
+
+  g["g_value"].replace(np.nan, 0, inplace=True)
+[12144:MainThread](2026-05-28 13:32:40,414) INFO - quant_master.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (2/3)
+[20]	train's l2: 1.30185	valid's l2: 1.01139
+[12144:MainThread](2026-05-28 13:32:42,563) INFO - quant_master.DEnsembleModel - [double_ensemble.py:91] - Retrieving loss curve and loss values...
+[12144:MainThread](2026-05-28 13:32:44,333) INFO - quant_master.DEnsembleModel - [double_ensemble.py:101] - Sample re-weighting...
+[12144:MainThread](2026-05-28 13:32:47,472) INFO - quant_master.DEnsembleModel - [double_ensemble.py:105] - Feature selection...
+C:\Users\15728\Desktop\Quant-Master-Research\quant_master\contrib\model\double_ensemble.py:210: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
+
+For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
+
+
+  g["g_value"].replace(np.nan, 0, inplace=True)
+[12144:MainThread](2026-05-28 13:34:26,310) INFO - quant_master.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (3/3)
+[20]	train's l2: 1.25924	valid's l2: 1.00779
+[12144:MainThread](2026-05-28 13:34:28,564) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:239] - Training lgb_h5 with horizon=5
+Training until validation scores don't improve for 80 rounds
+[20]	train's l2: 0.20519	valid's l2: 0.199738
+[40]	train's l2: 0.203243	valid's l2: 0.200027
+[60]	train's l2: 0.201852	valid's l2: 0.200296
+[80]	train's l2: 0.200682	valid's l2: 0.200502
+Early stopping, best iteration is:
+[9]	train's l2: 0.206859	valid's l2: 0.199673
+[12144:MainThread](2026-05-28 13:34:52,104) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:265] - Global weights: {'de_h1': 9.99999999999e-13, 'lgb_h5': 0.9999999999989999}
+[12144:MainThread](2026-05-28 13:34:52,104) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:266] - Regime weights: {0: {'de_h1': 0.1, 'lgb_h5': 0.9}, 1: {'de_h1': 0.1, 'lgb_h5': 0.9}, 2: {'de_h1': 0.1, 'lgb_h5': 0.9}, 3: {'de_h1': 9.99999999999e-13, 'lgb_h5': 0.9999999999989999}, 4: {'de_h1': 0.1, 'lgb_h5': 0.9}, 5: {}}
+[12144:MainThread](2026-05-28 13:34:52,104) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:267] - Regime thresholds (consensus): [0.8982658021139143, 0.922445175987544]
+[12144:MainThread](2026-05-28 13:34:52,104) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:268] - Regime thresholds (disagreement): [0.43997056614010915]
+[12144:MainThread](2026-05-28 13:34:52,104) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:269] - Selected penalties: turnover_penalty=5e-05, risk_penalty=0.0
+[12144:MainThread](2026-05-28 13:34:52,104) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:274] - Final score controls: robust_rank_blend=0.0, prediction_shrinkage=1.0
+[12144:MainThread](2026-05-28 13:34:52,104) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:279] - Memory boost: 0.0
+[12144:MainThread](2026-05-28 13:34:52,125) INFO - quant_master.fill_placeholder - [__init__.py:798] - <PRED> lookes like a placeholder, but it can't match to any given values
+[12144:MainThread](2026-05-28 13:34:53,444) INFO - quant_master.workflow - [record_temp.py:197] - Signal record 'pred.pkl' has been saved as the artifact of the Experiment 984329077332834218
+('The following are prediction results of the RegimeHorizonCostEnsembleModel '
+ 'model.')
+                          score
+datetime   instrument          
+2024-01-02 SH600000   -1.185984
+           SH600009    0.565438
+           SH600010   -0.655070
+           SH600011    1.455972
+           SH600015    0.342911
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]
+{'IC': np.float64(0.021136063125514807),
+ 'ICIR': np.float64(0.1446913655414924),
+ 'Rank IC': np.float64(0.020061002772033674),
+ 'Rank ICIR': np.float64(0.12939967726604956)}
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 63.94it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<00:00, 63.94it/s]
+[12144:MainThread](2026-05-28 13:34:53,915) INFO - quant_master.backtest caller - [__init__.py:93] - Create new exchange
+[12144:MainThread](2026-05-28 13:35:17,479) WARNING - quant_master.online operator - [exchange.py:219] - $close field data contains nan.
+[12144:MainThread](2026-05-28 13:35:17,479) WARNING - quant_master.online operator - [exchange.py:219] - $close field data contains nan.
+[12144:MainThread](2026-05-28 13:35:31,198) WARNING - quant_master.BaseExecutor - [executor.py:121] - `common_infra` is not set for <quant_master.backtest.executor.SimulatorExecutor object at 0x0000028ADD7E1CA0>
+backtest loop:   0%|          | 0/562 [00:00<?, ?it/s]C:\Users\15728\Desktop\Quant-Master-Research\quant_master\utils\index_data.py:492: RuntimeWarning: Mean of empty slice
+  return np.nanmean(self.data)
+backtest loop:   2%|▏         | 14/562 [00:00<00:04, 128.32it/s]backtest loop:   5%|▍         | 28/562 [00:00<00:04, 128.36it/s]backtest loop:   7%|▋         | 42/562 [00:00<00:03, 131.86it/s]backtest loop:  10%|▉         | 56/562 [00:00<00:03, 130.39it/s]backtest loop:  12%|█▏        | 70/562 [00:00<00:03, 130.15it/s]backtest loop:  15%|█▍        | 84/562 [00:00<00:03, 126.58it/s]backtest loop:  17%|█▋        | 98/562 [00:00<00:03, 127.23it/s]backtest loop:  20%|█▉        | 112/562 [00:00<00:03, 127.36it/s]backtest loop:  22%|██▏       | 125/562 [00:00<00:03, 127.13it/s]backtest loop:  25%|██▍       | 138/562 [00:01<00:03, 124.66it/s]backtest loop:  27%|██▋       | 151/562 [00:01<00:03, 124.80it/s]backtest loop:  29%|██▉       | 164/562 [00:01<00:03, 120.79it/s]backtest loop:  31%|███▏      | 177/562 [00:01<00:03, 118.97it/s]backtest loop:  34%|███▎      | 189/562 [00:01<00:03, 118.01it/s]backtest loop:  36%|███▌      | 201/562 [00:01<00:03, 117.61it/s]backtest loop:  38%|███▊      | 215/562 [00:01<00:02, 120.26it/s]backtest loop:  41%|████      | 229/562 [00:01<00:02, 124.89it/s]backtest loop:  43%|████▎     | 242/562 [00:01<00:02, 119.14it/s]backtest loop:  45%|████▌     | 254/562 [00:02<00:02, 118.24it/s]backtest loop:  47%|████▋     | 266/562 [00:02<00:02, 118.17it/s]backtest loop:  49%|████▉     | 278/562 [00:02<00:02, 117.87it/s]backtest loop:  52%|█████▏    | 292/562 [00:02<00:02, 121.75it/s]C:\Users\15728\Desktop\Quant-Master-Research\quant_master\utils\index_data.py:492: RuntimeWarning: Mean of empty slice
+  return np.nanmean(self.data)
+backtest loop:  54%|█████▍    | 305/562 [00:02<00:02, 120.43it/s]backtest loop:  57%|█████▋    | 318/562 [00:02<00:02, 119.56it/s]backtest loop:  59%|█████▊    | 330/562 [00:02<00:01, 119.20it/s]backtest loop:  61%|██████    | 343/562 [00:02<00:01, 120.59it/s]backtest loop:  63%|██████▎   | 356/562 [00:02<00:01, 122.72it/s]backtest loop:  66%|██████▌   | 369/562 [00:03<00:01, 119.45it/s]backtest loop:  68%|██████▊   | 381/562 [00:03<00:01, 116.90it/s]backtest loop:  70%|██████▉   | 393/562 [00:03<00:01, 110.80it/s]backtest loop:  72%|███████▏  | 405/562 [00:03<00:01, 110.68it/s]backtest loop:  74%|███████▍  | 418/562 [00:03<00:01, 113.22it/s]backtest loop:  77%|███████▋  | 430/562 [00:03<00:01, 112.65it/s]backtest loop:  79%|███████▊  | 442/562 [00:03<00:01, 113.45it/s]backtest loop:  81%|████████  | 454/562 [00:03<00:00, 114.35it/s]backtest loop:  83%|████████▎ | 467/562 [00:03<00:00, 113.76it/s]backtest loop:  85%|████████▌ | 479/562 [00:04<00:00, 114.07it/s]backtest loop:  87%|████████▋ | 491/562 [00:04<00:00, 113.27it/s]backtest loop:  90%|████████▉ | 504/562 [00:04<00:00, 116.24it/s]backtest loop:  92%|█████████▏| 516/562 [00:04<00:00, 115.13it/s]backtest loop:  94%|█████████▍| 529/562 [00:04<00:00, 115.01it/s]backtest loop:  96%|█████████▋| 541/562 [00:04<00:00, 82.10it/s] backtest loop:  98%|█████████▊| 553/562 [00:04<00:00, 87.94it/s]backtest loop: 100%|██████████| 562/562 [00:04<00:00, 115.30it/s]
+[12144:MainThread](2026-05-28 13:35:36,100) INFO - quant_master.workflow - [record_temp.py:520] - Portfolio analysis record 'port_analysis_1day.pkl' has been saved as the artifact of the Experiment 984329077332834218
+'The following are analysis results of benchmark return(1day).'
+                       risk
+mean               0.000666
+std                0.011468
+annualized_return  0.158446
+information_ratio  0.895557
+max_drawdown      -0.157869
+'The following are analysis results of the excess return without cost(1day).'
+                       risk
+mean               0.000689
+std                0.005467
+annualized_return  0.164067
+information_ratio  1.945179
+max_drawdown      -0.058789
+'The following are analysis results of the excess return with cost(1day).'
+                       risk
+mean               0.000514
+std                0.005468
+annualized_return  0.122387
+information_ratio  1.450926
+max_drawdown      -0.061155
+[12144:MainThread](2026-05-28 13:35:36,112) INFO - quant_master.workflow - [record_temp.py:545] - Indicator analysis record 'indicator_analysis_1day.pkl' has been saved as the artifact of the Experiment 984329077332834218
+'The following are analysis results of indicators(1day).'
+     value
+ffr    1.0
+pa     0.0
+pos    0.0
+[12144:MainThread](2026-05-28 13:35:36,475) INFO - quant_master.timer - [log.py:127] - Time cost: 0.024s | waiting `async_log` Done

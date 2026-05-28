@@ -91,11 +91,42 @@ try:
     from .pytorch_tcn import TCN
     from .pytorch_add import ADD
     from .pytorch_tft import TFTModel
+    from .pytorch_adarnn import ADARNN
+    from .pytorch_localformer import LocalformerModel
+    from .pytorch_hist import HIST
+    from .pytorch_krnn import KRNN
+    from .pytorch_igmtf import IGMTF
+    from .pytorch_sandwich import Sandwich
+    from .pytorch_tcts import TCTS
+    from .pytorch_tra import TRAModel
+    from .pytorch_general_nn import GeneralPTNN
 
-    pytorch_classes = (ALSTM, GATs, GRU, LSTM, DNNModelPytorch, TabnetModel, SFM_Model, TCN, ADD, TFTModel)
+    pytorch_classes = (
+        ALSTM, GATs, GRU, LSTM, DNNModelPytorch, TabnetModel, SFM_Model, TCN, ADD, TFTModel,
+        ADARNN, LocalformerModel, HIST, KRNN, IGMTF, Sandwich, TCTS, TRAModel, GeneralPTNN,
+    )
 except ModuleNotFoundError:
     pytorch_classes = ()
     print("ModuleNotFoundError.  PyTorch models are skipped (optional: maybe installing pytorch can fix it).")
+try:
+    from .regime_horizon_cost_ensemble import RegimeHorizonCostEnsembleModel
+    from .transcendence_hybrid import TranscendenceHybridModel
+    from .transcendence_signal_ensemble import TranscendenceSignalEnsembleModel
+except ModuleNotFoundError:
+    RegimeHorizonCostEnsembleModel = None
+    TranscendenceHybridModel = None
+    TranscendenceSignalEnsembleModel = None
+    print("ModuleNotFoundError. Transcendence models are skipped.")
+try:
+    from .topk_meta_label_model import TopKMetaLabelModel
+except ModuleNotFoundError:
+    TopKMetaLabelModel = None
+    print("ModuleNotFoundError. TopKMetaLabelModel is skipped. (optional: maybe installing lightgbm can fix it.)")
+try:
+    from .highfreq_gdbt_model import HFLGBModel
+except ModuleNotFoundError:
+    HFLGBModel = None
+    print("ModuleNotFoundError. HFLGBModel is skipped. (optional: maybe installing lightgbm can fix it.)")
 
 all_model_classes = (
     CatBoostModel,
@@ -113,4 +144,9 @@ all_model_classes = (
     PretrainedSignalModel,
     XGBModel,
     LinearModel,
+    RegimeHorizonCostEnsembleModel,
+    TranscendenceHybridModel,
+    TranscendenceSignalEnsembleModel,
+    TopKMetaLabelModel,
+    HFLGBModel,
 ) + pytorch_classes

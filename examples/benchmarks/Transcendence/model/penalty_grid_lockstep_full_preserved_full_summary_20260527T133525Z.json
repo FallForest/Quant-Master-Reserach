@@ -1,0 +1,143 @@
+{
+  "timestamp_utc": "2026-05-27T13:35:25Z",
+  "script": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\alpha158alpha360_regime_horizon_run.py",
+  "command": "examples/benchmarks/Transcendence/model/alpha158alpha360_regime_horizon_run.py --mode full --preserve-config-windows --workflow-config examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_only_penalty_grid_lockstep_Alpha158_2026_csi300.yaml --output-prefix penalty_grid_lockstep_full_preserved --experiment-name penalty_grid_lockstep_full_preserved",
+  "mode": "full",
+  "preserve_config_windows": true,
+  "status": "ok",
+  "blocker": "",
+  "workflow_config_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\workflow_config_regime_horizon_de_only_penalty_grid_lockstep_Alpha158_2026_csi300.yaml",
+  "artifacts": {
+    "run_config_yaml": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_full_preserved_full_run_config_20260527T133525Z.yaml",
+    "report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_full_preserved_full_report_20260527T133525Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_full_preserved_full_summary_20260527T133525Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_full_preserved_full_summary_20260527T133525Z.md",
+    "artifact_parse_smoke_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\model\\penalty_grid_lockstep_full_preserved_full_artifact_parse_smoke_20260527T133525Z.json"
+  },
+  "protocol": {
+    "model_path": "quant_master.contrib.model.regime_horizon_cost_ensemble.RegimeHorizonCostEnsembleModel",
+    "train": [
+      "2020-01-01",
+      "2022-12-31"
+    ],
+    "valid_select": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ],
+    "no_2024_2026_tuning": true,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27,
+      "finite_rows_eq": 562
+    },
+    "wrapper_guard": "full/verify set min_regime_samples=0 to avoid empty 2023 validation regime weights"
+  },
+  "actual_segments": {
+    "train": [
+      "2012-01-01",
+      "2020-12-31"
+    ],
+    "valid": [
+      "2021-01-01",
+      "2023-12-31"
+    ],
+    "test": [
+      "2024-01-01",
+      "2026-04-30"
+    ]
+  },
+  "actual_train": [
+    "2012-01-01",
+    "2020-12-31"
+  ],
+  "actual_valid": [
+    "2021-01-01",
+    "2023-12-31"
+  ],
+  "actual_test": [
+    "2024-01-01",
+    "2026-04-30"
+  ],
+  "window_overrides": [],
+  "budget_overrides": [
+    {
+      "path": "task.model.kwargs.min_regime_samples",
+      "old": null,
+      "new": 0
+    }
+  ],
+  "selection_grid_decisions": [],
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "mlflow": {
+    "experiment_id": "955099105866192013",
+    "recorder_id": "1d256932e8ea4bb7b86a97b7342887a0",
+    "artifact_uri": "file:C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns/955099105866192013/1d256932e8ea4bb7b86a97b7342887a0/artifacts"
+  },
+  "test_metrics": {
+    "costed_annret": 0.192443205592618,
+    "costed_ir": 2.158837948178254,
+    "max_drawdown": -0.06193131092729008,
+    "turnover": 0.17659827534404698,
+    "rows": 562,
+    "finite_rows": 562,
+    "nonfinite_rows": 0,
+    "start": "2024-01-02",
+    "end": "2026-04-30"
+  },
+  "split_metrics": [
+    {
+      "split": "2024",
+      "costed_annret": 0.13199595955752055,
+      "costed_ir": 1.339284432891725,
+      "max_drawdown": -0.06193131092729008,
+      "turnover": 0.17786640052412395,
+      "rows": 242,
+      "finite_rows": 242,
+      "nonfinite_rows": 0,
+      "start": "2024-01-02",
+      "end": "2024-12-31"
+    },
+    {
+      "split": "2025",
+      "costed_annret": 0.2353223757642891,
+      "costed_ir": 2.8921932524141085,
+      "max_drawdown": -0.037707134510425365,
+      "turnover": 0.17532778738752833,
+      "rows": 243,
+      "finite_rows": 243,
+      "nonfinite_rows": 0,
+      "start": "2025-01-02",
+      "end": "2025-12-31"
+    },
+    {
+      "split": "2026_ytd",
+      "costed_annret": 0.24710028596635175,
+      "costed_ir": 3.021563469589224,
+      "max_drawdown": -0.030849892086857525,
+      "turnover": 0.17662220105645515,
+      "rows": 77,
+      "finite_rows": 77,
+      "nonfinite_rows": 0,
+      "start": "2026-01-05",
+      "end": "2026-04-30"
+    }
+  ],
+  "runtime_sec": 539.7524144000017,
+  "validation_metrics": {
+    "ic_days": 562,
+    "rank_ic_days": 562,
+    "ic": 0.02272528202803267,
+    "ic_ir": 2.6169807061138655,
+    "rank_ic": 0.02090150007066071,
+    "rank_ic_ir": 2.289823089880466
+  },
+  "ic": 0.02272528202803267,
+  "rank_ic": 0.02090150007066071
+}
