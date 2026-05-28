@@ -1,0 +1,187 @@
+{
+  "candidate": "de_only_objective_rankdecile_vadj_Alpha158_2026_csi300",
+  "run": {
+    "experiment_id": "984329077332834218",
+    "run_id": "0008c3994da04c2fab6a114d76cd354c",
+    "run_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c",
+    "artifact_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts"
+  },
+  "artifact_paths": {
+    "pred": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts\\pred.pkl",
+    "sig_ic": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts\\sig_analysis\\ic.pkl",
+    "sig_rank_ic": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts\\sig_analysis\\ric.pkl",
+    "portfolio_analysis": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts\\portfolio_analysis\\port_analysis_1day.pkl",
+    "indicator_analysis": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts\\portfolio_analysis\\indicator_analysis_1day.pkl",
+    "params": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts\\params.pkl",
+    "mlflow_metrics_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\metrics"
+  },
+  "selected_weights": {
+    "global_weights": {
+      "de_h1": 1.0
+    },
+    "regime_weights": {
+      "0": {
+        "de_h1": 1.0
+      },
+      "1": {
+        "de_h1": 1.0
+      },
+      "2": {
+        "de_h1": 1.0
+      },
+      "3": {
+        "de_h1": 1.0
+      },
+      "4": {
+        "de_h1": 1.0
+      },
+      "5": {
+        "de_h1": 1.0
+      }
+    },
+    "regime_consensus_thresholds": [
+      0.99999999998157,
+      0.999999999983498
+    ],
+    "regime_disagreement_thresholds": [
+      0.0
+    ],
+    "turnover_penalty": 5e-05,
+    "risk_penalty": 0.0,
+    "robust_rank_blend": 0.0,
+    "prediction_shrinkage": 1.0,
+    "memory_boost": 0.005,
+    "selection_objective": "aggregate",
+    "yearly_stability_penalty": 0.0,
+    "min_valid_years": 1,
+    "min_yearly_objective": null,
+    "cost_weight_grid": [],
+    "turnover_penalty_grid": [],
+    "risk_penalty_grid": []
+  },
+  "selected_weights_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\0008c3994da04c2fab6a114d76cd354c\\artifacts\\params.pkl",
+  "objective_label_params": {
+    "objective_label_mode": "rank_decile_spread",
+    "objective_horizon_days": [
+      1,
+      5,
+      10
+    ],
+    "objective_horizon_weights": [
+      0.6,
+      0.3,
+      0.1
+    ],
+    "objective_market_relative": true,
+    "objective_vol_adjust": true,
+    "objective_vol_window": 20,
+    "objective_vol_floor": 0.0001,
+    "objective_rank_power": 1.0,
+    "objective_decile": 0.1,
+    "objective_decile_scale": 0.45,
+    "objective_clip": 6.0,
+    "objective_enabled": true
+  },
+  "test_metrics": {
+    "costed_ir": 1.9575056262585562,
+    "costed_annret": 0.16894259304444717,
+    "max_drawdown": -0.060478234795164156,
+    "finite_rows": 562,
+    "nonfinite_rows": 0
+  },
+  "metrics": {
+    "IC": 0.02095876529996888,
+    "ICIR": 0.15306462207164828,
+    "RankIC": 0.0152588857589151,
+    "RankICIR": 0.101774808928157
+  },
+  "portfolio_analysis_metrics": [
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "mean",
+      "risk": 0.0008824467
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "std",
+      "risk": 0.0055927247
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "annualized_return",
+      "risk": 0.2100223147
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "information_ratio",
+      "risk": 2.4341846574
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "max_drawdown",
+      "risk": -0.057417271
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "mean",
+      "risk": 0.0007098428
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "std",
+      "risk": 0.0055943246
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "annualized_return",
+      "risk": 0.168942593
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "information_ratio",
+      "risk": 1.9575056263
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "max_drawdown",
+      "risk": -0.0604782348
+    }
+  ],
+  "indicator_analysis_metrics": [
+    {
+      "index": "ffr",
+      "value": 1.0
+    },
+    {
+      "index": "pa",
+      "value": 0.0
+    },
+    {
+      "index": "pos",
+      "value": 0.0
+    }
+  ],
+  "signal_analysis_metrics": {
+    "ic_mean_from_artifact": 0.02095876529996888,
+    "rank_ic_mean_from_artifact": 0.0152588857589151,
+    "ic_count": 562,
+    "rank_ic_count": 562
+  },
+  "prediction_metrics": {
+    "rows": 168600,
+    "unique_trade_days": 562,
+    "finite_scores": 168600,
+    "nonfinite_scores": 0
+  },
+  "leakage_guardrails": {
+    "full_selection_uses_test_metrics": false,
+    "full_does_not_tune_using_2024_2026": true,
+    "source": "original CLI full run; objective labels are built from train/valid segments and summary metrics copied from completed run artifacts"
+  },
+  "baseline_7406": {
+    "IR": 2.7999836767,
+    "AnnRet": 0.2446646361,
+    "IC": 0.0239212214,
+    "RankIC": 0.0212250393
+  }
+}

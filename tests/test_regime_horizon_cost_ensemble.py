@@ -74,6 +74,19 @@ class TestRegimeHorizonCostEnsembleControls(unittest.TestCase):
         label = pd.Series([0.0, 1.0, -1.0, 0.0, 1.0, -1.0], index=index)
         return pred_frame, label
 
+    def _yearly_stability_data(self):
+        index = pd.MultiIndex.from_product(
+            [
+                pd.to_datetime(["2021-01-04", "2021-01-05", "2022-01-04", "2022-01-05"]),
+                ["a", "b"],
+            ],
+            names=["datetime", "instrument"],
+        )
+        burst_score = pd.Series([1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0], index=index)
+        stable_score = pd.Series([0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0], index=index)
+        label = pd.Series([10.0, 0.5, 10.0, 0.5, -8.0, 0.5, -8.0, 0.5], index=index)
+        return burst_score, stable_score, label
+
     def test_default_final_score_controls_are_identity(self):
         model = self._model()
         score = pd.Series([0.3, -0.2, 1.1], index=pd.Index(["a", "b", "c"]))
@@ -241,6 +254,61 @@ class TestRegimeHorizonCostEnsembleControls(unittest.TestCase):
         regime_weights = model._learn_regime_weights(pred_frame, label, regimes, global_weights)
 
         self.assertEqual(regime_weights[0], global_weights)
+
+    def test_aggregate_selection_objective_matches_topk_cost_objective(self):
+        model = self._model(topk=1, turnover_penalty=0.0, risk_penalty=0.0)
+        score, _, label = self._yearly_stability_data()
+
+        aggregate = model._topk_cost_objective(score, label)
+        selected = model._selection_objective_score(score, label)
+
+        self.assertEqual(model.selection_objective, "aggregate")
+        self.assertEqual(selected, aggregate)
+
+    def test_stable_yearly_penalizes_single_year_burst_candidate(self):
+        model = self._model(
+            topk=1,
+            turnover_penalty=0.0,
+            risk_penalty=0.0,
+            selection_objective="stable_yearly",
+            yearly_stability_penalty=1.0,
+        )
+        burst_score, stable_score, label = self._yearly_stability_data()
+
+        self.assertGreater(
+            model._topk_cost_objective(burst_score, label),
+            model._topk_cost_objective(stable_score, label),
+        )
+        self.assertLess(
+            model._selection_objective_score(burst_score, label),
+            model._selection_objective_score(stable_score, label),
+        )
+
+    def test_stable_yearly_min_yearly_objective_rejects_bad_year(self):
+        model = self._model(
+            topk=1,
+            turnover_penalty=0.0,
+            risk_penalty=0.0,
+            selection_objective="stable_yearly",
+            yearly_stability_penalty=0.0,
+            min_yearly_objective=0.0,
+        )
+        burst_score, stable_score, label = self._yearly_stability_data()
+
+        self.assertEqual(model._selection_objective_score(burst_score, label), float("-inf"))
+        self.assertTrue(np.isfinite(model._selection_objective_score(stable_score, label)))
+
+    def test_stable_yearly_min_valid_years_requires_enough_years(self):
+        model = self._model(
+            topk=1,
+            turnover_penalty=0.0,
+            risk_penalty=0.0,
+            selection_objective="stable_yearly",
+            min_valid_years=3,
+        )
+        score, _, label = self._yearly_stability_data()
+
+        self.assertEqual(model._selection_objective_score(score, label), float("-inf"))
 
 
 if __name__ == "__main__":

@@ -99,6 +99,10 @@ class RegimeHorizonCostEnsembleModel(Model):
         objective_decile: float = 0.1,
         objective_decile_scale: float = 0.0,
         objective_clip: Optional[float] = None,
+        selection_objective: str = "aggregate",
+        yearly_stability_penalty: float = 0.0,
+        min_yearly_objective: Optional[float] = None,
+        min_valid_years: int = 1,
         weight_constraints: Optional[Dict] = None,
         **kwargs,
     ):
@@ -110,6 +114,13 @@ class RegimeHorizonCostEnsembleModel(Model):
             raise ValueError("zscore_clip must be positive.")
         if monotonic_direction not in {"decreasing", "increasing"}:
             raise ValueError("monotonic_direction must be 'decreasing' or 'increasing'.")
+        selection_objective = str(selection_objective or "aggregate").strip().lower()
+        if selection_objective not in {"aggregate", "stable_yearly"}:
+            raise ValueError("selection_objective must be 'aggregate' or 'stable_yearly'.")
+        if yearly_stability_penalty < 0:
+            raise ValueError("yearly_stability_penalty must be non-negative.")
+        if min_valid_years <= 0:
+            raise ValueError("min_valid_years must be positive.")
 
         self.logger = get_module_logger("RegimeHorizonCostEnsembleModel")
         self.topk = topk
@@ -177,6 +188,10 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.objective_decile = float(objective_decile)
         self.objective_decile_scale = float(objective_decile_scale)
         self.objective_clip = None if objective_clip is None else float(objective_clip)
+        self.selection_objective = selection_objective
+        self.yearly_stability_penalty = float(yearly_stability_penalty)
+        self.min_yearly_objective = None if min_yearly_objective is None else float(min_yearly_objective)
+        self.min_valid_years = int(min_valid_years)
         self.objective_enabled = (
             self.objective_label_mode != "raw"
             or self.objective_horizon_days is not None
@@ -295,6 +310,7 @@ class RegimeHorizonCostEnsembleModel(Model):
             if self._is_better_penalty_state(selected_control, best_state):
                 best_state = {
                     "objective": float(selected_control["objective"]),
+                    "aggregate_objective": float(selected_control["aggregate_objective"]),
                     "rank_ic": float(selected_control["rank_ic"]),
                     "is_identity_control": bool(selected_control["is_identity_control"]),
                     "turnover_penalty": float(turnover_penalty),
@@ -376,9 +392,11 @@ class RegimeHorizonCostEnsembleModel(Model):
         )
         memory_boost = self._learn_memory_boost(controlled, label)
         adjusted = self._apply_turnover_boost(controlled, memory_boost) if memory_boost > 0 else controlled
-        objective = self._topk_cost_objective(adjusted, label)
+        aggregate_objective = self._topk_cost_objective(adjusted, label)
+        objective = self._selection_objective_score(adjusted, label, aggregate_objective=aggregate_objective)
         return {
             "objective": float(objective),
+            "aggregate_objective": float(aggregate_objective),
             "rank_ic": float(self._daily_rank_ic(controlled, label)),
             "memory_boost": float(memory_boost),
             "robust_rank_blend": float(robust_rank_blend),
@@ -623,7 +641,7 @@ class RegimeHorizonCostEnsembleModel(Model):
                 continue
             score = pd.Series(pred_frame.values @ weights, index=pred_frame.index)
             score = self._apply_risk_controls(score)
-            objective = self._topk_cost_objective(score, label)
+            objective = self._selection_objective_score(score, label)
             if best_score is None or objective > best_score:
                 best_score = objective
                 best_weights = weights
@@ -641,7 +659,7 @@ class RegimeHorizonCostEnsembleModel(Model):
         best_objective = None
         for boost in self.memory_boost_grid:
             adjusted = self._apply_turnover_boost(score, float(boost)) if boost > 0 else score
-            objective = self._topk_cost_objective(adjusted, label)
+            objective = self._selection_objective_score(adjusted, label)
             if best_objective is None or objective > best_objective:
                 best_objective = objective
                 best_boost = float(boost)
@@ -728,6 +746,42 @@ class RegimeHorizonCostEnsembleModel(Model):
         turnover = float(np.mean(daily_turnovers)) if daily_turnovers else 0.0
         risk = float(np.std(daily_returns))
         return mean_return - self.turnover_penalty * turnover - self.risk_penalty * risk
+
+    def _selection_objective_score(
+        self,
+        score: pd.Series,
+        label: pd.Series,
+        aggregate_objective: Optional[float] = None,
+    ) -> float:
+        if aggregate_objective is None:
+            aggregate_objective = self._topk_cost_objective(score, label)
+        if self.selection_objective == "aggregate":
+            return float(aggregate_objective)
+        if not np.isfinite(aggregate_objective):
+            return float("-inf")
+        yearly_objectives = self._yearly_topk_cost_objectives(score, label)
+        if len(yearly_objectives) < self.min_valid_years:
+            return float("-inf")
+        if self.min_yearly_objective is not None and min(yearly_objectives) < self.min_yearly_objective:
+            return float("-inf")
+        stability_penalty = self.yearly_stability_penalty * float(np.std(yearly_objectives))
+        return float(aggregate_objective) - stability_penalty
+
+    def _yearly_topk_cost_objectives(self, score: pd.Series, label: pd.Series) -> List[float]:
+        common_index = score.index.intersection(label.index)
+        if len(common_index) == 0 or not isinstance(score.index, pd.MultiIndex):
+            return []
+        score = score.loc[common_index]
+        label = label.loc[common_index]
+        date_level = self._date_level(score.index)
+        years = pd.Index(score.index.get_level_values(date_level)).year
+        objectives = []
+        for year in sorted(pd.unique(years)):
+            mask = years == year
+            objective = self._topk_cost_objective(score.loc[mask], label.loc[mask])
+            if np.isfinite(objective):
+                objectives.append(float(objective))
+        return objectives
 
     def _apply_risk_controls(self, score: pd.Series) -> pd.Series:
         score = score.replace([np.inf, -np.inf], np.nan).fillna(0.0)

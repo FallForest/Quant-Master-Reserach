@@ -1,0 +1,214 @@
+{
+  "candidate": "de_only_rank_preserving_cost_exec_hyper_num_models4_epochs32_Alpha158_2026_csi300",
+  "run": {
+    "experiment_id": "984329077332834218",
+    "run_id": "7a5bb50ef2cf4208b7bec2e381c8310e",
+    "run_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e",
+    "artifact_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts"
+  },
+  "artifact_paths": {
+    "pred": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts\\pred.pkl",
+    "sig_ic": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts\\sig_analysis\\ic.pkl",
+    "sig_rank_ic": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts\\sig_analysis\\ric.pkl",
+    "portfolio_analysis": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts\\portfolio_analysis\\port_analysis_1day.pkl",
+    "indicator_analysis": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts\\portfolio_analysis\\indicator_analysis_1day.pkl",
+    "params": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts\\params.pkl",
+    "mlflow_metrics_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\metrics"
+  },
+  "selected_weights": {
+    "global_weights": {
+      "de_h1": 1.0
+    },
+    "regime_weights": {
+      "0": {
+        "de_h1": 1.0
+      },
+      "1": {
+        "de_h1": 1.0
+      },
+      "2": {
+        "de_h1": 1.0
+      },
+      "3": {
+        "de_h1": 1.0
+      },
+      "4": {
+        "de_h1": 1.0
+      },
+      "5": {
+        "de_h1": 1.0
+      }
+    },
+    "regime_consensus_thresholds": [
+      0.999999999989999,
+      0.9999999999913043
+    ],
+    "regime_disagreement_thresholds": [
+      0.0
+    ],
+    "turnover_penalty": 5e-05,
+    "risk_penalty": 0.0,
+    "robust_rank_blend": 0.0,
+    "prediction_shrinkage": 1.0,
+    "memory_boost": 0.0,
+    "selection_objective": "aggregate",
+    "yearly_stability_penalty": 0.0,
+    "min_valid_years": 1,
+    "min_yearly_objective": null,
+    "objective_horizon_weights": null,
+    "cost_weight_grid": [],
+    "turnover_penalty_grid": [],
+    "risk_penalty_grid": []
+  },
+  "selected_weights_source": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7a5bb50ef2cf4208b7bec2e381c8310e\\artifacts\\params.pkl",
+  "capacity_params": {
+    "horizon_model_specs_param": "[{'name': 'de_h1', 'model_type': 'double_ensemble', 'horizon': 1, 'model_kwargs': {'base_model': 'gbm', 'loss': 'mse', 'num_models': 4, 'enable_sr': True, 'enable_fs': True, 'alpha1': 1, 'alpha2': 1, 'bins_sr': 10, 'bins_fs': 5, 'decay': 0.5, 'sample_ratios': [0.8, 0.7, 0.6, 0.5, 0.4], 'sub_weights': [1, 1, 1, 1], 'epochs': 32, 'colsample_bytree': 0.8879, 'learning_rate': 0.2, 'subsample': 0.8789, 'lambda_l1': 205.6999, 'lambda_l2': 580.9768, 'max_depth': 8, 'num_leaves': 210, 'num_threads': 20, 'verbosity': -1, 'random_state': 42}}]",
+    "model_specs": [
+      {
+        "name": "de_h1",
+        "model_type": "double_ensemble",
+        "horizon": 1,
+        "num_models": 4,
+        "epochs": 32,
+        "model_kwargs": {
+          "base_model": "gbm",
+          "loss": "mse",
+          "num_models": 4,
+          "enable_sr": true,
+          "enable_fs": true,
+          "alpha1": 1,
+          "alpha2": 1,
+          "bins_sr": 10,
+          "bins_fs": 5,
+          "decay": 0.5,
+          "sample_ratios": [
+            0.8,
+            0.7,
+            0.6,
+            0.5,
+            0.4
+          ],
+          "sub_weights": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "epochs": 32,
+          "colsample_bytree": 0.8879,
+          "learning_rate": 0.2,
+          "subsample": 0.8789,
+          "lambda_l1": 205.6999,
+          "lambda_l2": 580.9768,
+          "max_depth": 8,
+          "num_leaves": 210,
+          "num_threads": 20,
+          "verbosity": -1,
+          "random_state": 42
+        }
+      }
+    ]
+  },
+  "test_metrics": {
+    "costed_ir": 2.535331271814064,
+    "costed_annret": 0.22080031728859215,
+    "max_drawdown": -0.06038143240904756,
+    "finite_rows": 562,
+    "nonfinite_rows": 0
+  },
+  "metrics": {
+    "IC": 0.022399092301118948,
+    "ICIR": 0.16356903859551894,
+    "RankIC": 0.020890557163395582,
+    "RankICIR": 0.14714965120604295
+  },
+  "portfolio_analysis_metrics": [
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "mean",
+      "risk": 0.0011024572
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "std",
+      "risk": 0.0056425888
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "annualized_return",
+      "risk": 0.2623848148
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "information_ratio",
+      "risk": 3.0141982729
+    },
+    {
+      "level_0": "excess_return_without_cost",
+      "level_1": "max_drawdown",
+      "risk": -0.0496180425
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "mean",
+      "risk": 0.0009277324
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "std",
+      "risk": 0.0056451632
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "annualized_return",
+      "risk": 0.2208003173
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "information_ratio",
+      "risk": 2.5353312718
+    },
+    {
+      "level_0": "excess_return_with_cost",
+      "level_1": "max_drawdown",
+      "risk": -0.0603814324
+    }
+  ],
+  "indicator_analysis_metrics": [
+    {
+      "index": "ffr",
+      "value": 1.0
+    },
+    {
+      "index": "pa",
+      "value": 0.0
+    },
+    {
+      "index": "pos",
+      "value": 0.0
+    }
+  ],
+  "signal_analysis_metrics": {
+    "ic_mean_from_artifact": 0.022399092301118948,
+    "rank_ic_mean_from_artifact": 0.020890557163395582,
+    "ic_count": 562,
+    "rank_ic_count": 562
+  },
+  "prediction_metrics": {
+    "rows": 168600,
+    "unique_trade_days": 562,
+    "finite_scores": 168600,
+    "nonfinite_scores": 0
+  },
+  "leakage_guardrails": {
+    "full_selection_uses_test_metrics": false,
+    "full_does_not_tune_using_2024_2026": true,
+    "source": "original CLI full run; summary metrics copied from completed run artifacts for verification"
+  },
+  "baseline_7406": {
+    "IR": 2.7999836767,
+    "AnnRet": 0.2446646361,
+    "IC": 0.0239212214,
+    "RankIC": 0.0212250393
+  }
+}
