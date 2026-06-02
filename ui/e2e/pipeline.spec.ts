@@ -1,15 +1,17 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Pipeline Page', () => {
-  test('loads pipeline page', async ({ page }) => {
+test.describe('Removed routes', () => {
+  test('redirects pipeline route to overview', async ({ page }) => {
     await page.goto('/pipeline')
     await page.waitForLoadState('domcontentloaded')
-    await expect(page.locator('body')).toContainText('数据管道')
+    await expect(page).toHaveURL(/\/$/)
+    await expect(page.locator('body')).toContainText('总览')
   })
 
-  test('has run button', async ({ page }) => {
-    await page.goto('/pipeline')
+  test('redirects factor route to overview', async ({ page }) => {
+    await page.goto('/factor')
     await page.waitForLoadState('domcontentloaded')
-    await expect(page.locator('body')).toContainText('一键更新')
+    await expect(page).toHaveURL(/\/$/)
+    await expect(page.locator('body')).toContainText('总览')
   })
 })

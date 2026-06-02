@@ -181,7 +181,78 @@ cdef class Rsquare(Rolling):
             sqrt((N*self.x2_sum - self.x_sum*self.x_sum) * (N*self.y2_sum - self.y_sum*self.y_sum))
         return rvalue * rvalue
 
-    
+
+from libcpp.vector cimport vector
+
+
+cdef class WMA(Rolling):
+    """1-D array rolling weighted moving average
+    Matches: nanmean(w * x) where w = arange(len(x))+1, w = w/w.sum()
+    Uses a growing vector (like Python's rolling window) instead of
+    the fixed deque from the base class to match growing-window behavior.
+    """
+    cdef vector[double] barv_vec
+    def __init__(self, int window):
+        super(WMA, self).__init__(window)
+
+    cdef double update(self, double val):
+        self.barv_vec.push_back(val)
+        cdef size_t wsize = self.barv_vec.size()
+        if wsize > <size_t>self.window:
+            self.barv_vec.erase(self.barv_vec.begin())
+            wsize = self.window
+        # result = sum(w_i * x_i) / (W * count) for non-NaN positions
+        # w_i = i+1, W = wsize*(wsize+1)/2 (based on actual window size)
+        cdef double wval = 0.0
+        cdef double wtotal = wsize * (wsize + 1.0) / 2.0
+        cdef int count = 0
+        cdef size_t i
+        cdef double v
+        for i in range(wsize):
+            v = self.barv_vec[i]
+            if not isnan(v):
+                wval += (<double>(i + 1)) * v
+                count += 1
+        if count == 0:
+            return NAN
+        return wval / (wtotal * count)
+
+
+cdef class Mad(Rolling):
+    """1-D array rolling median absolute deviation
+    MAD = mean(|x - mean(x)|), computed incrementally.
+    """
+    cdef double vsum
+    def __init__(self, int window):
+        super(Mad, self).__init__(window)
+        self.vsum = 0.0
+
+    cdef double update(self, double val):
+        self.barv.push_back(val)
+        cdef double old_val = self.barv.front()
+        if not isnan(old_val):
+            self.vsum -= old_val
+        else:
+            self.na_count -= 1
+        self.barv.pop_front()
+        if isnan(val):
+            self.na_count += 1
+        else:
+            self.vsum += val
+        cdef int count = self.window - self.na_count
+        if count == 0:
+            return NAN
+        cdef double mean_val = self.vsum / count
+        cdef double mad_sum = 0.0
+        cdef int i
+        cdef double v
+        for i in range(self.window):
+            v = self.barv[i]
+            if not isnan(v):
+                mad_sum += v - mean_val if v >= mean_val else mean_val - v
+        return mad_sum / count
+
+
 cdef np.ndarray[double, ndim=1] rolling(Rolling r, np.ndarray a):
     cdef int  i
     cdef int  N = len(a)
@@ -204,4 +275,12 @@ def rolling_rsquare(np.ndarray a, int window):
 
 def rolling_resi(np.ndarray a, int window):
     cdef Resi r = Resi(window)
+    return rolling(r, a)
+
+def rolling_wma(np.ndarray a, int window):
+    cdef WMA r = WMA(window)
+    return rolling(r, a)
+
+def rolling_mad(np.ndarray a, int window):
+    cdef Mad r = Mad(window)
     return rolling(r, a)

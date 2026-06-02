@@ -8,7 +8,7 @@ import json, sys, os
 import numpy as np
 
 DATA_DIR = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser(
-    "~/.quant_master/quant_master_data/cn_data")
+    "~/.quant_master/quant_master_data/tdx_cn_data")
 OUT = os.path.join(os.path.dirname(__file__), "..", "public", "instruments.json")
 
 # 读取名称映射 (code -> name)

@@ -26,7 +26,7 @@ class TranscendenceAlpha(DataHandlerLP):
         filter_pipe=None,
         inst_processors=None,
         include_alpha158_base=True,
-        benchmark="SH000300",
+        benchmark=None,
         **kwargs,
     ):
         self.include_alpha158_base = include_alpha158_base
@@ -122,7 +122,9 @@ class TranscendenceAlpha(DataHandlerLP):
 
         ret = "$close/Ref($close, 1)-1"
         vret = "Log($volume+1)-Log(Ref($volume, 1)+1)"
-        mret = f"ChangeInstrument('{self.benchmark}', $close/Ref($close, 1)-1)"
+        benchmark = str(self.benchmark).strip() if self.benchmark else ""
+        has_benchmark = bool(benchmark)
+        mret = f"ChangeInstrument('{benchmark}', $close/Ref($close, 1)-1)" if has_benchmark else None
 
         # 1) multi-period momentum / reversal
         for d in [3, 5, 10, 20, 40, 60, 120]:
@@ -187,17 +189,18 @@ class TranscendenceAlpha(DataHandlerLP):
             add(f"TX_LEFT_TAIL_GAP_{d}", f"Med({ret}, {d})-Quantile({ret}, {d}, 0.1)")
 
         # 6) market-relative strength (if benchmark data exists)
-        for d in [5, 10, 20, 40, 60, 120]:
-            add(f"TX_EXCESS_RET_{d}", f"Mean({ret}, {d})-ChangeInstrument('{self.benchmark}', Mean({ret}, {d}))")
-            add(
-                f"TX_REL_MOM_{d}",
-                f"($close/Ref($close, {d}))/(ChangeInstrument('{self.benchmark}', $close/Ref($close, {d}))+1e-12)-1",
-            )
-            add(
-                f"TX_BETA_{d}",
-                f"Cov({ret}, {mret}, {d})/(ChangeInstrument('{self.benchmark}', Var({mret}, {d}))+1e-12)",
-            )
-            add(f"TX_IDIO_VOL_{d}", f"Std({ret}, {d})-Abs(Cov({ret}, {mret}, {d}))")
+        if has_benchmark:
+            for d in [5, 10, 20, 40, 60, 120]:
+                add(f"TX_EXCESS_RET_{d}", f"Mean({ret}, {d})-ChangeInstrument('{benchmark}', Mean({ret}, {d}))")
+                add(
+                    f"TX_REL_MOM_{d}",
+                    f"($close/Ref($close, {d}))/(ChangeInstrument('{benchmark}', $close/Ref($close, {d}))+1e-12)-1",
+                )
+                add(
+                    f"TX_BETA_{d}",
+                    f"Cov({ret}, {mret}, {d})/(ChangeInstrument('{benchmark}', Var({mret}, {d}))+1e-12)",
+                )
+                add(f"TX_IDIO_VOL_{d}", f"Std({ret}, {d})-Abs(Cov({ret}, {mret}, {d}))")
 
         return fields, names
 

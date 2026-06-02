@@ -1,0 +1,48 @@
+Transcendence directory map
+===========================
+
+Why this directory is larger than Transformer:
+- Transformer is a mostly single-family benchmark with a few configs at root.
+- Transcendence currently acts as a research workbench for model, strategy, gate, replay, and audit flows.
+- Root still contains thin compatibility entry scripts plus a small set of high-signal result references.
+
+Active source and configs kept at root:
+- *.py research entry scripts
+- 4 primary workflow_config_*.yaml entry configs kept at root for direct script compatibility
+- sota_snapshot.json because active support/search scripts read it directly
+
+Root script role split:
+- thin wrapper entry scripts remain at root for command compatibility with archived summaries, snapshots, and prior run notes
+- substantial logic lives under support/, strategy/, and model/
+- regime_switch_stability_eval.py is a notable root-level wrapper with extra post-processing logic and therefore remains visible at root
+
+Subdirectories:
+- support/ helper scripts and supporting research utilities
+- strategy/ strategy-layer experiments
+- model/ model-layer runners and model-specific generated configs/summaries
+- configs/ older generated run configs plus organized workflow configs
+- configs/workflows/regime_horizon/de_only/ long-tail de_only variants
+- configs/workflows/regime_horizon/variants/ other regime-horizon variants
+- configs/workflows/transcendence/ factor / hybrid / metalabel / validation-selected workflows
+- configs/workflows/deep/ deep-model workflow configs
+- configs/workflows/ensemble/ ensemble workflow configs
+- reports/curated/ preserved high-value leaderboard / gate / round-summary references
+- archive/root_runs/ historical root-level timestamped outputs moved out of the main entry area
+- archive/runs/ archived run folders
+- archive/logs/ archived logs
+
+Current high-signal references:
+- workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml
+- workflow_config_regime_horizon_cost_ensemble_Alpha158Alpha360_2026_csi300.yaml
+- reports/curated/regime_switch_stability_reverify_gate_ready_summary_7406e470_20260527T093714Z.json
+- reports/curated/portfolio_innov_ext_i10_summary_7406e470_20260519T122816Z.json
+- archive/root_runs/wf_portfolio_small_v23_summary_7406e470_20260528T090224Z.json
+
+Notes:
+- Root-level timestamped outputs are archival evidence, not primary entry points.
+- Most experimental workflow YAMLs were moved under configs/workflows/ to reduce root clutter.
+- Root keeps only the small set of configs still directly hard-referenced by code paths.
+- Many root-level *.py files are intentionally thin wrappers that forward to support/ implementations for compatibility with old commands and archived run records.
+- Read-mostly benchmark result references were moved into reports/curated/ to keep the root focused on runnable entry points.
+- Root wrappers are intentionally preserved because historical summaries and snapshot metadata still reference `examples/benchmarks/Transcendence/*.py` command paths.
+- Model-layer full verification artifacts after 2026-05-28 live under repo-level artifacts/verifier_v17-v22.

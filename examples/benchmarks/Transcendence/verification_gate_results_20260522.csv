@@ -1,5 +1,0 @@
-candidate,artifact,ir,annret,mdd,turnover,hard_gate_pass,eng_gate,test_gate,leakage_gate,perf_gate,go_no_go,risk_note
-baseline_7406_default_tk45_nd4_daily,portfolio_fixed_oos_summary_7406e470_20260520T070317Z.json,2.799983676714275,0.24466463608994513,-0.04812598495553805,0.1749957877001195,false,pass,pass,pass,pass,no-go,below hard breakthrough threshold
-buffered_tk55_hk85_equal_weekly,portfolio_fixed_oos_summary_7406e470_20260520T070317Z.json,3.02300194018593,0.387854415471524,-0.0477231242830699,0.25471396243602523,true,pass,pass,warning,pass,no-go,test-period strategy selection risk
-rank_ensemble_broad_tinyA_best,rank_ensemble_scan_broad_tinyA_summary_20260520T112550Z.json,2.896572176805887,0.21669828649269696,-0.04541403750746531,0.14418254720019916,false,pass,pass,warning,pass,no-go,ir below 2.90 and annret below 0.27
-regime_overlay_continuous_reverify,regime_switch_stability_reverify_summary_7406e470_20260520T105141Z.json,2.9565999209261435,0.27620091509314726,-0.048125984955538,0.17499578770011953,true,pass,pass,pass,pass,go_conditional,needs freeze-and-forward check before integration

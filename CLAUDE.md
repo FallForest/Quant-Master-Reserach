@@ -26,8 +26,11 @@ python -m pytest test_all_pipeline.py::TestClass::test_method -v  # Single test
 
 Tests require data downloaded first:
 ```bash
-python scripts/get_data.py quant_master_data --name quant_master_data_simple --target_dir ~/.quant_master/quant_master_data/cn_data --interval 1d --region cn
+python scripts/get_data.py quant_master_data --name quant_master_data_simple --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --interval 1d --region cn
 ```
+
+Current unified CN data directory: `~/.quant_master/quant_master_data/tdx_cn_data`
+(Windows runtime path: `C:\Users\15728\.quant_master\quant_master_data\tdx_cn_data`).
 
 RL tests (`tests/rl/`) are Linux-only and auto-skipped on other platforms.
 
@@ -50,7 +53,7 @@ python quant_master/cli/run.py examples/benchmarks/LightGBM/workflow_config_ligh
 
 ### Data Collection (Yahoo example)
 ```bash
-python scripts/data_collector/yahoo/collector.py update_data_to_bin --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --end_date 2025-01-01
+python scripts/data_collector/yahoo/collector.py update_data_to_bin --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data --end_date 2025-01-01
 ```
 
 ## Architecture
@@ -64,7 +67,7 @@ python scripts/data_collector/yahoo/collector.py update_data_to_bin --quant_mast
 ### Initialization
 ```python
 import quant_master
-quant_master.init(provider_uri="~/.quant_master/quant_master_data/cn_data", region="cn")
+quant_master.init(provider_uri="~/.quant_master/quant_master_data/tdx_cn_data", region="cn")
 ```
 
 ### Package Layout

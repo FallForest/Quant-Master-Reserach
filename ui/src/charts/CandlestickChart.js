@@ -46,7 +46,7 @@ export default class CandlestickChart {
     this.hoverIdx = -1
     this.period = 'D'
 
-    this.PADDING = { top: 24, right: 64, bottom: 28, left: 12 }
+    this.PADDING = { top: 24, right: 72, bottom: 32, left: 24 }
     this.VOL_HEIGHT = 80
     this.VOL_GAP = 8
 
@@ -222,10 +222,17 @@ export default class CandlestickChart {
     ctx.textAlign = 'center'
     ctx.fillStyle = this.theme.text
     ctx.font = '11px "Fira Code", monospace'
-    const step = Math.max(1, Math.floor(count / 6))
+    const labelMinGap = 56
+    const step = Math.max(1, Math.ceil((count * labelMinGap) / Math.max(chartW, 1)))
+    let prevLabelX = -Infinity
     for (let i = 0; i < count; i += step) {
       const d = visible[i]
-      if (d?.date) ctx.fillText(d.date.length > 5 ? d.date.slice(5) : d.date, xScale(i), this.mainH - 2)
+      if (!d?.date) continue
+      const rawX = xScale(i)
+      const safeX = Math.max(left + 18, Math.min(this.W - right - 18, rawX))
+      if (safeX - prevLabelX < labelMinGap) continue
+      ctx.fillText(d.date.length > 5 ? d.date.slice(5) : d.date, safeX, this.mainH - 2)
+      prevLabelX = safeX
     }
 
     this._drawMALines(ctx, visible, xScale, yScale)
@@ -391,7 +398,8 @@ export default class CandlestickChart {
       const mm = m % 60
       const label = `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
       if (x - prevLabelX >= 40) {
-        ctx.fillText(label, x, this.mainH - 2)
+        const safeX = Math.max(left + 18, Math.min(this.W - this.PADDING.right - 18, x))
+        ctx.fillText(label, safeX, this.mainH - 2)
         prevLabelX = x
       }
     }

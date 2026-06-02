@@ -183,10 +183,11 @@ class Expression(abc.ABC):
         """
         from .cache import H  # pylint: disable=C0415
 
-        # cache
+        # cache — single lock acquisition instead of __contains__ + __getitem__
         cache_key = str(self), instrument, start_index, end_index, *args
-        if cache_key in H["f"]:
-            return H["f"][cache_key]
+        cached = H["f"].get(cache_key)
+        if cached is not None:
+            return cached
         if start_index is not None and end_index is not None and start_index > end_index:
             raise ValueError("Invalid index range: {} {}".format(start_index, end_index))
         try:

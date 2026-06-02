@@ -317,7 +317,7 @@ class MLflowExperiment(Experiment):
     def search_records(self, **kwargs):
         filter_string = "" if kwargs.get("filter_string") is None else kwargs.get("filter_string")
         run_view_type = 1 if kwargs.get("run_view_type") is None else kwargs.get("run_view_type")
-        max_results = 100000 if kwargs.get("max_results") is None else kwargs.get("max_results")
+        max_results = kwargs.get("max_results", self.UNLIMITED)
         order_by = kwargs.get("order_by")
 
         return self._client.search_runs([self.id], filter_string, run_view_type, max_results, order_by)
@@ -337,7 +337,8 @@ class MLflowExperiment(Experiment):
                 f"Error: {e}. Something went wrong when deleting recorder. Please check if the name/id of the recorder is correct."
             ) from e
 
-    UNLIMITED = 50000  # FIXME: Mlflow can only list 50000 records at most!!!!!!!
+    # Upper bound for MLflow list/search queries. Override via subclass or config if needed.
+    UNLIMITED = 50000
 
     def list_recorders(
         self,

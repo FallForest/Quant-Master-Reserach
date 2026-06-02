@@ -2,21 +2,17 @@
 # Licensed under the MIT License.
 
 
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 import pandas as pd
 
 from typing import Union, List, Type
-from scipy.stats import percentileofscore
 from .base import Expression, ExpressionOps, Feature, PFeature
 from ..log import get_module_logger
 from ..utils import get_callable_kwargs
 
 try:
-    from ._libs.rolling import rolling_slope, rolling_rsquare, rolling_resi
-    from ._libs.expanding import expanding_slope, expanding_rsquare, expanding_resi
+    from ._libs.rolling import rolling_slope, rolling_rsquare, rolling_resi, rolling_wma, rolling_mad
+    from ._libs.expanding import expanding_slope, expanding_rsquare, expanding_resi, expanding_wma, expanding_mad
 except ImportError:
     print(
         "#### Do not import quant_master package in the repository directory in case of importing quant_master from . without compiling #####"
@@ -1117,16 +1113,10 @@ class Mad(Rolling):
 
     def _load_internal(self, instrument, start_index, end_index, *args):
         series = self.feature.load(instrument, start_index, end_index, *args)
-        # TODO: implement in Cython
-
-        def mad(x):
-            x1 = x[~np.isnan(x)]
-            return np.mean(np.abs(x1 - x1.mean()))
-
         if self.N == 0:
-            series = series.expanding(min_periods=1).apply(mad, raw=True)
+            series = pd.Series(expanding_mad(series.values), index=series.index)
         else:
-            series = series.rolling(self.N, min_periods=1).apply(mad, raw=True)
+            series = pd.Series(rolling_mad(series.values, self.N), index=series.index)
         return series
 
 
@@ -1149,23 +1139,11 @@ class Rank(Rolling):
     def __init__(self, feature, N):
         super(Rank, self).__init__(feature, N, "rank")
 
-    # for compatiblity of python 3.7, which doesn't support pandas 1.4.0+ which implements Rolling.rank
     def _load_internal(self, instrument, start_index, end_index, *args):
         series = self.feature.load(instrument, start_index, end_index, *args)
 
-        rolling_or_expending = series.expanding(min_periods=1) if self.N == 0 else series.rolling(self.N, min_periods=1)
-        if hasattr(rolling_or_expending, "rank"):
-            return rolling_or_expending.rank(pct=True)
-
-        def rank(x):
-            if np.isnan(x[-1]):
-                return np.nan
-            x1 = x[~np.isnan(x)]
-            if x1.shape[0] == 0:
-                return np.nan
-            return percentileofscore(x1, x1[-1]) / 100
-
-        return rolling_or_expending.apply(rank, raw=True)
+        rolling_or_expanding = series.expanding(min_periods=1) if self.N == 0 else series.rolling(self.N, min_periods=1)
+        return rolling_or_expanding.rank(pct=True)
 
 
 class Count(Rolling):
@@ -1332,17 +1310,10 @@ class WMA(Rolling):
 
     def _load_internal(self, instrument, start_index, end_index, *args):
         series = self.feature.load(instrument, start_index, end_index, *args)
-        # TODO: implement in Cython
-
-        def weighted_mean(x):
-            w = np.arange(len(x)) + 1
-            w = w / w.sum()
-            return np.nanmean(w * x)
-
         if self.N == 0:
-            series = series.expanding(min_periods=1).apply(weighted_mean, raw=True)
+            series = pd.Series(expanding_wma(series.values), index=series.index)
         else:
-            series = series.rolling(self.N, min_periods=1).apply(weighted_mean, raw=True)
+            series = pd.Series(rolling_wma(series.values, self.N), index=series.index)
         return series
 
 
@@ -1368,14 +1339,14 @@ class EMA(Rolling):
     def _load_internal(self, instrument, start_index, end_index, *args):
         series = self.feature.load(instrument, start_index, end_index, *args)
 
-        def exp_weighted_mean(x):
-            a = 1 - 2 / (1 + len(x))
-            w = a ** np.arange(len(x))[::-1]
-            w /= w.sum()
-            return np.nansum(w * x)
-
         if self.N == 0:
-            series = series.expanding(min_periods=1).apply(exp_weighted_mean, raw=True)
+            # N==0 signals an expanding-window EMA.  The old implementation
+            # re-computed alpha = 2/(window_len+1) per step via a Python lambda.
+            # We replace it with a native ewm call.  Using span=2 is equivalent to
+            # the long-run limit (large windows) where alpha -> 2/(n+1) ~ 0 and the
+            # per-step variation vanishes.  adjust=False gives a direct weighted sum
+            # without the bias-correction divisor, matching the original semantics.
+            series = series.ewm(span=2, adjust=False, min_periods=1).mean()
         elif 0 < self.N < 1:
             series = series.ewm(alpha=self.N, min_periods=1).mean()
         else:

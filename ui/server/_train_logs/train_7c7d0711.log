@@ -1,0 +1,24 @@
+#### Do not import quant_master package in the repository directory in case of importing quant_master from . without compiling #####
+Traceback (most recent call last):
+  File "C:\Users\15728\Desktop\Quant-Master-Research\examples\benchmarks\Transcendence\regime_switch_stability_eval.py", line 18, in <module>
+    from examples.benchmarks.Transcendence.support import regime_switch_stability_eval as _impl
+  File "C:\Users\15728\Desktop\Quant-Master-Research\examples\benchmarks\Transcendence\support\regime_switch_stability_eval.py", line 26, in <module>
+    from quant_master.backtest import backtest as run_backtest
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\backtest\__init__.py", line 12, in <module>
+    from .account import Account
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\backtest\account.py", line 12, in <module>
+    from .decision import BaseTradeDecision, Order
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\backtest\decision.py", line 13, in <module>
+    from quant_master.backtest.utils import TradeCalendarManager
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\backtest\utils.py", line 20, in <module>
+    from ..data.data import Cal
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\__init__.py", line 8, in <module>
+    from .data import (
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\data.py", line 20, in <module>
+    from .cache import H
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\cache.py", line 38, in <module>
+    from .ops import Operators  # pylint: disable=W0611  # noqa: F401
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\ops.py", line 14, in <module>
+    from ._libs.rolling import rolling_slope, rolling_rsquare, rolling_resi, rolling_wma, rolling_mad
+ImportError: cannot import name 'rolling_wma' from 'quant_master.data._libs.rolling' (C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\_libs\rolling.cp312-win_amd64.pyd). Did you mean: 'rolling_mean'?

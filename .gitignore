@@ -54,7 +54,6 @@ tags
 .aider*
 
 # Data directories
-.qmData/
 mlruns_tmp/
 
 # Experiment outputs

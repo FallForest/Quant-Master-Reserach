@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -296,8 +296,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--tracking-uri", default="file:./mlruns")
     p.add_argument("--base-run-id", default=conv.SOTA_RUN_ID)
     p.add_argument("--signal-runs", default="gru_bcbecf55:bcbecf55,metalabel_top_bottom_29864:29864,metalabel_rank_4a98:4a98")
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--grid-mode", choices=["tiny", "smoke", "topkdrop_smoke", "topkdrop_fullish", "full"], default="full")
     p.add_argument("--max-candidates", type=int, default=0, help="Cap evaluated train candidates per lockstep segment; 0 means no cap.")
     p.add_argument("--max-apply-plans", type=int, default=0, help="Cap lockstep train/apply segments for smoke runs; 0 means all.")
@@ -685,3 +685,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

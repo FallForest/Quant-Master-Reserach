@@ -1,0 +1,95 @@
+﻿timestamp=2026-05-29T20:06:25.9270041+08:00
+listeners:
+[{"LocalAddress":"127.0.0.1","LocalPort":5173,"OwningProcess":15388},{"LocalAddress":"127.0.0.1","LocalPort":5174,"OwningProcess":22940}]
+service_processes:
+[
+    {
+        "ProcessId":  15388,
+        "ParentProcessId":  12708,
+        "Name":  "node.exe",
+        "CreationDate":  "\/Date(1780052400158)\/",
+        "CommandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" C:\\Users\\15728\\Desktop\\Quant-Master-Research\\ui\\node_modules\\vite\\bin\\vite.js --host 127.0.0.1 --port 5173 "
+    },
+    {
+        "ProcessId":  22940,
+        "ParentProcessId":  2020,
+        "Name":  "python.exe",
+        "CreationDate":  "\/Date(1780055250195)\/",
+        "CommandLine":  "\"C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -m ui.server --port 5174 "
+    }
+]
+python_parent_groups:
+[
+    {
+        "ParentProcessId":  "11220",
+        "ChildCount":  15,
+        "ParentName":  "python.exe",
+        "ParentCmd":  "\"C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -"
+    },
+    {
+        "ParentProcessId":  "25184",
+        "ChildCount":  15,
+        "ParentName":  "python.exe",
+        "ParentCmd":  "C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -"
+    },
+    {
+        "ParentProcessId":  "18844",
+        "ChildCount":  15,
+        "ParentName":  "python.exe",
+        "ParentCmd":  "C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -"
+    },
+    {
+        "ParentProcessId":  "23304",
+        "ChildCount":  15,
+        "ParentName":  "python.exe",
+        "ParentCmd":  "\"C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -"
+    },
+    {
+        "ParentProcessId":  "12532",
+        "ChildCount":  14,
+        "ParentName":  "\u003cexited\u003e",
+        "ParentCmd":  "\u003cexited\u003e"
+    },
+    {
+        "ParentProcessId":  "2872",
+        "ChildCount":  1,
+        "ParentName":  "powershell.exe",
+        "ParentCmd":  "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -Command \"[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;\n$env:THESIS_AIGC_DOC = \\\"C:\\Users\\15728\\Desktop\\Sparkling Idea\\graduation-project\\code_readme\\output\\doc\\code_readme-毕业论文-终稿格式修正版.skilltest.docx\\\"; python \\\"C:\\Users\\15728\\.codex\\skills\\thesis-aigc-safe-pipeline\\scripts\\run.py\\\"\""
+    },
+    {
+        "ParentProcessId":  "14760",
+        "ChildCount":  1,
+        "ParentName":  "powershell.exe",
+        "ParentCmd":  "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -Command \"[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;\n@\u0027\nimport sys\nfrom pathlib import Path\nrepo = Path(r\u0027C:\\Users\\15728\\Desktop\\Quant-Master-Research\u0027)\nif str(repo) not in sys.path:\n    sys.path.insert(0, str(repo))\nfrom ui.server.datadir import create_data_dir, get_effective_data_dir\nfrom ui.server.qm_runtime import ui_low_concurrency_quant_master\nfrom ui.server.stock_select import ensure_quant_master_initialized\nfrom ui.server.model_catalog import get_handlers\nfrom quant_master.data.dataset.processor import Fillna\nfrom quant_master.data.dataset.handler import DataHandlerLP\nfrom quant_master.data.dataset import DatasetH\n\napp_data = create_data_dir(None)\nprovider_uri = get_effective_data_dir(app_data)\nensure_quant_master_initialized(provider_uri, region=\u0027cn\u0027)\nhandler_spec = get_handlers()[\u0027alpha158\u0027]\nhandler_mod = __import__(handler_spec[\u0027import_path\u0027], fromlist=[handler_spec[\u0027class_name\u0027]])\nhandler_cls = getattr(handler_mod, handler_spec[\u0027class_name\u0027])\nwith ui_low_concurrency_quant_master():\n    handler = handler_cls(\n        start_time=\u00272018-01-01\u0027, end_time=\u00272026-05-29\u0027, fit_start_time=\u00272018-01-01\u0027, fit_end_time=\u00272023-12-31\u0027, instruments=\u0027csi300\u0027, infer_processors=[Fillna()]\n    )\n    for seg in [\n        [\u00272026-05-28\u0027,\u00272026-05-29\u0027],\n        [\u00272026-05-27\u0027,\u00272026-05-29\u0027],\n        [\u00272026-05-22\u0027,\u00272026-05-29\u0027],\n        [\u00272026-05-01\u0027,\u00272026-05-29\u0027],\n    ]:\n        ds = DatasetH(handler=handler, segments={\u0027train\u0027:[\u00272018-01-01\u0027,\u00272023-12-31\u0027],\u0027valid\u0027:[\u00272024-01-01\u0027,\u00272025-06-30\u0027],\u0027test\u0027:seg})\n        feat = ds.prepare(\u0027test\u0027, col_set=\u0027feature\u0027, data_key=DataHandlerLP.DK_I)\n        print(\u0027seg\u0027, seg, \u0027len\u0027, len(feat), \u0027dates\u0027, list(dict.fromkeys([str(idx[0])[:10] for idx in feat.index[:10]]))[:5])\n        print(\u0027tail dates\u0027, list(dict.fromkeys([str(idx[0])[:10] for idx in feat.index[-10:]]))[-5:])\n\u0027@ | python -\""
+    },
+    {
+        "ParentProcessId":  "2020",
+        "ChildCount":  1,
+        "ParentName":  "\u003cexited\u003e",
+        "ParentCmd":  "\u003cexited\u003e"
+    },
+    {
+        "ParentProcessId":  "16284",
+        "ChildCount":  1,
+        "ParentName":  "powershell.exe",
+        "ParentCmd":  "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -Command \"[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;\n@\u0027\nimport time\nimport quant_master as qm\nfrom ui.server.datadir import get_effective_data_dir\nfrom ui.server.qm_runtime import ui_low_concurrency_quant_master\nfrom quant_master.contrib.data.handler import Alpha158\nfrom quant_master.data.dataset import DatasetH\nfrom quant_master.data.dataset.handler import DataHandlerLP\nfrom quant_master.data.dataset.processor import Fillna\n\nprovider_uri = get_effective_data_dir(None)\nprint(\u0027provider_uri=\u0027, provider_uri, flush=True)\nwith ui_low_concurrency_quant_master():\n    qm.init(provider_uri=provider_uri, region=\u0027cn\u0027)\n    t0 = time.time()\n    handler = Alpha158(\n        start_time=\u00272018-01-01\u0027,\n        end_time=\u00272026-05-29\u0027,\n        fit_start_time=\u00272018-01-01\u0027,\n        fit_end_time=\u00272023-12-31\u0027,\n        instruments=\u0027csi300\u0027,\n        infer_processors=[Fillna()],\n    )\n    print(\u0027handler_ready_sec=\u0027, round(time.time()-t0, 1), flush=True)\n    dataset = DatasetH(\n        handler=handler,\n        segments={\n            \u0027test\u0027: [\u00272026-05-29\u0027, \u00272026-05-29\u0027],\n            \u0027prev\u0027: [\u00272026-05-28\u0027, \u00272026-05-28\u0027],\n        },\n    )\n    for seg in [\u0027test\u0027, \u0027prev\u0027]:\n        for key_name, key in [(\u0027infer\u0027, DataHandlerLP.DK_I), (\u0027learn\u0027, DataHandlerLP.DK_L)]:\n            try:\n                df = dataset.prepare(seg, col_set=\u0027feature\u0027, data_key=key)\n                print(seg, key_name, \u0027shape=\u0027, df.shape, \u0027empty=\u0027, df.empty, flush=True)\n                print(seg, key_name, \u0027first_index=\u0027, list(df.index[:5]), flush=True)\n            except Exception as exc:\n                print(seg, key_name, \u0027ERR\u0027, type(exc).__name__, str(exc), flush=True)\n\u0027@ | python -\""
+    },
+    {
+        "ParentProcessId":  "25928",
+        "ChildCount":  1,
+        "ParentName":  "\u003cexited\u003e",
+        "ParentCmd":  "\u003cexited\u003e"
+    },
+    {
+        "ParentProcessId":  "6048",
+        "ChildCount":  1,
+        "ParentName":  "\u003cexited\u003e",
+        "ParentCmd":  "\u003cexited\u003e"
+    },
+    {
+        "ParentProcessId":  "16468",
+        "ChildCount":  1,
+        "ParentName":  "python.exe",
+        "ParentCmd":  "\"C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -"
+    }
+]

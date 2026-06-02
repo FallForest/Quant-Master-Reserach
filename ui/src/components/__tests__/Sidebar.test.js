@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import Sidebar from '../Sidebar.vue'
 
@@ -7,33 +7,25 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: { template: '<div />' } },
-    { path: '/pipeline', component: { template: '<div />' } },
     { path: '/browser', component: { template: '<div />' } },
-    { path: '/factor', component: { template: '<div />' } },
-    { path: '/model-lab', component: { template: '<div />' } },
-    { path: '/model-performance', component: { template: '<div />' } },
-    { path: '/stock-select', component: { template: '<div />' } },
-    { path: '/experiments', component: { template: '<div />' } },
-    { path: '/strategy-lab', component: { template: '<div />' } },
-    { path: '/backtest', component: { template: '<div />' } },
-    { path: '/portfolio', component: { template: '<div />' } },
-    { path: '/optimizer', component: { template: '<div />' } },
-    { path: '/attribution', component: { template: '<div />' } },
+    { path: '/model', component: { template: '<div />' } },
+    { path: '/strategy', component: { template: '<div />' } },
+    { path: '/strategy/buffered-rebalance', component: { template: '<div />' } },
+    { path: '/execution', component: { template: '<div />' } },
   ],
 })
 
 describe('Sidebar', () => {
-  it('renders all 13 navigation links', async () => {
+  it('renders all 5 navigation links', async () => {
     router.push('/')
     await router.isReady()
     const wrapper = mount(Sidebar, {
       props: { collapsed: false, mobileOpen: false },
       global: { plugins: [router] },
     })
-    // 13 nav item buttons with aria-label
-    const navButtons = wrapper.findAll('button[aria-label]')
-    // 13 nav items + 1 collapse button = 14 buttons with aria-label
-    expect(navButtons.length).toBe(14)
+
+    const navButtons = wrapper.findAll('nav button[aria-label]')
+    expect(navButtons.length).toBe(5)
   })
 
   it('emits toggle event on collapse button click', async () => {
@@ -43,6 +35,7 @@ describe('Sidebar', () => {
       props: { collapsed: false, mobileOpen: false },
       global: { plugins: [router] },
     })
+
     const collapseBtn = wrapper.find('button[aria-label="收起侧边栏"]')
     expect(collapseBtn.exists()).toBe(true)
     await collapseBtn.trigger('click')
@@ -56,8 +49,8 @@ describe('Sidebar', () => {
       props: { collapsed: true, mobileOpen: false },
       global: { plugins: [router] },
     })
-    const aside = wrapper.find('aside')
-    expect(aside.classes()).toContain('sidebar-collapsed')
+
+    expect(wrapper.find('aside').classes()).toContain('sidebar-collapsed')
   })
 
   it('applies sidebar-expanded class when not collapsed', async () => {
@@ -67,32 +60,49 @@ describe('Sidebar', () => {
       props: { collapsed: false, mobileOpen: false },
       global: { plugins: [router] },
     })
-    const aside = wrapper.find('aside')
-    expect(aside.classes()).toContain('sidebar-expanded')
+
+    expect(wrapper.find('aside').classes()).toContain('sidebar-expanded')
   })
 
-  it('renders all 5 group labels', async () => {
+  it('renders all 4 group labels', async () => {
     router.push('/')
     await router.isReady()
     const wrapper = mount(Sidebar, {
       props: { collapsed: false, mobileOpen: false },
       global: { plugins: [router] },
     })
+
     const text = wrapper.text()
-    expect(text).toContain('概览')
+    expect(text).toContain('总览')
     expect(text).toContain('数据')
-    expect(text).toContain('模型')
     expect(text).toContain('策略')
-    expect(text).toContain('分析')
+    expect(text).toContain('执行')
   })
 
-  it('renders QuantMaster logo text', async () => {
+  it('keeps 策略调仓 active for nested strategy routes', async () => {
+    router.push('/strategy/buffered-rebalance')
+    await router.isReady()
+    const wrapper = mount(Sidebar, {
+      props: { collapsed: false, mobileOpen: false },
+      global: { plugins: [router] },
+    })
+
+    await flushPromises()
+    const strategyButton = wrapper.find('button[aria-label="策略调仓"]')
+    expect(strategyButton.attributes('aria-current')).toBe('page')
+  })
+
+  it('navigates to /strategy when clicking 策略调仓', async () => {
     router.push('/')
     await router.isReady()
     const wrapper = mount(Sidebar, {
       props: { collapsed: false, mobileOpen: false },
       global: { plugins: [router] },
     })
-    expect(wrapper.text()).toContain('QuantMaster')
+
+    await wrapper.find('button[aria-label="策略调仓"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.path).toBe('/strategy')
   })
+
 })

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -23,6 +23,7 @@ for _path in (REPO_ROOT, BENCHMARK_ROOT, BENCHMARK_ROOT / "model", BENCHMARK_ROO
         sys.path.insert(0, str(_path))
 
 import quant_master
+from quant_master.config import resolve_provider_uri
 import pre2024_train_new_model_lockstep as base
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
@@ -644,14 +645,14 @@ def _resolve_workflow_config(path_text: str) -> Path:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Style-neutral residual return target quick-smoke / strict full eval.")
     p.add_argument("--mode", choices=["smoke", "full"], default="smoke")
-    p.add_argument("--provider-uri", default=".qmData/cn_data")
+    p.add_argument("--provider-uri", default="~/.quant_master/quant_master_data/tdx_cn_data")
     p.add_argument("--market", default="csi300")
     p.add_argument(
         "--workflow-config",
         default="workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml",
     )
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--alpha-grid", default="10")
     p.add_argument("--topk-grid", default="35,40")
     p.add_argument("--ndrop-grid", default="2,3")
@@ -696,7 +697,7 @@ def main() -> int:
     t0_all = time.perf_counter()
     stamp = _stamp()
     paths = _artifact_paths(str(args.output_prefix), stamp)
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
     mode = str(args.mode)
     data_end = TEST_END if mode == "full" else VALID_END
     summary: Dict[str, Any] = {
@@ -1046,3 +1047,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

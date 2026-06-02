@@ -8,7 +8,6 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 from typing import Text, Union
-import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
 import torch
@@ -284,7 +283,7 @@ class GATs(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.GAT_model.state_dict())
+                best_param = self.GAT_model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

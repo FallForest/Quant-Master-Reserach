@@ -5,7 +5,6 @@ from __future__ import division
 from __future__ import print_function
 
 
-import copy
 import math
 from typing import Text, Union
 
@@ -283,9 +282,7 @@ class ADD(Model):
 
         cur_step = 1
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
+        for i in range(0, len(indices), self.batch_size):
             batch = indices[i : i + self.batch_size]
             feature = torch.from_numpy(x_train_values[batch]).float().to(self.device)
             label_excess = torch.from_numpy(y_train_values[batch]).float().to(self.device)
@@ -336,7 +333,7 @@ class ADD(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.ADD_model.state_dict())
+                best_param = self.ADD_model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:
@@ -410,7 +407,7 @@ class ADD(Model):
 
         self.bootstrap_fit(x_train, y_train, m_train, x_valid, y_valid, m_valid)
 
-        best_param = copy.deepcopy(self.ADD_model.state_dict())
+        best_param = self.ADD_model.state_dict()
         save_path = get_or_create_path(save_path)
         torch.save(best_param, save_path)
         if self.use_gpu:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -31,6 +31,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri, resolve_provider_uri_in_config
 from quant_master.contrib.evaluate import risk_analysis
 from quant_master.model.trainer import task_train
 from quant_master.workflow import R
@@ -40,8 +41,8 @@ TRAIN_RANGE = ["2020-01-01", "2022-12-31"]
 VALID_RANGE = ["2023-01-01", "2023-12-31"]
 TEST_RANGE = ["2024-01-01", "2026-04-30"]
 SMOKE_TEST_RANGE = ["2024-01-01", "2024-03-31"]
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 HARD_GATE_ROWS = 562
@@ -94,7 +95,7 @@ def _jsonable(x: Any) -> Any:
 def _load_config(path: Path) -> Dict[str, Any]:
     yaml = YAML(typ="safe", pure=True)
     with path.open("r", encoding="utf-8") as f:
-        return yaml.load(f)
+        return resolve_provider_uri_in_config(yaml.load(f), base_dir=path.parent)
 
 
 def _dump_config(config: Dict[str, Any], path: Path) -> None:
@@ -377,10 +378,9 @@ def _apply_budget_overrides(
 def _apply_common_overrides(config: Dict[str, Any], mode: str, preserve_config_windows: bool = False) -> Dict[str, Any]:
     cfg = copy.deepcopy(config)
     window_overrides: List[Dict[str, Any]] = []
-    provider_uri = Path(str(cfg["quant_master_init"]["provider_uri"])).expanduser()
-    if not provider_uri.is_absolute():
-        provider_uri = (REPO_ROOT / provider_uri).resolve()
-    cfg["quant_master_init"]["provider_uri"] = str(provider_uri)
+    cfg["quant_master_init"]["provider_uri"] = str(
+        resolve_provider_uri(cfg["quant_master_init"]["provider_uri"], base_dir=REPO_ROOT)
+    )
 
     handler_cfg = cfg["task"]["dataset"]["kwargs"]["handler"]["kwargs"]
     if preserve_config_windows:
@@ -725,3 +725,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

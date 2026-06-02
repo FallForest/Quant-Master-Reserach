@@ -1,0 +1,38 @@
+{
+  "brokerKind": "paper",
+  "dryRun": true,
+  "submittedAt": "2026-06-02T12:24:02",
+  "summary": {
+    "total": 2,
+    "accepted": 0,
+    "rejected": 2
+  },
+  "results": [
+    {
+      "stockId": "SH600003",
+      "side": "sell",
+      "price": 8.0,
+      "amount": 900,
+      "accepted": false,
+      "rejectionReason": "insufficient_available_position",
+      "postCheckStatus": "not_checked",
+      "note": "buffered-rebalance",
+      "orderId": null,
+      "status": null,
+      "dealAmount": 0
+    },
+    {
+      "stockId": "SH600001",
+      "side": "buy",
+      "price": 10.0,
+      "amount": 800,
+      "accepted": false,
+      "rejectionReason": "insufficient_available_cash",
+      "postCheckStatus": "not_checked",
+      "note": "buffered-rebalance",
+      "orderId": null,
+      "status": null,
+      "dealAmount": 0
+    }
+  ]
+}

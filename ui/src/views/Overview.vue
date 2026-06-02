@@ -10,17 +10,15 @@ const loading = ref(true)
 const stats = ref([
   { label: '股票总数', value: '--', unit: '只', color: 'text-brand-600', trend: [] },
   { label: '交易日历', value: '--', unit: '天', color: 'text-brand-600', trend: [] },
-  { label: '最后更新', value: '--', unit: '', color: 'text-slate-600', trend: [] },
-  { label: '数据完整度', value: '--', unit: '%', color: 'text-success', trend: [] },
+  { label: '实际更新', value: '--', unit: '', color: 'text-slate-600', trend: [] },
+  { label: '覆盖率', value: '--', unit: '%', color: 'text-success', trend: [] },
 ])
 
 const quickActions = [
-  { route: '/pipeline', label: '更新数据', icon: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' },
   { route: '/browser', label: '浏览数据', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
-  { route: '/factor',  label: '因子分析', icon: 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z' },
-  { route: '/model-lab', label: '模型工坊', icon: 'M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9' },
-  { route: '/backtest', label: '策略回测', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-  { route: '/experiments', label: '实验管理', icon: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z' },
+  { route: '/model',  label: '模型选股', icon: 'M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6' },
+  { route: '/strategy', label: '策略调仓', icon: 'M3.75 6.75h16.5M3.75 12h10.5m-10.5 5.25h16.5m-6-6l3 3m0 0l-3 3m3-3H9.75' },
+  { route: '/execution', label: '交易执行', icon: 'M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3' },
 ]
 
 // 数据分布
@@ -32,56 +30,22 @@ onMounted(async () => {
   if (data) {
     stats.value[0].value = data.stockCount || '--'
     stats.value[1].value = data.calendarDays || '--'
-    stats.value[2].value = data.lastUpdate || '--'
-    stats.value[3].value = data.completeness || '--'
+    stats.value[2].value = data.effectiveLastDate || data.lastUpdate || '--'
+    stats.value[3].value = data.equityCount ? (data.equityCoverageAtLastDate * 100).toFixed(1) : '--'
 
     if (data.fieldStats) {
       fieldStats.value = data.fieldStats
     }
   }
 
-  // Generate demo sparkline data
-  stats.value.forEach(s => {
-    if (!s.trend.length) {
-      s.trend = Array.from({ length: 14 }, () => 0.5 + Math.random() * 0.5)
-    }
-  })
-
   loading.value = false
   await nextTick()
-  renderSparklines()
   renderCompletenessChart()
 })
 
 onUnmounted(() => {
   completenessChart?.dispose()
 })
-
-function renderSparklines() {
-  stats.value.forEach((s, i) => {
-    const el = document.getElementById(`sparkline-${i}`)
-    if (!el || !s.trend.length) return
-    const chart = echarts.init(el)
-    chart.setOption({
-      grid: { left: 0, right: 0, top: 0, bottom: 0 },
-      xAxis: { type: 'category', show: false, data: s.trend.map((_, j) => j) },
-      yAxis: { type: 'value', show: false, min: 'dataMin' },
-      series: [{
-        type: 'line',
-        data: s.trend,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { color: '#3B82F6', width: 1.5 },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(59,130,246,0.25)' },
-            { offset: 1, color: 'rgba(59,130,246,0)' },
-          ]),
-        },
-      }],
-    })
-  })
-}
 
 function renderCompletenessChart() {
   const el = document.getElementById('completeness-chart')
@@ -168,7 +132,6 @@ function renderCompletenessChart() {
               <span class="text-sm text-slate-500">{{ s.unit }}</span>
             </div>
           </div>
-          <div :id="`sparkline-${i}`" class="w-20 h-8 opacity-60 group-hover:opacity-100 transition"></div>
         </div>
       </div>
     </div>
@@ -196,6 +159,20 @@ function renderCompletenessChart() {
       <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">数据完整度</h2>
       <div v-if="loading" class="w-full h-[200px]"><div class="skeleton w-full h-full rounded-lg"></div></div>
       <div v-else id="completeness-chart" class="w-full h-[200px]"></div>
+      <div v-if="!loading" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-600">
+        <div class="rounded-lg bg-surface-1/60 border border-surface-3 px-4 py-3">
+          <div class="text-xs text-slate-500 mb-1">实际更新日期</div>
+          <div class="font-medium">{{ stats[2].value }}</div>
+        </div>
+        <div class="rounded-lg bg-surface-1/60 border border-surface-3 px-4 py-3">
+          <div class="text-xs text-slate-500 mb-1">股票覆盖率</div>
+          <div class="font-medium">{{ stats[3].value }}<span v-if="stats[3].value !== '--'">%</span></div>
+        </div>
+        <div class="rounded-lg bg-surface-1/60 border border-surface-3 px-4 py-3">
+          <div class="text-xs text-slate-500 mb-1">说明</div>
+          <div class="font-medium">日历推进不再等同于全市场已更新</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -10,6 +10,7 @@ import sys
 import stat
 import time
 import pickle
+import threading
 import traceback
 import redis_lock
 import contextlib
@@ -48,33 +49,45 @@ class MemCacheUnit(abc.ABC):
         self.size_limit = kwargs.pop("size_limit", 0)
         self._size = 0
         self.od = OrderedDict()
+        self._lock = threading.RLock()
 
     def __setitem__(self, key, value):
-        # TODO: thread safe?__setitem__ failure might cause inconsistent size?
+        with self._lock:
+            # precalculate the size after od.__setitem__
+            self._adjust_size(key, value)
 
-        # precalculate the size after od.__setitem__
-        self._adjust_size(key, value)
+            self.od.__setitem__(key, value)
 
-        self.od.__setitem__(key, value)
+            # move the key to end,make it latest
+            self.od.move_to_end(key)
 
-        # move the key to end,make it latest
-        self.od.move_to_end(key)
-
-        if self.limited:
-            # pop the oldest items beyond size limit
-            while self._size > self.size_limit:
-                self.popitem(last=False)
+            if self.limited:
+                # pop the oldest items beyond size limit
+                while self._size > self.size_limit:
+                    self.popitem(last=False)
 
     def __getitem__(self, key):
-        v = self.od.__getitem__(key)
-        self.od.move_to_end(key)
-        return v
+        with self._lock:
+            v = self.od.__getitem__(key)
+            self.od.move_to_end(key)
+            return v
 
     def __contains__(self, key):
-        return key in self.od
+        with self._lock:
+            return key in self.od
+
+    def get(self, key, default=None):
+        """Single-lock lookup: returns value if present, else default."""
+        with self._lock:
+            if key in self.od:
+                v = self.od.__getitem__(key)
+                self.od.move_to_end(key)
+                return v
+            return default
 
     def __len__(self):
-        return self.od.__len__()
+        with self._lock:
+            return self.od.__len__()
 
     def __repr__(self):
         return f"{self.__class__.__name__}<size_limit:{self.size_limit if self.limited else 'no limit'} total_size:{self._size}>\n{self.od.__repr__()}"
@@ -92,20 +105,21 @@ class MemCacheUnit(abc.ABC):
         return self._size
 
     def clear(self):
-        self._size = 0
-        self.od.clear()
+        with self._lock:
+            self._size = 0
+            self.od.clear()
 
     def popitem(self, last=True):
-        k, v = self.od.popitem(last=last)
-        self._size -= self._get_value_size(v)
-
-        return k, v
+        with self._lock:
+            k, v = self.od.popitem(last=last)
+            self._size -= self._get_value_size(v)
+            return k, v
 
     def pop(self, key):
-        v = self.od.pop(key)
-        self._size -= self._get_value_size(v)
-
-        return v
+        with self._lock:
+            v = self.od.pop(key)
+            self._size -= self._get_value_size(v)
+            return v
 
     def _adjust_size(self, key, value):
         if key in self.od:
@@ -209,6 +223,13 @@ class MemCacheExpire:
 
 class CacheUtils:
     LOCK_ID = "QLIB"
+    _visit_locks = {}
+    _visit_locks_guard = threading.Lock()
+
+    # Local (in-process) reader-writer locks — used when cache_use_redis_lock=False
+    _local_wlock = threading.RLock()
+    _local_reader_count = 0
+    _local_reader_count_lock = threading.Lock()
 
     @staticmethod
     def organize_meta_file():
@@ -219,21 +240,52 @@ class CacheUtils:
         r = get_redis_connection()
         redis_lock.reset_all(r)
 
+    @classmethod
+    def _get_visit_lock(cls, path_str: str) -> threading.Lock:
+        """Get or create a per-path lock for visit() serialization."""
+        with cls._visit_locks_guard:
+            if path_str not in cls._visit_locks:
+                cls._visit_locks[path_str] = threading.Lock()
+            return cls._visit_locks[path_str]
+
     @staticmethod
     def visit(cache_path: Union[str, Path]):
-        # FIXME: Because read_lock was canceled when reading the cache, multiple processes may have read and write exceptions here
+        """Update visit metadata for a cache file.
+
+        Uses per-path locking to serialize concurrent read-modify-write
+        of the .meta file within a single process.  The write is done
+        atomically (temp file + rename) to protect against partial
+        writes when multiple processes share the same cache directory.
+
+        Can be disabled via config ``cache_visit_enabled=False`` to avoid
+        write amplification on every cache read (the default).
+        """
+        if not C.get("cache_visit_enabled", False):
+            return
         try:
             cache_path = Path(cache_path)
             meta_path = cache_path.with_suffix(".meta")
-            with meta_path.open("rb") as f:
-                d = restricted_pickle_load(f)
-            with meta_path.open("wb") as f:
+            path_str = str(meta_path)
+            visit_lock = CacheUtils._get_visit_lock(path_str)
+            with visit_lock:
+                with meta_path.open("rb") as f:
+                    d = restricted_pickle_load(f)
                 try:
                     d["meta"]["last_visit"] = str(time.time())
                     d["meta"]["visits"] = d["meta"]["visits"] + 1
                 except KeyError as key_e:
                     raise KeyError("Unknown meta keyword") from key_e
-                pickle.dump(d, f, protocol=C.dump_protocol_version)
+                # Atomic write: write to temp file then rename
+                tmp_path = meta_path.with_suffix(".meta.tmp")
+                try:
+                    with tmp_path.open("wb") as f:
+                        pickle.dump(d, f, protocol=C.dump_protocol_version)
+                    tmp_path.replace(meta_path)
+                except Exception:
+                    # Clean up temp file on failure
+                    if tmp_path.exists():
+                        tmp_path.unlink()
+                    raise
         except Exception as e:
             get_module_logger("CacheUtils").warning(f"visit {cache_path} cache error: {e}")
 
@@ -256,40 +308,62 @@ class CacheUtils:
     @staticmethod
     @contextlib.contextmanager
     def reader_lock(redis_t, lock_name: str):
-        current_cache_rlock = redis_lock.Lock(redis_t, f"{lock_name}-rlock")
-        current_cache_wlock = redis_lock.Lock(redis_t, f"{lock_name}-wlock")
-        lock_reader = f"{lock_name}-reader"
-        # make sure only one reader is entering
-        current_cache_rlock.acquire(timeout=60)
-        try:
-            current_cache_readers = redis_t.get(lock_reader)
-            if current_cache_readers is None or int(current_cache_readers) == 0:
-                CacheUtils.acquire(current_cache_wlock, lock_name)
-            redis_t.incr(lock_reader)
-        finally:
-            current_cache_rlock.release()
-        try:
-            yield
-        finally:
-            # make sure only one reader is leaving
+        if not C.get("cache_use_redis_lock", True):
+            # Local lock mode — no Redis round-trips
+            with CacheUtils._local_reader_count_lock:
+                CacheUtils._local_reader_count += 1
+                if CacheUtils._local_reader_count == 1:
+                    CacheUtils._local_wlock.acquire()
+            try:
+                yield
+            finally:
+                with CacheUtils._local_reader_count_lock:
+                    CacheUtils._local_reader_count -= 1
+                    if CacheUtils._local_reader_count == 0:
+                        CacheUtils._local_wlock.release()
+        else:
+            current_cache_rlock = redis_lock.Lock(redis_t, f"{lock_name}-rlock")
+            current_cache_wlock = redis_lock.Lock(redis_t, f"{lock_name}-wlock")
+            lock_reader = f"{lock_name}-reader"
+            # make sure only one reader is entering
             current_cache_rlock.acquire(timeout=60)
             try:
-                redis_t.decr(lock_reader)
-                if int(redis_t.get(lock_reader)) == 0:
-                    redis_t.delete(lock_reader)
-                    current_cache_wlock.reset()
+                current_cache_readers = redis_t.get(lock_reader)
+                if current_cache_readers is None or int(current_cache_readers) == 0:
+                    CacheUtils.acquire(current_cache_wlock, lock_name)
+                redis_t.incr(lock_reader)
             finally:
                 current_cache_rlock.release()
+            try:
+                yield
+            finally:
+                # make sure only one reader is leaving
+                current_cache_rlock.acquire(timeout=60)
+                try:
+                    redis_t.decr(lock_reader)
+                    if int(redis_t.get(lock_reader)) == 0:
+                        redis_t.delete(lock_reader)
+                        current_cache_wlock.reset()
+                finally:
+                    current_cache_rlock.release()
 
     @staticmethod
     @contextlib.contextmanager
     def writer_lock(redis_t, lock_name):
-        current_cache_wlock = redis_lock.Lock(redis_t, f"{lock_name}-wlock", id=CacheUtils.LOCK_ID)
-        CacheUtils.acquire(current_cache_wlock, lock_name)
-        try:
-            yield
-        finally:
-            current_cache_wlock.release()
+        if not C.get("cache_use_redis_lock", True):
+            # Local lock mode
+            CacheUtils._local_wlock.acquire()
+            try:
+                yield
+            finally:
+                CacheUtils._local_wlock.release()
+        else:
+            current_cache_wlock = redis_lock.Lock(redis_t, f"{lock_name}-wlock", id=CacheUtils.LOCK_ID)
+            CacheUtils.acquire(current_cache_wlock, lock_name)
+            try:
+                yield
+            finally:
+                current_cache_wlock.release()
 
 
 class BaseProviderCache:
@@ -478,9 +552,11 @@ class DatasetCache(BaseProviderCache):
         :return: pd.DataFrame.
         """
         not_space_fields = remove_fields_space(fields)
-        data = data.loc[:, not_space_fields]
-        # set features fields
-        data.columns = [str(i) for i in fields]
+        # Build rename map instead of loc slice + column reassign (avoids a DataFrame copy)
+        rename_map = dict(zip(not_space_fields, [str(i) for i in fields]))
+        data = data.rename(columns=rename_map)
+        # Reorder columns to match the requested field order
+        data = data[[str(i) for i in fields]]
         return data
 
     @staticmethod
@@ -495,6 +571,8 @@ class DatasetCache(BaseProviderCache):
 
 class DiskExpressionCache(ExpressionCache):
     """Prepared cache mechanism for server."""
+
+    _parsed_field_cache = {}  # field string -> eval(parse_field(field)) result
 
     def __init__(self, provider, **kwargs):
         super(DiskExpressionCache, self).__init__(provider)
@@ -523,19 +601,16 @@ class DiskExpressionCache(ExpressionCache):
 
         if self.check_cache_exists(cache_path, suffix_list=[".meta"]):
             """
-            In most cases, we do not need reader_lock.
-            Because updating data is a small probability event compare to reading data.
-
+            Use per-path lock to serialize visit update and data read,
+            preventing conflicts when a writer is updating the cache
+            concurrently.  The reader_lock from Redis is re-enabled for
+            distributed safety; the per-path lock handles intra-process safety.
             """
-            # FIXME: Removing the reader lock may result in conflicts.
-            # with CacheUtils.reader_lock(self.r, 'expression-%s' % _cache_uri):
-
-            # modify expression cache meta file
             try:
-                # FIXME: Multiple readers may result in error visit number
-                if not self.remote:
-                    CacheUtils.visit(cache_path)
-                series = read_bin(cache_path, start_index, end_index)
+                with CacheUtils.reader_lock(self.r, f'expression-{_cache_uri}'):
+                    if not self.remote:
+                        CacheUtils.visit(cache_path)
+                    series = read_bin(cache_path, start_index, end_index)
                 return series
             except Exception:
                 series = None
@@ -546,7 +621,13 @@ class DiskExpressionCache(ExpressionCache):
             field = remove_fields_space(field)
             # cache unavailable, generate the cache
             _instrument_dir.mkdir(parents=True, exist_ok=True)
-            if not isinstance(eval(parse_field(field)), Feature):
+            # Cache the eval(parse_field()) result — this is expensive and the same field
+            # string always yields the same expression type
+            _parsed = self.__class__._parsed_field_cache.get(field)
+            if _parsed is None:
+                _parsed = eval(parse_field(field))
+                self.__class__._parsed_field_cache[field] = _parsed
+            if not isinstance(_parsed, Feature):
                 # When the expression is not a raw feature
                 # generate expression cache if the feature is not a Feature
                 # instance
@@ -680,20 +761,13 @@ class DiskDatasetCache(DatasetCache):
         :return:
         """
 
-        im = DiskDatasetCache.IndexManager(cache_path)
-        index_data = im.get_index(start_time, end_time)
-        if index_data.shape[0] > 0:
-            start, stop = (
-                index_data["start"].iloc[0].item(),
-                index_data["end"].iloc[-1].item(),
-            )
-        else:
-            start = stop = 0
+        im = DiskDatasetCache.IndexManager.get_cached(cache_path)
+        start, stop = im.get_index_bounds(start_time, end_time)
 
         with pd.HDFStore(cache_path, mode="r") as store:
             if "/{}".format(im.KEY) in store.keys():
                 df = store.select(key=im.KEY, start=start, stop=stop)
-                df = df.swaplevel("datetime", "instrument").sort_index()
+                df = df.swaplevel("datetime", "instrument").sort_index(kind="mergesort")
                 # read cache and need to replace not-space fields to field
                 df = cls.cache_to_origin_data(df, fields)
 
@@ -711,7 +785,6 @@ class DiskDatasetCache(DatasetCache):
             return self.provider.dataset(
                 instruments, fields, start_time, end_time, freq, inst_processors=inst_processors
             )
-        # FIXME: The cache after resample, when read again and intercepted with end_time, results in incomplete data date
         if inst_processors:
             raise ValueError(
                 f"{self.__class__.__name__} does not support inst_processor. "
@@ -753,8 +826,14 @@ class DiskDatasetCache(DatasetCache):
                     freq=freq,
                     inst_processors=inst_processors,
                 )
+            # After generating the cache (which covers the full calendar range),
+            # read it back through the same path as the cache-hit case so that
+            # the time-range slicing is applied consistently.  This avoids the
+            # problem where post-generation slicing with the original start/end
+            # time produced incomplete results when resampling had changed the
+            # effective date range.
             if not features.empty:
-                features = features.sort_index().loc(axis=0)[:, start_time:end_time]
+                features = self.read_data_from_cache(cache_path, start_time, end_time, fields)
         return features
 
     def _dataset_uri(
@@ -769,7 +848,6 @@ class DiskDatasetCache(DatasetCache):
 
             LocalDatasetProvider.multi_cache_walker(instruments, fields, start_time, end_time, freq)
             return ""
-        # FIXME: The cache after resample, when read again and intercepted with end_time, results in incomplete data date
         if inst_processors:
             raise ValueError(
                 f"{self.__class__.__name__} does not support inst_processor. "
@@ -811,16 +889,45 @@ class DiskDatasetCache(DatasetCache):
 
         KEY = "df"
 
+        # Module-level cache for IndexManager instances to avoid repeated HDF reads
+        _instance_cache = {}
+        _instance_cache_lock = threading.Lock()
+
         def __init__(self, cache_path: Union[str, Path]):
             self.index_path = cache_path.with_suffix(".index")
             self._data = None
             self.logger = get_module_logger(self.__class__.__name__)
 
+        @classmethod
+        def get_cached(cls, cache_path: Union[str, Path]):
+            """Return a cached IndexManager for *cache_path*, creating one if needed."""
+            path_str = str(cache_path)
+            with cls._instance_cache_lock:
+                if path_str not in cls._instance_cache:
+                    cls._instance_cache[path_str] = cls(cache_path)
+                return cls._instance_cache[path_str]
+
+        @classmethod
+        def invalidate(cls, cache_path: Union[str, Path]):
+            """Remove a cached IndexManager (e.g. after cache regeneration)."""
+            path_str = str(cache_path)
+            with cls._instance_cache_lock:
+                cls._instance_cache.pop(path_str, None)
+
         def get_index(self, start_time=None, end_time=None):
             # TODO: fast read index from the disk.
             if self._data is None:
                 self.sync_from_disk()
-            return self._data.loc[start_time:end_time].copy()
+            return self._data.loc[start_time:end_time]
+
+        def get_index_bounds(self, start_time=None, end_time=None):
+            """Return (start, stop) row numbers without copying the index DataFrame."""
+            if self._data is None:
+                self.sync_from_disk()
+            sl = self._data.loc[start_time:end_time]
+            if sl.shape[0] == 0:
+                return 0, 0
+            return sl["start"].iloc[0].item(), sl["end"].iloc[-1].item()
 
         def sync_to_disk(self):
             if self._data is None:
@@ -951,7 +1058,8 @@ class DiskDatasetCache(DatasetCache):
         with cache_path.with_suffix(".meta").open("wb") as f:
             pickle.dump(meta, f, protocol=C.dump_protocol_version)
         cache_path.with_suffix(".meta").chmod(stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
-        # write index file
+        # write index file and invalidate any cached IndexManager
+        DiskDatasetCache.IndexManager.invalidate(cache_path)
         im = DiskDatasetCache.IndexManager(cache_path)
         index_data = im.build_index_from_data(features)
         im.update(index_data)
@@ -1046,16 +1154,20 @@ class DiskDatasetCache(DatasetCache):
                     return 0  # No data to update cache
 
                 store = pd.HDFStore(cp_cache_uri)
-                # FIXME:
-                # Because the feature cache are stored as .bin file.
-                # So the series read from features are all float32.
-                # However, the first dataset cache is calculated based on the
-                # raw data. So the data type may be float64.
-                # Different data type will result in failure of appending data
+                # Match dtypes between new data and existing cache to prevent
+                # HDFStore.append failures.  Feature caches are stored as .bin
+                # files (float32), while dataset caches may be float64.
                 if "/{}".format(DatasetCache.HDF_KEY) in store.keys():
                     schema = store.select(DatasetCache.HDF_KEY, start=0, stop=0)
                     for col, dtype in schema.dtypes.items():
-                        data[col] = data[col].astype(dtype)
+                        if col in data.columns:
+                            data[col] = data[col].astype(dtype)
+                else:
+                    # No existing data – normalise numeric columns to float32
+                    # so that future appends from float64 sources succeed.
+                    for col in data.columns:
+                        if pd.api.types.is_numeric_dtype(data[col]):
+                            data[col] = data[col].astype(np.float32)
                 if rm_lines > 0:
                     store.remove(key=im.KEY, start=-rm_lines)
                 store.append(DatasetCache.HDF_KEY, data)
@@ -1164,7 +1276,6 @@ class DatasetURICache(DatasetCache):
                 return_uri=False,
                 inst_processors=inst_processors,
             )
-        # FIXME: The cache after resample, when read again and intercepted with end_time, results in incomplete data date
         if inst_processors:
             raise ValueError(
                 f"{self.__class__.__name__} does not support inst_processor. "

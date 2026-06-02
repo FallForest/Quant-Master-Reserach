@@ -1,11 +1,38 @@
 export async function api(url, opts) {
   try {
     const res = await fetch(url, opts)
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
-    return await res.json()
+    const contentType = res.headers?.get?.('content-type') || ''
+    let payload = null
+
+    if (contentType.includes('application/json')) {
+      payload = await res.json()
+    } else {
+      const text = await res.text()
+      payload = text ? { error: text } : null
+    }
+
+    if (!res.ok) {
+      if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+        return {
+          ...payload,
+          _httpStatus: res.status,
+          _httpStatusText: res.statusText,
+        }
+      }
+      return {
+        error: `${res.status} ${res.statusText}`,
+        _httpStatus: res.status,
+        _httpStatusText: res.statusText,
+      }
+    }
+
+    return payload
   } catch (e) {
-    console.error('API error:', e)
-    return null
+    // AbortError 是正常的取消行为，不需要记录错误
+    if (e.name !== 'AbortError') {
+      console.error('API error:', e)
+    }
+    return { error: e.message || 'Network error', _httpStatus: 0, _httpStatusText: 'Network Error', aborted: e.name === 'AbortError' }
   }
 }
 

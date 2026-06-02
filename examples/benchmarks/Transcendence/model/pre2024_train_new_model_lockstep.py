@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -22,6 +22,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
@@ -494,7 +495,7 @@ def _run_bt(
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Pre-2024 strict ridge rank retrain with one-shot 2024-2026 evaluation.")
-    p.add_argument("--provider-uri", default=".qmData/cn_data")
+    p.add_argument("--provider-uri", default="~/.quant_master/quant_master_data/tdx_cn_data")
     p.add_argument("--market", default="csi300")
     p.add_argument(
         "--workflow-config",
@@ -503,8 +504,8 @@ def build_parser() -> argparse.ArgumentParser:
             / "workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml"
         ),
     )
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--alpha-grid", default="1,10,100,1000,10000")
     p.add_argument("--topk-grid", default="35,40,45")
     p.add_argument("--ndrop-grid", default="2,3,4")
@@ -519,7 +520,7 @@ def main() -> int:
     t0_all = time.perf_counter()
     out_dir = Path(__file__).resolve().parent
     stamp = _stamp()
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
     quant_master.init(provider_uri=str(provider_uri), region="cn")
     wf_cfg = _load_config(Path(args.workflow_config).expanduser().resolve())
     port_cfg = _extract_port_config(wf_cfg)
@@ -847,3 +848,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

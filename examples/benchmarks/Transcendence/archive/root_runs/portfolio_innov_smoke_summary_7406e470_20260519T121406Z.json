@@ -1,0 +1,65 @@
+{
+  "run_id": "7406e47063e9479cb34d300b9ed03bad",
+  "tracking_uri": "file:./mlruns",
+  "artifact_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts",
+  "config_path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\config",
+  "scan_time_utc": "2026-05-19T12:14:06Z",
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "benchmark": "SH000300",
+  "combo_count": 4,
+  "baseline_7406": {
+    "costed_annret": 0.24466463608994535,
+    "costed_ir": 2.799983676714277,
+    "max_drawdown": -0.04812598495553819,
+    "turnover": 0.17499578770011953
+  },
+  "target_costed_ir": 2.80638,
+  "best": {
+    "family": "topk_dropout_sched",
+    "tag": "topkdrop_tk35_nd1_daily_sch1,2,3",
+    "topk": 35,
+    "hold_topk": 35,
+    "n_drop": 1,
+    "rebalance_mode": "daily",
+    "rebalance_interval": 5,
+    "n_drop_schedule": "1,2,3",
+    "weight_mode": "",
+    "score_power": 1.0,
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "costed_annret": 0.22179384014595974,
+    "costed_ir": 2.2806872332233814,
+    "max_drawdown": -0.06052016052926719,
+    "turnover": 0.11240969007929873,
+    "elapsed_sec": 3.65055989999928
+  },
+  "best_by_family": {
+    "topk_dropout_sched": {
+      "family": "topk_dropout_sched",
+      "tag": "topkdrop_tk35_nd1_daily_sch1,2,3",
+      "topk": 35,
+      "hold_topk": 35,
+      "n_drop": 1,
+      "rebalance_mode": "daily",
+      "rebalance_interval": 5,
+      "n_drop_schedule": "1,2,3",
+      "weight_mode": "",
+      "score_power": 1.0,
+      "open_cost": 0.0005,
+      "close_cost": 0.0015,
+      "costed_annret": 0.22179384014595974,
+      "costed_ir": 2.2806872332233814,
+      "max_drawdown": -0.06052016052926719,
+      "turnover": 0.11240969007929873,
+      "elapsed_sec": 3.65055989999928
+    }
+  },
+  "better_than_7406": false,
+  "better_than_3": false,
+  "scan_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_innov_smoke_7406e470_20260519T121406Z.csv",
+  "ic": 0.023921221367623043,
+  "rank_ic": 0.021225039288402008
+}

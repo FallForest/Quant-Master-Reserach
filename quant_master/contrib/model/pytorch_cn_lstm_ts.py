@@ -4,7 +4,6 @@
 from __future__ import division
 from __future__ import print_function
 
-import copy
 import os
 from concurrent.futures import ThreadPoolExecutor
 
@@ -251,7 +250,7 @@ class CnLSTM(Model):
         stop_steps = 0
         best_score = -np.inf
         best_epoch = 0
-        best_param = copy.deepcopy(self.model.state_dict())
+        best_param = self.model.state_dict()
         evals_result["train"] = []
         evals_result["valid"] = []
 
@@ -271,7 +270,7 @@ class CnLSTM(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.model.state_dict())
+                best_param = self.model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

@@ -14,7 +14,8 @@ from ..contrib.evaluate import risk_analysis, indicator_analysis
 
 from ..data.dataset import DatasetH
 from ..data.dataset.handler import DataHandlerLP
-from ..backtest import backtest as normal_backtest
+from ..backtest import backtest as normal_backtest, get_strategy_executor
+from ..backtest.backtest import backtest_loop
 from ..log import get_module_logger
 from ..utils import fill_placeholder, flatten_dict, class_casting, get_date_by_shift
 from ..utils.time import Freq
@@ -407,7 +408,7 @@ class PortAnaRecord(ACRecordTemp):
                     "start_time": None,
                     "end_time": None,
                     "account": 100000000,
-                    "benchmark": "SH000300",
+                    "benchmark": None,
                     "exchange_kwargs": {
                         "limit_threshold": 0.095,
                         "deal_price": "close",
@@ -485,9 +486,25 @@ class PortAnaRecord(ACRecordTemp):
 
         artifact_objects = {}
         # custom strategy and get backtest
-        portfolio_metric_dict, indicator_dict = normal_backtest(
-            executor=self.executor_config, strategy=self.strategy_config, **self.backtest_config
+        trade_strategy, trade_executor = get_strategy_executor(
+            strategy=self.strategy_config,
+            executor=self.executor_config,
+            **self.backtest_config,
         )
+        portfolio_metric_dict, indicator_dict = backtest_loop(
+            self.backtest_config["start_time"],
+            self.backtest_config["end_time"],
+            trade_strategy,
+            trade_executor,
+        )
+        if hasattr(trade_strategy, "get_route_history"):
+            route_history = trade_strategy.get_route_history()
+            if not route_history.empty:
+                artifact_objects.update({f"strategy_route_{self.all_freq[0]}.pkl": route_history})
+        if hasattr(trade_strategy, "get_route_summary"):
+            route_summary = trade_strategy.get_route_summary()
+            if not route_summary.empty:
+                artifact_objects.update({f"strategy_route_summary_{self.all_freq[0]}.pkl": route_summary})
         for _freq, (report_normal, positions_normal) in portfolio_metric_dict.items():
             artifact_objects.update({f"report_normal_{_freq}.pkl": report_normal})
             artifact_objects.update({f"positions_normal_{_freq}.pkl": positions_normal})
@@ -503,12 +520,18 @@ class PortAnaRecord(ACRecordTemp):
                 )
             else:
                 report_normal, _ = portfolio_metric_dict.get(_analysis_freq)
+                bench_series = report_normal["bench"]
+                if bench_series.isna().all():
+                    warnings.warn(
+                        f"benchmark is disabled for freq {_analysis_freq}; skipping excess return risk analysis"
+                    )
+                    continue
                 analysis = dict()
                 analysis["excess_return_without_cost"] = risk_analysis(
-                    report_normal["return"] - report_normal["bench"], freq=_analysis_freq
+                    report_normal["return"] - bench_series, freq=_analysis_freq
                 )
                 analysis["excess_return_with_cost"] = risk_analysis(
-                    report_normal["return"] - report_normal["bench"] - report_normal["cost"], freq=_analysis_freq
+                    report_normal["return"] - bench_series - report_normal["cost"], freq=_analysis_freq
                 )
 
                 analysis_df = pd.concat(analysis)  # type: pd.DataFrame
@@ -522,7 +545,7 @@ class PortAnaRecord(ACRecordTemp):
                 )
                 # print out results
                 pprint(f"The following are analysis results of benchmark return({_analysis_freq}).")
-                pprint(risk_analysis(report_normal["bench"], freq=_analysis_freq))
+                pprint(risk_analysis(bench_series, freq=_analysis_freq))
                 pprint(f"The following are analysis results of the excess return without cost({_analysis_freq}).")
                 pprint(analysis["excess_return_without_cost"])
                 pprint(f"The following are analysis results of the excess return with cost({_analysis_freq}).")

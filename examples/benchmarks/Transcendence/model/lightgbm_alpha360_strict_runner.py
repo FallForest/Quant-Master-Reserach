@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -18,7 +18,6 @@ from ruamel.yaml import YAML
 REPO_ROOT = Path(__file__).resolve().parents[3]
 THIS_DIR = Path(__file__).resolve().parent
 ARTIFACT_DIR = REPO_ROOT / "artifacts" / "hard_gate_pass"
-LOCAL_PROVIDER = (REPO_ROOT / ".qmData" / "cn_data").resolve()
 LIGHTGBM_ALPHA360_CONFIG = (
     REPO_ROOT / "examples" / "benchmarks" / "LightGBM" / "workflow_config_lightgbm_Alpha360.yaml"
 )
@@ -27,6 +26,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
@@ -40,8 +40,8 @@ TEST_RANGE = ["2024-01-01", "2026-04-30"]
 SMOKE_TEST_RANGE = ["2024-01-01", "2024-03-31"]
 RAW_START = "2019-01-01"
 SMOKE_RAW_START = "2022-10-01"
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 HARD_GATE_ROWS = 562
@@ -176,7 +176,7 @@ def _build_dataset(test_range: List[str], mode: str) -> DatasetH:
 
 def _init_quant_master() -> None:
     quant_master.init(
-        provider_uri=str(LOCAL_PROVIDER),
+        provider_uri=str(resolve_provider_uri("~/.quant_master/quant_master_data/tdx_cn_data", base_dir=REPO_ROOT)),
         region="cn",
         kernels=1,
         joblib_backend="threading",
@@ -288,7 +288,7 @@ def _run_backtest(
             limit_threshold=0.095,
             open_cost=OPEN_COST,
             close_cost=CLOSE_COST,
-            min_cost=5,
+            min_cost=0,
         )
     strategy = TopkDropoutStrategy(
         signal=signal_df,
@@ -374,7 +374,7 @@ def main() -> int:
         "blocker": "",
         "artifacts": {k: str(v) for k, v in paths.items()},
         "protocol": {
-            "objective": "strict LightGBM Alpha360 tree baseline using local .qmData",
+            "objective": "strict LightGBM Alpha360 tree baseline using the local QuantMaster CN data store",
             "train": TRAIN_RANGE,
             "valid_select": VALID_RANGE,
             "test": TEST_RANGE,
@@ -568,3 +568,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

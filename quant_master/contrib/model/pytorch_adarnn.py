@@ -2,7 +2,6 @@
 import os
 from torch.utils.data import Dataset, DataLoader
 
-import copy
 from typing import Text, Union
 
 import numpy as np
@@ -286,7 +285,7 @@ class ADARNN(Model):
                 best_score = valid_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.model.state_dict())
+                best_param = self.model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

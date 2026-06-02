@@ -1,0 +1,22 @@
+﻿timestamp=2026-05-29T20:07:03.5511831+08:00
+ui.server-pid=22940
+ui.vite-pid=15388
+listeners=
+[{"LocalAddress":"127.0.0.1","LocalPort":5173,"OwningProcess":15388},{"LocalAddress":"127.0.0.1","LocalPort":5174,"OwningProcess":22940}]
+service_processes=
+[
+    {
+        "ProcessId":  15388,
+        "ParentProcessId":  12708,
+        "Name":  "node.exe",
+        "CreationDate":  "\/Date(1780052400158)\/",
+        "CommandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" C:\\Users\\15728\\Desktop\\Quant-Master-Research\\ui\\node_modules\\vite\\bin\\vite.js --host 127.0.0.1 --port 5173 "
+    },
+    {
+        "ProcessId":  22940,
+        "ParentProcessId":  2020,
+        "Name":  "python.exe",
+        "CreationDate":  "\/Date(1780055250195)\/",
+        "CommandLine":  "\"C:\\Users\\15728\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -m ui.server --port 5174 "
+    }
+]

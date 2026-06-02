@@ -527,6 +527,13 @@ class DataHandlerLP(DataHandler):
         self.process_data(with_fit=True)
 
     @staticmethod
+    def _describe_df(df: pd.DataFrame) -> str:
+        return (
+            f"shape={df.shape}, index_names={list(df.index.names)}, "
+            f"index_unique={df.index.is_unique}, columns={len(df.columns)}"
+        )
+
+    @staticmethod
     def _run_proc_l(
         df: pd.DataFrame, proc_l: List[processor_module.Processor], with_fit: bool, check_for_infer: bool
     ) -> pd.DataFrame:
@@ -536,7 +543,25 @@ class DataHandlerLP(DataHandler):
             with TimeInspector.logt(f"{proc.__class__.__name__}"):
                 if with_fit:
                     proc.fit(df)
-                df = proc(df)
+                before_desc = DataHandlerLP._describe_df(df)
+                try:
+                    df = proc(df)
+                except Exception as exc:
+                    raise type(exc)(
+                        f"Processor {proc.__class__.__name__} failed during DataHandlerLP processing. "
+                        f"Input {before_desc}. Original error: {exc}"
+                    ) from exc
+                if not isinstance(df, pd.DataFrame):
+                    raise TypeError(
+                        f"Processor {proc.__class__.__name__} must return pd.DataFrame, got {type(df).__name__}"
+                    )
+                after_desc = DataHandlerLP._describe_df(df)
+                if not df.index.is_unique:
+                    raise ValueError(
+                        f"Processor {proc.__class__.__name__} produced non-unique index. Output {after_desc}"
+                    )
+                logger = get_module_logger("DataHandlerLP")
+                logger.debug("Processor %s completed: %s -> %s", proc.__class__.__name__, before_desc, after_desc)
         return df
 
     @staticmethod

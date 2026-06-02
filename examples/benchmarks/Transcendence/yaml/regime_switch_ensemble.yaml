@@ -1,0 +1,47 @@
+﻿# Regime Horizon Cost Ensemble + Causal Regime Switch Strategy
+# 杩欎笉鏄竴涓?qrun 閰嶇疆锛岃€屾槸涓€涓?meta-config锛屽憡璇夊悗绔浣曡繍琛?regime_switch_stability_eval.py
+type: regime_switch
+name: "Regime Switch Ensemble"
+display_name: "Regime Horizon Cost Ensemble + Causal Regime Switch"
+description: >
+  妯″瀷+绛栫暐缁勫悎銆傚簳灞傜敤 7406e470 鍩虹妯″瀷淇″彿锛屼笂灞傜敤 CausalRegimeSwitchStrategy
+  鍦?6 涓€欓€夌瓥鐣ラ棿鍔ㄦ€佸垏鎹€傚垏鎹㈣鍒欎粎浣跨敤 t-1 璇婃柇鐗瑰緛锛岄珮娉㈠姩/浣庣鏁ｅ害鏃跺亸鍚戜繚瀹堢瓥鐣ャ€?  婊炲悗淇濇姢锛歝andidate_score >= prev_score + 0.02 鎵嶅厑璁稿垏鎹€?
+# 鍩虹妯″瀷閰嶇疆锛堝凡璁粌瀹屾垚锛?base_run_id: "7406e47063e9479cb34d300b9ed03bad"
+tracking_uri: "file:./mlruns"
+
+# 鎵ц鍙傛暟
+open_cost: 0.0001
+close_cost: 0.0006
+
+# 6 涓€欓€夌瓥鐣?candidate_strategies:
+  - id: baseline_7406_default_tk45_nd4_daily
+    desc: "7406 榛樿 topk=45 n_drop=4"
+  - id: fixed_topk40_nd2_daily
+    desc: "淇濆畧 topk=40 n_drop=2锛堥珮娉㈠姩/浣庣鏁ｅ害鏃朵娇鐢級"
+  - id: fixed_topk50_nd5_daily
+    desc: "婵€杩?topk=50 n_drop=5"
+  - id: fixed_rank_ensemble_tk45_nd4_daily
+    desc: "Rank Ensemble (7406+773+bc641) tk=45 nd=4"
+  - id: fixed_rank_ensemble_tk50_nd5_daily
+    desc: "Rank Ensemble (7406+773+bc641) tk=50 nd=5"
+  - id: fixed_gru_meta_rank_ens_tk45_nd4_daily
+    desc: "GRU Meta Rank Ensemble (7406+1a085ff+773) tk=45 nd=4"
+
+# 鍒囨崲瑙勫垯
+switch_rules:
+  high_vol_trigger: "bench_vol20 > Q75(bench_vol20_expanding)"
+  low_disp_trigger: "base_disp < Q35(base_disp_expanding)"
+  hysteresis: "candidate_score >= prev_score + 0.02"
+  warmup_days: 25
+
+# 鍚庣杩愯鍛戒护锛堢敱 model_train handler 鑷姩鏋勫缓锛?script: "examples/benchmarks/Transcendence/regime_switch_stability_eval.py"
+script_args:
+  - "--run-id"
+  - "7406e47063e9479cb34d300b9ed03bad"
+  - "--tracking-uri"
+  - "file:./mlruns"
+  - "--open-cost"
+  - "0.0005"
+  - "--close-cost"
+  - "0.0015"
+

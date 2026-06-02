@@ -53,25 +53,53 @@ describe('api', () => {
   it('returns parsed JSON on success', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
+      headers: { get: () => 'application/json' },
       json: async () => ({ a: 1 }),
     })
     const result = await api('/test')
     expect(result).toEqual({ a: 1 })
   })
 
-  it('returns null on non-ok response', async () => {
+  it('returns JSON error payload on non-ok response', async () => {
     fetchMock.mockResolvedValue({
       ok: false,
+      headers: { get: () => 'application/json' },
       status: 500,
       statusText: 'Internal Server Error',
+      json: async () => ({ error: 'boom' }),
     })
     const result = await api('/test')
-    expect(result).toBeNull()
+    expect(result).toEqual({
+      error: 'boom',
+      _httpStatus: 500,
+      _httpStatusText: 'Internal Server Error',
+    })
   })
 
-  it('returns null when fetch throws', async () => {
+  it('falls back to a synthesized error for non-json failures', async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      headers: { get: () => 'text/plain' },
+      status: 409,
+      statusText: 'Conflict',
+      text: async () => '',
+    })
+    const result = await api('/test')
+    expect(result).toEqual({
+      error: '409 Conflict',
+      _httpStatus: 409,
+      _httpStatusText: 'Conflict',
+    })
+  })
+
+  it('returns a synthesized network error when fetch throws', async () => {
     fetchMock.mockRejectedValue(new Error('Network error'))
     const result = await api('/test')
-    expect(result).toBeNull()
+    expect(result).toEqual({
+      error: 'Network error',
+      _httpStatus: 0,
+      _httpStatusText: 'Network Error',
+      aborted: false,
+    })
   })
 })

@@ -41,7 +41,9 @@ Load and prepare data by running the following code:
 
 .. code-block::
 
-    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
+    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --region cn
+
+The current unified China-market data directory is ``~/.quant_master/quant_master_data/tdx_cn_data``.
 
 This dataset is created by public data collected by crawler scripts in ``scripts/data_collector/``, which have been released in the same repository. Users could create the same dataset with it.
 

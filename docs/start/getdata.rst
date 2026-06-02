@@ -19,12 +19,14 @@ Examples
 
 .. note:: In order to get the data, users need to initialize ``QuantMaster`` with `quant_master.init` first. Please refer to `initialization <initialization.html>`_.
 
+.. note:: The current unified China-market data directory is ``~/.quant_master/quant_master_data/tdx_cn_data``. On Windows runtime environments this corresponds to ``C:\\Users\\15728\\.quant_master\\quant_master_data\\tdx_cn_data``.
+
 If users followed steps in `initialization <initialization.html>`_ and downloaded the data, they should use the following code to initialize quant_master
 
 .. code-block:: python
 
     >> import quant_master
-    >> quant_master.init(provider_uri='~/.quant_master/quant_master_data/cn_data')
+    >> quant_master.init(provider_uri='~/.quant_master/quant_master_data/tdx_cn_data')
 
 
 Load trading calendar with given time range and frequency:

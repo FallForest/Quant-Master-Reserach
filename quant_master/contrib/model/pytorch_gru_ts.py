@@ -7,7 +7,6 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
-import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
 
@@ -264,7 +263,7 @@ class GRU(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.GRU_model.state_dict())
+                best_param = self.GRU_model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

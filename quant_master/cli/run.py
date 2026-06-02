@@ -96,7 +96,7 @@ def workflow(config_path, experiment_name="workflow", uri_folder="mlruns"):
     For examples:
 
         quant_master_init:
-            provider_uri: "~/.quant_master/quant_master_data/cn_data"
+            provider_uri: "~/.quant_master/quant_master_data/tdx_cn_data"
             region: cn
         BASE_CONFIG_PATH: "workflow_config_lightgbm_Alpha158_csi500.yaml"
         market: csi300

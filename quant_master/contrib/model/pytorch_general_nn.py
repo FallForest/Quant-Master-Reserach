@@ -9,7 +9,6 @@ from torch.utils.data import DataLoader
 import numpy as np
 import pandas as pd
 from typing import Union
-import copy
 
 import torch
 import torch.optim as optim
@@ -312,12 +311,12 @@ class GeneralPTNN(Model):
             self.lr_scheduler.step(val_score)
 
             if step == 0:
-                best_param = copy.deepcopy(self.dnn_model.state_dict())
+                best_param = self.dnn_model.state_dict()
             if val_score < best_score:
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.dnn_model.state_dict())
+                best_param = self.dnn_model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

@@ -1,0 +1,90 @@
+{
+  "timestamp_utc": "2026-05-23T05:50:20Z",
+  "task": "strict_conversion_lockstep",
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "evaluation_complete": false,
+  "protocol": "Select signal conversion on prior period only, then apply to next period; stitched apply windows are 2024H2, 2025, 2026_ytd.",
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "controls": {
+    "grid_mode": "tiny",
+    "max_candidates": 1,
+    "max_apply_plans": 1,
+    "checkpoint_every": 1
+  },
+  "counts": {
+    "eval_rows": 2,
+    "error_rows": 1,
+    "selection_rows": 1,
+    "apply_success_windows": 0,
+    "apply_plan_windows": 1
+  },
+  "stitched_metrics": {
+    "annret": NaN,
+    "ir": NaN,
+    "max_drawdown": NaN
+  },
+  "split_metrics": [],
+  "selection_rows": [
+    {
+      "sig_key": "gru_bcbecf55",
+      "run_id": "bcbecf55a3924357ba93fc55b1140e99",
+      "train_tag": "2024H1_train",
+      "apply_tag": "2024H2_apply",
+      "selection_score": 3.785615008818267,
+      "train_ir": 3.661707801946901,
+      "train_annret": 0.3842696016993186,
+      "train_mdd": -0.04234861489358316,
+      "train_turnover": 0.27550362479613344,
+      "transform": "raw",
+      "blend_weight": 0.2,
+      "family": "buffered_weight",
+      "topk": 40,
+      "n_drop": 2,
+      "hold_topk": 65,
+      "selected": true,
+      "apply_ok": false,
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "train_candidates_possible": 3,
+      "train_candidates_evaluated": 1,
+      "train_candidates_skipped_by_cap": 2,
+      "error_type": "TypeError",
+      "error_message": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    }
+  ],
+  "error_rows": [
+    {
+      "phase": "apply_selected",
+      "ok": false,
+      "sig_key": "gru_bcbecf55",
+      "run_id": "bcbecf55a3924357ba93fc55b1140e99",
+      "train_tag": "2024H1_train",
+      "apply_tag": "2024H2_apply",
+      "start": "2024-07-01",
+      "end": "2024-12-31",
+      "transform": "raw",
+      "blend_weight": 0.2,
+      "family": "buffered_weight",
+      "topk": 40,
+      "n_drop": 2,
+      "hold_topk": 65,
+      "elapsed_sec": 0.0,
+      "error_type": "TypeError",
+      "error_message": "unsupported operand type(s) for *: 'NoneType' and 'float'"
+    }
+  ],
+  "runtime_sec": 52.43812500000058,
+  "artifacts": {
+    "checkpoint_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\strict_conversion_lockstep_smoke_checkpoint_20260523T054927Z.json",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\strict_conversion_lockstep_smoke_summary_20260523T054927Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\strict_conversion_lockstep_smoke_summary_20260523T054927Z.md",
+    "selections_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\strict_conversion_lockstep_smoke_selections_20260523T054927Z.csv",
+    "splits_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\strict_conversion_lockstep_smoke_splits_20260523T054927Z.csv",
+    "eval_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\strict_conversion_lockstep_smoke_eval_20260523T054927Z.csv",
+    "error_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\strict_conversion_lockstep_smoke_errors_20260523T054927Z.csv"
+  }
+}

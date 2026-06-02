@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -20,16 +20,18 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri_in_config
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
+from examples.benchmarks.Transcendence._bootstrap import init_quant_master_from_config, load_config_with_resolved_provider
 
 
 TRANS_DIR = Path(__file__).resolve().parent
 TEST_START = "2024-01-01"
 TEST_END = "2026-04-30"
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 
@@ -90,10 +92,11 @@ def _dump_pickle(path: Path, obj: Any) -> None:
 
 
 def _load_config(path: Path) -> Dict[str, Any]:
-    try:
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
-    except UnicodeDecodeError:
-        return _load_pickle(path)
+    return load_config_with_resolved_provider(
+        path,
+        loader=lambda config_path: yaml.safe_load(config_path.read_text(encoding="utf-8")),
+        binary_fallback=_load_pickle,
+    )
 
 
 def _extract_port_config(config: Dict[str, Any]) -> Dict[str, Any]:
@@ -109,12 +112,7 @@ def _extract_port_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _init_quant_master(config: Dict[str, Any]) -> None:
-    init_cfg = copy.deepcopy(config.get("quant_master_init", {}))
-    if not isinstance(init_cfg, dict):
-        init_cfg = {}
-    init_cfg.setdefault("provider_uri", ".qmData/cn_data")
-    init_cfg.setdefault("region", "cn")
-    quant_master.init(**init_cfg)
+    init_quant_master_from_config(config, base_dir=REPO_ROOT, region="cn")
 
 
 def _as_score_series(obj: Any) -> pd.Series:
@@ -507,3 +505,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

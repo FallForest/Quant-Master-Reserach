@@ -1,0 +1,440 @@
+{
+  "run_id": "7406e47063e9479cb34d300b9ed03bad",
+  "tracking_uri": "file:./mlruns",
+  "artifact_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts",
+  "config_path": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\config",
+  "scan_time_utc": "2026-05-20T06:58:44Z",
+  "signal_coverage": {
+    "start": "2024-01-02",
+    "end": "2026-04-30",
+    "rows": 168600,
+    "unique_trade_days": 562
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "slices": [
+    {
+      "slice": "2024",
+      "start": "2024-01-02",
+      "end": "2024-12-31"
+    },
+    {
+      "slice": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31"
+    },
+    {
+      "slice": "2026_ytd",
+      "start": "2026-01-01",
+      "end": "2026-04-30"
+    },
+    {
+      "slice": "2024_2026_full",
+      "start": "2024-01-02",
+      "end": "2026-04-30"
+    }
+  ],
+  "fixed_family": [
+    "fixed_topk50_nd5_daily",
+    "fixed_topk40_nd2_daily",
+    "fixed_buffered_tk55_hk85_equal_weekly",
+    "fixed_rank_ensemble_tk45_nd4_daily"
+  ],
+  "comparator": "baseline_7406_default_tk45_nd4_daily",
+  "rank_ensemble_spec": {
+    "runs": [
+      "7406e470",
+      "773bd6d",
+      "bc641"
+    ],
+    "weights": [
+      0.6,
+      0.2,
+      0.2
+    ]
+  },
+  "strategy_slice_metrics": [
+    {
+      "strategy_id": "baseline_7406_default_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2024",
+      "start_time": "2024-01-02",
+      "end_time": "2024-12-31",
+      "costed_annret": 0.19924026827139113,
+      "costed_ir": 2.081116654338518,
+      "max_drawdown": -0.04812598495553788,
+      "turnover": 0.17579334353042664,
+      "elapsed_sec": 1.7870727000008628,
+      "is_candidate_family": false
+    },
+    {
+      "strategy_id": "baseline_7406_default_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2025",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "costed_annret": 0.3351924083473373,
+      "costed_ir": 4.105866416738428,
+      "max_drawdown": -0.04373726699371078,
+      "turnover": 0.17755693336987782,
+      "elapsed_sec": 1.882023100000879,
+      "is_candidate_family": false
+    },
+    {
+      "strategy_id": "baseline_7406_default_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2026_ytd",
+      "start_time": "2026-01-01",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.09782847141729073,
+      "costed_ir": 0.9170323912246288,
+      "max_drawdown": -0.05319625615859125,
+      "turnover": 0.18285856661198055,
+      "elapsed_sec": 0.5650752000001376,
+      "is_candidate_family": false
+    },
+    {
+      "strategy_id": "baseline_7406_default_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2024_2026_full",
+      "start_time": "2024-01-02",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.24466463608994524,
+      "costed_ir": 2.79998367671428,
+      "max_drawdown": -0.04812598495553788,
+      "turnover": 0.1749957877001195,
+      "elapsed_sec": 4.493810699999813,
+      "is_candidate_family": false
+    },
+    {
+      "strategy_id": "fixed_topk50_nd5_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2024",
+      "start_time": "2024-01-02",
+      "end_time": "2024-12-31",
+      "costed_annret": 0.17631906877263231,
+      "costed_ir": 1.85070083855167,
+      "max_drawdown": -0.052498986476546036,
+      "turnover": 0.198093822187921,
+      "elapsed_sec": 2.221445799999856,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_topk50_nd5_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2025",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "costed_annret": 0.28946661676560387,
+      "costed_ir": 3.6522101970623386,
+      "max_drawdown": -0.040974228462444626,
+      "turnover": 0.19853053182125213,
+      "elapsed_sec": 2.0774430999990727,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_topk50_nd5_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2026_ytd",
+      "start_time": "2026-01-01",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.18493579894553375,
+      "costed_ir": 1.9060400785099854,
+      "max_drawdown": -0.04048373643395556,
+      "turnover": 0.20505439205436823,
+      "elapsed_sec": 0.6406497999996645,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_topk50_nd5_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2024_2026_full",
+      "start_time": "2024-01-02",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.20916029641767875,
+      "costed_ir": 2.450757751180738,
+      "max_drawdown": -0.052498986476546036,
+      "turnover": 0.1966781934389419,
+      "elapsed_sec": 4.9115316000006715,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_topk40_nd2_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2024",
+      "start_time": "2024-01-02",
+      "end_time": "2024-12-31",
+      "costed_annret": 0.24020811837891706,
+      "costed_ir": 2.28625428860776,
+      "max_drawdown": -0.04814207314335944,
+      "turnover": 0.10219419721009251,
+      "elapsed_sec": 1.5346241000006557,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_topk40_nd2_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2025",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "costed_annret": 0.2807143792155795,
+      "costed_ir": 3.426869451759593,
+      "max_drawdown": -0.03388444010088981,
+      "turnover": 0.10204055430310038,
+      "elapsed_sec": 1.589410399999906,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_topk40_nd2_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2026_ytd",
+      "start_time": "2026-01-01",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.13652482887026393,
+      "costed_ir": 1.2241047733131056,
+      "max_drawdown": -0.04452496248618916,
+      "turnover": 0.11435196142225537,
+      "elapsed_sec": 0.4831677000001946,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_topk40_nd2_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "base",
+      "slice": "2024_2026_full",
+      "start_time": "2024-01-02",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.2704249361319419,
+      "costed_ir": 2.806380274751095,
+      "max_drawdown": -0.05202813673085527,
+      "turnover": 0.1015145204608794,
+      "elapsed_sec": 3.7134722999999212,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_buffered_tk55_hk85_equal_weekly",
+      "family": "buffered_weight",
+      "signal_source": "base",
+      "slice": "2024",
+      "start_time": "2024-01-02",
+      "end_time": "2024-12-31",
+      "costed_annret": 0.3878544154715244,
+      "costed_ir": 3.0230019401859396,
+      "max_drawdown": -0.04772312428307072,
+      "turnover": 0.25471396243602523,
+      "elapsed_sec": 1.5603747999994084,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_buffered_tk55_hk85_equal_weekly",
+      "family": "buffered_weight",
+      "signal_source": "base",
+      "slice": "2025",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "costed_annret": 0.11638792704410715,
+      "costed_ir": 1.2783128256255178,
+      "max_drawdown": -0.04552668691832622,
+      "turnover": 0.23247242141041422,
+      "elapsed_sec": 2.0060314999991533,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_buffered_tk55_hk85_equal_weekly",
+      "family": "buffered_weight",
+      "signal_source": "base",
+      "slice": "2026_ytd",
+      "start_time": "2026-01-01",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.04137145570146077,
+      "costed_ir": 0.4356481755499201,
+      "max_drawdown": -0.042883649358543025,
+      "turnover": 0.20658347727715595,
+      "elapsed_sec": 0.6478907999990042,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_buffered_tk55_hk85_equal_weekly",
+      "family": "buffered_weight",
+      "signal_source": "base",
+      "slice": "2024_2026_full",
+      "start_time": "2024-01-02",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.3878544154715244,
+      "costed_ir": 3.0230019401859396,
+      "max_drawdown": -0.04772312428307072,
+      "turnover": 0.25471396243602523,
+      "elapsed_sec": 3.3326866000006703,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_rank_ensemble_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "rank_ensemble",
+      "slice": "2024",
+      "start_time": "2024-01-02",
+      "end_time": "2024-12-31",
+      "costed_annret": 0.2010073383801491,
+      "costed_ir": 2.0669836857443773,
+      "max_drawdown": -0.05206292846342297,
+      "turnover": 0.17706845095177984,
+      "elapsed_sec": 3.4367144999996526,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_rank_ensemble_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "rank_ensemble",
+      "slice": "2025",
+      "start_time": "2025-01-01",
+      "end_time": "2025-12-31",
+      "costed_annret": 0.3464664925295388,
+      "costed_ir": 4.076523088497006,
+      "max_drawdown": -0.04554592561869589,
+      "turnover": 0.17638932503552102,
+      "elapsed_sec": 3.152765000000727,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_rank_ensemble_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "rank_ensemble",
+      "slice": "2026_ytd",
+      "start_time": "2026-01-01",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.13406334511036533,
+      "costed_ir": 1.3113322496002886,
+      "max_drawdown": -0.04887694222561209,
+      "turnover": 0.18391749523643208,
+      "elapsed_sec": 0.8001309999999648,
+      "is_candidate_family": true
+    },
+    {
+      "strategy_id": "fixed_rank_ensemble_tk45_nd4_daily",
+      "family": "topk_dropout_sched",
+      "signal_source": "rank_ensemble",
+      "slice": "2024_2026_full",
+      "start_time": "2024-01-02",
+      "end_time": "2026-04-30",
+      "costed_annret": 0.2522873695372775,
+      "costed_ir": 2.8011123683230097,
+      "max_drawdown": -0.05283126363363039,
+      "turnover": 0.17588361892108534,
+      "elapsed_sec": 4.897764699999243,
+      "is_candidate_family": true
+    }
+  ],
+  "robust_ranking": [
+    {
+      "strategy_id": "fixed_topk50_nd5_daily",
+      "full_ir": 2.450757751180738,
+      "full_annret": 0.20916029641767875,
+      "full_max_drawdown": -0.052498986476546036,
+      "min_year_ir": 1.85070083855167,
+      "min_year_annret": 0.17631906877263231,
+      "year_count": 4,
+      "all_year_ir_positive": true,
+      "all_year_annret_positive": true,
+      "beats_7406_threshold": false
+    },
+    {
+      "strategy_id": "fixed_rank_ensemble_tk45_nd4_daily",
+      "full_ir": 2.8011123683230097,
+      "full_annret": 0.2522873695372775,
+      "full_max_drawdown": -0.05283126363363039,
+      "min_year_ir": 1.3113322496002886,
+      "min_year_annret": 0.13406334511036533,
+      "year_count": 4,
+      "all_year_ir_positive": true,
+      "all_year_annret_positive": true,
+      "beats_7406_threshold": true
+    },
+    {
+      "strategy_id": "fixed_topk40_nd2_daily",
+      "full_ir": 2.806380274751095,
+      "full_annret": 0.2704249361319419,
+      "full_max_drawdown": -0.05202813673085527,
+      "min_year_ir": 1.2241047733131056,
+      "min_year_annret": 0.13652482887026393,
+      "year_count": 4,
+      "all_year_ir_positive": true,
+      "all_year_annret_positive": true,
+      "beats_7406_threshold": true
+    },
+    {
+      "strategy_id": "fixed_buffered_tk55_hk85_equal_weekly",
+      "full_ir": 3.0230019401859396,
+      "full_annret": 0.3878544154715244,
+      "full_max_drawdown": -0.04772312428307072,
+      "min_year_ir": 0.4356481755499201,
+      "min_year_annret": 0.04137145570146077,
+      "year_count": 4,
+      "all_year_ir_positive": true,
+      "all_year_annret_positive": true,
+      "beats_7406_threshold": true
+    }
+  ],
+  "best_robust_rule": {
+    "strategy_id": "fixed_topk50_nd5_daily",
+    "full_ir": 2.450757751180738,
+    "full_annret": 0.20916029641767875,
+    "full_max_drawdown": -0.052498986476546036,
+    "min_year_ir": 1.85070083855167,
+    "min_year_annret": 0.17631906877263231,
+    "year_count": 4,
+    "all_year_ir_positive": true,
+    "all_year_annret_positive": true,
+    "beats_7406_threshold": false
+  },
+  "breakthrough_rule": {
+    "strategy_id": "fixed_rank_ensemble_tk45_nd4_daily",
+    "full_ir": 2.8011123683230097,
+    "full_annret": 0.2522873695372775,
+    "full_max_drawdown": -0.05283126363363039,
+    "min_year_ir": 1.3113322496002886,
+    "min_year_annret": 0.13406334511036533,
+    "year_count": 4,
+    "all_year_ir_positive": true,
+    "all_year_annret_positive": true,
+    "beats_7406_threshold": true
+  },
+  "has_cross_year_breakthrough": true,
+  "thresholds": {
+    "legacy_7406_costed_ir": 2.799983676714277,
+    "legacy_7406_costed_annret": 0.24466463608994535,
+    "strategy_sota_costed_ir": 3.0230019401859436
+  },
+  "baseline_full_period": {
+    "strategy_id": "baseline_7406_default_tk45_nd4_daily",
+    "family": "topk_dropout_sched",
+    "signal_source": "base",
+    "slice": "2024_2026_full",
+    "start_time": "2024-01-02",
+    "end_time": "2026-04-30",
+    "costed_annret": 0.24466463608994524,
+    "costed_ir": 2.79998367671428,
+    "max_drawdown": -0.04812598495553788,
+    "turnover": 0.1749957877001195,
+    "elapsed_sec": 4.493810699999813,
+    "is_candidate_family": false
+  },
+  "artifacts": {
+    "metrics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_fixed_oos_metrics_7406e470_20260520T065844Z.csv",
+    "robust_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_fixed_oos_robust_7406e470_20260520T065844Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_fixed_oos_summary_7406e470_20260520T065844Z.json",
+    "candidate_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\portfolio_fixed_oos_candidate_7406e470_20260520T065844Z.json"
+  }
+}

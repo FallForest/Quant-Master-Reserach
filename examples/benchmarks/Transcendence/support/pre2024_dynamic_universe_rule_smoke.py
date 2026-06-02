@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -21,6 +21,7 @@ for _thread_env in (
 
 import numpy as np
 import pandas as pd
+from quant_master.config import resolve_provider_uri
 
 THIS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = THIS_DIR.parents[3]
@@ -29,7 +30,7 @@ TASK_ID = "Q-DYNAMIC-UNIVERSE-PRE2024-RULE-SMOKE"
 YEARS = (2020, 2021, 2022, 2023)
 START_DATE = pd.Timestamp("2020-01-01")
 END_DATE = pd.Timestamp("2023-12-31")
-DEFAULT_PROVIDER_URI = REPO_ROOT / ".qmData" / "cn_data"
+DEFAULT_PROVIDER_URI = Path("~/.quant_master/quant_master_data/tdx_cn_data")
 
 DEFAULT_MARKET = "csiall"
 DEFAULT_DYNAMIC_TOPK = 1000
@@ -38,8 +39,8 @@ DEFAULT_TOPK = 50
 DEFAULT_MIN_NAMES = 25
 LOOKBACK_DAYS = 80
 
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 
 GATE_MIN_COMBINED_IR = 1.8
 GATE_MIN_YEAR_IR = 0.0
@@ -609,7 +610,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     t0 = time.perf_counter()
     stamp = _stamp()
     paths = _artifact_paths(str(args.output_prefix), stamp)
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
     years = tuple(int(x.strip()) for x in str(args.years).split(",") if x.strip())
 
     if years != YEARS:
@@ -768,3 +769,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -155,10 +155,7 @@ class TCTS(Model):
             p.requires_grad = True
 
         for i in range(self.steps):
-            for i in range(len(indices))[:: self.batch_size]:
-                if len(indices) - i < self.batch_size:
-                    break
-
+            for i in range(0, len(indices), self.batch_size):
                 feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
                 label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
 
@@ -188,10 +185,7 @@ class TCTS(Model):
             p.requires_grad = False
 
         # fix forecasting model and valid weight model
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
-
+        for i in range(0, len(indices), self.batch_size):
             feature = torch.from_numpy(x_valid_values[indices[i : i + self.batch_size]]).float().to(self.device)
             label = torch.from_numpy(y_valid_values[indices[i : i + self.batch_size]]).float().to(self.device)
 
@@ -219,10 +213,7 @@ class TCTS(Model):
 
         indices = np.arange(len(x_values))
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
-
+        for i in range(0, len(indices), self.batch_size):
             feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
             label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
 
@@ -327,8 +318,8 @@ class TCTS(Model):
                 best_loss = val_loss
                 stop_round = 0
                 best_epoch = epoch
-                torch.save(copy.deepcopy(self.fore_model.state_dict()), save_path + "_fore_model.bin")
-                torch.save(copy.deepcopy(self.weight_model.state_dict()), save_path + "_weight_model.bin")
+                torch.save(self.fore_model.state_dict(), save_path + "_fore_model.bin")
+                torch.save(self.weight_model.state_dict(), save_path + "_weight_model.bin")
 
             else:
                 stop_round += 1

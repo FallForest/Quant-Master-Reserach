@@ -16,7 +16,10 @@ Download and prepare the Data: execute the following command to download stock d
 
     .. code-block:: bash
 
-        python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
+        python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --region cn
+
+The current unified China-market data directory is ``~/.quant_master/quant_master_data/tdx_cn_data``.
+On Windows runtime environments this corresponds to ``C:\\Users\\15728\\.quant_master\\quant_master_data\\tdx_cn_data``.
 
 Please refer to `Data Preparation <../component/data.html#data-preparation>`_ for more information about `get_data.py`,
 
@@ -28,7 +31,7 @@ Initialize QuantMaster before calling other APIs: run following code in python.
         import quant_master
         # region in [REG_CN, REG_US]
         from quant_master.constant import REG_CN
-        provider_uri = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+        provider_uri = "~/.quant_master/quant_master_data/tdx_cn_data"  # current unified CN target_dir
         quant_master.init(provider_uri=provider_uri, region=REG_CN)
 
 .. note::

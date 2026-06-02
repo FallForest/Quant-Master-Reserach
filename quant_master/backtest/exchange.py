@@ -12,6 +12,9 @@ if TYPE_CHECKING:
 
 import random
 
+# Dedicated random instance for deterministic shuffle order in backtest (seeded once, not per-step)
+_deterministic_rng = random.Random(0)
+
 import numpy as np
 import pandas as pd
 
@@ -45,9 +48,9 @@ class Exchange:
         subscribe_fields: list = [],
         limit_threshold: Union[Tuple[str, str], float, None] = None,
         volume_threshold: Union[tuple, dict, None] = None,
-        open_cost: float = 0.0015,
-        close_cost: float = 0.0025,
-        min_cost: float = 5.0,
+        open_cost: float = 0.0015,   # NOTE: CN A-share default; override via YAML backtest config
+        close_cost: float = 0.0025,  # NOTE: CN A-share default; override via YAML backtest config
+        min_cost: float = 5.0,       # NOTE: CN A-share default; override via YAML backtest config
         impact_cost: float = 0.0,
         extra_quote: pd.DataFrame = None,
         quote_cls: Type[BaseQuote] = NumpyQuote,
@@ -552,10 +555,16 @@ class Exchange:
                     # NOTE: this function is used for calculating target position. So the default direction is buy
         """
 
+        # Cache tradability to avoid double query per stock
+        tradable_cache = {
+            stock_id: self.is_stock_tradable(stock_id=stock_id, start_time=start_time, end_time=end_time)
+            for stock_id in weight_position
+        }
+
         # calculate the total weight of tradable value
         tradable_weight = 0.0
         for stock_id, wp in weight_position.items():
-            if self.is_stock_tradable(stock_id=stock_id, start_time=start_time, end_time=end_time):
+            if tradable_cache[stock_id]:
                 # weight_position must be greater than 0 and less than 1
                 if wp < 0 or wp > 1:
                     raise ValueError(
@@ -568,11 +577,7 @@ class Exchange:
 
         amount_dict = {}
         for stock_id in weight_position:
-            if weight_position[stock_id] > 0.0 and self.is_stock_tradable(
-                stock_id=stock_id,
-                start_time=start_time,
-                end_time=end_time,
-            ):
+            if weight_position[stock_id] > 0.0 and tradable_cache[stock_id]:
                 amount_dict[stock_id] = (
                     cash
                     * weight_position[stock_id]
@@ -635,11 +640,16 @@ class Exchange:
         # so here we sort stock_id, and then randomly shuffle the order of stock_id
         # because the same random seed is used, the final stock_id order is fixed
         sorted_ids = sorted(set(list(current_position.keys()) + list(target_position.keys())))
-        random.seed(0)
-        random.shuffle(sorted_ids)
+        _deterministic_rng.shuffle(sorted_ids)
+
+        # Pre-compute tradability to avoid repeated queries per stock
+        tradable_cache = {
+            stock_id: self.is_stock_tradable(stock_id=stock_id, start_time=start_time, end_time=end_time)
+            for stock_id in sorted_ids
+        }
         for stock_id in sorted_ids:
             # Do not generate order for the non-tradable stocks
-            if not self.is_stock_tradable(stock_id=stock_id, start_time=start_time, end_time=end_time):
+            if not tradable_cache[stock_id]:
                 continue
 
             target_amount = target_position.get(stock_id, 0)
@@ -693,11 +703,25 @@ class Exchange:
                     So the default direction is sell.
         """
         value = 0
-        for stock_id in amount_dict:
-            if not only_tradable or (
-                not self.check_stock_suspended(stock_id=stock_id, start_time=start_time, end_time=end_time)
-                and not self.check_stock_limit(stock_id=stock_id, start_time=start_time, end_time=end_time)
-            ):
+        if only_tradable:
+            # Pre-compute tradability to avoid calling suspend+limit checks individually
+            tradable_cache = {
+                stock_id: self.is_stock_tradable(stock_id=stock_id, start_time=start_time, end_time=end_time)
+                for stock_id in amount_dict
+            }
+            for stock_id in amount_dict:
+                if tradable_cache[stock_id]:
+                    value += (
+                        self.get_deal_price(
+                            stock_id=stock_id,
+                            start_time=start_time,
+                            end_time=end_time,
+                            direction=direction,
+                        )
+                        * amount_dict[stock_id]
+                    )
+        else:
+            for stock_id in amount_dict:
                 value += (
                     self.get_deal_price(
                         stock_id=stock_id,

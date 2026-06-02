@@ -1,29 +1,31 @@
 """
-DoubleEnsemble prediction for May 25 — ALL stocks (5200+).
+DoubleEnsemble prediction for May 25 for all stocks (5200+).
 """
 import sys
+import warnings
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
 
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
-import pandas as pd
-import numpy as np
-import warnings
-warnings.filterwarnings("ignore")
-
 import quant_master as qm
+from quant_master.config import resolve_provider_uri
 from quant_master.contrib.data.handler import Alpha158
-from quant_master.data.dataset import DatasetH
 from quant_master.contrib.model.double_ensemble import DEnsembleModel
+from quant_master.data.dataset import DatasetH
+
+warnings.filterwarnings("ignore")
 
 
 def main():
-    provider_uri = str(project_root / ".qmData" / "cn_data")
+    provider_uri = resolve_provider_uri("~/.quant_master/quant_master_data/tdx_cn_data", base_dir=project_root)
     qm.init(provider_uri=provider_uri, region="cn")
 
     # Read all active stocks (end_date = 2026-05-22)
-    inst_path = project_root / ".qmData" / "cn_data" / "instruments" / "all.txt"
+    inst_path = Path(provider_uri) / "instruments" / "all.txt"
     stocks = []
     with open(inst_path) as f:
         for line in f:
@@ -33,9 +35,9 @@ def main():
 
     print(f"[INFO] Active stocks: {len(stocks)}")
 
-    target_date = "2026-05-22"  # latest data → scores for May 25 (Mon)
-    print(f"[INFO] Target: {target_date} → valid for 2026-05-25 (Monday)")
-    print(f"[INFO] Train: 2018-2023, Valid: 2024-2025H1")
+    target_date = "2026-05-22"  # latest data -> scores for May 25 (Mon)
+    print(f"[INFO] Target: {target_date} -> valid for 2026-05-25 (Monday)")
+    print("[INFO] Train: 2018-2023, Valid: 2024-2025H1")
 
     handler = Alpha158(
         start_time="2018-01-01",
@@ -99,26 +101,25 @@ def main():
     target_preds = target_preds.sort_values("score", ascending=False).reset_index(drop=True)
     target_preds["rank"] = range(1, len(target_preds) + 1)
 
-    print(f"\n{'='*70}")
-    print(f"  DoubleEnsemble Top 50 — 全市场 — 2026-05-25 (周一)")
-    print(f"{'='*70}")
+    print(f"\n{'=' * 70}")
+    print("  DoubleEnsemble Top 50 - All Market - 2026-05-25 (Monday)")
+    print(f"{'=' * 70}")
     print(f"{'Rank':<6} {'Stock':<12} {'Score':>10}")
-    print(f"{'-'*30}")
+    print(f"{'-' * 30}")
     for _, row in target_preds.head(50).iterrows():
         print(f"{row['rank']:<6} {row['instrument']:<12} {row['score']:>10.6f}")
 
-    print(f"\nBottom 10:")
-    print(f"{'-'*30}")
+    print("\nBottom 10:")
+    print(f"{'-' * 30}")
     for _, row in target_preds.tail(10).iterrows():
         print(f"{row['rank']:<6} {row['instrument']:<12} {row['score']:>10.6f}")
 
-    # Save
     output_path = project_root / "artifacts" / "double_ensemble_pred_2026-05-25_all.csv"
     output_path.parent.mkdir(exist_ok=True)
     target_preds.to_csv(output_path, index=False)
     print(f"\n[INFO] Saved {len(target_preds)} stocks to {output_path}")
 
-    print(f"\n[STATS] Score distribution:")
+    print("\n[STATS] Score distribution:")
     print(f"  Mean={target_preds['score'].mean():.4f}, Std={target_preds['score'].std():.4f}")
     print(f"  Range: [{target_preds['score'].min():.4f}, {target_preds['score'].max():.4f}]")
     print(f"  >0: {(target_preds['score'] > 0).sum()}/{len(target_preds)}")

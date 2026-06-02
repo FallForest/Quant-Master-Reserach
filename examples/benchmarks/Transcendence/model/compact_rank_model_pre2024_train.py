@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -23,6 +23,7 @@ if str(THIS_DIR) not in sys.path:
     sys.path.insert(0, str(THIS_DIR))
 
 import quant_master
+from quant_master.config import resolve_provider_uri
 import pre2024_train_new_model_lockstep as base
 
 
@@ -119,7 +120,7 @@ def _load_pickle(path: Path) -> Any:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Compact strict pre-2024 ridge rank model search.")
-    p.add_argument("--provider-uri", default=".qmData/cn_data")
+    p.add_argument("--provider-uri", default="~/.quant_master/quant_master_data/tdx_cn_data")
     p.add_argument("--market", default="csi300")
     p.add_argument(
         "--workflow-config",
@@ -127,8 +128,8 @@ def build_parser() -> argparse.ArgumentParser:
             THIS_DIR / "workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml"
         ),
     )
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--alpha-grid", default="0.1,1,10,100,1000,10000")
     p.add_argument("--topk-grid", default="35,40,45")
     p.add_argument("--ndrop-grid", default="2,3,4")
@@ -143,7 +144,7 @@ def main() -> int:
     args = build_parser().parse_args()
     t0_all = time.perf_counter()
     stamp = _stamp()
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
     quant_master.init(provider_uri=str(provider_uri), region="cn")
 
     workflow_cfg = base._load_config(Path(args.workflow_config).expanduser().resolve())
@@ -365,7 +366,7 @@ def main() -> int:
         "training_protocol": {
             "raw_start": RAW_START,
             "model_family": "closed_form_ridge_rank",
-            "feature_source": "local .qmData OHLCV/factor bins; expanded past-only rank/z factors",
+            "feature_source": "local QuantMaster CN data store OHLCV/factor bins; expanded past-only rank/z factors",
             "feature_modes": list(feature_modes.keys()),
             "target_modes": target_modes,
             "alpha_grid": alpha_grid,
@@ -464,3 +465,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

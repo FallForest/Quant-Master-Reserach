@@ -122,7 +122,6 @@
   --color-surface-3: #475569;
 }
 
-/* Dark mode overrides for Tailwind utility patterns used in templates */
 .dark .bg-white { background-color: var(--color-surface-1) !important; }
 .dark .bg-surface-0 { background-color: var(--color-surface-0) !important; }
 .dark .bg-surface-2 { background-color: var(--color-surface-2) !important; }
@@ -147,7 +146,6 @@
 .dark .text-slate-400 { color: #64748B !important; }
 .dark .text-slate-300 { color: #475569 !important; }
 .dark .text-brand-900 { color: var(--color-brand-200) !important; }
-
 .dark .text-brand-600 { color: var(--color-brand-400) !important; }
 .dark .text-brand-500 { color: var(--color-brand-400) !important; }
 
@@ -180,8 +178,5 @@
 .dark .shadow-lg { box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important; }
 .dark .shadow-xl { box-shadow: 0 20px 40px rgba(0,0,0,0.5) !important; }
 
-/* Dark mode for ECharts tooltip backgrounds — handled per-chart, but container bg */
 .dark .log-scroll::-webkit-scrollbar-track { background: #0F172A; }
-
-/* Dark mode body/page background */
 body.dark { background-color: #0F172A; color: #E2E8F0; }

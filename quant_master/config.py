@@ -20,7 +20,7 @@ import logging
 import platform
 import multiprocessing
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Optional, Union
 from typing import TYPE_CHECKING
 
 from quant_master.constant import REG_CN, REG_US, REG_TW
@@ -50,7 +50,7 @@ class QSettings(BaseSettings):
     """
 
     mlflow: MLflowSettings = MLflowSettings()
-    provider_uri: str = "~/.quant_master/quant_master_data/cn_data"
+    provider_uri: str = "~/.quant_master/quant_master_data/tdx_cn_data"
 
     model_config = SettingsConfigDict(
         env_prefix="QLIB_",
@@ -59,6 +59,116 @@ class QSettings(BaseSettings):
 
 
 QSETTINGS = QSettings()
+
+
+def _normalize_provider_uri_text(uri: Union[str, Path]) -> str:
+    return re.sub(r"/+", "/", str(uri).replace("\\", "/").strip()).rstrip("/").lower()
+
+
+def _iter_search_roots(base_dir: Optional[Union[str, Path]] = None):
+    seen = set()
+    inferred_repo_root = None
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "quant_master").is_dir() and (candidate / "examples").is_dir():
+            inferred_repo_root = candidate
+            break
+    for root in [base_dir, inferred_repo_root, Path.cwd()]:
+        if root is None:
+            continue
+        root_path = Path(root).expanduser().resolve()
+        for candidate in [root_path, *root_path.parents]:
+            candidate_str = str(candidate)
+            if candidate_str not in seen:
+                seen.add(candidate_str)
+                yield candidate
+
+
+def _resolve_existing_path_candidates(candidates: list[Path]) -> str:
+    deduped: list[Path] = []
+    seen = set()
+    for candidate in candidates:
+        resolved = candidate.expanduser().resolve()
+        resolved_str = str(resolved)
+        if resolved_str in seen:
+            continue
+        seen.add(resolved_str)
+        deduped.append(resolved)
+    for candidate in deduped:
+        if candidate.exists():
+            return str(candidate)
+    return str(deduped[0]) if deduped else ""
+
+
+def resolve_provider_uri(provider_uri: Union[str, Path, dict], base_dir: Optional[Union[str, Path]] = None):
+    """
+    Resolve local provider URIs with stable rules across cwd changes.
+
+    Relative local paths are searched from stable repo/cwd roots, while the
+    canonical active CN runtime path lives under
+    ``~/.quant_master/quant_master_data/tdx_cn_data``.
+    """
+    if provider_uri is None:
+        raise ValueError("provider_uri cannot be None")
+    if isinstance(provider_uri, dict):
+        return {freq: resolve_provider_uri(uri, base_dir=base_dir) for freq, uri in provider_uri.items()}
+    if not isinstance(provider_uri, (str, Path)):
+        raise TypeError(f"provider_uri does not support {type(provider_uri)}")
+
+    if QuantMasterConfig.DataPathManager.get_uri_type(provider_uri) != QuantMasterConfig.LOCAL_URI:
+        return provider_uri
+
+    raw_path = Path(provider_uri).expanduser()
+    candidates: list[Path] = []
+    if raw_path.is_absolute():
+        candidates.append(raw_path)
+    else:
+        for root in _iter_search_roots(base_dir):
+            candidates.append(root / raw_path)
+    resolved = _resolve_existing_path_candidates(candidates)
+    if not resolved:
+        raise ValueError("provider_uri cannot be resolved")
+    return resolved
+
+
+def resolve_provider_uri_in_config(config: Any, base_dir: Optional[Union[str, Path]] = None):
+    """
+    Resolve provider URI fields in workflow/config dictionaries in place.
+    """
+    if isinstance(config, dict):
+        for key, value in list(config.items()):
+            if key in {"provider_uri", "provider_uri_map"}:
+                config[key] = resolve_provider_uri(value, base_dir=base_dir)
+            else:
+                resolve_provider_uri_in_config(value, base_dir=base_dir)
+    elif isinstance(config, list):
+        for value in config:
+            resolve_provider_uri_in_config(value, base_dir=base_dir)
+    return config
+
+
+def normalize_quant_master_init_config(
+    init_config: Any,
+    *,
+    base_dir: Optional[Union[str, Path]] = None,
+    default_provider_uri: Optional[Union[str, Path]] = None,
+    default_region: Optional[str] = None,
+):
+    """
+    Normalize a ``quant_master_init`` config block in place and return it.
+
+    This is a light-weight helper for scripts that want to accept partially
+    specified init configs while still delegating provider URI resolution to the
+    unified resolver.
+    """
+    if isinstance(init_config, dict):
+        normalized = copy.deepcopy(init_config)
+    else:
+        normalized = {}
+    if default_provider_uri is not None:
+        normalized.setdefault("provider_uri", default_provider_uri)
+    if default_region is not None:
+        normalized.setdefault("region", default_region)
+    return resolve_provider_uri_in_config(normalized, base_dir=base_dir)
 
 
 class Config:
@@ -164,10 +274,14 @@ _default_config = {
     "dump_protocol_version": PROTOCOL_VERSION,
     # How many tasks belong to one process. Recommend 1 for high-frequency data and None for daily data.
     "maxtasksperchild": None,
-    # If joblib_backend is None, use loky
-    "joblib_backend": "multiprocessing",
+    # If joblib_backend is None, use loky (reuses worker processes, better on Windows)
+    "joblib_backend": None,
     "default_disk_cache": 1,  # 0:skip/1:use
-    "mem_cache_size_limit": 500,
+    # Disable visit() meta-file writes on every cache read (avoids write amplification)
+    "cache_visit_enabled": False,
+    # Use Redis distributed locks for cache coordination; False = in-process locks (faster for local)
+    "cache_use_redis_lock": False,
+    "mem_cache_size_limit": 2000,
     "mem_cache_limit_type": "length",
     # memory cache expire second, only in used 'DatasetURICache' and 'client D.calendar'
     # default 1 hour
@@ -349,7 +463,7 @@ class QuantMasterConfig(Config):
                 raise TypeError(f"provider_uri does not support {type(provider_uri)}")
             for freq, _uri in provider_uri.items():
                 if QuantMasterConfig.DataPathManager.get_uri_type(_uri) == QuantMasterConfig.LOCAL_URI:
-                    provider_uri[freq] = str(Path(_uri).expanduser().resolve())
+                    provider_uri[freq] = resolve_provider_uri(_uri)
             return provider_uri
 
         @staticmethod

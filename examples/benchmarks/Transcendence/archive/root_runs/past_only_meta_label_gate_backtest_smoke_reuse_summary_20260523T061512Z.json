@@ -1,0 +1,210 @@
+{
+  "timestamp_utc": "2026-05-23T06:15:51Z",
+  "task": "past_only_meta_label_gate",
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "evaluation_complete": false,
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "scope": {
+    "start_date": "2024-01-01",
+    "end_date": "2026-04-30",
+    "mode": "smoke",
+    "max_periods": 1,
+    "action_source": "backtest",
+    "action_coverage_start": "2024-01-02",
+    "action_coverage_end": "2024-12-31"
+  },
+  "strict_leakage_controls": [
+    "Action universe is predeclared: base45, base40, rank50, gru45, fallback.",
+    "No test-period conversion grid search; topk/n_drop/run weights are fixed constants in the script.",
+    "Gate features are rolling realized action report diagnostics shifted by one trading row before selection.",
+    "Per-period gate hyperparameters are selected only by blocked CV inside the prior train window.",
+    "Apply windows are selected lockstep after training: 2024H2, 2025H1, 2025H2, 2026YTD.",
+    "Artifact action-source mode is marked non-complete and cannot pass hard_gate_pass."
+  ],
+  "actions": [
+    {
+      "action_id": "base45",
+      "signal_kind": "base",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "fallback_of": "",
+      "annret": 0.1992402682713915,
+      "ir": 2.0811166543385213,
+      "max_drawdown": -0.048125984955537895,
+      "turnover": 0.17579334353042658,
+      "elapsed_sec": 1.987159000000247,
+      "source_action": "base45",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "base40",
+      "signal_kind": "base",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "fallback_of": "",
+      "annret": 0.2402081183789166,
+      "ir": 2.2862542886077537,
+      "max_drawdown": -0.0481420731433596,
+      "turnover": 0.1021941972100925,
+      "elapsed_sec": 1.7103204000013648,
+      "source_action": "base40",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "rank50",
+      "signal_kind": "rank_ensemble",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "773bd6d8413b4bb0b388a63a6b5b6a86",
+        "bc641cef654441d2bf0c7008e6c90458"
+      ],
+      "weights": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "topk": 50,
+      "n_drop": 5,
+      "fallback_of": "",
+      "annret": 0.14765058421582528,
+      "ir": 1.6500904193489692,
+      "max_drawdown": -0.04881506106501719,
+      "turnover": 0.19886324187830137,
+      "elapsed_sec": 2.1844904999998107,
+      "source_action": "rank50",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "gru45",
+      "signal_kind": "rank_ensemble",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "1a085ff9b5a34f408a44ad74055fc5da",
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        0.4,
+        0.2,
+        0.4
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "fallback_of": "",
+      "annret": 0.2036527898948927,
+      "ir": 2.3363036551403678,
+      "max_drawdown": -0.048445472760296815,
+      "turnover": 0.17520512029485097,
+      "elapsed_sec": 1.9145864999991318,
+      "source_action": "gru45",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "fallback",
+      "signal_kind": "fallback_anchor",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "fallback_of": "base45",
+      "annret": 0.1992402682713915,
+      "ir": 2.0811166543385213,
+      "max_drawdown": -0.048125984955537895,
+      "turnover": 0.17579334353042658,
+      "source_action": "base45",
+      "action_source": "backtest",
+      "artifact_note": "copied base45 action report",
+      "ok": true
+    }
+  ],
+  "period_metrics": [
+    {
+      "period": "2024H2",
+      "train_start": "2024-01-02",
+      "train_end": "2024-06-30",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "annret": 0.11980852588354708,
+      "ir": 1.1073353986863623,
+      "max_drawdown": -0.03018076862484048,
+      "turnover": 0.1387230068301593,
+      "cv_score": 5.746157767269334,
+      "cv_folds": 1,
+      "selected_counts": "{\"base40\": 61, \"gru45\": 31, \"base45\": 24, \"rank50\": 9}",
+      "params": "{\"w_ret5\": 0.6, \"w_ret20\": 0.9, \"w_ir20\": 0.2, \"w_vol20\": 0.35, \"w_turn5\": 0.2, \"margin\": 0.01}"
+    }
+  ],
+  "stitched_metrics": {
+    "annret": 0.11980852588354708,
+    "ir": 1.1073353986863623,
+    "max_drawdown": -0.03018076862484048,
+    "turnover": 0.1387230068301593
+  },
+  "split_metrics": [
+    {
+      "split": "2024",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "annret": 0.11980852588354708,
+      "ir": 1.1073353986863623,
+      "max_drawdown": -0.03018076862484048,
+      "turnover": 0.1387230068301593
+    }
+  ],
+  "selection_counts": {
+    "base40": 61,
+    "gru45": 31,
+    "base45": 24,
+    "rank50": 9
+  },
+  "errors": [],
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_smoke_reuse_summary_20260523T061512Z.json",
+    "checkpoint_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_smoke_reuse_checkpoint_20260523T061512Z.json",
+    "actions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_smoke_reuse_actions_20260523T061512Z.csv",
+    "selections_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_smoke_reuse_selections_20260523T061512Z.csv",
+    "splits_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_smoke_reuse_splits_20260523T061512Z.csv",
+    "periods_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_smoke_reuse_periods_20260523T061512Z.csv",
+    "errors_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_smoke_reuse_errors_20260523T061512Z.csv"
+  },
+  "runtime_sec": 38.82657229999859
+}

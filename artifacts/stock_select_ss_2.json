@@ -1,0 +1,381 @@
+{
+  "config": {
+    "model_id": "double_ensemble",
+    "handler_id": "alpha158",
+    "universe": "csi300",
+    "test_date": "2026-05-29",
+    "train_start": "2018-01-01",
+    "train_end": "2023-12-31",
+    "valid_start": "2024-01-01",
+    "valid_end": "2025-06-30",
+    "top_n": 50
+  },
+  "results": {
+    "top": [
+      {
+        "rank": 1,
+        "symbol": "SH688187",
+        "name": "时代电气",
+        "score": 0.325601
+      },
+      {
+        "rank": 2,
+        "symbol": "SH600183",
+        "name": "生益科技",
+        "score": 0.232772
+      },
+      {
+        "rank": 3,
+        "symbol": "SZ002709",
+        "name": "天赐材料",
+        "score": 0.230568
+      },
+      {
+        "rank": 4,
+        "symbol": "SH600482",
+        "name": "中国动力",
+        "score": 0.213496
+      },
+      {
+        "rank": 5,
+        "symbol": "SZ002179",
+        "name": "中航光电",
+        "score": 0.169723
+      },
+      {
+        "rank": 6,
+        "symbol": "SZ300442",
+        "name": "润泽科技",
+        "score": 0.165751
+      },
+      {
+        "rank": 7,
+        "symbol": "SZ300394",
+        "name": "天孚通信",
+        "score": 0.16265
+      },
+      {
+        "rank": 8,
+        "symbol": "SZ000938",
+        "name": "紫光股份",
+        "score": 0.142543
+      },
+      {
+        "rank": 9,
+        "symbol": "SH600188",
+        "name": "兖矿能源",
+        "score": 0.119675
+      },
+      {
+        "rank": 10,
+        "symbol": "SH600875",
+        "name": "东方电气",
+        "score": 0.117595
+      },
+      {
+        "rank": 11,
+        "symbol": "SZ000651",
+        "name": "格力电器",
+        "score": 0.113204
+      },
+      {
+        "rank": 12,
+        "symbol": "SH688256",
+        "name": "寒武纪",
+        "score": 0.106577
+      },
+      {
+        "rank": 13,
+        "symbol": "SH603260",
+        "name": "合盛硅业",
+        "score": 0.101231
+      },
+      {
+        "rank": 14,
+        "symbol": "SZ002028",
+        "name": "思源电气",
+        "score": 0.100548
+      },
+      {
+        "rank": 15,
+        "symbol": "SH601898",
+        "name": "中煤能源",
+        "score": 0.092762
+      },
+      {
+        "rank": 16,
+        "symbol": "SZ300124",
+        "name": "汇川技术",
+        "score": 0.089092
+      },
+      {
+        "rank": 17,
+        "symbol": "SZ300033",
+        "name": "同花顺",
+        "score": 0.085405
+      },
+      {
+        "rank": 18,
+        "symbol": "SH600690",
+        "name": "海尔智家",
+        "score": 0.084116
+      },
+      {
+        "rank": 19,
+        "symbol": "SH601225",
+        "name": "陕西煤业",
+        "score": 0.083867
+      },
+      {
+        "rank": 20,
+        "symbol": "SH600018",
+        "name": "上港集团",
+        "score": 0.08206
+      },
+      {
+        "rank": 21,
+        "symbol": "SZ300014",
+        "name": "亿纬锂能",
+        "score": 0.077524
+      },
+      {
+        "rank": 22,
+        "symbol": "SH688008",
+        "name": "澜起科技",
+        "score": 0.075525
+      },
+      {
+        "rank": 23,
+        "symbol": "SH600887",
+        "name": "伊利股份",
+        "score": 0.07328
+      },
+      {
+        "rank": 24,
+        "symbol": "SZ000975",
+        "name": "山金国际",
+        "score": 0.069693
+      },
+      {
+        "rank": 25,
+        "symbol": "SH601838",
+        "name": "成都银行",
+        "score": 0.063088
+      },
+      {
+        "rank": 26,
+        "symbol": "SH600011",
+        "name": "华能国际",
+        "score": 0.061683
+      },
+      {
+        "rank": 27,
+        "symbol": "SH688303",
+        "name": "大全能源",
+        "score": 0.05807
+      },
+      {
+        "rank": 28,
+        "symbol": "SZ300760",
+        "name": "迈瑞医疗",
+        "score": 0.057424
+      },
+      {
+        "rank": 29,
+        "symbol": "SZ000776",
+        "name": "广发证券",
+        "score": 0.055691
+      },
+      {
+        "rank": 30,
+        "symbol": "SH601138",
+        "name": "工业富联",
+        "score": 0.054414
+      },
+      {
+        "rank": 31,
+        "symbol": "SH600900",
+        "name": "长江电力",
+        "score": 0.053973
+      },
+      {
+        "rank": 32,
+        "symbol": "SZ300866",
+        "name": "安克创新",
+        "score": 0.053539
+      },
+      {
+        "rank": 33,
+        "symbol": "SH601066",
+        "name": "中信建投",
+        "score": 0.052057
+      },
+      {
+        "rank": 34,
+        "symbol": "SH601021",
+        "name": "春秋航空",
+        "score": 0.04976
+      },
+      {
+        "rank": 35,
+        "symbol": "SH601788",
+        "name": "光大证券",
+        "score": 0.049532
+      },
+      {
+        "rank": 36,
+        "symbol": "SZ002460",
+        "name": "赣锋锂业",
+        "score": 0.049228
+      },
+      {
+        "rank": 37,
+        "symbol": "SZ001965",
+        "name": "招商公路",
+        "score": 0.048759
+      },
+      {
+        "rank": 38,
+        "symbol": "SH601607",
+        "name": "上海医药",
+        "score": 0.047107
+      },
+      {
+        "rank": 39,
+        "symbol": "SZ300274",
+        "name": "阳光电源",
+        "score": 0.046469
+      },
+      {
+        "rank": 40,
+        "symbol": "SH600845",
+        "name": "宝信软件",
+        "score": 0.045575
+      },
+      {
+        "rank": 41,
+        "symbol": "SZ002001",
+        "name": "新 和 成",
+        "score": 0.04492
+      },
+      {
+        "rank": 42,
+        "symbol": "SH600522",
+        "name": "中天科技",
+        "score": 0.043585
+      },
+      {
+        "rank": 43,
+        "symbol": "SH605117",
+        "name": "德业股份",
+        "score": 0.043435
+      },
+      {
+        "rank": 44,
+        "symbol": "SZ300347",
+        "name": "泰格医药",
+        "score": 0.043261
+      },
+      {
+        "rank": 45,
+        "symbol": "SZ002050",
+        "name": "三花智控",
+        "score": 0.042415
+      },
+      {
+        "rank": 46,
+        "symbol": "SH601668",
+        "name": "中国建筑",
+        "score": 0.04234
+      },
+      {
+        "rank": 47,
+        "symbol": "SZ002466",
+        "name": "天齐锂业",
+        "score": 0.042266
+      },
+      {
+        "rank": 48,
+        "symbol": "SH600023",
+        "name": "浙能电力",
+        "score": 0.040696
+      },
+      {
+        "rank": 49,
+        "symbol": "SH600111",
+        "name": "北方稀土",
+        "score": 0.040582
+      },
+      {
+        "rank": 50,
+        "symbol": "SH600026",
+        "name": "中远海能",
+        "score": 0.038471
+      }
+    ],
+    "bottom": [
+      {
+        "rank": 300,
+        "symbol": "SZ300476",
+        "name": "胜宏科技",
+        "score": -0.299161
+      },
+      {
+        "rank": 299,
+        "symbol": "SZ002475",
+        "name": "立讯精密",
+        "score": -0.266868
+      },
+      {
+        "rank": 298,
+        "symbol": "SH603986",
+        "name": "兆易创新",
+        "score": -0.235879
+      },
+      {
+        "rank": 297,
+        "symbol": "SH688396",
+        "name": "华润微",
+        "score": -0.205685
+      },
+      {
+        "rank": 296,
+        "symbol": "SH603296",
+        "name": "华勤技术",
+        "score": -0.187615
+      },
+      {
+        "rank": 295,
+        "symbol": "SH600584",
+        "name": "长电科技",
+        "score": -0.181232
+      },
+      {
+        "rank": 294,
+        "symbol": "SZ300308",
+        "name": "中际旭创",
+        "score": -0.175804
+      },
+      {
+        "rank": 293,
+        "symbol": "SZ000338",
+        "name": "潍柴动力",
+        "score": -0.168437
+      },
+      {
+        "rank": 292,
+        "symbol": "SH688126",
+        "name": "沪硅产业",
+        "score": -0.157333
+      },
+      {
+        "rank": 291,
+        "symbol": "SH601868",
+        "name": "中国能建",
+        "score": -0.153534
+      }
+    ],
+    "total": 300
+  },
+  "timestamp": 1780070654.427458
+}

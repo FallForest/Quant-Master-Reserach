@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ui-vite-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "ui", "run", "dev", "--", "--host", "127.0.0.1", "--port", "5173"],
+      "port": 5173
+    },
+    {
+      "name": "ui-api-server",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "ui.server", "--port", "5174"],
+      "port": 5174
+    }
+  ]
+}

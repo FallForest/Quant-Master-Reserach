@@ -1,0 +1,168 @@
+{
+  "timestamp_utc": "2026-05-23T12:05:46Z",
+  "task": "topk_sensitivity_past_selected",
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "evaluation_complete": true,
+  "strict_non_test_selected": true,
+  "protocol": "Predeclared base-signal topk/n_drop daily family. 2024H1 uses fixed default tk40/nd2; 2024H2, 2025, and 2026_ytd are selected only from prior windows.",
+  "hard_gate": {
+    "test_start": "2024-01-01",
+    "test_end": "2026-04-30",
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "candidate_family": {
+    "base_run_id": "7406e47063e9479cb34d300b9ed03bad",
+    "topk_grid": [
+      35,
+      40,
+      45
+    ],
+    "n_drop_grid": [
+      2,
+      4,
+      6
+    ],
+    "rebalance_mode": "daily",
+    "default_for_2024H1": {
+      "topk": 40,
+      "n_drop": 2
+    },
+    "candidate_count": 9
+  },
+  "counts": {
+    "train_rows": 27,
+    "selection_rows": 4,
+    "apply_rows": 4,
+    "stitched_observations": 562
+  },
+  "stitched_metrics": {
+    "annret": 0.22031509509046687,
+    "ir": 2.322249870162778,
+    "max_drawdown": -0.04814207314335979
+  },
+  "split_metrics": [
+    {
+      "split": "2024H1_default",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "selection_rule": "fixed_predeclared_default",
+      "annret": 0.31145357311944205,
+      "ir": 2.9503560119575387,
+      "max_drawdown": -0.04814207314335979
+    },
+    {
+      "split": "2024H2",
+      "start": "2024-07-01",
+      "end": "2024-12-31",
+      "selection_rule": "selected_by_2024H1",
+      "annret": 0.06920807530777427,
+      "ir": 0.7139089247557165,
+      "max_drawdown": -0.03661462335477473
+    },
+    {
+      "split": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "selection_rule": "selected_by_2024",
+      "annret": 0.2807143792155788,
+      "ir": 3.4268694517595852,
+      "max_drawdown": -0.03388444010088998
+    },
+    {
+      "split": "2026_ytd",
+      "start": "2026-01-01",
+      "end": "2026-04-30",
+      "selection_rule": "selected_by_2024_2025",
+      "annret": 0.1365248288702625,
+      "ir": 1.2241047733130972,
+      "max_drawdown": -0.04452496248618875
+    }
+  ],
+  "selections": [
+    {
+      "apply_tag": "2024H1_default",
+      "apply_start": "2024-01-01",
+      "apply_end": "2024-06-30",
+      "selected": true,
+      "selection_train_tag": "predeclared_default_no_2024H1_selection",
+      "candidate_id": "tk40_nd2_daily",
+      "topk": 40,
+      "n_drop": 2,
+      "rebalance_mode": "daily",
+      "selection_score": "",
+      "train_ir": "",
+      "train_annret": "",
+      "train_mdd": "",
+      "train_turnover": "",
+      "strict_non_test_selected": true,
+      "candidate_family_predeclared": true
+    },
+    {
+      "apply_tag": "2024H2",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "selected": true,
+      "selection_train_tag": "2024H1",
+      "candidate_id": "tk45_nd4_daily",
+      "topk": 45,
+      "n_drop": 4,
+      "rebalance_mode": "daily",
+      "selection_score": 3.5600659747946093,
+      "train_ir": 3.457474343633391,
+      "train_annret": 0.3274946497145798,
+      "train_mdd": -0.0481259849555376,
+      "train_turnover": 0.18245010322638544,
+      "strict_non_test_selected": true,
+      "candidate_family_predeclared": true
+    },
+    {
+      "apply_tag": "2025",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-12-31",
+      "selected": true,
+      "selection_train_tag": "2024",
+      "candidate_id": "tk40_nd2_daily",
+      "topk": 40,
+      "n_drop": 2,
+      "rebalance_mode": "daily",
+      "selection_score": 2.3582916117545345,
+      "train_ir": 2.2862542886077537,
+      "train_annret": 0.2402081183789167,
+      "train_mdd": -0.04814207314335979,
+      "train_turnover": 0.10219419721009249,
+      "strict_non_test_selected": true,
+      "candidate_family_predeclared": true
+    },
+    {
+      "apply_tag": "2026_ytd",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-04-30",
+      "selected": true,
+      "selection_train_tag": "2024_2025",
+      "candidate_id": "tk40_nd2_daily",
+      "topk": 40,
+      "n_drop": 2,
+      "rebalance_mode": "daily",
+      "selection_score": 2.9989281681348685,
+      "train_ir": 2.915477256756488,
+      "train_annret": 0.2728183704692014,
+      "train_mdd": -0.04814207314335979,
+      "train_turnover": 0.10099275002376357,
+      "strict_non_test_selected": true,
+      "candidate_family_predeclared": true
+    }
+  ],
+  "runtime_sec": 756.2054833000002,
+  "artifacts": {
+    "candidate_train_metrics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\topk_sensitivity_past_selected_full_candidate_train_metrics_20260523T115310Z.csv",
+    "selections_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\topk_sensitivity_past_selected_full_selections_20260523T115310Z.csv",
+    "split_metrics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\topk_sensitivity_past_selected_full_split_metrics_20260523T115310Z.csv",
+    "test_metrics_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\topk_sensitivity_past_selected_full_test_metrics_20260523T115310Z.json",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\topk_sensitivity_past_selected_full_summary_20260523T115310Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\topk_sensitivity_past_selected_full_summary_20260523T115310Z.md"
+  }
+}

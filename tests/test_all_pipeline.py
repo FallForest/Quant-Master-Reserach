@@ -5,15 +5,20 @@ import sys
 import shutil
 import unittest
 import pytest
+import tempfile
 from pathlib import Path
+
+import pandas as pd
 
 import quant_master
 from quant_master.config import C
+from quant_master.data import D
+from quant_master.data.filter import NameDFilter
+from quant_master.tests import TestAutoData
+from quant_master.tests.config import CSI300_GBDT_TASK, CSI300_BENCH
 from quant_master.utils import init_instance_by_config, flatten_dict
 from quant_master.workflow import R
 from quant_master.workflow.record_temp import SignalRecord, SigAnaRecord, PortAnaRecord
-from quant_master.tests import TestAutoData
-from quant_master.tests.config import CSI300_GBDT_TASK, CSI300_BENCH
 
 
 def train(uri_path: str = None):
@@ -81,6 +86,13 @@ def fake_experiment():
     return default_uri == default_uri_to_check, current_uri == current_uri_to_check, current_uri
 
 
+def build_manual_prediction():
+    instruments = D.instruments("csi300", filter_pipe=[NameDFilter(name_rule_re="SH600110")])
+    pred = D.features(instruments, ["$close"], start_time="2005-01-04", end_time="2005-01-14")
+    pred = pred.rename(columns={"$close": "score"})
+    return pred
+
+
 def backtest_analysis(pred, rid, uri_path: str = None):
     """backtest and analysis
 
@@ -144,15 +156,104 @@ def backtest_analysis(pred, rid, uri_path: str = None):
     return analysis_df
 
 
+def backtest_analysis_with_router(recorder, pred):
+    port_analysis_config = {
+        "executor": {
+            "class": "SimulatorExecutor",
+            "module_path": "quant_master.backtest.executor",
+            "kwargs": {
+                "time_per_step": "day",
+                "generate_portfolio_metrics": True,
+            },
+        },
+        "strategy": {
+            "class": "DailyRebalanceRouterStrategy",
+            "module_path": "quant_master.contrib.strategy",
+            "kwargs": {
+                "selector": {
+                    "type": "series",
+                    "signal": pd.Series(
+                        [
+                            {"family": "topk", "variant": "aggressive", "reason": "trend_following"},
+                            {"family": "buffered", "variant": "base", "reason": "cost_defense"},
+                        ],
+                        index=pd.to_datetime(["2005-01-04", "2005-01-05"]),
+                    ),
+                },
+                "default_family": "topk",
+                "default_variant": "aggressive",
+                "strategy_families": {
+                    "topk": {
+                        "default_variant": "aggressive",
+                        "variants": {
+                            "aggressive": {
+                                "class": "TopkDropoutStrategy",
+                                "module_path": "quant_master.contrib.strategy.signal_strategy",
+                                "kwargs": {
+                                    "signal": "<PRED>",
+                                    "topk": 1,
+                                    "n_drop": 1,
+                                },
+                            }
+                        },
+                    },
+                    "buffered": {
+                        "default_variant": "base",
+                        "variants": {
+                            "base": {
+                                "class": "TopkDropoutStrategy",
+                                "module_path": "quant_master.contrib.strategy.signal_strategy",
+                                "kwargs": {
+                                    "signal": "<PRED>",
+                                    "topk": 1,
+                                    "n_drop": 0,
+                                },
+                            }
+                        },
+                    },
+                },
+            },
+        },
+        "backtest": {
+            "start_time": "2005-01-04",
+            "end_time": "2005-01-13",
+            "account": 100000000,
+            "benchmark": CSI300_BENCH,
+            "exchange_kwargs": {
+                "freq": "day",
+                "limit_threshold": 0.095,
+                "deal_price": "close",
+                "open_cost": 0.0005,
+                "close_cost": 0.0015,
+                "min_cost": 5,
+                "codes": "csi300",
+            },
+        },
+    }
+    recorder.save_objects(**{"pred.pkl": pred, "label.pkl": pred[["score"]].rename(columns={"score": "label"})})
+    par = PortAnaRecord(recorder, port_analysis_config, risk_analysis_freq=[])
+    artifacts = par.generate()
+    report_df = par.load("report_normal_1day.pkl")
+    route_df = par.load("strategy_route_1day.pkl")
+    route_summary_df = par.load("strategy_route_summary_1day.pkl")
+    return report_df, route_df, route_summary_df, artifacts
+
+
 class TestAllFlow(TestAutoData):
     REPORT_NORMAL = None
     POSITIONS = None
     RID = None
-    URI_PATH = "file:" + str(Path(__file__).parent.joinpath("test_all_flow_mlruns").resolve())
+    URI_PATH = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        cls._temp_dir = tempfile.TemporaryDirectory(prefix="quant-master-test-all-flow-")
+        cls.URI_PATH = "file:" + str(Path(cls._temp_dir.name).resolve())
 
     @classmethod
     def tearDownClass(cls) -> None:
-        shutil.rmtree(cls.URI_PATH.lstrip("file:"))
+        cls._temp_dir.cleanup()
 
     @pytest.mark.slow
     def test_0_train(self):
@@ -171,7 +272,26 @@ class TestAllFlow(TestAutoData):
         self.assertTrue(not analyze_df.isna().any().any(), "backtest failed")
 
     @pytest.mark.slow
-    def test_2_expmanager(self):
+    def test_2_router_backtest(self):
+        with R.start(experiment_name="workflow_router", uri=self.URI_PATH):
+            recorder = R.get_recorder()
+            pred = build_manual_prediction()
+            report_df, route_df, route_summary_df, artifacts = backtest_analysis_with_router(recorder, pred)
+        self.assertFalse(report_df.empty, "router backtest report should not be empty")
+        self.assertFalse(route_df.empty, "router route history should not be empty")
+        self.assertIn("strategy_key", route_df.columns, "route history should include selected strategy key")
+        self.assertIn("strategy_family", route_df.columns, "route history should include strategy family")
+        self.assertIn("strategy_variant", route_df.columns, "route history should include strategy variant")
+        self.assertIn("reason", route_df.columns, "route history should include selection reason")
+        self.assertFalse(route_summary_df.empty, "router route summary should not be empty")
+        self.assertIn("selection_count", route_summary_df.columns, "route summary should include selection count")
+        self.assertIn("strategy_route_1day.pkl", artifacts, "router route artifact should be generated")
+        self.assertIn(
+            "strategy_route_summary_1day.pkl", artifacts, "router route summary artifact should be generated"
+        )
+
+    @pytest.mark.slow
+    def test_3_expmanager(self):
         pass_default, pass_current, uri_path = fake_experiment()
         self.assertTrue(pass_default, msg="default uri is incorrect")
         self.assertTrue(pass_current, msg="current uri is incorrect")
@@ -182,7 +302,8 @@ def suite():
     _suite = unittest.TestSuite()
     _suite.addTest(TestAllFlow("test_0_train"))
     _suite.addTest(TestAllFlow("test_1_backtest"))
-    _suite.addTest(TestAllFlow("test_2_expmanager"))
+    _suite.addTest(TestAllFlow("test_2_router_backtest"))
+    _suite.addTest(TestAllFlow("test_3_expmanager"))
     return _suite
 
 

@@ -6,7 +6,6 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 from typing import Text, Union
-import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
 
@@ -200,7 +199,7 @@ class TabnetModel(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = epoch_idx
-                best_param = copy.deepcopy(self.tabnet_model.state_dict())
+                best_param = self.tabnet_model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:
@@ -255,12 +254,10 @@ class TabnetModel(Model):
 
         indices = np.arange(len(x_values))
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
+        for i in range(0, len(indices), self.batch_size):
             feature = x_values[indices[i : i + self.batch_size]].float().to(self.device)
             label = y_values[indices[i : i + self.batch_size]].float().to(self.device)
-            priors = torch.ones(self.batch_size, self.d_feat).to(self.device)
+            priors = torch.ones(feature.shape[0], self.d_feat).to(self.device)
             with torch.no_grad():
                 pred = self.tabnet_model(feature, priors)
                 loss = self.loss_fn(pred, label)
@@ -281,13 +278,10 @@ class TabnetModel(Model):
         indices = np.arange(len(x_train_values))
         np.random.shuffle(indices)
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
-
+        for i in range(0, len(indices), self.batch_size):
             feature = x_train_values[indices[i : i + self.batch_size]].float().to(self.device)
             label = y_train_values[indices[i : i + self.batch_size]].float().to(self.device)
-            priors = torch.ones(self.batch_size, self.d_feat).to(self.device)
+            priors = torch.ones(feature.shape[0], self.d_feat).to(self.device)
             pred = self.tabnet_model(feature, priors)
             loss = self.loss_fn(pred, label)
 
@@ -305,11 +299,9 @@ class TabnetModel(Model):
         self.tabnet_model.train()
         self.tabnet_decoder.train()
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
-
-            S_mask = torch.bernoulli(torch.empty(self.batch_size, self.d_feat).fill_(self.ps))
+        for i in range(0, len(indices), self.batch_size):
+            actual_batch_size = min(self.batch_size, len(indices) - i)
+            S_mask = torch.bernoulli(torch.empty(actual_batch_size, self.d_feat).fill_(self.ps))
             x_train_values = train_set[indices[i : i + self.batch_size]] * (1 - S_mask)
             y_train_values = train_set[indices[i : i + self.batch_size]] * (S_mask)
 
@@ -335,11 +327,9 @@ class TabnetModel(Model):
 
         losses = []
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
-
-            S_mask = torch.bernoulli(torch.empty(self.batch_size, self.d_feat).fill_(self.ps))
+        for i in range(0, len(indices), self.batch_size):
+            actual_batch_size = min(self.batch_size, len(indices) - i)
+            S_mask = torch.bernoulli(torch.empty(actual_batch_size, self.d_feat).fill_(self.ps))
             x_train_values = train_set[indices[i : i + self.batch_size]] * (1 - S_mask)
             y_train_values = train_set[indices[i : i + self.batch_size]] * (S_mask)
 

@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from typing import Text, Union
 import urllib.request
-import copy
 from ...utils import get_or_create_path
 from ...log import get_module_logger
 import torch
@@ -316,7 +315,7 @@ class HIST(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.HIST_model.state_dict())
+                best_param = self.HIST_model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

@@ -1,0 +1,36 @@
+18:52:32 [vite] Internal server error: Failed to resolve import "./model-lab/OptimalModel.vue" from "src/views/ModelLab.vue". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/15728/Desktop/Quant-Master-Research/ui/src/views/ModelLab.vue:4:27
+  1  |  import { computed, onMounted, ref } from 'vue'
+  2  |  import { api } from '../utils/api'
+  3  |  import OptimalModel from './model-lab/OptimalModel.vue'
+     |                            ^
+  4  |  
+  5  |  
+      at TransformPluginContext._formatLog (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42553:41)
+      at TransformPluginContext.error (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42550:16)
+      at normalizeUrl (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:40529:23)
+      at async file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:40648:37
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:40575:7)
+      at async EnvironmentPluginContainer.transform (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42348:18)
+      at async loadAndTransform (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:35740:27)
+      at async viteTransformMiddleware (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:37264:24)
+18:52:55 [vite] Internal server error: Failed to resolve import "./model-lab/OptimalModel.vue" from "src/views/ModelLab.vue". Does the file exist?
+  Plugin: vite:import-analysis
+  File: C:/Users/15728/Desktop/Quant-Master-Research/ui/src/views/ModelLab.vue:4:27
+  1  |  import { computed, onMounted, ref } from 'vue'
+  2  |  import { api } from '../utils/api'
+  3  |  import OptimalModel from './model-lab/OptimalModel.vue'
+     |                            ^
+  4  |  
+  5  |  
+      at TransformPluginContext._formatLog (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42553:41)
+      at TransformPluginContext.error (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42550:16)
+      at normalizeUrl (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:40529:23)
+      at async file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:40648:37
+      at async Promise.all (index 2)
+      at async TransformPluginContext.transform (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:40575:7)
+      at async EnvironmentPluginContainer.transform (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:42348:18)
+      at async loadAndTransform (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:35740:27)
+      at async viteTransformMiddleware (file:///C:/Users/15728/Desktop/Quant-Master-Research/ui/node_modules/vite/dist/node/chunks/dep-Dq2t6Dq0.js:37264:24)

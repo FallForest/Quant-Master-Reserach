@@ -1,0 +1,187 @@
+[15088:MainThread](2026-05-30 14:39:56,591) INFO - quant_master.qrun - [run.py:78] - Render the template with the context: {}
+[15088:MainThread](2026-05-30 14:39:56,601) INFO - quant_master.Initialization - [config.py:563] - default_conf: client.
+[15088:MainThread](2026-05-30 14:39:56,601) INFO - quant_master.Initialization - [__init__.py:82] - quant_master successfully initialized based on client settings.
+[15088:MainThread](2026-05-30 14:39:56,601) INFO - quant_master.Initialization - [__init__.py:84] - data_path={'__DEFAULT_FREQ': WindowsPath('C:/Users/15728/.quant_master/quant_master_data/tdx_cn_data')}
+C:\Users\15728\AppData\Roaming\Python\Python312\site-packages\mlflow\tracking\_tracking_service\utils.py:184: FutureWarning: The filesystem tracking backend (e.g., './mlruns') is deprecated as of February 2026. Consider transitioning to a database backend (e.g., 'sqlite:///mlflow.db') to take advantage of the latest MLflow features. See https://mlflow.org/docs/latest/self-hosting/migrate-from-file-store for migration guidance.
+  return FileStore(store_uri, store_uri)
+[15088:MainThread](2026-05-30 14:39:56,656) INFO - quant_master.workflow - [exp.py:258] - Experiment 984329077332834218 starts running ...
+[15088:MainThread](2026-05-30 14:39:57,163) INFO - quant_master.workflow - [recorder.py:345] - Recorder d6d7cdfc3e6f426fa3464698a6db58e7 starts running under Experiment 984329077332834218 ...
+warning: in the working copy of '.github/workflows/test_quant_master_from_pip.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/test_quant_master_from_source.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.github/workflows/test_quant_master_from_source_slow.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CLAUDE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/component/data.rst', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/component/workflow.rst', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/introduction/quick.rst', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/start/getdata.rst', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/start/initialization.rst', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/_bootstrap.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/alpha158alpha360_regime_horizon_run.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/compact_linear_rank_pre2024_v2.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/compact_rank_model_pre2024_train.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/deep_alpha360_existing_runner.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/double_ensemble_alpha360_runner.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/lightgbm_alpha360_strict_runner.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/model/meta_label_retrain_pre2024.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/strategy/finite_price_universe_replay.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/strategy/historical_validation_ensemble_search.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/strategy/replay_action_reports_cache.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/fixed_rule_oos_eval.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/long_history_model_retrain.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/nonlinear_regime_portfolio_search.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/optimize_portfolio_from_signal.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/pre2024_dynamic_universe_rule_smoke.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/pre2024_dynamic_universe_smoke.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/regime_switch_stability_eval.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/scan_portfolio_innovations.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/signal_portfolio_conversion_scan.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'examples/benchmarks/Transcendence/support/walk_forward_portfolio_scan.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/backtest/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/backtest/report.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/backtest/utils.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/cli/run.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/config.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/contrib/data/processor.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/contrib/data/transcendence_handler.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/contrib/evaluate.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'quant_master/workflow/record_temp.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/predict_double_ensemble.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/smoke_test.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/models.yaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/scripts/export_instruments.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/__main__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/app.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/datadir.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/handlers/analysis.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/handlers/pipeline.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/handlers/static.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/model_catalog.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/routes.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/stock_select.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/sync.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/tests/conftest.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/tests/test_endpoints_async.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/tests/test_endpoints_data.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/tests/test_endpoints_static.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/server/tests/test_error_handling.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/components/Sidebar.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/components/__tests__/Sidebar.test.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/data/modelArchLayers.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/router/index.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/utils/__tests__/api.test.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/utils/api.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/Backtest.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/Browser.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/ModelLab.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/Overview.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/Pipeline.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/StockSelection.vue', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ui/src/views/__tests__/Pipeline.test.js', LF will be replaced by CRLF the next time Git touches it
+ModuleNotFoundError. CatBoostModel are skipped. (optional: maybe installing CatBoostModel can fix it.)
+ModuleNotFoundError. XGBModel is skipped(optional: maybe installing xgboost can fix it).
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[15088:MainThread](2026-05-30 14:41:42,554) INFO - quant_master.timer - [log.py:127] - Time cost: 101.655s | Loading data Done
+[15088:MainThread](2026-05-30 14:41:43,210) INFO - quant_master.timer - [log.py:127] - Time cost: 0.230s | DropnaLabel Done
+[15088:MainThread](2026-05-30 14:41:44,825) INFO - quant_master.timer - [log.py:127] - Time cost: 1.614s | CSZScoreNorm Done
+[15088:MainThread](2026-05-30 14:41:44,878) INFO - quant_master.timer - [log.py:127] - Time cost: 2.319s | fit & process data Done
+[15088:MainThread](2026-05-30 14:41:44,878) INFO - quant_master.timer - [log.py:127] - Time cost: 103.980s | Init data Done
+[15088:MainThread](2026-05-30 14:41:44,878) WARNING - quant_master.utils - [__init__.py:841] - The parameter `reweighter` with value `None` is ignored.
+[15088:MainThread](2026-05-30 14:41:44,878) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:256] - Training de_h1 with horizon=1
+[15088:MainThread](2026-05-30 14:41:44,878) INFO - quant_master.DEnsembleModel - [double_ensemble.py:58] - Double Ensemble Model...
+[15088:MainThread](2026-05-30 14:41:46,161) INFO - quant_master.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (1/3)
+[20]	train's l2: 0.982592	valid's l2: 0.997119
+[15088:MainThread](2026-05-30 14:41:49,941) INFO - quant_master.DEnsembleModel - [double_ensemble.py:91] - Retrieving loss curve and loss values...
+[15088:MainThread](2026-05-30 14:41:52,649) INFO - quant_master.DEnsembleModel - [double_ensemble.py:101] - Sample re-weighting...
+[15088:MainThread](2026-05-30 14:41:55,838) INFO - quant_master.DEnsembleModel - [double_ensemble.py:105] - Feature selection...
+C:\Users\15728\Desktop\Quant-Master-Research\quant_master\contrib\model\double_ensemble.py:210: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
+
+For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
+
+
+  g["g_value"].replace(np.nan, 0, inplace=True)
+[15088:MainThread](2026-05-30 14:43:23,569) INFO - quant_master.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (2/3)
+[20]	train's l2: 1.31657	valid's l2: 1.0079
+[15088:MainThread](2026-05-30 14:43:25,985) INFO - quant_master.DEnsembleModel - [double_ensemble.py:91] - Retrieving loss curve and loss values...
+[15088:MainThread](2026-05-30 14:43:28,022) INFO - quant_master.DEnsembleModel - [double_ensemble.py:101] - Sample re-weighting...
+[15088:MainThread](2026-05-30 14:43:31,226) INFO - quant_master.DEnsembleModel - [double_ensemble.py:105] - Feature selection...
+C:\Users\15728\Desktop\Quant-Master-Research\quant_master\contrib\model\double_ensemble.py:210: FutureWarning: A value is trying to be set on a copy of a DataFrame or Series through chained assignment using an inplace method.
+The behavior will change in pandas 3.0. This inplace method will never work because the intermediate object on which we are setting values always behaves as a copy.
+
+For example, when doing 'df[col].method(value, inplace=True)', try using 'df.method({col: value}, inplace=True)' or df[col] = df[col].method(value) instead, to perform the operation inplace on the original object.
+
+
+  g["g_value"].replace(np.nan, 0, inplace=True)
+[15088:MainThread](2026-05-30 14:45:29,331) INFO - quant_master.DEnsembleModel - [double_ensemble.py:84] - Training sub-model: (3/3)
+[20]	train's l2: 1.27489	valid's l2: 1.00533
+[15088:MainThread](2026-05-30 14:45:39,292) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:282] - Global weights: {'de_h1': 1.0}
+[15088:MainThread](2026-05-30 14:45:39,292) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:283] - Regime weights: {0: {'de_h1': 1.0}, 1: {'de_h1': 1.0}, 2: {'de_h1': 1.0}, 3: {'de_h1': 1.0}, 4: {'de_h1': 1.0}, 5: {'de_h1': 1.0}}
+[15088:MainThread](2026-05-30 14:45:39,292) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:284] - Regime thresholds (consensus): [0.999999999989235, 0.9999999999905884]
+[15088:MainThread](2026-05-30 14:45:39,292) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:285] - Regime thresholds (disagreement): [0.0]
+[15088:MainThread](2026-05-30 14:45:39,292) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:286] - Selected penalties: turnover_penalty=5e-05, risk_penalty=0.0
+[15088:MainThread](2026-05-30 14:45:39,292) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:291] - Final score controls: robust_rank_blend=0.0, prediction_shrinkage=1.0
+[15088:MainThread](2026-05-30 14:45:39,292) INFO - quant_master.RegimeHorizonCostEnsembleModel - [regime_horizon_cost_ensemble.py:296] - Memory boost: 0.0
+[15088:MainThread](2026-05-30 14:45:39,307) INFO - quant_master.fill_placeholder - [__init__.py:790] - <PRED> lookes like a placeholder, but it can't match to any given values
+[15088:MainThread](2026-05-30 14:45:40,444) INFO - quant_master.workflow - [record_temp.py:197] - Signal record 'pred.pkl' has been saved as the artifact of the Experiment 984329077332834218
+('The following are prediction results of the RegimeHorizonCostEnsembleModel '
+ 'model.')
+                          score
+datetime   instrument          
+2024-01-02 SH600000   -0.426298
+           SH600009    0.352609
+           SH600010   -1.026244
+           SH600011    1.978362
+           SH600015    0.444561
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]
+{'IC': np.float64(0.023076640411887134),
+ 'ICIR': np.float64(0.1633359442329684),
+ 'Rank IC': np.float64(0.023453537952275203),
+ 'Rank ICIR': np.float64(0.1612553308334797)}
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]
+Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]Downloading artifacts: 100%|██████████| 1/1 [00:00<?, ?it/s]
+[15088:MainThread](2026-05-30 14:45:40,929) INFO - quant_master.backtest caller - [__init__.py:93] - Create new exchange
+[15088:MainThread](2026-05-30 14:46:01,580) WARNING - quant_master.online operator - [exchange.py:222] - $close field data contains nan.
+[15088:MainThread](2026-05-30 14:46:01,585) WARNING - quant_master.online operator - [exchange.py:222] - $close field data contains nan.
+[15088:MainThread](2026-05-30 14:46:14,307) WARNING - quant_master.data - [data.py:671] - load calendar error: freq=day, future=True; return current calendar!
+[15088:MainThread](2026-05-30 14:46:14,307) WARNING - quant_master.data - [data.py:674] - You can get future calendar by referring to the following document: https://github.com/microsoft/quant_master/blob/main/scripts/data_collector/contrib/README.md
+[15088:MainThread](2026-05-30 14:46:14,317) WARNING - quant_master.BaseExecutor - [executor.py:121] - `common_infra` is not set for <quant_master.backtest.executor.SimulatorExecutor object at 0x00000128606DD370>
+backtest loop:   0%|          | 0/562 [00:00<?, ?it/s]C:\Users\15728\Desktop\Quant-Master-Research\quant_master\utils\index_data.py:492: RuntimeWarning: Mean of empty slice
+  return np.nanmean(self.data)
+backtest loop:   2%|▏         | 14/562 [00:00<00:04, 127.27it/s]backtest loop:   5%|▍         | 28/562 [00:00<00:04, 130.77it/s]backtest loop:   8%|▊         | 43/562 [00:00<00:03, 133.36it/s]backtest loop:  10%|█         | 58/562 [00:00<00:03, 134.56it/s]backtest loop:  13%|█▎        | 72/562 [00:00<00:03, 134.13it/s]backtest loop:  15%|█▌        | 86/562 [00:00<00:03, 131.76it/s]backtest loop:  18%|█▊        | 100/562 [00:00<00:03, 132.27it/s]backtest loop:  20%|██        | 114/562 [00:00<00:03, 130.65it/s]backtest loop:  23%|██▎       | 128/562 [00:00<00:03, 131.47it/s]backtest loop:  25%|██▌       | 142/562 [00:01<00:03, 130.15it/s]backtest loop:  28%|██▊       | 157/562 [00:01<00:03, 132.08it/s]backtest loop:  30%|███       | 171/562 [00:01<00:02, 134.33it/s]backtest loop:  33%|███▎      | 185/562 [00:01<00:02, 128.50it/s]backtest loop:  36%|███▌      | 200/562 [00:01<00:02, 132.36it/s]backtest loop:  38%|███▊      | 215/562 [00:01<00:02, 133.55it/s]backtest loop:  41%|████      | 230/562 [00:01<00:02, 134.40it/s]backtest loop:  43%|████▎     | 244/562 [00:01<00:02, 128.74it/s]backtest loop:  46%|████▌     | 259/562 [00:01<00:02, 131.00it/s]backtest loop:  49%|████▊     | 273/562 [00:02<00:02, 126.48it/s]backtest loop:  51%|█████     | 286/562 [00:02<00:02, 127.44it/s]backtest loop:  53%|█████▎    | 300/562 [00:02<00:02, 129.15it/s]backtest loop:  56%|█████▌    | 313/562 [00:02<00:01, 129.39it/s]backtest loop:  58%|█████▊    | 326/562 [00:02<00:01, 129.57it/s]backtest loop:  60%|██████    | 340/562 [00:02<00:01, 130.70it/s]backtest loop:  63%|██████▎   | 354/562 [00:02<00:01, 129.64it/s]backtest loop:  65%|██████▌   | 368/562 [00:02<00:01, 130.74it/s]backtest loop:  68%|██████▊   | 383/562 [00:02<00:01, 132.26it/s]backtest loop:  71%|███████   | 398/562 [00:03<00:01, 131.68it/s]backtest loop:  73%|███████▎  | 413/562 [00:03<00:01, 133.09it/s]backtest loop:  76%|███████▌  | 427/562 [00:03<00:01, 127.85it/s]backtest loop:  79%|███████▊  | 442/562 [00:03<00:00, 128.64it/s]backtest loop:  81%|████████▏ | 457/562 [00:03<00:00, 130.90it/s]backtest loop:  84%|████████▍ | 472/562 [00:03<00:00, 132.52it/s]backtest loop:  86%|████████▋ | 486/562 [00:03<00:00, 130.96it/s]backtest loop:  89%|████████▉ | 500/562 [00:03<00:00, 131.64it/s]backtest loop:  92%|█████████▏| 515/562 [00:03<00:00, 132.77it/s]backtest loop:  94%|█████████▍| 529/562 [00:04<00:00, 131.11it/s]backtest loop:  97%|█████████▋| 544/562 [00:04<00:00, 132.69it/s]backtest loop:  99%|█████████▉| 558/562 [00:04<00:00, 132.88it/s]backtest loop: 100%|██████████| 562/562 [00:04<00:00, 131.24it/s]
+[15088:MainThread](2026-05-30 14:46:18,629) INFO - quant_master.workflow - [record_temp.py:526] - Portfolio analysis record 'port_analysis_1day.pkl' has been saved as the artifact of the Experiment 984329077332834218
+'The following are analysis results of benchmark return(1day).'
+                       risk
+mean               0.000666
+std                0.011468
+annualized_return  0.158445
+information_ratio  0.895554
+max_drawdown      -0.157869
+'The following are analysis results of the excess return without cost(1day).'
+                       risk
+mean               0.000820
+std                0.005681
+annualized_return  0.195180
+information_ratio  2.226842
+max_drawdown      -0.070206
+'The following are analysis results of the excess return with cost(1day).'
+                       risk
+mean               0.000646
+std                0.005686
+annualized_return  0.153701
+information_ratio  1.752190
+max_drawdown      -0.073166
+[15088:MainThread](2026-05-30 14:46:18,634) INFO - quant_master.workflow - [record_temp.py:551] - Indicator analysis record 'indicator_analysis_1day.pkl' has been saved as the artifact of the Experiment 984329077332834218
+'The following are analysis results of indicators(1day).'
+     value
+ffr    1.0
+pa     0.0
+pos    0.0
+[15088:MainThread](2026-05-30 14:46:18,981) INFO - quant_master.timer - [log.py:127] - Time cost: 0.055s | waiting `async_log` Done

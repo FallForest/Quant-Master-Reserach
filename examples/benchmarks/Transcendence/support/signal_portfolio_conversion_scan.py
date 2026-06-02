@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -23,12 +23,14 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri_in_config
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.backtest.decision import TradeDecisionWO
 from quant_master.contrib.evaluate import risk_analysis
 from quant_master.contrib.strategy.order_generator import OrderGenWInteract
 from quant_master.contrib.strategy.signal_strategy import TopkDropoutStrategy, WeightStrategyBase
+from examples.benchmarks.Transcendence._bootstrap import init_quant_master_from_config, load_config_with_resolved_provider
 
 
 SOTA_RUN_ID = "7406e47063e9479cb34d300b9ed03bad"
@@ -257,10 +259,11 @@ def _load_pickle(path: Path) -> Any:
 
 
 def _load_config(path: Path) -> Dict[str, Any]:
-    try:
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
-    except UnicodeDecodeError:
-        return _load_pickle(path)
+    return load_config_with_resolved_provider(
+        path,
+        loader=lambda config_path: yaml.safe_load(config_path.read_text(encoding="utf-8")),
+        binary_fallback=_load_pickle,
+    )
 
 
 def _extract_port_config(config: Dict[str, Any]) -> Dict[str, Any]:
@@ -276,12 +279,7 @@ def _extract_port_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _init_quant_master(config: Dict[str, Any]) -> None:
-    init_cfg = copy.deepcopy(config.get("quant_master_init", {}))
-    if not isinstance(init_cfg, dict):
-        init_cfg = {}
-    init_cfg.setdefault("provider_uri", ".qmData/cn_data")
-    init_cfg.setdefault("region", "cn")
-    quant_master.init(**init_cfg)
+    init_quant_master_from_config(config, base_dir=REPO_ROOT, region="cn")
 
 
 def _as_score_df(pred_obj: Any) -> pd.DataFrame:
@@ -614,8 +612,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--topk-grid", default="40,45,50,55")
     p.add_argument("--n-drop-grid", default="2,3,4")
     p.add_argument("--hold-buffers", default="20,30")
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--blend-candidate-weights", default="0.2,0.3")
     p.add_argument("--blend-transforms", default="raw,inverted,winsor_rank,smooth3")
     p.add_argument("--output-prefix", default="signal_portfolio_conversion")
@@ -923,3 +921,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

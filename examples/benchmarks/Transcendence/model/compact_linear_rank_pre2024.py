@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -25,6 +25,7 @@ if str(THIS_DIR) not in sys.path:
     sys.path.insert(0, str(THIS_DIR))
 
 import quant_master
+from quant_master.config import resolve_provider_uri
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
@@ -486,7 +487,7 @@ def _objective_target(df: pd.DataFrame, objective_mode: str) -> pd.Series:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Compact pre-2024 ridge/rank model using long-history utilities.")
-    p.add_argument("--provider-uri", default=".qmData/cn_data")
+    p.add_argument("--provider-uri", default="~/.quant_master/quant_master_data/tdx_cn_data")
     p.add_argument("--market", default="csi300")
     p.add_argument(
         "--workflow-config",
@@ -494,8 +495,8 @@ def build_parser() -> argparse.ArgumentParser:
             THIS_DIR / "workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml"
         ),
     )
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--alpha-grid", default="0.1,1,10,100,1000,10000")
     p.add_argument("--objective-grid", default="rank,zscore,volnorm")
     p.add_argument("--topk-grid", default="40,45")
@@ -527,7 +528,7 @@ def main() -> int:
     args = build_parser().parse_args()
     t0_all = time.perf_counter()
     stamp = _stamp()
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
 
     output_dir = THIS_DIR
     coverage_csv = output_dir / f"{args.output_prefix}_coverage_{stamp}.csv"
@@ -920,3 +921,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

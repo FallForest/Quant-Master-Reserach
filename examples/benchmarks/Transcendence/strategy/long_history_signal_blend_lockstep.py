@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -406,8 +406,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--long-history-summary", default=DEFAULT_LONG_HISTORY_SUMMARY)
     p.add_argument("--start-date", default=TEST_START)
     p.add_argument("--end-date", default=TEST_END)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--weights", default="0,0.01,0.02,0.03,0.05,0.08,0.10,0.15,0.20,0.25")
     p.add_argument("--topk", type=int, default=40)
     p.add_argument("--n-drop", type=int, default=2)
@@ -607,3 +607,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

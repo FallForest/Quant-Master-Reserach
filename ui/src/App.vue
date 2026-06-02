@@ -58,7 +58,11 @@ const toastIcons = {
     <div class="flex-1 flex flex-col min-w-0">
       <HeaderBar :title="pageTitle" :isDark="isDark" @toggle-mobile="toggleMobile" @toggle-dark="toggleDarkMode" />
       <div class="flex-1 overflow-y-auto">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <keep-alive>
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </div>
     </div>
 

@@ -125,7 +125,7 @@ class PandasQuote(BaseQuote):
 
 
 class NumpyQuote(BaseQuote):
-    def __init__(self, quote_df: pd.DataFrame, freq: str, region: str = "cn") -> None:
+    def __init__(self, quote_df: pd.DataFrame, freq: str, region: str = "cn", data_cache_maxsize: int = 512) -> None:
         """NumpyQuote
 
         Parameters
@@ -133,6 +133,8 @@ class NumpyQuote(BaseQuote):
         quote_df : pd.DataFrame
             the init dataframe from quant_master.
         self.data : Dict(stock_id, IndexData.DataFrame)
+        data_cache_maxsize : int
+            Maximum number of entries in the data query LRU cache (default 512).
         """
         super().__init__(quote_df=quote_df, freq=freq)
         quote_dict = {}
@@ -148,7 +150,7 @@ class NumpyQuote(BaseQuote):
             raise ValueError(f"{freq} is not supported in NumpyQuote")
         self.region = region
         self._data_cache = OrderedDict()
-        self._data_cache_maxsize = 512
+        self._data_cache_maxsize = data_cache_maxsize
 
     def get_all_stock(self):
         return self.data.keys()

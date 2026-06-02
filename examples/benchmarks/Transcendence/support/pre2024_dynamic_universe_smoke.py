@@ -21,6 +21,7 @@ for _thread_env in (
 
 import numpy as np
 import pandas as pd
+from quant_master.config import resolve_provider_uri
 
 THIS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = THIS_DIR.parents[3]
@@ -30,7 +31,7 @@ START_DATE = pd.Timestamp("2020-01-01")
 END_DATE = pd.Timestamp("2023-12-31")
 MARKETS = ("csi300", "csi500", "csi800", "csi1000", "csiall", "all")
 FIELDS = ("amount", "volume", "change", "factor")
-DEFAULT_PROVIDER_URI = REPO_ROOT / ".qmData" / "cn_data"
+DEFAULT_PROVIDER_URI = Path("~/.quant_master/quant_master_data/tdx_cn_data")
 
 GATE_MIN_POOL_SIZE = 800
 GATE_MAX_MISSING_RATE = 0.10
@@ -412,7 +413,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--min-amount-quantile", type=float, default=DEFAULT_MIN_AMOUNT_QUANTILE)
     args = p.parse_args(argv)
 
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
     stamp = _stamp()
     paths = _artifact_paths(str(args.output_prefix), stamp)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -825,8 +825,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Diagnose lockstep backtest execution constraint failures and safe fallback.")
     p.add_argument("--tracking-uri", default="file:./mlruns")
     p.add_argument("--base-run-id", default=nrs.DEFAULT_BASE_RUN)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--test-start", default=DEFAULT_TEST_START)
     p.add_argument("--test-end", default=DEFAULT_TEST_END)
     p.add_argument("--apply-start", default=DEFAULT_APPLY_START)
@@ -1156,3 +1156,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -28,8 +28,6 @@ onMounted(async () => {
   const data = await api(`/api/factor/analysis?factor=${selectedFactor.value}`)
   if (data) {
     applyData(data)
-  } else {
-    applyData(generateDemoData())
   }
   loading.value = false
   await nextTick()
@@ -54,8 +52,6 @@ watch(selectedFactor, async () => {
   const data = await api(`/api/factor/analysis?factor=${selectedFactor.value}`)
   if (data) {
     applyData(data)
-  } else {
-    applyData(generateDemoData())
   }
   loading.value = false
   await nextTick()
@@ -88,58 +84,6 @@ function icQuality(val) {
   if (val > 0.03) return { text: '良好', cls: 'text-brand-600 bg-brand-50' }
   if (val > 0) return { text: '一般', cls: 'text-warn bg-warn/10' }
   return { text: '弱', cls: 'text-danger bg-danger/10' }
-}
-
-function generateDemoData() {
-  const days = []
-  const start = new Date('2025-01-02')
-  const end = new Date('2025-12-31')
-  const cur = new Date(start)
-  while (cur <= end) {
-    const d = cur.getDay()
-    if (d !== 0 && d !== 6) days.push(cur.toISOString().slice(0, 10))
-    cur.setDate(cur.getDate() + 1)
-  }
-
-  const icData = days.map(date => {
-    const ic = +((Math.random() - 0.42) * 0.15).toFixed(4)
-    return { date, ic }
-  })
-
-  const icMean = +(icData.reduce((s, d) => s + d.ic, 0) / icData.length).toFixed(4)
-  const icStd = +(Math.sqrt(icData.reduce((s, d) => s + (d.ic - icMean) ** 2, 0) / icData.length)).toFixed(4)
-  const icir = icStd > 0 ? +(icMean / icStd).toFixed(4) : 0
-  const positive = +(icData.filter(d => d.ic > 0).length / icData.length * 100).toFixed(1)
-
-  const qDates = ['2025-01-02', '2025-04-01', '2025-07-01', '2025-10-01']
-  const groups = {}
-  for (let q = 1; q <= 5; q++) {
-    groups[`Q${q}`] = qDates.map(date => ({
-      date,
-      value: +((6 - q) * 0.008 + (Math.random() - 0.5) * 0.04).toFixed(4),
-    }))
-  }
-
-  const factors = ['Alpha158', 'Alpha360', 'Momentum', 'Value', 'Volatility', 'Size']
-  const matrix = factors.map(() =>
-    factors.map(() => +((Math.random() - 0.3) * 0.8).toFixed(2))
-  )
-  factors.forEach((_, i) => { matrix[i][i] = 1 })
-
-  return {
-    metrics: {
-      icMean: icMean,
-      icStd: icStd,
-      icir: icir,
-      rankIC: +(icMean * 1.1).toFixed(4),
-      icPositive: positive,
-      annualReturnQ5: +(18.5 + Math.random() * 10).toFixed(2),
-    },
-    icSeries: icData,
-    groupReturns: groups,
-    corrMatrix: matrix,
-    corrFactors: factors,
-  }
 }
 
 // ---- 图表渲染 ----

@@ -1,0 +1,327 @@
+{
+  "timestamp_utc": "2026-05-24T05:09:05Z",
+  "task": "high_return_low_corr_signal_search",
+  "hard_gate_pass": false,
+  "evaluation_complete": true,
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "scope": {
+    "start_date": "2024-01-01",
+    "end_date": "2026-04-30",
+    "base_run_id": "7406e47063e9479cb34d300b9ed03bad",
+    "max_discovery_runs": 0,
+    "max_shortlist": 1,
+    "blend_weights": [
+      0.35
+    ],
+    "include_raw_candidate": false,
+    "fixed_first_action": "base40"
+  },
+  "leakage_controls": {
+    "shortlist_selection": "Uses full-window prediction-only diagnostics vs base: rank correlation and top40 overlap. No returns, labels, reports, or test performance are used.",
+    "first_window": "2024H1 uses fixed predeclared action.",
+    "forward_selection": "2024H2 uses only 2024H1 action reports; 2025 uses only 2024 action reports; 2026_ytd uses only 2024-2025 action reports.",
+    "full_metrics_role": "Full-window action metrics and final stitched metrics are evaluation artifacts only and are not used to choose the shortlist or selected action plan."
+  },
+  "discovery_counts": {
+    "discovered_runs": 28,
+    "full_coverage_runs": 27,
+    "diagnosed_runs": 26,
+    "shortlisted_runs": 1,
+    "actions_evaluated": 2
+  },
+  "shortlisted_candidates": [
+    {
+      "run_id": "bcbecf55a3924357ba93fc55b1140e99",
+      "selected": true,
+      "shortlist_rank": 1,
+      "selection_score": -0.25378889291005413,
+      "corr_gate": true,
+      "rank_corr_abs_mean": 0.26288889291005413,
+      "rank_corr_mean": 0.25768263408118164,
+      "rank_corr_days": 562,
+      "top40_overlap_mean": 0.24248220640569396,
+      "valid_l2": null,
+      "source_topk": 50,
+      "source_n_drop": 5,
+      "model_class": "GRU",
+      "dataset_class": "Alpha158",
+      "instruments": "csi300",
+      "shortlist_rule": "full-test non-performance diagnostics only: low abs rank corr vs base, then pre-2024 valid_l2 tie-break",
+      "performance_used_for_shortlist": false
+    }
+  ],
+  "action_definitions": [
+    {
+      "action_id": "base40",
+      "signal_kind": "base",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "base_weight": 1.0,
+      "candidate_weight": 0.0,
+      "shortlist_rank": 0,
+      "shortlist_reason": "predeclared base40 control",
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.27042493613194196,
+      "ir": 2.8063802747510977,
+      "max_drawdown": -0.05202813673085527,
+      "turnover": 0.10151452046087943,
+      "elapsed_sec": 3.781837400000086,
+      "full_window_metrics_used_for_selection": false
+    },
+    {
+      "action_id": "cand01_blend35",
+      "signal_kind": "base_candidate_rank_blend",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "bcbecf55a3924357ba93fc55b1140e99"
+      ],
+      "weights": [
+        0.65,
+        0.35
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "base_weight": 0.65,
+      "candidate_weight": 0.35,
+      "shortlist_rank": 1,
+      "shortlist_reason": "full-test non-performance diagnostics only: low abs rank corr vs base, then pre-2024 valid_l2 tie-break",
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.13464101044669574,
+      "ir": 1.522263826766902,
+      "max_drawdown": -0.10816005016263674,
+      "turnover": 0.09875480726393984,
+      "elapsed_sec": 3.91852259999996,
+      "full_window_metrics_used_for_selection": false
+    }
+  ],
+  "selection_plan": [
+    {
+      "apply_tag": "2024H1_fixed",
+      "train_start": "",
+      "train_end": "",
+      "apply_start": "2024-01-01",
+      "apply_end": "2024-06-30",
+      "selected_action": "base40",
+      "selection_reason": "fixed_predeclared_no_target_performance_selection"
+    },
+    {
+      "apply_tag": "2024H2",
+      "train_start": "2024-01-01",
+      "train_end": "2024-06-30",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "selected_action": "cand01_blend35",
+      "selection_reason": "max_prior_annret_tiebreak_ir"
+    },
+    {
+      "apply_tag": "2025",
+      "train_start": "2024-01-01",
+      "train_end": "2024-12-31",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-12-31",
+      "selected_action": "base40",
+      "selection_reason": "max_prior_annret_tiebreak_ir"
+    },
+    {
+      "apply_tag": "2026_ytd",
+      "train_start": "2024-01-01",
+      "train_end": "2025-12-31",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-04-30",
+      "selected_action": "base40",
+      "selection_reason": "max_prior_annret_tiebreak_ir"
+    }
+  ],
+  "selection_rows": [
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.3114535731194421,
+      "ir": 2.9503560119575507,
+      "max_drawdown": -0.04814207314335944,
+      "turnover": 0.1073890710141374,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2024H2",
+      "selection_rule": "strict_prior_window_performance_only"
+    },
+    {
+      "action_id": "cand01_blend35",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.41946732439540235,
+      "ir": 4.935436256239147,
+      "max_drawdown": -0.02871724292062218,
+      "turnover": 0.10215512549028459,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2024H2",
+      "selection_rule": "strict_prior_window_performance_only"
+    },
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.24020811837891665,
+      "ir": 2.2862542886077573,
+      "max_drawdown": -0.04814207314335944,
+      "turnover": 0.10219419721009249,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "strict_prior_window_performance_only"
+    },
+    {
+      "action_id": "cand01_blend35",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.19287217596404851,
+      "ir": 2.04189378057522,
+      "max_drawdown": -0.0962824869255973,
+      "turnover": 0.10020228204398046,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "strict_prior_window_performance_only"
+    },
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.2728183704692014,
+      "ir": 2.915477256756496,
+      "max_drawdown": -0.04814207314335944,
+      "turnover": 0.10099275002376358,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "strict_prior_window_performance_only"
+    },
+    {
+      "action_id": "cand01_blend35",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.12242497166009471,
+      "ir": 1.4001557105458728,
+      "max_drawdown": -0.10816005016263674,
+      "turnover": 0.09897574591472073,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "strict_prior_window_performance_only"
+    }
+  ],
+  "full_metrics": {
+    "annret": 0.22755499491541986,
+    "ir": 2.3762696736661533,
+    "max_drawdown": -0.09628248692559735,
+    "turnover": 0.10174642109449449
+  },
+  "split_metrics": [
+    {
+      "split": "full",
+      "start": "2024-01-01",
+      "end": "2026-04-30",
+      "days": 562,
+      "annret": 0.22755499491541986,
+      "ir": 2.3762696736661533,
+      "max_drawdown": -0.09628248692559735,
+      "turnover": 0.10174642109449449,
+      "selected_counts": "{\"base40\": 437, \"cand01_blend35\": 125}"
+    },
+    {
+      "split": "2024H1",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.3114535731194421,
+      "ir": 2.9503560119575507,
+      "max_drawdown": -0.04814207314335944,
+      "turnover": 0.1073890710141374,
+      "selected_counts": "{\"base40\": 117}"
+    },
+    {
+      "split": "2024H2",
+      "start": "2024-07-01",
+      "end": "2024-12-31",
+      "days": 125,
+      "annret": -0.019220882967698666,
+      "ir": -0.1904155008449009,
+      "max_drawdown": -0.09628248692559738,
+      "turnover": 0.09837442057823977,
+      "selected_counts": "{\"cand01_blend35\": 125}"
+    },
+    {
+      "split": "2024",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.14065065158682805,
+      "ir": 1.3583454137577116,
+      "max_drawdown": -0.09628248692559735,
+      "turnover": 0.10273274330964481,
+      "selected_counts": "{\"cand01_blend35\": 125, \"base40\": 117}"
+    },
+    {
+      "split": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "days": 243,
+      "annret": 0.3052944239912133,
+      "ir": 3.7836047679473293,
+      "max_drawdown": -0.03641599675069468,
+      "turnover": 0.09979624706453889,
+      "selected_counts": "{\"base40\": 243}"
+    },
+    {
+      "split": "2026_ytd",
+      "start": "2026-01-01",
+      "end": "2026-04-30",
+      "days": 77,
+      "annret": 0.25534940816349005,
+      "ir": 2.259196436176715,
+      "max_drawdown": -0.05202813673085521,
+      "turnover": 0.10480099659076486,
+      "selected_counts": "{\"base40\": 77}"
+    }
+  ],
+  "selection_counts": {
+    "base40": 437,
+    "cand01_blend35": 125
+  },
+  "artifacts": {
+    "discovery_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_discovered_runs_20260524T050751Z.csv",
+    "diagnostics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_diagnostics_20260524T050751Z.csv",
+    "shortlist_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_shortlist_20260524T050751Z.csv",
+    "actions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_actions_20260524T050751Z.csv",
+    "selection_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_selection_20260524T050751Z.csv",
+    "plan_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_plan_20260524T050751Z.csv",
+    "splits_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_splits_20260524T050751Z.csv",
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\high_return_low_corr_signal_search_smoke_summary_20260524T050751Z.json"
+  },
+  "runtime_sec": 74.3512303
+}

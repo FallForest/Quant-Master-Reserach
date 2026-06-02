@@ -1,0 +1,20 @@
+#### Do not import quant_master package in the repository directory in case of importing quant_master from . without compiling #####
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\cli\run.py", line 15, in <module>
+    from quant_master.model.trainer import task_train
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\model\__init__.py", line 6, in <module>
+    from .base import Model
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\model\base.py", line 6, in <module>
+    from ..data.dataset import Dataset
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\__init__.py", line 8, in <module>
+    from .data import (
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\data.py", line 20, in <module>
+    from .cache import H
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\cache.py", line 38, in <module>
+    from .ops import Operators  # pylint: disable=W0611  # noqa: F401
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\ops.py", line 14, in <module>
+    from ._libs.rolling import rolling_slope, rolling_rsquare, rolling_resi, rolling_wma, rolling_mad
+ImportError: cannot import name 'rolling_wma' from 'quant_master.data._libs.rolling' (C:\Users\15728\Desktop\Quant-Master-Research\quant_master\data\_libs\rolling.cp312-win_amd64.pyd). Did you mean: 'rolling_mean'?

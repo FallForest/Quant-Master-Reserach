@@ -186,7 +186,7 @@ class LocalformerModel(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.model.state_dict())
+                best_param = self.model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

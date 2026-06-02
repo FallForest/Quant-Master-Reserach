@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -24,6 +24,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri_in_config
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
@@ -98,7 +99,7 @@ def _load_pickle(path: Path) -> Any:
 
 def _load_config(path: Path) -> Dict[str, Any]:
     try:
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
+        return resolve_provider_uri_in_config(yaml.safe_load(path.read_text(encoding="utf-8")), base_dir=path.parent)
     except UnicodeDecodeError:
         return _load_pickle(path)
 
@@ -131,7 +132,7 @@ def _init_quant_master(config: Dict[str, Any]) -> None:
     init_cfg = copy.deepcopy(config.get("quant_master_init", {}))
     if not isinstance(init_cfg, dict):
         init_cfg = {}
-    init_cfg.setdefault("provider_uri", ".qmData/cn_data")
+    init_cfg.setdefault("provider_uri", "~/.quant_master/quant_master_data/tdx_cn_data")
     init_cfg.setdefault("region", "cn")
     quant_master.init(**init_cfg)
 
@@ -744,8 +745,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-run-id", default="7406e47063e9479cb34d300b9ed03bad")
     parser.add_argument("--start-date", default="2024-01-01")
     parser.add_argument("--end-date", default="2026-04-30")
-    parser.add_argument("--open-cost", type=float, default=0.0005)
-    parser.add_argument("--close-cost", type=float, default=0.0015)
+    parser.add_argument("--open-cost", type=float, default=0.0001)
+    parser.add_argument("--close-cost", type=float, default=0.0006)
     parser.add_argument("--topk-grid", default="25,30,35,40,45,50,55,60,65,70")
     parser.add_argument("--n-drop-grid", default="1,2,3,4,5,6,7,8")
     parser.add_argument("--stage1-topk-grid", default="45")
@@ -1010,3 +1011,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -1,4 +1,4 @@
-# Copyright (c) Microsoft Corporation.
+﻿# Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
 from __future__ import division
@@ -7,7 +7,7 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 import warnings
-from typing import Union, Literal
+from typing import Literal, Optional, Union
 
 from ..log import get_module_logger
 from ..utils import get_date_range
@@ -150,7 +150,7 @@ def backtest_daily(
     strategy: Union[str, dict, BaseStrategy],
     executor: Union[str, dict, _executor.BaseExecutor] = None,
     account: Union[float, int, position.Position] = 1e8,
-    benchmark: str = "SH000300",
+    benchmark: Optional[str] = None,
     exchange_kwargs: dict = None,
     pos_type: str = "Position",
 ):
@@ -282,7 +282,7 @@ def long_short_backtest(
     close_cost=0,
     trade_unit=None,
     limit_threshold=None,
-    min_cost=5,
+    min_cost=0,
     subscribe_fields=[],
     extract_codes=False,
 ):
@@ -417,3 +417,4 @@ def t_run():
 
 if __name__ == "__main__":
     t_run()
+

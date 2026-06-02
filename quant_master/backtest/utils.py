@@ -8,7 +8,7 @@ from typing import Any, Set, Tuple, TYPE_CHECKING, Union
 
 import numpy as np
 
-from quant_master.utils.time import epsilon_change
+from quant_master.utils.time import Freq, epsilon_change
 
 if TYPE_CHECKING:
     from quant_master.backtest.decision import BaseTradeDecision
@@ -99,6 +99,22 @@ class TradeCalendarManager:
     def get_trade_step(self) -> int:
         return self.trade_step
 
+    def _get_step_right_boundary(self, calendar_index: int) -> pd.Timestamp:
+        next_index = calendar_index + 1
+        if next_index < len(self._calendar):
+            return epsilon_change(self._calendar[next_index])
+
+        count, base = Freq.parse(self.freq)
+        offset_kwargs = {
+            Freq.NORM_FREQ_MINUTE: {"minutes": count},
+            Freq.NORM_FREQ_DAY: {"days": count},
+            Freq.NORM_FREQ_WEEK: {"weeks": count},
+            Freq.NORM_FREQ_MONTH: {"months": count},
+        }
+        if base not in offset_kwargs:
+            raise ValueError(f"Unsupported freq for trade calendar tail step: {self.freq}")
+        return epsilon_change(self._calendar[calendar_index] + pd.DateOffset(**offset_kwargs[base]))
+
     def get_step_time(self, trade_step: int | None = None, shift: int = 0) -> Tuple[pd.Timestamp, pd.Timestamp]:
         """
         Get the left and right endpoints of the trade_step'th trading interval
@@ -128,7 +144,7 @@ class TradeCalendarManager:
         if trade_step is None:
             trade_step = self.get_trade_step()
         calendar_index = self.start_index + trade_step - shift
-        return self._calendar[calendar_index], epsilon_change(self._calendar[calendar_index + 1])
+        return self._calendar[calendar_index], self._get_step_right_boundary(calendar_index)
 
     def get_data_cal_range(self, rtype: str = "full") -> Tuple[int, int]:
         """

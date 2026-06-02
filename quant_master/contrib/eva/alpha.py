@@ -47,25 +47,23 @@ def calc_long_short_prec(
     if dropna:
         df.dropna(inplace=True)
 
-    group = df.groupby(level=date_col, group_keys=False)
+    # Vectorized quantile-based masking: rank predictions within each date group,
+    # then select top/bottom N = int(len(group) * quantile) items.
+    # Descending rank for long (matches nlargest), ascending rank for short (matches nsmallest).
+    group_col = df.groupby(level=date_col, group_keys=False)["pred"]
+    df["_n"] = group_col.transform("count")
+    df["_N"] = (df["_n"] * quantile).astype(int)
+    df["_rank_desc"] = group_col.rank(method="first", ascending=False)
+    df["_rank_asc"] = group_col.rank(method="first", ascending=True)
+    long_mask = df["_rank_desc"] <= df["_N"]
+    short_mask = df["_rank_asc"] <= df["_N"]
 
-    def N(x):
-        return int(len(x) * quantile)
+    long_pos = (df.loc[long_mask, "label"] > 0).groupby(level=date_col).sum()
+    long_cnt = long_mask.groupby(level=date_col).sum()
+    short_neg = (df.loc[short_mask, "label"] < 0).groupby(level=date_col).sum()
+    short_cnt = short_mask.groupby(level=date_col).sum()
 
-    # find the top/low quantile of prediction and treat them as long and short target
-    long = group.apply(lambda x: x.nlargest(N(x), columns="pred").label)
-    short = group.apply(lambda x: x.nsmallest(N(x), columns="pred").label)
-
-    groupll = long.groupby(date_col, group_keys=False)
-    l_dom = groupll.apply(lambda x: x > 0)
-    l_c = groupll.count()
-
-    groups = short.groupby(date_col, group_keys=False)
-    s_dom = groups.apply(lambda x: x < 0)
-    s_c = groups.count()
-    return (l_dom.groupby(date_col, group_keys=False).sum() / l_c), (
-        s_dom.groupby(date_col, group_keys=False).sum() / s_c
-    )
+    return long_pos / long_cnt, short_neg / short_cnt
 
 
 def calc_long_short_return(
@@ -131,13 +129,13 @@ def pred_autocorr(pred: pd.Series, lag=1, inst_col="instrument", date_col="datet
     """
     if isinstance(pred, pd.DataFrame):
         pred = pred.iloc[:, 0]
-        get_module_logger("pred_autocorr").warning(f"Only the first column in {pred.columns} of `pred` is kept")
+        get_module_logger("pred_autocorr").warning(f"Only the first column of `pred` is kept")
     pred_ustk = pred.sort_index().unstack(inst_col)
-    corr_s = {}
-    for (idx, cur), (_, prev) in zip(pred_ustk.iterrows(), pred_ustk.shift(lag).iterrows()):
-        corr_s[idx] = cur.corr(prev)
-    corr_s = pd.Series(corr_s).sort_index()
-    return corr_s
+    # Vectorized: compute cross-sectional correlation of each date's predictions
+    # with those from `lag` dates earlier, across all instruments at once.
+    corr_s = pred_ustk.corrwith(pred_ustk.shift(lag), axis=1)
+    corr_s.name = None
+    return corr_s.sort_index()
 
 
 def pred_autocorr_all(pred_dict, n_jobs=-1, **kwargs):
@@ -175,8 +173,13 @@ def calc_ic(pred: pd.Series, label: pd.Series, date_col="datetime", dropna=False
         ic and rank ic
     """
     df = pd.DataFrame({"pred": pred, "label": label})
-    ic = df.groupby(date_col, group_keys=False).apply(lambda df: df["pred"].corr(df["label"]))
-    ric = df.groupby(date_col, group_keys=False).apply(lambda df: df["pred"].corr(df["label"], method="spearman"))
+    # Fused: compute both Pearson IC and Spearman rank IC in a single groupby pass.
+    def _ic(group):
+        return group["pred"].corr(group["label"]), group["pred"].corr(group["label"], method="spearman")
+
+    ic_ric = df.groupby(date_col, group_keys=False).apply(_ic)
+    ic = ic_ric.apply(lambda x: x[0])
+    ric = ic_ric.apply(lambda x: x[1])
     if dropna:
         return ic.dropna(), ric.dropna()
     else:

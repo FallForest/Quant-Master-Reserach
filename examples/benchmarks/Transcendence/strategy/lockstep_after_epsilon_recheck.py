@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -80,8 +80,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Strict lockstep replay after sell epsilon fix, with diagnostic wrapper comparison.")
     p.add_argument("--tracking-uri", default="file:./mlruns")
     p.add_argument("--base-run-id", default=diag.nrs.DEFAULT_BASE_RUN)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--test-start", default=diag.DEFAULT_TEST_START)
     p.add_argument("--test-end", default=diag.DEFAULT_TEST_END)
     p.add_argument("--lockstep-summary-json", default="")
@@ -335,3 +335,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

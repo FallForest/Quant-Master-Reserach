@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -23,6 +23,7 @@ for _path in (REPO_ROOT, BENCHMARK_ROOT, BENCHMARK_ROOT / "model", BENCHMARK_ROO
 import drawdown_conditional_label_pre2024 as dd
 import liquidity_survival_label_pre2024 as liq
 import market_state_target_pre2024 as ms
+from quant_master.config import resolve_provider_uri
 
 
 EXPERIMENT_NAME = "pre-2024 multi-year stable label gate"
@@ -392,7 +393,7 @@ def _evaluate_candidate(
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Generic pre-2024 multi-year label gate; never loads/evaluates 2024+ data.")
-    p.add_argument("--provider-uri", default=".qmData/cn_data")
+    p.add_argument("--provider-uri", default="~/.quant_master/quant_master_data/tdx_cn_data")
     p.add_argument("--market", default="csi300")
     p.add_argument("--benchmark", default="SH000300")
     p.add_argument("--years", default="2020,2021,2022,2023")
@@ -400,8 +401,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-candidates", type=int, default=3)
     p.add_argument("--output-prefix", default="pre2024_multiyear_label_gate")
     p.add_argument("--workflow-config", default=DEFAULT_WORKFLOW_CONFIG)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--horizon-grid", default="5,10,20")
     p.add_argument("--lambda-grid", default="0.25,0.5,1.0")
     p.add_argument("--liquidity-weight-grid", default="0.25,0.5,1.0")
@@ -447,7 +448,7 @@ def main() -> int:
     t0 = time.perf_counter()
     stamp = _stamp()
     paths = _artifact_paths(str(args.output_prefix), stamp)
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
     years = _parse_int_csv(args.years)
     families = _parse_csv(args.families)
 
@@ -614,3 +615,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

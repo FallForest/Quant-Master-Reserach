@@ -127,6 +127,64 @@ cdef class Rsquare(Expanding):
         return rvalue * rvalue
 
 
+cdef class WMA(Expanding):
+    """1-D array expanding weighted moving average
+    Matches: nanmean(w * x) where w = arange(len(x))+1, w = w/w.sum()
+    i.e. result = sum(w_i * x_i) / (W * n) where W=sum(w), n=count of non-NaN.
+    """
+    def __init__(self):
+        super(WMA, self).__init__()
+
+    cdef double update(self, double val):
+        self.barv.push_back(val)
+        cdef size_t size = self.barv.size()
+        if isnan(val):
+            self.na_count += 1
+        cdef double wval = 0.0
+        cdef int count = 0
+        cdef size_t i
+        cdef double v
+        for i in range(size):
+            v = self.barv[i]
+            if not isnan(v):
+                wval += <double>(i + 1) * v
+                count += 1
+        if count == 0:
+            return NAN
+        cdef double wtotal = <double>size * (<double>size + 1.0) / 2.0
+        return wval / (wtotal * count)
+
+
+cdef class Mad(Expanding):
+    """1-D array expanding median absolute deviation
+    MAD = mean(|x - mean(x)|), computed incrementally.
+    """
+    cdef double vsum
+    def __init__(self):
+        super(Mad, self).__init__()
+        self.vsum = 0.0
+
+    cdef double update(self, double val):
+        self.barv.push_back(val)
+        if isnan(val):
+            self.na_count += 1
+        else:
+            self.vsum += val
+        cdef size_t size = self.barv.size()
+        cdef int count = <int>size - self.na_count
+        if count == 0:
+            return NAN
+        cdef double mean_val = self.vsum / count
+        cdef double mad_sum = 0.0
+        cdef size_t i
+        cdef double v
+        for i in range(size):
+            v = self.barv[i]
+            if not isnan(v):
+                mad_sum += v - mean_val if v >= mean_val else mean_val - v
+        return mad_sum / count
+
+
 cdef np.ndarray[double, ndim=1] expanding(Expanding r, np.ndarray a):
     cdef int  i
     cdef int  N = len(a)
@@ -149,4 +207,12 @@ def expanding_rsquare(np.ndarray a):
 
 def expanding_resi(np.ndarray a):
     cdef Resi r = Resi()
+    return expanding(r, a)
+
+def expanding_wma(np.ndarray a):
+    cdef WMA r = WMA()
+    return expanding(r, a)
+
+def expanding_mad(np.ndarray a):
+    cdef Mad r = Mad()
     return expanding(r, a)

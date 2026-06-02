@@ -1,0 +1,223 @@
+{
+  "timestamp_utc": "2026-05-23T11:57:07Z",
+  "task": "intra2024_forward_blend_gate",
+  "hard_gate_pass": false,
+  "evaluation_complete": false,
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "scope": {
+    "start_date": "2024-01-01",
+    "end_date": "2026-04-30",
+    "fixed_2024h1_action": "base40",
+    "candidate_actions": [
+      "base40"
+    ],
+    "max_actions": 1
+  },
+  "strict_protocol": [
+    "No selection uses the full 2024-2026 target period.",
+    "2024H1 is fixed to a predeclared action because no prior intra-2024 window exists inside the target.",
+    "2024H2 selection uses only 2024-01-01..2024-06-30 action report slices.",
+    "2025 selection uses only 2024-01-01..2024-12-31 action report slices.",
+    "2026 selection uses only 2024-01-01..2025-12-31 action report slices.",
+    "Action signals, blend weights, topk/n_drop, costs, and hard gate are constants or CLI inputs recorded in artifacts."
+  ],
+  "action_definitions": [
+    {
+      "action_id": "base40",
+      "signal_kind": "base",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "blend_gru_weight": null,
+      "note": "fixed base signal topk=40,n_drop=2",
+      "ok": true,
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.2704249361319421,
+      "ir": 2.806380274751097,
+      "max_drawdown": -0.05202813673085549,
+      "turnover": 0.10151452046087939,
+      "elapsed_sec": 12.819338799999969
+    }
+  ],
+  "selection_plan": [
+    {
+      "apply_tag": "2024H1_fixed",
+      "train_start": "",
+      "train_end": "",
+      "apply_start": "2024-01-01",
+      "apply_end": "2024-06-30",
+      "selected_action": "base40",
+      "selection_reason": "fixed_predeclared_2024H1_no_test_selection"
+    },
+    {
+      "apply_tag": "2024H2",
+      "train_start": "2024-01-01",
+      "train_end": "2024-06-30",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "selected_action": "base40",
+      "selection_reason": "max_prior_window_ir_tiebreak_annret"
+    },
+    {
+      "apply_tag": "2025",
+      "train_start": "2024-01-01",
+      "train_end": "2024-12-31",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-12-31",
+      "selected_action": "base40",
+      "selection_reason": "max_prior_window_ir_tiebreak_annret"
+    },
+    {
+      "apply_tag": "2026_ytd",
+      "train_start": "2024-01-01",
+      "train_end": "2025-12-31",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-04-30",
+      "selected_action": "base40",
+      "selection_reason": "max_prior_window_ir_tiebreak_annret"
+    }
+  ],
+  "selection_rows": [
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.31145357311944205,
+      "ir": 2.950356011957546,
+      "max_drawdown": -0.048142073143359616,
+      "turnover": 0.1073890710141374,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2024H2",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.24020811837891723,
+      "ir": 2.2862542886077626,
+      "max_drawdown": -0.048142073143359616,
+      "turnover": 0.10219419721009249,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.2728183704692012,
+      "ir": 2.91547725675649,
+      "max_drawdown": -0.048142073143359616,
+      "turnover": 0.10099275002376357,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "prior_window_only"
+    }
+  ],
+  "full_metrics": {
+    "annret": 0.2704249361319421,
+    "ir": 2.806380274751097,
+    "max_drawdown": -0.05202813673085549,
+    "turnover": 0.10151452046087939
+  },
+  "split_metrics": [
+    {
+      "split": "full",
+      "start": "2024-01-01",
+      "end": "2026-04-30",
+      "days": 562,
+      "annret": 0.2704249361319421,
+      "ir": 2.806380274751097,
+      "max_drawdown": -0.05202813673085549,
+      "turnover": 0.10151452046087939,
+      "selected_counts": "{\"base40\": 562}"
+    },
+    {
+      "split": "2024H1",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.31145357311944205,
+      "ir": 2.950356011957546,
+      "max_drawdown": -0.048142073143359616,
+      "turnover": 0.1073890710141374,
+      "selected_counts": "{\"base40\": 117}"
+    },
+    {
+      "split": "2024H2",
+      "start": "2024-07-01",
+      "end": "2024-12-31",
+      "days": 125,
+      "annret": 0.173522372741786,
+      "ir": 1.6551670302783585,
+      "max_drawdown": -0.030180768624840884,
+      "turnover": 0.09733179532950646,
+      "selected_counts": "{\"base40\": 125}"
+    },
+    {
+      "split": "2024",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.24020811837891723,
+      "ir": 2.2862542886077626,
+      "max_drawdown": -0.048142073143359616,
+      "turnover": 0.10219419721009249,
+      "selected_counts": "{\"base40\": 242}"
+    },
+    {
+      "split": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "days": 243,
+      "annret": 0.3052944239912124,
+      "ir": 3.783604767947305,
+      "max_drawdown": -0.03641599675069523,
+      "turnover": 0.09979624706453889,
+      "selected_counts": "{\"base40\": 243}"
+    },
+    {
+      "split": "2026_ytd",
+      "start": "2026-01-01",
+      "end": "2026-04-30",
+      "days": 77,
+      "annret": 0.2553494081634915,
+      "ir": 2.2591964361767323,
+      "max_drawdown": -0.052028136730855226,
+      "turnover": 0.10480099659076472,
+      "selected_counts": "{\"base40\": 77}"
+    }
+  ],
+  "selection_counts": {
+    "base40": 562
+  },
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_smoke_summary_20260523T115442Z.json",
+    "actions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_smoke_actions_20260523T115442Z.csv",
+    "selection_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_smoke_selection_20260523T115442Z.csv",
+    "plan_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_smoke_plan_20260523T115442Z.csv",
+    "splits_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_smoke_splits_20260523T115442Z.csv"
+  },
+  "runtime_sec": 145.3174469000005
+}

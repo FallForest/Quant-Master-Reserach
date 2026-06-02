@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -267,8 +267,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Strict pre-2024 base40/gru45 rank blend search.")
     p.add_argument("--tracking-uri", default="file:./mlruns")
     p.add_argument("--base-run-id", default=BASE_RUN_ID)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--valid-start", default="2021-01-01")
     p.add_argument("--valid-end", default=VALID_END)
     p.add_argument("--test-start", default=TEST_START)
@@ -503,3 +503,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

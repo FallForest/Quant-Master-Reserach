@@ -1,0 +1,45 @@
+{
+  "config": {
+    "model_id": "lightgbm",
+    "handler_id": "alpha158",
+    "universe": "50",
+    "test_date": "2025-02-20",
+    "train_start": "2018-01-01",
+    "train_end": "2023-12-31",
+    "valid_start": "2024-01-01",
+    "valid_end": "2025-02-20",
+    "top_n": 2
+  },
+  "results": {
+    "top": [
+      {
+        "rank": 1,
+        "symbol": "SH600000",
+        "name": "",
+        "score": 0.42
+      },
+      {
+        "rank": 2,
+        "symbol": "SZ000001",
+        "name": "",
+        "score": -0.17
+      }
+    ],
+    "bottom": [
+      {
+        "rank": 2,
+        "symbol": "SZ000001",
+        "name": "",
+        "score": -0.17
+      },
+      {
+        "rank": 1,
+        "symbol": "SH600000",
+        "name": "",
+        "score": 0.42
+      }
+    ],
+    "total": 2
+  },
+  "timestamp": 1780057751.292887
+}

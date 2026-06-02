@@ -1,0 +1,274 @@
+{
+  "timestamp_utc": "2026-05-23T06:23:38Z",
+  "task": "past_only_meta_label_gate",
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "evaluation_complete": true,
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "scope": {
+    "start_date": "2024-01-01",
+    "end_date": "2026-04-30",
+    "mode": "full",
+    "max_periods": 0,
+    "action_source": "backtest",
+    "action_coverage_start": "2024-01-02",
+    "action_coverage_end": "2026-04-30"
+  },
+  "strict_leakage_controls": [
+    "Action universe is predeclared: base45, base40, rank50, gru45, fallback.",
+    "No test-period conversion grid search; topk/n_drop/run weights are fixed constants in the script.",
+    "Gate features are rolling realized action report diagnostics shifted by one trading row before selection.",
+    "Per-period gate hyperparameters are selected only by blocked CV inside the prior train window.",
+    "Apply windows are selected lockstep after training: 2024H2, 2025H1, 2025H2, 2026YTD.",
+    "Artifact action-source mode is marked non-complete and cannot pass hard_gate_pass."
+  ],
+  "actions": [
+    {
+      "action_id": "base45",
+      "signal_kind": "base",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "fallback_of": "",
+      "annret": 0.2446646360899453,
+      "ir": 2.7999836767142736,
+      "max_drawdown": -0.04812598495553758,
+      "turnover": 0.17499578770011953,
+      "elapsed_sec": 4.433304700000008,
+      "source_action": "base45",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "base40",
+      "signal_kind": "base",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "fallback_of": "",
+      "annret": 0.27042493613194185,
+      "ir": 2.8063802747510995,
+      "max_drawdown": -0.05202813673085527,
+      "turnover": 0.10151452046087941,
+      "elapsed_sec": 3.69162630000028,
+      "source_action": "base40",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "rank50",
+      "signal_kind": "rank_ensemble",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "773bd6d8413b4bb0b388a63a6b5b6a86",
+        "bc641cef654441d2bf0c7008e6c90458"
+      ],
+      "weights": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "topk": 50,
+      "n_drop": 5,
+      "fallback_of": "",
+      "annret": 0.23691294334144164,
+      "ir": 2.8433823530550337,
+      "max_drawdown": -0.048815061065016874,
+      "turnover": 0.19748264254513848,
+      "elapsed_sec": 4.978902199998629,
+      "source_action": "rank50",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "gru45",
+      "signal_kind": "rank_ensemble",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "1a085ff9b5a34f408a44ad74055fc5da",
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        0.4,
+        0.2,
+        0.4
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "fallback_of": "",
+      "annret": 0.24462956122955587,
+      "ir": 2.9447364812322703,
+      "max_drawdown": -0.05335155599542829,
+      "turnover": 0.17515988123618667,
+      "elapsed_sec": 4.334422500000073,
+      "source_action": "gru45",
+      "action_source": "backtest",
+      "artifact_note": "",
+      "artifact_run_id": "",
+      "artifact_report_path": "",
+      "ok": true
+    },
+    {
+      "action_id": "fallback",
+      "signal_kind": "fallback_anchor",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "fallback_of": "base45",
+      "annret": 0.2446646360899453,
+      "ir": 2.7999836767142736,
+      "max_drawdown": -0.04812598495553758,
+      "turnover": 0.17499578770011953,
+      "source_action": "base45",
+      "action_source": "backtest",
+      "artifact_note": "copied base45 action report",
+      "ok": true
+    }
+  ],
+  "period_metrics": [
+    {
+      "period": "2024H2",
+      "train_start": "2024-01-02",
+      "train_end": "2024-06-30",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "annret": 0.11795102673079336,
+      "ir": 1.090191012032778,
+      "max_drawdown": -0.030180768624840475,
+      "turnover": 0.1390643959646174,
+      "cv_score": 5.746157767269283,
+      "cv_folds": 1,
+      "selected_counts": "{\"base40\": 61, \"gru45\": 30, \"base45\": 24, \"rank50\": 10}",
+      "params": "{\"w_ret5\": 0.5, \"w_ret20\": 1.0, \"w_ir20\": 0.15, \"w_vol20\": 0.25, \"w_turn5\": 0.15, \"margin\": 0.0}"
+    },
+    {
+      "period": "2025H1",
+      "train_start": "2024-01-02",
+      "train_end": "2024-12-31",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-06-30",
+      "annret": 0.21013884838774208,
+      "ir": 2.409356776034564,
+      "max_drawdown": -0.04303287902205946,
+      "turnover": 0.14858736414920856,
+      "cv_score": 1.3057418050366951,
+      "cv_folds": 3,
+      "selected_counts": "{\"base40\": 50, \"rank50\": 38, \"gru45\": 19, \"base45\": 9, \"fallback\": 1}",
+      "params": "{\"w_ret5\": 0.6, \"w_ret20\": 0.9, \"w_ir20\": 0.2, \"w_vol20\": 0.35, \"w_turn5\": 0.2, \"margin\": 0.01}"
+    },
+    {
+      "period": "2025H2",
+      "train_start": "2024-07-01",
+      "train_end": "2025-06-30",
+      "apply_start": "2025-07-01",
+      "apply_end": "2025-12-31",
+      "annret": 0.34534360453563795,
+      "ir": 5.563191760891961,
+      "max_drawdown": -0.024617786344004244,
+      "turnover": 0.16682712698741134,
+      "cv_score": 2.647146069649675,
+      "cv_folds": 3,
+      "selected_counts": "{\"rank50\": 43, \"gru45\": 40, \"base40\": 27, \"base45\": 16}",
+      "params": "{\"w_ret5\": 0.5, \"w_ret20\": 1.0, \"w_ir20\": 0.15, \"w_vol20\": 0.25, \"w_turn5\": 0.15, \"margin\": 0.0}"
+    },
+    {
+      "period": "2026YTD",
+      "train_start": "2025-01-01",
+      "train_end": "2025-12-31",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-04-30",
+      "annret": 0.2915935448871375,
+      "ir": 2.9662145445494805,
+      "max_drawdown": -0.04316203033527471,
+      "turnover": 0.1654688234545298,
+      "cv_score": 5.344309859081936,
+      "cv_folds": 3,
+      "selected_counts": "{\"rank50\": 22, \"gru45\": 20, \"base40\": 17, \"base45\": 17, \"fallback\": 1}",
+      "params": "{\"w_ret5\": 0.8, \"w_ret20\": 0.7, \"w_ir20\": 0.3, \"w_vol20\": 0.45, \"w_turn5\": 0.25, \"margin\": 0.02}"
+    }
+  ],
+  "stitched_metrics": {
+    "annret": 0.23662049602362914,
+    "ir": 2.6406575491977784,
+    "max_drawdown": -0.043162030335274715,
+    "turnover": 0.15399795170212854
+  },
+  "split_metrics": [
+    {
+      "split": "2024",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "annret": 0.11795102673079336,
+      "ir": 1.090191012032778,
+      "max_drawdown": -0.030180768624840475,
+      "turnover": 0.1390643959646174
+    },
+    {
+      "split": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "annret": 0.28024501824220666,
+      "ir": 3.726345456634244,
+      "max_drawdown": -0.04303287902205946,
+      "turnover": 0.15804501895420262
+    },
+    {
+      "split": "2026_ytd",
+      "start": "2026-01-01",
+      "end": "2026-04-30",
+      "annret": 0.2915935448871375,
+      "ir": 2.9662145445494805,
+      "max_drawdown": -0.04316203033527471,
+      "turnover": 0.1654688234545298
+    }
+  ],
+  "selection_counts": {
+    "base40": 155,
+    "rank50": 113,
+    "gru45": 109,
+    "base45": 66,
+    "fallback": 2
+  },
+  "errors": [],
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_all_or_2p_summary_20260523T062239Z.json",
+    "checkpoint_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_all_or_2p_checkpoint_20260523T062239Z.json",
+    "actions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_all_or_2p_actions_20260523T062239Z.csv",
+    "selections_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_all_or_2p_selections_20260523T062239Z.csv",
+    "splits_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_all_or_2p_splits_20260523T062239Z.csv",
+    "periods_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_all_or_2p_periods_20260523T062239Z.csv",
+    "errors_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\past_only_meta_label_gate_backtest_all_or_2p_errors_20260523T062239Z.csv"
+  },
+  "runtime_sec": 58.83186039999964
+}

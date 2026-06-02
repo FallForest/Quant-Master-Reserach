@@ -14,7 +14,6 @@ import quant_master.utils.index_data as idd
 from quant_master.backtest.decision import BaseTradeDecision, Order, OrderDir
 from quant_master.backtest.exchange import Exchange
 
-from ..tests.config import CSI300_BENCH
 from ..utils.resam import get_higher_eq_freq_feature, resam_ts_data
 from .high_performance_ds import BaseOrderIndicator, BaseSingleMetric, NumpyOrderIndicator
 
@@ -90,15 +89,25 @@ class PortfolioMetrics:
     def init_bench(self, freq: str | None = None, benchmark_config: dict | None = None) -> None:
         if freq is not None:
             self.freq = freq
-        self.benchmark_config = benchmark_config
+        self.benchmark_config = benchmark_config or {}
         self.bench = self._cal_benchmark(self.benchmark_config, self.freq)
 
     @staticmethod
-    def _cal_benchmark(benchmark_config: Optional[dict], freq: str) -> Optional[pd.Series]:
-        if benchmark_config is None:
-            return None
-        benchmark = benchmark_config.get("benchmark", CSI300_BENCH)
+    def _is_benchmark_disabled(benchmark: Any) -> bool:
         if benchmark is None:
+            return True
+        if isinstance(benchmark, str):
+            return benchmark.strip().lower() in {"", "none", "null", "disabled"}
+        if isinstance(benchmark, (list, tuple, set, dict)):
+            return len(benchmark) == 0
+        return False
+
+    @staticmethod
+    def _cal_benchmark(benchmark_config: Optional[dict], freq: str) -> Optional[pd.Series]:
+        if not benchmark_config or "benchmark" not in benchmark_config:
+            return None
+        benchmark = benchmark_config.get("benchmark")
+        if PortfolioMetrics._is_benchmark_disabled(benchmark):
             return None
 
         if isinstance(benchmark, pd.Series):

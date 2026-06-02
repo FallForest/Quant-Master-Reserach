@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -23,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
@@ -478,8 +479,8 @@ def _build_mask(idx_dt: pd.Index, start: str, end: str) -> np.ndarray:
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Worker G long-history retrain from local .qmData feature bins")
-    p.add_argument("--provider-uri", default=".qmData/cn_data")
+    p = argparse.ArgumentParser(description="Worker G long-history retrain from the local QuantMaster CN data store feature bins")
+    p.add_argument("--provider-uri", default="~/.quant_master/quant_master_data/tdx_cn_data")
     p.add_argument("--market", default="csi300")
     p.add_argument(
         "--workflow-config",
@@ -488,8 +489,8 @@ def main() -> int:
             / "workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml"
         ),
     )
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--random-state", type=int, default=42)
     p.add_argument("--output-prefix", default="long_history_retrain")
     p.add_argument("--n-estimators", type=int, default=800)
@@ -504,7 +505,7 @@ def main() -> int:
     t0_all = time.perf_counter()
     out_dir = Path(__file__).resolve().parent
     stamp = _stamp()
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=REPO_ROOT))
 
     _init_quant_master(str(provider_uri))
 
@@ -906,3 +907,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

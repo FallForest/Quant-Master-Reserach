@@ -31,3 +31,12 @@ def server_url(tmp_path_factory):
     yield f"http://127.0.0.1:{port}"
 
     server.shutdown()
+
+
+@pytest.fixture(autouse=True)
+def reset_server_app_state(tmp_path):
+    app.data = FakeDataDir(tmp_path)
+    app.tdx_quote = FakeTDXQuote()
+    app.pipeline_runs = {}
+    if hasattr(app, "backtest_runs"):
+        app.backtest_runs = {}

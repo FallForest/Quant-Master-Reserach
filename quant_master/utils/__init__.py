@@ -12,6 +12,7 @@ import copy
 import json
 import redis
 import bisect
+import threading
 import struct
 import difflib
 import inspect
@@ -23,7 +24,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import List, Union, Optional, Callable
-from packaging import version
 from ruamel.yaml import YAML
 from .file import (
     get_or_create_path,
@@ -35,19 +35,26 @@ from ..config import C
 from ..log import get_module_logger, set_log_with_config
 
 log = get_module_logger("utils")
-# MultiIndex.is_lexsorted() is a deprecated method in Pandas 1.3.0.
-is_deprecated_lexsorted_pandas = version.parse(pd.__version__) > version.parse("1.3.0")
 
 
 #################### Server ####################
+_redis_connection = None
+_redis_connection_lock = threading.Lock()
+
+
 def get_redis_connection():
-    """get redis connection instance."""
-    return redis.StrictRedis(
-        host=C.redis_host,
-        port=C.redis_port,
-        db=C.redis_task_db,
-        password=C.redis_password,
-    )
+    """get redis connection instance (singleton)."""
+    global _redis_connection
+    if _redis_connection is None:
+        with _redis_connection_lock:
+            if _redis_connection is None:
+                _redis_connection = redis.StrictRedis(
+                    host=C.redis_host,
+                    port=C.redis_port,
+                    db=C.redis_task_db,
+                    password=C.redis_password,
+                )
+    return _redis_connection
 
 
 #################### Data ####################
@@ -664,12 +671,7 @@ def lazy_sort_index(df: pd.DataFrame, axis=0) -> pd.DataFrame:
         sorted dataframe
     """
     idx = df.index if axis == 0 else df.columns
-    if (
-        not idx.is_monotonic_increasing
-        or not is_deprecated_lexsorted_pandas
-        and isinstance(idx, pd.MultiIndex)
-        and not idx.is_lexsorted()
-    ):  # this case is for the old version
+    if not idx.is_monotonic_increasing:
         return df.sort_index(axis=axis)
     else:
         return df

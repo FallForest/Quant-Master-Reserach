@@ -1,0 +1,37 @@
+{
+  "cash": 1664.75,
+  "positions": {
+    "000676": {
+      "shares": 200,
+      "price": 9.085
+    },
+    "600271": {
+      "shares": 400,
+      "price": 15.098
+    },
+    "600703": {
+      "shares": 100,
+      "price": 15.2117
+    },
+    "002572": {
+      "shares": 100,
+      "price": 9.4709
+    },
+    "601012": {
+      "shares": 100,
+      "price": 13.7315
+    },
+    "600108": {
+      "shares": 400,
+      "price": 3.5434
+    }
+  },
+  "date": "2026-06-02",
+  "total_assets": 1000000.0,
+  "stock_commission_rate": 0.0001,
+  "etf_commission_rate": 5e-05,
+  "stamp_duty_rate": 0.0005,
+  "sh_transfer_fee_rate": 1e-05,
+  "trading_fee_rate": 0.0001,
+  "capital_amount": 12312.0
+}

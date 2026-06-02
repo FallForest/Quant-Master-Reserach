@@ -3,7 +3,6 @@
 
 import io
 import os
-import copy
 import math
 import json
 import numpy as np
@@ -360,8 +359,8 @@ class TRAModel(Model):
         best_epoch = 0
         stop_rounds = 0
         best_params = {
-            "model": copy.deepcopy(self.model.state_dict()),
-            "tra": copy.deepcopy(self.tra.state_dict()),
+            "model": self.model.state_dict(),
+            "tra": self.tra.state_dict(),
         }
         # train
         if not is_pretrain and self.transport_method != "none":
@@ -396,8 +395,8 @@ class TRAModel(Model):
                 stop_rounds = 0
                 best_epoch = epoch
                 best_params = {
-                    "model": copy.deepcopy(self.model.state_dict()),
-                    "tra": copy.deepcopy(self.tra.state_dict()),
+                    "model": self.model.state_dict(),
+                    "tra": self.tra.state_dict(),
                 }
                 if self.logdir is not None:
                     torch.save(best_params, self.logdir + "/model.bin")

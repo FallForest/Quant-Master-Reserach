@@ -1,0 +1,299 @@
+{
+  "timestamp_utc": "2026-05-24T08:33:20Z",
+  "task": "strict_causal_ic_decay_signal_combiner",
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "verification_mode": false,
+  "verify_selection_json": "",
+  "strict_non_test_selected": true,
+  "protocol": {
+    "test_start": "2024-01-01",
+    "test_end": "2026-04-30",
+    "open_cost": 0.0005,
+    "close_cost": 0.0015,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27
+    },
+    "portfolio_rule": {
+      "family": "topk_dropout",
+      "topk": 40,
+      "n_drop": 2,
+      "rebalance_mode": "daily"
+    },
+    "selection_rule": "2024H1 fixed base40; later windows use only immediately prior window realized label IC",
+    "ic_decay_formula": "max(0, ewm_recent_ic + 0.25*mean_ic + 0.015*ic_ir - 0.50*max(0,-late_minus_early_ic))",
+    "max_weight": 0.55,
+    "min_ic_days": 40,
+    "label_embargo_days": 2
+  },
+  "label_coverage": {
+    "rows": 168600,
+    "days": 562,
+    "start": "2024-01-02",
+    "end": "2026-04-30",
+    "test_rows": 168600,
+    "test_days": 562,
+    "test_start": "2024-01-02",
+    "test_end": "2026-04-30"
+  },
+  "candidate_specs": [
+    {
+      "signal_id": "base40",
+      "kind": "single",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "note": "base SOTA pred.pkl; fixed 2024H1 anchor"
+    },
+    {
+      "signal_id": "gru1a085",
+      "kind": "single",
+      "run_ids": [
+        "1a085ff9b5a34f408a44ad74055fc5da"
+      ],
+      "weights": [
+        1.0
+      ],
+      "note": "GRU component run"
+    },
+    {
+      "signal_id": "gru773",
+      "kind": "single",
+      "run_ids": [
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        1.0
+      ],
+      "note": "GRU/rank component run"
+    },
+    {
+      "signal_id": "gru_bcbecf55",
+      "kind": "single",
+      "run_ids": [
+        "bcbecf55a3924357ba93fc55b1140e99"
+      ],
+      "weights": [
+        1.0
+      ],
+      "note": "GRU conversion candidate run"
+    },
+    {
+      "signal_id": "rank_gru45",
+      "kind": "rank_ensemble",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "1a085ff9b5a34f408a44ad74055fc5da",
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        0.4,
+        0.2,
+        0.4
+      ],
+      "note": "predeclared GRU45 rank ensemble"
+    },
+    {
+      "signal_id": "rank50",
+      "kind": "rank_ensemble",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "773bd6d8413b4bb0b388a63a6b5b6a86",
+        "bc641cef654441d2bf0c7008e6c90458"
+      ],
+      "weights": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "note": "predeclared rank50 ensemble"
+    }
+  ],
+  "selections": [
+    {
+      "apply_tag": "2024H1",
+      "apply_start": "2024-01-01",
+      "apply_end": "2024-06-30",
+      "selection_rule": "fixed_predeclared_base40",
+      "train_start": "",
+      "train_end": "",
+      "train_window_strictly_before_apply": true,
+      "selection_reason": "fixed_predeclared_base40",
+      "weights_json": "{\"base40\": 1.0}",
+      "nonzero_signal_count": 1,
+      "selected_signal_rows": 35100,
+      "selected_signal_days": 117
+    },
+    {
+      "apply_tag": "2024H2",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "selection_rule": "selected_by_2024H1_prior_ic",
+      "train_start": "2024-01-01",
+      "train_end": "2024-06-30",
+      "train_window_strictly_before_apply": true,
+      "selection_reason": "prior_ic_decay_positive_weights",
+      "weights_json": "{\"base40\": 0.14433735544310844, \"gru1a085\": 0.18630357476447199, \"gru773\": 0.1387049172376587, \"gru_bcbecf55\": 0.23373920792119485, \"rank50\": 0.14308044253139718, \"rank_gru45\": 0.1538345021021688}",
+      "nonzero_signal_count": 6,
+      "selected_signal_rows": 37500,
+      "selected_signal_days": 125
+    },
+    {
+      "apply_tag": "2025H1",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-06-30",
+      "selection_rule": "selected_by_2024H2_prior_ic",
+      "train_start": "2024-07-01",
+      "train_end": "2024-12-31",
+      "train_window_strictly_before_apply": true,
+      "selection_reason": "prior_ic_decay_positive_weights",
+      "weights_json": "{\"base40\": 0.16649749724206306, \"gru1a085\": 0.13645885626622142, \"gru773\": 0.16134800846938038, \"gru_bcbecf55\": 0.21755973636255926, \"rank50\": 0.16085546513265006, \"rank_gru45\": 0.15728043652712584}",
+      "nonzero_signal_count": 6,
+      "selected_signal_rows": 35100,
+      "selected_signal_days": 117
+    },
+    {
+      "apply_tag": "2025H2",
+      "apply_start": "2025-07-01",
+      "apply_end": "2025-12-31",
+      "selection_rule": "selected_by_2025H1_prior_ic",
+      "train_start": "2025-01-01",
+      "train_end": "2025-06-30",
+      "train_window_strictly_before_apply": true,
+      "selection_reason": "prior_ic_decay_positive_weights",
+      "weights_json": "{\"base40\": 0.05190575293593714, \"gru1a085\": 0.19124433890136755, \"gru773\": 0.12415326352511963, \"gru_bcbecf55\": 0.44880840267859556, \"rank50\": 0.06896690230351553, \"rank_gru45\": 0.1149213396554646}",
+      "nonzero_signal_count": 6,
+      "selected_signal_rows": 37800,
+      "selected_signal_days": 126
+    },
+    {
+      "apply_tag": "2026_ytd",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-04-30",
+      "selection_rule": "selected_by_2025H2_prior_ic",
+      "train_start": "2025-07-01",
+      "train_end": "2025-12-31",
+      "train_window_strictly_before_apply": true,
+      "selection_reason": "prior_ic_decay_positive_weights",
+      "weights_json": "{\"base40\": 0.18938286465187898, \"gru1a085\": 0.13332054380844702, \"gru773\": 0.2632380931649937, \"rank50\": 0.2053514305776109, \"rank_gru45\": 0.2087070677970695}",
+      "nonzero_signal_count": 5,
+      "selected_signal_rows": 23100,
+      "selected_signal_days": 77
+    }
+  ],
+  "continuous_full_metrics": {
+    "costed_annret": 0.08879842992909509,
+    "costed_ir": 0.9577502324989595,
+    "max_drawdown": -0.13061896226637398,
+    "turnover": 0.10094277476775995,
+    "rows": 562,
+    "finite_rows": 562,
+    "nonfinite_rows": 0,
+    "elapsed_sec": 4.66776419999951
+  },
+  "split_metrics": [
+    {
+      "split": "test_full",
+      "start": "2024-01-01",
+      "end": "2026-04-30",
+      "days": 562,
+      "costed_annret": 0.08879842992909509,
+      "costed_ir": 0.9577502324989595,
+      "max_drawdown": -0.13061896226637398,
+      "turnover": 0.10094277476775995,
+      "selected_counts": "{\"2024H1\": 117, \"2024H2\": 125, \"2025H1\": 117, \"2025H2\": 126, \"2026_ytd\": 77}"
+    },
+    {
+      "split": "2024H1",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "costed_annret": 0.31145357311944194,
+      "costed_ir": 2.9503560119575485,
+      "max_drawdown": -0.04814207314335977,
+      "turnover": 0.1073890710141374,
+      "selected_counts": "{\"2024H1\": 117}"
+    },
+    {
+      "split": "2024H2",
+      "start": "2024-07-01",
+      "end": "2024-12-31",
+      "days": 125,
+      "costed_annret": 0.03573522806755876,
+      "costed_ir": 0.39640930531011215,
+      "max_drawdown": -0.05968226927658136,
+      "turnover": 0.09465884035137133,
+      "selected_counts": "{\"2024H2\": 125}"
+    },
+    {
+      "split": "2024",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "costed_annret": 0.1690370725761138,
+      "costed_ir": 1.7229619985135491,
+      "max_drawdown": -0.05968226927658132,
+      "turnover": 0.10081353864700615,
+      "selected_counts": "{\"2024H1\": 117, \"2024H2\": 125}"
+    },
+    {
+      "split": "2025H1",
+      "start": "2025-01-01",
+      "end": "2025-06-30",
+      "days": 117,
+      "costed_annret": 0.11463940893853512,
+      "costed_ir": 1.4557731164667358,
+      "max_drawdown": -0.03493944504982078,
+      "turnover": 0.09933962466102988,
+      "selected_counts": "{\"2025H1\": 117}"
+    },
+    {
+      "split": "2025H2",
+      "start": "2025-07-01",
+      "end": "2025-12-31",
+      "days": 126,
+      "costed_annret": -0.06774589618165835,
+      "costed_ir": -0.796818537581589,
+      "max_drawdown": -0.12222956891698038,
+      "turnover": 0.10246090836607674,
+      "selected_counts": "{\"2025H2\": 126}"
+    },
+    {
+      "split": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "days": 243,
+      "costed_annret": 0.020069250728064432,
+      "costed_ir": 0.24443332011816468,
+      "max_drawdown": -0.13061896226637393,
+      "turnover": 0.10095806806364678,
+      "selected_counts": "{\"2025H1\": 117, \"2025H2\": 126}"
+    },
+    {
+      "split": "2026_ytd",
+      "start": "2026-01-01",
+      "end": "2026-04-30",
+      "days": 77,
+      "costed_annret": 0.053518417270288686,
+      "costed_ir": 0.5032197833701949,
+      "max_drawdown": -0.06249349675626835,
+      "turnover": 0.10130068217453815,
+      "selected_counts": "{\"2026_ytd\": 77}"
+    }
+  ],
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_summary_20260524T083229Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_summary_20260524T083229Z.md",
+    "coverage_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_coverage_20260524T083229Z.csv",
+    "ic_decay_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_ic_decay_20260524T083229Z.csv",
+    "selections_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_selections_20260524T083229Z.csv",
+    "split_metrics_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_split_metrics_20260524T083229Z.csv",
+    "continuous_report_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_continuous_report_20260524T083229Z.csv",
+    "selected_signal_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\robust_ic_decay_signal_model_full_selected_signal_20260524T083229Z.pkl"
+  },
+  "runtime_sec": 50.8050592999989
+}

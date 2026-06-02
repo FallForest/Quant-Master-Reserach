@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -24,10 +24,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri_in_config
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
 from quant_master.contrib.strategy.signal_strategy import TopkDropoutStrategy
+from examples.benchmarks.Transcendence._bootstrap import init_quant_master_from_config, load_config_with_resolved_provider
 
 
 TEST_START = "2024-01-01"
@@ -140,11 +142,11 @@ def _load_pickle(path: Path) -> Any:
 
 
 def _load_config(path: Path) -> Dict[str, Any]:
-    try:
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
-    except UnicodeDecodeError:
-        with path.open("rb") as f:
-            return pickle.load(f)
+    return load_config_with_resolved_provider(
+        path,
+        loader=lambda config_path: yaml.safe_load(config_path.read_text(encoding="utf-8")),
+        binary_fallback=_load_pickle,
+    )
 
 
 def _parse_metric_file(metric_path: Path) -> float | None:
@@ -538,8 +540,8 @@ def _parse_run_list(text: str) -> List[str]:
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Search pre-2024 validated rank/blend candidates and test once on 2024-2026.")
     p.add_argument("--tracking-uri", default="file:./mlruns")
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--output-prefix", default="historical_validation_ensemble_search")
     p.add_argument("--preferred-cluster", default="", help="Optional cluster key override for candidate generation.")
     p.add_argument("--max-members", type=int, default=4, help="Max runs per candidate.")
@@ -642,7 +644,7 @@ def main() -> int:
     selected_base_run = selected_members[0]
     run_dir = _find_run_dir(tracking_dir, selected_base_run.run_id)
     workflow_cfg = _load_config(run_dir / "artifacts" / "config")
-    quant_master.init(provider_uri=".qmData/cn_data", region="cn")
+    init_quant_master_from_config(workflow_cfg, base_dir=run_dir / "artifacts", region="cn")
     base_port_cfg = _extract_port_config(workflow_cfg)
     base_pred = _as_score_df(_load_pickle(run_dir / "artifacts" / "pred.pkl"))
     base_index = base_pred.index
@@ -800,3 +802,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

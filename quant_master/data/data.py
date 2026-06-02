@@ -10,6 +10,7 @@ import abc
 import copy
 import queue
 import bisect
+import threading
 import numpy as np
 import pandas as pd
 from typing import List, Union, Optional
@@ -55,11 +56,24 @@ class ProviderBackendMixin:
         backend.setdefault("module_path", "quant_master.data.storage.file_storage")
         return backend
 
+    _storage_cache = {}
+    _storage_cache_lock = threading.Lock()
+
     def backend_obj(self, **kwargs):
+        cache_key = tuple(sorted(kwargs.items()))
+        # Single lock acquisition: check and return if cached, otherwise create and store
+        with self._storage_cache_lock:
+            cached = self._storage_cache.get(cache_key)
+            if cached is not None:
+                return cached
+        # Cache miss — create outside lock (may be duplicated by concurrent threads, harmless)
         backend = self.backend if self.backend else self.get_default_backend()
         backend = copy.deepcopy(backend)
         backend.setdefault("kwargs", {}).update(**kwargs)
-        return init_instance_by_config(backend)
+        obj = init_instance_by_config(backend)
+        with self._storage_cache_lock:
+            self._storage_cache[cache_key] = obj
+        return obj
 
 
 class CalendarProvider(abc.ABC):
@@ -635,9 +649,17 @@ class DatasetProvider(abc.ABC):
 
         for _processor in inst_processors:
             if _processor:
-                _processor_obj = init_instance_by_config(_processor, accept_types=InstProcessor)
+                # Cache processor instances — same config dict content -> same key
+                _processor_key = str(sorted(_processor.items())) if isinstance(_processor, dict) else str(_processor)
+                _processor_obj = DatasetProvider._processor_cache.get(_processor_key)
+                if _processor_obj is None:
+                    _processor_obj = init_instance_by_config(_processor, accept_types=InstProcessor)
+                    DatasetProvider._processor_cache[_processor_key] = _processor_obj
                 data = _processor_obj(data, instrument=inst)
         return data
+
+    # Cache for inst_processor instances (attached after class body)
+    _processor_cache = {}
 
 
 class LocalCalendarProvider(CalendarProvider, ProviderBackendMixin):
@@ -742,9 +764,20 @@ class LocalFeatureProvider(FeatureProvider, ProviderBackendMixin):
 
     def feature(self, instrument, field, start_index, end_index, freq):
         # validate
-        field = str(field)[1:]
+        raw_field = str(field)
+        raw_instrument = instrument
+        field = raw_field[1:]
         instrument = code_to_fname(instrument)
-        return self.backend_obj(instrument=instrument, field=field, freq=freq)[start_index : end_index + 1]
+        storage = self.backend_obj(instrument=instrument, field=field, freq=freq)
+        try:
+            return storage[start_index : end_index + 1]
+        except Exception as exc:
+            raise type(exc)(
+                f"LocalFeatureProvider failed to load feature: instrument={raw_instrument}, "
+                f"normalized_instrument={instrument}, field={raw_field}, normalized_field={field}, "
+                f"freq={freq}, start_index={start_index}, end_index={end_index}, "
+                f"storage={type(storage).__name__}, path={storage.uri}. Original error: {exc}"
+            ) from exc
 
 
 class LocalPITProvider(PITProvider):

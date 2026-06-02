@@ -52,7 +52,7 @@ jobs:
     - name: Downloads dependencies data
       run: |
         cd ..
-        python -m quant_master.cli.data quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
+        python -m quant_master.cli.data quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --region cn
         cd quant_master
 
     - name: Test workflow by config

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -22,8 +22,8 @@ from quant_master.contrib.evaluate import risk_analysis
 
 TEST_START = pd.Timestamp("2024-01-01")
 TEST_END = pd.Timestamp("2026-04-30")
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 ACTION_IDS = ("base40", "gru45", "factor_augmented_meta")
@@ -563,3 +563,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

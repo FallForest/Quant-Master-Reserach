@@ -1,12 +1,101 @@
-"""封装 quant_master 数据目录的二进制文件读取操作。"""
+"""Helpers for reading binary market data from the QuantMaster data directory."""
+
+import logging
+import warnings
+from bisect import bisect_left
 from pathlib import Path
 
 import numpy as np
 
+_log = logging.getLogger(__name__)
+
+DEFAULT_DATA_DIR = Path("~/.quant_master/quant_master_data/tdx_cn_data")
+
+
+def resolve_data_dir(data_dir: str | None = None) -> Path:
+    candidate = Path(data_dir).expanduser() if data_dir else DEFAULT_DATA_DIR.expanduser()
+    return candidate.resolve()
+
+
+def get_effective_data_dir(data_dir_obj=None, data_dir: str | None = None) -> str:
+    if data_dir_obj is not None and getattr(data_dir_obj, "data_dir", None):
+        return str(resolve_data_dir(data_dir_obj.data_dir))
+    return str(resolve_data_dir(data_dir))
+
+
+def create_data_dir(data_dir: str | None = None):
+    return DataDir(str(resolve_data_dir(data_dir)))
+
+
+def ensure_data_dir(data_dir_obj=None, data_dir: str | None = None):
+    if data_dir_obj is not None and getattr(data_dir_obj, "data_dir", None):
+        if data_dir is None:
+            return data_dir_obj
+        if resolve_data_dir(data_dir_obj.data_dir) == resolve_data_dir(data_dir):
+            return data_dir_obj
+    return create_data_dir(data_dir)
+
+
+def get_trading_calendar(data_dir_obj=None, freq="day", data_dir: str | None = None):
+    data = ensure_data_dir(data_dir_obj, data_dir)
+    return data.read_calendar(freq)
+
+
+def describe_trading_day(target_date: str, trading_dates: list[str]):
+    if not trading_dates:
+        return {
+            "ok": False,
+            "requested": target_date,
+            "latest": None,
+            "previous": None,
+            "next": None,
+            "message": "No trading dates are available in the current data directory. Please sync data first.",
+        }
+
+    idx = bisect_left(trading_dates, target_date)
+    is_exact = idx < len(trading_dates) and trading_dates[idx] == target_date
+    previous_date = trading_dates[idx - 1] if idx > 0 else None
+    next_date = trading_dates[idx] if idx < len(trading_dates) else None
+    latest_date = trading_dates[-1]
+
+    if is_exact:
+        return {
+            "ok": True,
+            "requested": target_date,
+            "latest": latest_date,
+            "previous": previous_date,
+            "next": trading_dates[idx + 1] if idx + 1 < len(trading_dates) else None,
+            "message": "",
+        }
+
+    if target_date > latest_date:
+        message = f"Target date {target_date} is beyond the current data range. Latest available trading day is {latest_date}."
+    elif next_date and previous_date:
+        message = (
+            f"Target date {target_date} is not a supported trading day in the current data range. "
+            f"Previous trading day is {previous_date}, next trading day is {next_date}."
+        )
+    elif next_date:
+        message = (
+            f"Target date {target_date} is earlier than the start of the current data range. "
+            f"Earliest available trading day is {next_date}."
+        )
+    else:
+        message = f"Target date {target_date} is not a supported trading day. Latest available trading day is {latest_date}."
+
+    return {
+        "ok": False,
+        "requested": target_date,
+        "latest": latest_date,
+        "previous": previous_date,
+        "next": next_date,
+        "message": message,
+    }
+
 
 class DataDir:
     def __init__(self, data_dir: str):
-        self.data_dir = str(Path(data_dir).expanduser().resolve())
+        self.data_dir = str(resolve_data_dir(data_dir))
         self.root = Path(self.data_dir)
         self.features_dir = self.root / "features"
         self._calendar_cache = {}
@@ -25,13 +114,14 @@ class DataDir:
         return self.features_dir / symbol.lower()
 
     def read_field(self, symbol, field, freq="day"):
-        """读取某个字段的 bin 文件，返回 (date_index, values_array)。"""
+        """Read one binary field file and return ``(date_index, values_array)``."""
         d = self._sym_to_dir(symbol)
         path = d / f"{field}.{freq}.bin"
         if not path.exists():
             if freq == "day":
                 path = d / f"{field}.1min.bin"
                 if path.exists():
+                    _log.warning("Fallback: %s.day.bin not found for %s, using 1min data", field, symbol)
                     return self._read_bin(path)
             return None, None
         return self._read_bin(path)
@@ -44,7 +134,7 @@ class DataDir:
         return int(data[0]), data[1:]
 
     def get_instruments(self):
-        """读取 instruments/all.txt，返回 [(symbol, start, end), ...]。"""
+        """Read ``instruments/all.txt`` and return ``[(symbol, start, end), ...]``."""
         path = self.root / "instruments" / "all.txt"
         result = []
         with open(path, encoding="utf-8") as f:
@@ -55,7 +145,7 @@ class DataDir:
         return result
 
     def get_names(self):
-        """读取 instruments/names.txt，返回 {code: name}。"""
+        """Read ``instruments/names.txt`` and return ``{code: name}``."""
         path = self.root / "instruments" / "names.txt"
         mapping = {}
         if path.exists():
@@ -67,7 +157,7 @@ class DataDir:
         return mapping
 
     def get_kline(self, symbol, freq="day", start=None, end=None):
-        """读取 K 线数据，返回 [{date, open, high, low, close, volume}, ...]。"""
+        """Read K-line data and return ``[{date, open, high, low, close, volume}, ...]``."""
         cal = self.read_calendar(freq)
         if not cal:
             return []

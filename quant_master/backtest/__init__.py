@@ -163,7 +163,7 @@ def create_account_instance(
         position_dict=position_dict,
         pos_type=pos_type,
         benchmark_config=(
-            {}
+            {"benchmark": None}
             if benchmark is None
             else {
                 "benchmark": benchmark,
@@ -179,7 +179,7 @@ def get_strategy_executor(
     end_time: Union[pd.Timestamp, str],
     strategy: Union[str, dict, object, Path],
     executor: Union[str, dict, object, Path],
-    benchmark: Optional[str] = "SH000300",
+    benchmark: Optional[str] = None,
     account: Union[float, int, dict] = 1e9,
     exchange_kwargs: dict = {},
     pos_type: str = "Position",
@@ -219,7 +219,7 @@ def backtest(
     end_time: Union[pd.Timestamp, str],
     strategy: Union[str, dict, object, Path],
     executor: Union[str, dict, object, Path],
-    benchmark: str = "SH000300",
+    benchmark: Optional[str] = None,
     account: Union[float, int, dict] = 1e9,
     exchange_kwargs: dict = {},
     pos_type: str = "Position",
@@ -281,7 +281,7 @@ def collect_data(
     end_time: Union[pd.Timestamp, str],
     strategy: Union[str, dict, object, Path],
     executor: Union[str, dict, object, Path],
-    benchmark: str = "SH000300",
+    benchmark: Optional[str] = None,
     account: Union[float, int, dict] = 1e9,
     exchange_kwargs: dict = {},
     pos_type: str = "Position",

@@ -1,4 +1,4 @@
-quant_master_init:
+﻿quant_master_init:
     provider_uri: "~/.quant_master/quant_master_data/cn_data"
     region: cn
 market: &market csi300
@@ -38,9 +38,9 @@ port_analysis_config: &port_analysis_config
         exchange_kwargs:
             limit_threshold: 0.095
             deal_price: close
-            open_cost: 0.0005
-            close_cost: 0.0015
-            min_cost: 5
+            open_cost: 0.0001
+            close_cost: 0.0006
+            min_cost: 0
 task:
     model:
         class: LinearModel
@@ -74,3 +74,4 @@ task:
           module_path: quant_master.workflow.record_temp
           kwargs: 
             config: *port_analysis_config
+

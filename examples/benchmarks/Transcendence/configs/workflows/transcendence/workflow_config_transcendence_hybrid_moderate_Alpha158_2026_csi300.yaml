@@ -1,0 +1,157 @@
+﻿quant_master_init:
+    provider_uri: "~/.quant_master/quant_master_data/tdx_cn_data"
+    region: cn
+    kernels: 1
+    joblib_backend: threading
+market: &market csi300
+benchmark: &benchmark SH000300
+data_handler_config: &data_handler_config
+    start_time: 2012-01-01
+    end_time: 2026-04-30
+    fit_start_time: 2012-01-01
+    fit_end_time: 2020-12-31
+    instruments: *market
+port_analysis_config: &port_analysis_config
+    strategy:
+        class: TopkDropoutStrategy
+        module_path: quant_master.contrib.strategy
+        kwargs:
+            signal: <PRED>
+            topk: 45
+            n_drop: 4
+    backtest:
+        start_time: 2024-01-01
+        end_time: 2026-04-30
+        account: 100000000
+        benchmark: *benchmark
+        exchange_kwargs:
+            limit_threshold: 0.095
+            deal_price: close
+            open_cost: 0.0001
+            close_cost: 0.0006
+            min_cost: 0
+task:
+    model:
+        class: TranscendenceHybridModel
+        module_path: quant_master.contrib.model.transcendence_hybrid
+        kwargs:
+            use_rank_score: true
+            topk: 45
+            search_step: 0.2
+            max_random_weight_candidates: 256
+            ir_weight: 1.0
+            annret_weight: 4.0
+            ann_scaler: 252
+            random_state: 42
+            base_model_specs:
+                - name: de_main
+                  model_type: double_ensemble
+                  model_kwargs:
+                      base_model: gbm
+                      loss: mse
+                      num_models: 2
+                      enable_sr: true
+                      enable_fs: true
+                      alpha1: 1
+                      alpha2: 1
+                      bins_sr: 10
+                      bins_fs: 5
+                      decay: 0.5
+                      sample_ratios: [0.8, 0.7, 0.6, 0.5, 0.4]
+                      sub_weights: [1, 1]
+                      epochs: 16
+                      colsample_bytree: 0.8879
+                      learning_rate: 0.18
+                      subsample: 0.8789
+                      lambda_l1: 90.0
+                      lambda_l2: 300.0
+                      max_depth: 8
+                      num_leaves: 180
+                      num_threads: 8
+                      verbosity: -1
+                      random_state: 42
+                - name: lgb_aux
+                  model_type: lightgbm
+                  model_kwargs:
+                      loss: mse
+                      early_stopping_rounds: 50
+                      num_boost_round: 320
+                      learning_rate: 0.05
+                      colsample_bytree: 0.86
+                      subsample: 0.86
+                      lambda_l1: 8.0
+                      lambda_l2: 100.0
+                      max_depth: 8
+                      min_data_in_leaf: 120
+                      num_leaves: 127
+                      num_threads: 8
+                      seed: 42
+                      feature_fraction_seed: 42
+                      bagging_seed: 42
+                      data_random_seed: 42
+                - name: lin_aux
+                  model_type: linear
+                  model_kwargs:
+                      estimator: ridge
+                      alpha: 0.8
+                      fit_intercept: false
+            residual_learner:
+                enabled: true
+                use_rank_score: true
+                num_boost_round: 220
+                early_stopping_rounds: 40
+                weight_grid: [-0.4, -0.2, 0.0, 0.2, 0.4, 0.6]
+                lgb_params:
+                    learning_rate: 0.035
+                    num_leaves: 127
+                    max_depth: 8
+                    min_data_in_leaf: 160
+                    num_threads: 8
+                    lambda_l1: 5.0
+                    lambda_l2: 80.0
+            deep_branch:
+                enabled: true
+                name: deep_gru
+                class: GRU
+                module_path: quant_master.contrib.model.pytorch_gru
+                kwargs:
+                    d_feat: 6
+                    hidden_size: 64
+                    num_layers: 2
+                    dropout: 0.0
+                    n_epochs: 8
+                    lr: 0.001
+                    metric: ""
+                    batch_size: 2000
+                    early_stop: 3
+                    optimizer: adam
+                    loss: mse
+                    GPU: -1
+    dataset:
+        class: DatasetH
+        module_path: quant_master.data.dataset
+        kwargs:
+            handler:
+                class: Alpha158
+                module_path: quant_master.contrib.data.handler
+                kwargs: *data_handler_config
+            segments:
+                train: [2012-01-01, 2020-12-31]
+                valid: [2021-01-01, 2023-12-31]
+                test: [2024-01-01, 2026-04-30]
+    record:
+        - class: SignalRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            model: <MODEL>
+            dataset: <DATASET>
+        - class: SigAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            ana_long_short: false
+            ann_scaler: 252
+        - class: PortAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            config: *port_analysis_config
+

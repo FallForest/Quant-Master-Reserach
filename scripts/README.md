@@ -16,11 +16,14 @@
 
 ```bash
 # daily data
-python get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
+python get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --region cn
 
 # 1min  data (Optional for running non-high-frequency strategies)
 python get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data_1min --region cn --interval 1min
 ```
+
+The current unified CN daily data directory is `~/.quant_master/quant_master_data/tdx_cn_data`
+(Windows runtime path: `C:\Users\15728\.quant_master\quant_master_data\tdx_cn_data`).
 
 ### Download US Data
 
@@ -32,7 +35,7 @@ python get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_d
 ### Download CN Simple Data
 
 ```bash
-python get_data.py quant_master_data --name quant_master_data_simple --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
+python get_data.py quant_master_data --name quant_master_data_simple --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --region cn
 ```
 
 ### Help
@@ -64,7 +67,7 @@ quant_master.init(provider_uri=provider_uri, region=REG_US)
 import quant_master
 from quant_master.constant import REG_CN
 
-provider_uri = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+provider_uri = "~/.quant_master/quant_master_data/tdx_cn_data"  # current unified CN target_dir
 quant_master.init(provider_uri=provider_uri, region=REG_CN)
 ```
 
@@ -72,5 +75,5 @@ quant_master.init(provider_uri=provider_uri, region=REG_CN)
 The is also a [crowd sourced version of quant_master data](data_collector/crowd_source/README.md): https://github.com/chenditc/investment_data/releases
 ```bash
 wget https://github.com/chenditc/investment_data/releases/latest/download/quant_master_bin.tar.gz
-tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/cn_data --strip-components=2
+tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/tdx_cn_data --strip-components=2
 ```

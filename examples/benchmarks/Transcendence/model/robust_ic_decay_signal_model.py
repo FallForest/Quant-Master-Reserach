@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -784,8 +784,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Strict causal IC-decay signal combiner for 2024+ Transcendence gate.")
     p.add_argument("--tracking-uri", default="file:./mlruns")
     p.add_argument("--base-run-id", default=BASE_RUN_ID)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--topk", type=int, default=40)
     p.add_argument("--n-drop", type=int, default=2)
     p.add_argument("--min-ic-days", type=int, default=40)
@@ -972,3 +972,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

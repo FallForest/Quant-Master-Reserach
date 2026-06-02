@@ -1,0 +1,502 @@
+{
+  "timestamp_utc": "2026-05-23T12:13:52Z",
+  "task": "intra2024_forward_blend_gate",
+  "hard_gate_pass": false,
+  "evaluation_complete": true,
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "costs": {
+    "open_cost": 0.0005,
+    "close_cost": 0.0015
+  },
+  "scope": {
+    "start_date": "2024-01-01",
+    "end_date": "2026-04-30",
+    "fixed_2024h1_action": "base40",
+    "candidate_actions": [
+      "base40",
+      "gru45",
+      "blend25",
+      "blend50",
+      "blend75"
+    ],
+    "max_actions": 0
+  },
+  "strict_protocol": [
+    "No selection uses the full 2024-2026 target period.",
+    "2024H1 is fixed to a predeclared action because no prior intra-2024 window exists inside the target.",
+    "2024H2 selection uses only 2024-01-01..2024-06-30 action report slices.",
+    "2025 selection uses only 2024-01-01..2024-12-31 action report slices.",
+    "2026 selection uses only 2024-01-01..2025-12-31 action report slices.",
+    "Action signals, blend weights, topk/n_drop, costs, and hard gate are constants or CLI inputs recorded in artifacts."
+  ],
+  "action_definitions": [
+    {
+      "action_id": "base40",
+      "signal_kind": "base",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad"
+      ],
+      "weights": [
+        1.0
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "blend_gru_weight": null,
+      "note": "fixed base signal topk=40,n_drop=2",
+      "ok": true,
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.2704249361319419,
+      "ir": 2.806380274751095,
+      "max_drawdown": -0.05202813673085538,
+      "turnover": 0.1015145204608794,
+      "elapsed_sec": 13.623514400000204
+    },
+    {
+      "action_id": "gru45",
+      "signal_kind": "gru_rank",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "1a085ff9b5a34f408a44ad74055fc5da",
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        0.4,
+        0.2,
+        0.4
+      ],
+      "topk": 45,
+      "n_drop": 4,
+      "blend_gru_weight": 1.0,
+      "note": "fixed GRU/rank signal topk=45,n_drop=4",
+      "ok": true,
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.24462956122955606,
+      "ir": 2.9447364812322907,
+      "max_drawdown": -0.05335155599542829,
+      "turnover": 0.17515988123618667,
+      "elapsed_sec": 16.03851510000004
+    },
+    {
+      "action_id": "blend25",
+      "signal_kind": "base_gru_blend",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "1a085ff9b5a34f408a44ad74055fc5da",
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        0.75,
+        0.25
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "blend_gru_weight": 0.25,
+      "note": "fixed rank-signal blend: base_weight=0.75, gru_weight=0.25; topk=40,n_drop=2",
+      "ok": true,
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.20798655510205685,
+      "ir": 2.2532957543173926,
+      "max_drawdown": -0.04133237610236651,
+      "turnover": 0.10004205865867952,
+      "elapsed_sec": 13.506106600000749
+    },
+    {
+      "action_id": "blend50",
+      "signal_kind": "base_gru_blend",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "1a085ff9b5a34f408a44ad74055fc5da",
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "blend_gru_weight": 0.5,
+      "note": "fixed rank-signal blend: base_weight=0.50, gru_weight=0.50; topk=40,n_drop=2",
+      "ok": true,
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.22033582288688,
+      "ir": 2.462053914654499,
+      "max_drawdown": -0.05696207421381572,
+      "turnover": 0.10069281334993853,
+      "elapsed_sec": 13.375393300000724
+    },
+    {
+      "action_id": "blend75",
+      "signal_kind": "base_gru_blend",
+      "run_ids": [
+        "7406e47063e9479cb34d300b9ed03bad",
+        "1a085ff9b5a34f408a44ad74055fc5da",
+        "773bd6d8413b4bb0b388a63a6b5b6a86"
+      ],
+      "weights": [
+        0.25,
+        0.75
+      ],
+      "topk": 40,
+      "n_drop": 2,
+      "blend_gru_weight": 0.75,
+      "note": "fixed rank-signal blend: base_weight=0.25, gru_weight=0.75; topk=40,n_drop=2",
+      "ok": true,
+      "signal_start": "2024-01-02",
+      "signal_end": "2026-04-30",
+      "signal_days": 562,
+      "annret": 0.22303676334396325,
+      "ir": 2.493066392928957,
+      "max_drawdown": -0.06601262984030698,
+      "turnover": 0.09971367934011052,
+      "elapsed_sec": 13.604674900000646
+    }
+  ],
+  "selection_plan": [
+    {
+      "apply_tag": "2024H1_fixed",
+      "train_start": "",
+      "train_end": "",
+      "apply_start": "2024-01-01",
+      "apply_end": "2024-06-30",
+      "selected_action": "base40",
+      "selection_reason": "fixed_predeclared_2024H1_no_test_selection"
+    },
+    {
+      "apply_tag": "2024H2",
+      "train_start": "2024-01-01",
+      "train_end": "2024-06-30",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "selected_action": "base40",
+      "selection_reason": "fallback_no_prior_candidate_met_train_gate"
+    },
+    {
+      "apply_tag": "2025",
+      "train_start": "2024-01-01",
+      "train_end": "2024-12-31",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-12-31",
+      "selected_action": "blend75",
+      "selection_reason": "max_prior_window_ir_tiebreak_annret"
+    },
+    {
+      "apply_tag": "2026_ytd",
+      "train_start": "2024-01-01",
+      "train_end": "2025-12-31",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-04-30",
+      "selected_action": "gru45",
+      "selection_reason": "max_prior_window_ir_tiebreak_annret"
+    }
+  ],
+  "selection_rows": [
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.31145357311944155,
+      "ir": 2.95035601195755,
+      "max_drawdown": -0.04814207314335946,
+      "turnover": 0.1073890710141374,
+      "train_gate_ok": false,
+      "train_gate_reason": "requires days>=200, ir>=-99.0, annret>=-99.0",
+      "apply_tag": "2024H2",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "gru45",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.3997044049155713,
+      "ir": 4.603349039610813,
+      "max_drawdown": -0.04844547276029604,
+      "turnover": 0.1834138401992981,
+      "train_gate_ok": false,
+      "train_gate_reason": "requires days>=200, ir>=-99.0, annret>=-99.0",
+      "apply_tag": "2024H2",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend25",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.37075393981059673,
+      "ir": 3.617797337855678,
+      "max_drawdown": -0.04133237610236651,
+      "turnover": 0.10776414041954122,
+      "train_gate_ok": false,
+      "train_gate_reason": "requires days>=200, ir>=-99.0, annret>=-99.0",
+      "apply_tag": "2024H2",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend50",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.38037973798547653,
+      "ir": 4.0010157824544,
+      "max_drawdown": -0.03189768580124412,
+      "turnover": 0.10691845259075289,
+      "train_gate_ok": false,
+      "train_gate_reason": "requires days>=200, ir>=-99.0, annret>=-99.0",
+      "apply_tag": "2024H2",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend75",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.35447192832622015,
+      "ir": 3.841535572654072,
+      "max_drawdown": -0.04016494524038618,
+      "turnover": 0.10586218462129246,
+      "train_gate_ok": false,
+      "train_gate_reason": "requires days>=200, ir>=-99.0, annret>=-99.0",
+      "apply_tag": "2024H2",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.240208118378917,
+      "ir": 2.286254288607764,
+      "max_drawdown": -0.04814207314335946,
+      "turnover": 0.10219419721009249,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "gru45",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.2036527898948927,
+      "ir": 2.3363036551403757,
+      "max_drawdown": -0.04844547276029604,
+      "turnover": 0.17520512029485097,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend25",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.20614810093308383,
+      "ir": 2.0900322387220536,
+      "max_drawdown": -0.04133237610236651,
+      "turnover": 0.10167946569787652,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend50",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.21022179677009464,
+      "ir": 2.225862161412814,
+      "max_drawdown": -0.04737381315578881,
+      "turnover": 0.10100567795782711,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend75",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.2315738111035021,
+      "ir": 2.4600059056400707,
+      "max_drawdown": -0.04016494524038618,
+      "turnover": 0.10121143775651001,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2025",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "base40",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.2728183704692012,
+      "ir": 2.915477256756489,
+      "max_drawdown": -0.04814207314335946,
+      "turnover": 0.10099275002376355,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "gru45",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.239793620278816,
+      "ir": 2.9852886797512475,
+      "max_drawdown": -0.04844547276029604,
+      "turnover": 0.1753385134067868,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend25",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.2047713216108816,
+      "ir": 2.2688266864493967,
+      "max_drawdown": -0.04133237610236651,
+      "turnover": 0.0996606714617243,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend50",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.22926173096011884,
+      "ir": 2.6420461388559873,
+      "max_drawdown": -0.04737381315578881,
+      "turnover": 0.10051122863807112,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "prior_window_only"
+    },
+    {
+      "action_id": "blend75",
+      "start": "2024-01-01",
+      "end": "2025-12-31",
+      "days": 485,
+      "annret": 0.24285058818520258,
+      "ir": 2.815466961327795,
+      "max_drawdown": -0.04016494524038618,
+      "turnover": 0.10001308247104297,
+      "train_gate_ok": true,
+      "train_gate_reason": "",
+      "apply_tag": "2026_ytd",
+      "selection_rule": "prior_window_only"
+    }
+  ],
+  "full_metrics": {
+    "annret": 0.2509856676267943,
+    "ir": 2.6926378255194385,
+    "max_drawdown": -0.05335155599542829,
+    "turnover": 0.11057801964175817
+  },
+  "split_metrics": [
+    {
+      "split": "full",
+      "start": "2024-01-01",
+      "end": "2026-04-30",
+      "days": 562,
+      "annret": 0.2509856676267943,
+      "ir": 2.6926378255194385,
+      "max_drawdown": -0.05335155599542829,
+      "turnover": 0.11057801964175817,
+      "selected_counts": "{\"blend75\": 243, \"base40\": 242, \"gru45\": 77}"
+    },
+    {
+      "split": "2024H1",
+      "start": "2024-01-01",
+      "end": "2024-06-30",
+      "days": 117,
+      "annret": 0.31145357311944155,
+      "ir": 2.95035601195755,
+      "max_drawdown": -0.04814207314335946,
+      "turnover": 0.1073890710141374,
+      "selected_counts": "{\"base40\": 117}"
+    },
+    {
+      "split": "2024H2",
+      "start": "2024-07-01",
+      "end": "2024-12-31",
+      "days": 125,
+      "annret": 0.17352237274178597,
+      "ir": 1.6551670302783583,
+      "max_drawdown": -0.03018076862484069,
+      "turnover": 0.09733179532950646,
+      "selected_counts": "{\"base40\": 125}"
+    },
+    {
+      "split": "2024",
+      "start": "2024-01-01",
+      "end": "2024-12-31",
+      "days": 242,
+      "annret": 0.240208118378917,
+      "ir": 2.286254288607764,
+      "max_drawdown": -0.04814207314335946,
+      "turnover": 0.10219419721009249,
+      "selected_counts": "{\"base40\": 242}"
+    },
+    {
+      "split": "2025",
+      "start": "2025-01-01",
+      "end": "2025-12-31",
+      "days": 243,
+      "annret": 0.25408095877685494,
+      "ir": 3.265450057187383,
+      "max_drawdown": -0.03387578099135541,
+      "turnover": 0.0988196586888083,
+      "selected_counts": "{\"blend75\": 243}"
+    },
+    {
+      "split": "2026_ytd",
+      "start": "2026-01-01",
+      "end": "2026-04-30",
+      "days": 77,
+      "annret": 0.2750897087764252,
+      "ir": 2.77213107886613,
+      "max_drawdown": -0.0533515559954284,
+      "turnover": 0.17403473055123764,
+      "selected_counts": "{\"gru45\": 77}"
+    }
+  ],
+  "selection_counts": {
+    "blend75": 243,
+    "base40": 242,
+    "gru45": 77
+  },
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_mindays200_summary_20260523T121030Z.json",
+    "actions_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_mindays200_actions_20260523T121030Z.csv",
+    "selection_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_mindays200_selection_20260523T121030Z.csv",
+    "plan_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_mindays200_plan_20260523T121030Z.csv",
+    "splits_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\intra2024_forward_blend_gate_mindays200_splits_20260523T121030Z.csv"
+  },
+  "runtime_sec": 202.87865520000014
+}

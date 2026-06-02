@@ -1,0 +1,841 @@
+{
+  "timestamp_utc": "2026-05-23T05:17:20Z",
+  "task": "strict_past_only_causal_regime_residual_candidate",
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "protocol": {
+    "candidate": "factor_meta main leg plus causal stress-only long_history residual and small anchor defense.",
+    "selection": "quarterly_forward_locked_low_df_grid",
+    "daily_regime_gate": "stress if previous-day main dispersion is below expanding quantile OR previous-day main-anchor agreement is below expanding quantile.",
+    "parameter_grid": [
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.0,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.05,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.1,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.15,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.0,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.1,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.25,
+        "agreement_q": 0.35
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.25
+      },
+      {
+        "residual_weight": 0.2,
+        "anchor_defense_weight": 0.2,
+        "dispersion_q": 0.35,
+        "agreement_q": 0.35
+      }
+    ],
+    "cv": {
+      "min_history_days": 126,
+      "valid_days": 42,
+      "max_folds": 3,
+      "warmup_days": 60
+    },
+    "execution": {
+      "strategy": "BufferedTopkWeightStrategy",
+      "topk": 55,
+      "hold_topk": 85,
+      "rebalance_mode": "weekly",
+      "runtime_sell_wrapper": "none"
+    }
+  },
+  "leakage_boundary": {
+    "past_only": [
+      "Quarter parameters are chosen only from dates before the apply quarter.",
+      "Blocked CV folds use validation dates that are all before the future apply quarter.",
+      "Daily stress gate uses diagnostics shifted to t-1 through expanding thresholds.",
+      "No test-window full-period parameter search is used."
+    ],
+    "known_risk": "Anchor signal is used only as a small stress-regime stabilizer selected by prior-only CV; anchor portfolio parameters are not copied."
+  },
+  "paths": {
+    "anchor_pred": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\pred.pkl",
+    "anchor_label": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\mlruns\\984329077332834218\\7406e47063e9479cb34d300b9ed03bad\\artifacts\\label.pkl",
+    "meta_pred": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_candidate_pred_20260522T120515Z.pkl",
+    "long_history_pred": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\long_history_retrain_candidate_pred_20260522T134241Z.pkl",
+    "factor_meta_summary": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\factor_augmented_meta_summary_20260522T120515Z.json",
+    "long_history_summary": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\long_history_retrain_summary_20260522T134241Z.json",
+    "long_history_second_order_summary": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\long_history_second_order_summary_20260522T153041Z.json"
+  },
+  "coverage": {
+    "global_start_requested": "2024-01-01",
+    "global_end_requested": "2026-04-30",
+    "common_start": "2024-01-02",
+    "common_end": "2026-04-28",
+    "effective_eval_start": "2025-01-01",
+    "effective_eval_end": "2026-04-28",
+    "common_rows": 166858,
+    "common_days": 560,
+    "eval_rows": 95073,
+    "eval_days": 318
+  },
+  "correlations": {
+    "main_vs_aux_mean_daily_spearman": 0.08886148805217149,
+    "main_vs_residual_mean_daily_spearman": 0.008084738508452803,
+    "anchor_vs_residual_mean_daily_spearman": 0.013066801309484613
+  },
+  "metrics": {
+    "candidate_eval_backtest_status": {
+      "ok": false,
+      "metrics": null,
+      "error": {
+        "type": "ValueError",
+        "message": "only have 164539.64975975643 SZ002311, require 164540.14808790767"
+      }
+    },
+    "factor_meta_eval_backtest_status": {
+      "ok": true,
+      "metrics": {
+        "annret": 0.08646049377076649,
+        "ir": 0.9658612935833345,
+        "max_drawdown": -0.037766443596712815,
+        "turnover": 0.23456178698737185,
+        "elapsed_sec": 2.2526421999991726
+      },
+      "error": null
+    },
+    "candidate_proxy_eval": {
+      "ic_mean": 0.018947230916419828,
+      "ic_ir": 2.358984735142853,
+      "ann_proxy": 10.829980004251208,
+      "spread_ir_proxy": 3.0507979088067896,
+      "max_drawdown_proxy": -0.9065074542693043,
+      "turnover_proxy": 0.5042730140521939,
+      "objective": 4.574376075136765
+    },
+    "factor_meta_proxy_eval_same_window": {
+      "ic_mean": 0.019603273541419865,
+      "ic_ir": 2.4107279232901018,
+      "ann_proxy": 10.933324460884464,
+      "spread_ir_proxy": 3.0468130978689616,
+      "max_drawdown_proxy": -0.9092398990321637,
+      "turnover_proxy": 0.5000860338399771,
+      "objective": 4.647528085112917
+    },
+    "anchor_proxy_eval_same_window": {
+      "ic_mean": 0.016175812110388443,
+      "ic_ir": 2.0309024715278627,
+      "ann_proxy": 9.7662550108608,
+      "spread_ir_proxy": 2.7931216981710016,
+      "max_drawdown_proxy": -0.9428973845235934,
+      "turnover_proxy": 0.5183825638084313,
+      "objective": 3.9812700978071605
+    },
+    "delta_vs_factor_meta_proxy_eval": {
+      "ic_ir": -0.051743188147248986,
+      "ann_proxy": -0.10334445663325553,
+      "spread_ir_proxy": 0.003984810937827987,
+      "max_drawdown_proxy": 0.0027324447628593873,
+      "turnover_proxy": 0.004186980212216862,
+      "objective": -0.07315200997615179
+    },
+    "year_slices_same_window": [
+      {
+        "split": "2025",
+        "start": "2025-01-01",
+        "end": "2025-12-31",
+        "candidate_backtest_ok": false,
+        "candidate_backtest_error": "{\"type\": \"ValueError\", \"message\": \"only have 164539.64975975643 SZ002311, require 164540.14808790767\"}",
+        "candidate_ir": NaN,
+        "candidate_annret": NaN,
+        "candidate_max_drawdown": NaN,
+        "candidate_turnover": NaN,
+        "meta_backtest_ok": true,
+        "meta_backtest_error": null,
+        "meta_ir": 0.9658612935833345,
+        "meta_annret": 0.08646049377076649,
+        "meta_max_drawdown": -0.037766443596712815,
+        "meta_turnover": 0.23456178698737185,
+        "candidate_proxy_ic_ir": 2.0589822671903613,
+        "candidate_proxy_ann": 9.868818789162958,
+        "meta_proxy_ic_ir": 2.1303672799311766,
+        "meta_proxy_ann": 10.099492735215378,
+        "delta_proxy_ic_ir": -0.07138501274081532,
+        "delta_proxy_ann": -0.23067394605241986
+      },
+      {
+        "split": "2026_ytd",
+        "start": "2026-01-01",
+        "end": "2026-04-28",
+        "candidate_backtest_ok": true,
+        "candidate_backtest_error": null,
+        "candidate_ir": 0.9458422152011314,
+        "candidate_annret": 0.08069956310770823,
+        "candidate_max_drawdown": -0.03989444426205559,
+        "candidate_turnover": 0.20559966339393632,
+        "meta_backtest_ok": true,
+        "meta_backtest_error": null,
+        "meta_ir": 0.8391713809563728,
+        "meta_annret": 0.07213087960607519,
+        "meta_max_drawdown": -0.04134685933699725,
+        "meta_turnover": 0.20607977994388907,
+        "candidate_proxy_ic_ir": 3.318416271335306,
+        "candidate_proxy_ann": 13.944142341137127,
+        "meta_proxy_ic_ir": 3.314331129040894,
+        "meta_proxy_ann": 13.634939252052298,
+        "delta_proxy_ic_ir": 0.004085142294411703,
+        "delta_proxy_ann": 0.3092030890848285
+      }
+    ],
+    "reference_published": {
+      "factor_meta_full_2024_2026": {
+        "annret": 0.3386261002570873,
+        "ir": 2.8208783790760705,
+        "max_drawdown": -0.04089447967616651,
+        "turnover": 0.2522513294744337,
+        "elapsed_sec": 7.671771799999988
+      },
+      "long_history_full_2024_2026": null,
+      "long_history_second_order_verdict": "NO_GO",
+      "long_history_second_order_proxy_delta": {
+        "ic_ir": -0.03177357970116024,
+        "ann_proxy": -0.02520473406393009,
+        "max_drawdown_proxy": -0.0024443085615470928,
+        "turnover_proxy": 0.007112130771436798
+      }
+    }
+  },
+  "selection_periods": [
+    {
+      "period_seq": 1,
+      "period": "2024Q1",
+      "apply_start": "2024-01-02",
+      "apply_end": "2024-03-31",
+      "train_days": 0,
+      "apply_days": 58,
+      "residual_weight": 0.0,
+      "anchor_defense_weight": 0.0,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.25,
+      "stress_rate": 0.0,
+      "selection_reason": "warmup_default_main_only",
+      "cv_folds": 0,
+      "cv_score": null,
+      "cv_baseline_score": null,
+      "cv_margin": null,
+      "apply_ic_ir": 2.0152118503910943,
+      "apply_ann_proxy": 12.505851106164586,
+      "apply_spread_ir_proxy": 2.2612367332493846,
+      "apply_turnover_proxy": 0.523444976076555,
+      "meta_apply_ic_ir": 2.0152118503910943,
+      "meta_apply_ann_proxy": 12.505851106164586,
+      "meta_apply_spread_ir_proxy": 2.2612367332493846,
+      "meta_apply_turnover_proxy": 0.523444976076555,
+      "delta_apply_ic_ir": 0.0,
+      "delta_apply_ann_proxy": 0.0
+    },
+    {
+      "period_seq": 2,
+      "period": "2024Q2",
+      "apply_start": "2024-04-01",
+      "apply_end": "2024-06-30",
+      "train_days": 58,
+      "apply_days": 59,
+      "residual_weight": 0.0,
+      "anchor_defense_weight": 0.0,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.25,
+      "stress_rate": 0.288135593220339,
+      "selection_reason": "warmup_default_main_only",
+      "cv_folds": 0,
+      "cv_score": null,
+      "cv_baseline_score": null,
+      "cv_margin": null,
+      "apply_ic_ir": 4.519780656822242,
+      "apply_ann_proxy": 12.471520603107658,
+      "apply_spread_ir_proxy": 3.8131648568060457,
+      "apply_turnover_proxy": 0.5410658307210031,
+      "meta_apply_ic_ir": 4.519780656822242,
+      "meta_apply_ann_proxy": 12.471520603107658,
+      "meta_apply_spread_ir_proxy": 3.8131648568060457,
+      "meta_apply_turnover_proxy": 0.5410658307210031,
+      "delta_apply_ic_ir": 0.0,
+      "delta_apply_ann_proxy": 0.0
+    },
+    {
+      "period_seq": 3,
+      "period": "2024Q3",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-09-30",
+      "train_days": 117,
+      "apply_days": 64,
+      "residual_weight": 0.0,
+      "anchor_defense_weight": 0.0,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.25,
+      "stress_rate": 0.703125,
+      "selection_reason": "warmup_default_main_only",
+      "cv_folds": 0,
+      "cv_score": null,
+      "cv_baseline_score": null,
+      "cv_margin": null,
+      "apply_ic_ir": 1.895096079558677,
+      "apply_ann_proxy": 9.757614727549726,
+      "apply_spread_ir_proxy": 2.7777000499501057,
+      "apply_turnover_proxy": 0.5356421356421356,
+      "meta_apply_ic_ir": 1.895096079558677,
+      "meta_apply_ann_proxy": 9.757614727549726,
+      "meta_apply_spread_ir_proxy": 2.7777000499501057,
+      "meta_apply_turnover_proxy": 0.5356421356421356,
+      "delta_apply_ic_ir": 0.0,
+      "delta_apply_ann_proxy": 0.0
+    },
+    {
+      "period_seq": 4,
+      "period": "2024Q4",
+      "apply_start": "2024-10-01",
+      "apply_end": "2024-12-31",
+      "train_days": 181,
+      "apply_days": 61,
+      "residual_weight": 0.15,
+      "anchor_defense_weight": 0.1,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.25,
+      "stress_rate": 1.0,
+      "selection_reason": "blocked_cv_prior_only",
+      "cv_folds": 1,
+      "cv_score": 8.11650759458112,
+      "cv_baseline_score": 7.131684919118394,
+      "cv_margin": 0.984822675462727,
+      "apply_ic_ir": 2.082136073782786,
+      "apply_ann_proxy": 12.186284604615453,
+      "apply_spread_ir_proxy": 2.783164178990619,
+      "apply_turnover_proxy": 0.645151515151515,
+      "meta_apply_ic_ir": 2.019385569204656,
+      "meta_apply_ann_proxy": 8.733461859095243,
+      "meta_apply_spread_ir_proxy": 2.054249650110302,
+      "meta_apply_turnover_proxy": 0.6563636363636363,
+      "delta_apply_ic_ir": 0.0627505045781298,
+      "delta_apply_ann_proxy": 3.4528227455202103
+    },
+    {
+      "period_seq": 5,
+      "period": "2025Q1",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-03-31",
+      "train_days": 242,
+      "apply_days": 57,
+      "residual_weight": 0.1,
+      "anchor_defense_weight": 0.2,
+      "dispersion_q": 0.35,
+      "agreement_q": 0.25,
+      "stress_rate": 0.05263157894736842,
+      "selection_reason": "blocked_cv_prior_only",
+      "cv_folds": 2,
+      "cv_score": 2.7385762581681248,
+      "cv_baseline_score": 1.8715837079816788,
+      "cv_margin": 0.8669925501864459,
+      "apply_ic_ir": 2.0492461681572602,
+      "apply_ann_proxy": 7.62476507115296,
+      "apply_spread_ir_proxy": 2.613245738536131,
+      "apply_turnover_proxy": 0.5077922077922078,
+      "meta_apply_ic_ir": 2.110307980306289,
+      "meta_apply_ann_proxy": 7.6269647760468615,
+      "meta_apply_spread_ir_proxy": 2.639686798657806,
+      "meta_apply_turnover_proxy": 0.5077922077922078,
+      "delta_apply_ic_ir": -0.06106181214902895,
+      "delta_apply_ann_proxy": -0.002199704893901533
+    },
+    {
+      "period_seq": 6,
+      "period": "2025Q2",
+      "apply_start": "2025-04-01",
+      "apply_end": "2025-06-30",
+      "train_days": 299,
+      "apply_days": 60,
+      "residual_weight": 0.2,
+      "anchor_defense_weight": 0.2,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.35,
+      "stress_rate": 0.9833333333333333,
+      "selection_reason": "blocked_cv_prior_only",
+      "cv_folds": 3,
+      "cv_score": 3.201459409924464,
+      "cv_baseline_score": 2.5870494536219257,
+      "cv_margin": 0.6144099563025383,
+      "apply_ic_ir": 0.774682533817469,
+      "apply_ann_proxy": 6.483309101965231,
+      "apply_spread_ir_proxy": 1.8164808515505022,
+      "apply_turnover_proxy": 0.5368258859784284,
+      "meta_apply_ic_ir": 1.0695630684694135,
+      "meta_apply_ann_proxy": 7.415448863828311,
+      "meta_apply_spread_ir_proxy": 1.9594492563149437,
+      "meta_apply_turnover_proxy": 0.5149460708782744,
+      "delta_apply_ic_ir": -0.2948805346519445,
+      "delta_apply_ann_proxy": -0.9321397618630796
+    },
+    {
+      "period_seq": 7,
+      "period": "2025Q3",
+      "apply_start": "2025-07-01",
+      "apply_end": "2025-09-30",
+      "train_days": 359,
+      "apply_days": 66,
+      "residual_weight": 0.0,
+      "anchor_defense_weight": 0.0,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.25,
+      "stress_rate": 0.8939393939393939,
+      "selection_reason": "prior_cv_no_material_edge_default_main_only",
+      "cv_folds": 3,
+      "cv_score": 1.2581755965837516,
+      "cv_baseline_score": 1.2376296530912274,
+      "cv_margin": 0.020545943492524144,
+      "apply_ic_ir": 1.1205092565882078,
+      "apply_ann_proxy": 6.7226633463626335,
+      "apply_spread_ir_proxy": 1.7337331367173654,
+      "apply_turnover_proxy": 0.521958041958042,
+      "meta_apply_ic_ir": 1.1205092565882078,
+      "meta_apply_ann_proxy": 6.7226633463626335,
+      "meta_apply_spread_ir_proxy": 1.7337331367173654,
+      "meta_apply_turnover_proxy": 0.521958041958042,
+      "delta_apply_ic_ir": 0.0,
+      "delta_apply_ann_proxy": 0.0
+    },
+    {
+      "period_seq": 8,
+      "period": "2025Q4",
+      "apply_start": "2025-10-01",
+      "apply_end": "2025-12-31",
+      "train_days": 425,
+      "apply_days": 60,
+      "residual_weight": 0.0,
+      "anchor_defense_weight": 0.0,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.25,
+      "stress_rate": 0.1,
+      "selection_reason": "prior_cv_no_material_edge_default_main_only",
+      "cv_folds": 3,
+      "cv_score": 2.4192935822863166,
+      "cv_baseline_score": 2.4617538997466344,
+      "cv_margin": -0.042460317460317754,
+      "apply_ic_ir": 4.434311345965712,
+      "apply_ann_proxy": 18.84695049555055,
+      "apply_spread_ir_proxy": 5.290793947124733,
+      "apply_turnover_proxy": 0.48628659476117103,
+      "meta_apply_ic_ir": 4.434311345965712,
+      "meta_apply_ann_proxy": 18.84695049555055,
+      "meta_apply_spread_ir_proxy": 5.290793947124733,
+      "meta_apply_turnover_proxy": 0.48628659476117103,
+      "delta_apply_ic_ir": 0.0,
+      "delta_apply_ann_proxy": 0.0
+    },
+    {
+      "period_seq": 9,
+      "period": "2026Q1",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-03-31",
+      "train_days": 485,
+      "apply_days": 56,
+      "residual_weight": 0.0,
+      "anchor_defense_weight": 0.0,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.25,
+      "stress_rate": 0.48214285714285715,
+      "selection_reason": "prior_cv_no_material_edge_default_main_only",
+      "cv_folds": 3,
+      "cv_score": 5.3387579556627,
+      "cv_baseline_score": 5.350946909490513,
+      "cv_margin": -0.012188953827812377,
+      "apply_ic_ir": 2.3872063857788377,
+      "apply_ann_proxy": 11.06414320462147,
+      "apply_spread_ir_proxy": 2.7348328583214077,
+      "apply_turnover_proxy": 0.46148760330578503,
+      "meta_apply_ic_ir": 2.3872063857788377,
+      "meta_apply_ann_proxy": 11.06414320462147,
+      "meta_apply_spread_ir_proxy": 2.7348328583214077,
+      "meta_apply_turnover_proxy": 0.46148760330578503,
+      "delta_apply_ic_ir": 0.0,
+      "delta_apply_ann_proxy": 0.0
+    },
+    {
+      "period_seq": 10,
+      "period": "2026Q2",
+      "apply_start": "2026-04-01",
+      "apply_end": "2026-04-28",
+      "train_days": 541,
+      "apply_days": 19,
+      "residual_weight": 0.05,
+      "anchor_defense_weight": 0.2,
+      "dispersion_q": 0.25,
+      "agreement_q": 0.35,
+      "stress_rate": 0.631578947368421,
+      "selection_reason": "blocked_cv_prior_only",
+      "cv_folds": 3,
+      "cv_score": 6.597263589007976,
+      "cv_baseline_score": 6.49252722061108,
+      "cv_margin": 0.10473636839689604,
+      "apply_ic_ir": 7.742349526105883,
+      "apply_ann_proxy": 22.432560848762222,
+      "apply_spread_ir_proxy": 9.354290534748992,
+      "apply_turnover_proxy": 0.5060606060606061,
+      "meta_apply_ic_ir": 7.510004121466296,
+      "meta_apply_ann_proxy": 21.212022339216848,
+      "meta_apply_spread_ir_proxy": 8.566611294401216,
+      "meta_apply_turnover_proxy": 0.502020202020202,
+      "delta_apply_ic_ir": 0.2323454046395872,
+      "delta_apply_ann_proxy": 1.2205385095453742
+    }
+  ],
+  "hard_gate_reference": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27,
+    "candidate_pass_eval_window": false,
+    "note": "Smoke gate focuses on 2025-01-01 through common end migration window before any full run recommendation."
+  },
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_summary_20260523T050315Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_summary_20260523T050315Z.md",
+    "candidate_pred_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_candidate_pred_20260523T050315Z.pkl",
+    "candidate_pred_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_candidate_pred_20260523T050315Z.csv",
+    "periods_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_periods_20260523T050315Z.csv",
+    "selector_diag_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_selector_diag_20260523T050315Z.csv",
+    "slices_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_slices_20260523T050315Z.csv",
+    "artifact_parse_smoke_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_regime_residual_artifact_parse_smoke_20260523T050315Z.json"
+  },
+  "runtime_sec_total": 846.1097074999998
+}

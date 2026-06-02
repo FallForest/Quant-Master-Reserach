@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -419,8 +419,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--base-run-id", default=BASE_RUN_ID)
     p.add_argument("--factor-pred-pkl", default="")
     p.add_argument("--factor-summary-json", default="")
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--output-prefix", default="factor_meta_gru_base_fusion_lockstep")
     p.add_argument("--skip-full-audit", action="store_true")
     p.add_argument("--verify-selection-json", default="", help="Rerun apply windows using frozen selections from a prior summary JSON.")
@@ -853,3 +853,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -28,13 +28,10 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: { template: '<div />' } },
-    { path: '/pipeline', component: { template: '<div />' } },
     { path: '/browser', component: { template: '<div />' } },
-    { path: '/factor', component: { template: '<div />' } },
-    { path: '/model-lab', component: { template: '<div />' } },
-    { path: '/stock-select', component: { template: '<div />' } },
-    { path: '/backtest', component: { template: '<div />' } },
-    { path: '/experiments', component: { template: '<div />' } },
+    { path: '/model', component: { template: '<div />' } },
+    { path: '/strategy', component: { template: '<div />' } },
+    { path: '/execution', component: { template: '<div />' } },
   ],
 })
 
@@ -76,19 +73,33 @@ describe('Overview', () => {
     await flushPromises()
     const text = wrapper.text()
     expect(text).toContain('浏览数据')
-    expect(text).toContain('因子分析')
-    expect(text).toContain('模型工坊')
-    expect(text).toContain('策略回测')
+    expect(text).toContain('模型选股')
+    expect(text).toContain('策略调仓')
+    expect(text).toContain('交易执行')
   })
 
-  it('renders 6 quick action buttons', async () => {
+  it('renders 4 quick action buttons', async () => {
     mockApi.mockResolvedValue(null)
     const wrapper = mount(Overview, {
       global: { plugins: [router] },
     })
     await flushPromises()
     const actionButtons = wrapper.findAll('button[aria-label]')
-    expect(actionButtons.length).toBe(6)
+    expect(actionButtons.length).toBe(4)
+  })
+
+  it('navigates to /strategy when clicking 策略调仓 quick action', async () => {
+    mockApi.mockResolvedValue(null)
+    router.push('/')
+    await router.isReady()
+    const wrapper = mount(Overview, {
+      global: { plugins: [router] },
+    })
+    await flushPromises()
+
+    await wrapper.find('button[aria-label="策略调仓"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.path).toBe('/strategy')
   })
 
   it('renders stat cards with correct labels', async () => {
@@ -105,7 +116,7 @@ describe('Overview', () => {
     const text = wrapper.text()
     expect(text).toContain('股票总数')
     expect(text).toContain('交易日历')
-    expect(text).toContain('最后更新')
+    expect(text).toContain('实际更新')
     expect(text).toContain('数据完整度')
   })
 

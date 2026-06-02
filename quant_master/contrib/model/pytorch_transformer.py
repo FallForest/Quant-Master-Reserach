@@ -8,7 +8,6 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 from typing import Text, Union
-import copy
 import math
 from ...utils import get_or_create_path
 from ...log import get_module_logger
@@ -110,10 +109,7 @@ class TransformerModel(Model):
         indices = np.arange(len(x_train_values))
         np.random.shuffle(indices)
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
-
+        for i in range(0, len(indices), self.batch_size):
             feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
             label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
 
@@ -137,10 +133,7 @@ class TransformerModel(Model):
 
         indices = np.arange(len(x_values))
 
-        for i in range(len(indices))[:: self.batch_size]:
-            if len(indices) - i < self.batch_size:
-                break
-
+        for i in range(0, len(indices), self.batch_size):
             feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
             label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
 
@@ -198,7 +191,7 @@ class TransformerModel(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = copy.deepcopy(self.model.state_dict())
+                best_param = self.model.state_dict()
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

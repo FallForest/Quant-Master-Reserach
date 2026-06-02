@@ -19,8 +19,9 @@ from data_collector.yahoo.collector import Run
 
 
 def main():
-    smoke_source = ROOT / ".qmData" / "yahoo" / "smoke_source"
-    smoke_norm = ROOT / ".qmData" / "yahoo" / "smoke_normalize"
+    smoke_root = Path("~/.quant_master/quant_master_data/yahoo_smoke").expanduser().resolve()
+    smoke_source = smoke_root / "source"
+    smoke_norm = smoke_root / "normalize"
 
     # Clean previous runs
     for d in [smoke_source, smoke_norm]:

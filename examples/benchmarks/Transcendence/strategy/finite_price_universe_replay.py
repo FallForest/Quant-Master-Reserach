@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -40,8 +40,8 @@ GRU45_RUN_WEIGHTS = (0.4, 0.2, 0.4)
 MARKET = "csi300"
 TEST_START = "2024-01-01"
 TEST_END = "2026-04-30"
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 
@@ -132,7 +132,7 @@ def _init_quant_master(config: Dict[str, Any]) -> None:
     init_cfg = copy.deepcopy(config.get("quant_master_init", {}))
     if not isinstance(init_cfg, dict):
         init_cfg = {}
-    init_cfg.setdefault("provider_uri", ".qmData/cn_data")
+    init_cfg.setdefault("provider_uri", "~/.quant_master/quant_master_data/tdx_cn_data")
     init_cfg.setdefault("region", "cn")
     quant_master.init(**init_cfg)
 
@@ -690,3 +690,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

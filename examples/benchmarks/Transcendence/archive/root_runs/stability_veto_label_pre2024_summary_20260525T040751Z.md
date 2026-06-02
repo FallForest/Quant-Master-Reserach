@@ -1,0 +1,25 @@
+# Pre-2023 Stability-Veto Label Family (20260525T040751Z)
+
+- status: `full_hard_gate_failed`
+- verdict: `NO_GO`
+- mode: `full`
+- smoke_no_2024_2026_load_or_eval: `False`
+- full_locked_candidate: `ridge_stab_vol_scaled_net_excess_10d_rank_trend_quality_rank10_a10`
+- candidates_total/survivors: `1` / `1`
+- selected_candidate: `ridge_stab_vol_scaled_net_excess_10d_rank_trend_quality_rank10_a10`
+- selected_rule: `topk=40, n_drop=3`
+- selected_train_year_rank_ic: `2020=0.052169, 2021=0.049645, 2022=0.057660`
+- selected_train_year_rank_ic_nonnegative: `True`
+- 2023 costed IR / AnnRet / turnover: `3.094545` / `0.228364` / `0.148274`
+- 2024-2026 costed IR / AnnRet / turnover: `0.741645` / `0.062232` / `0.145500`
+- 2024-2026 max_drawdown: `-0.076896`
+- 2024-2026 finite_rows: `562` / `562`
+- 2024-2026 nonfinite_rows: `0`
+- full_hard_gate_passed: `False`
+- finite_rows: `242` / `242`
+- validation_nonfinite_rows: `0`
+- fail_closed_finite_gate_passed: `True`
+- investigate_gate: `IR >= 1.8`
+- promotion_gate: `IR >= 2.3, AnnRet >= 0.16`
+- runtime_sec: `55.993`
+- summary_json: `C:\Users\15728\Desktop\Quant-Master-Research\examples\benchmarks\Transcendence\stability_veto_label_pre2024_summary_20260525T040751Z.json`

@@ -1,0 +1,10 @@
+{
+  "rhce_v1": {
+    "run_id": "7406e47063e9479cb34d300b9ed03bad",
+    "name": "RegimeHorizonCostEnsemble",
+    "description": "多机制成本感知集成模型 (Alpha158, CSI300)",
+    "handler": "Alpha158",
+    "instruments": "csi300",
+    "benchmark": "SH000300"
+  }
+}

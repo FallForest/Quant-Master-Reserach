@@ -111,13 +111,8 @@ class FileCalendarStorage(FileStorageMixin, CalendarStorage):
         if not self.uri.exists():
             self._write_calendar(values=[])
 
-        with self.uri.open("r") as fp:
-            res = []
-            for line in fp.readlines():
-                line = line.strip()
-                if len(line) > 0:
-                    res.append(line)
-            return res
+        lines = self.uri.read_text().splitlines()
+        return [line for line in (l.strip() for l in lines) if line]
 
     def _write_calendar(self, values: Iterable[CalVT], mode: str = "wb"):
         with self.uri.open(mode=mode) as fp:
@@ -204,7 +199,6 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
         if not self.uri.exists():
             self._write_instrument()
 
-        _instruments = dict()
         df = pd.read_csv(
             self.uri,
             sep="\t",
@@ -213,9 +207,10 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
             dtype={self.SYMBOL_FIELD_NAME: str},
             parse_dates=[self.INSTRUMENT_START_FIELD, self.INSTRUMENT_END_FIELD],
         )
-        for row in df.itertuples(index=False):
-            _instruments.setdefault(row[0], []).append((row[1], row[2]))
-        return _instruments
+        return {
+            inst: list(zip(group[self.INSTRUMENT_START_FIELD], group[self.INSTRUMENT_END_FIELD]))
+            for inst, group in df.groupby(self.SYMBOL_FIELD_NAME, sort=False)
+        }
 
     def _write_instrument(self, data: Dict[InstKT, InstVT] = None) -> None:
         if not data:
@@ -233,7 +228,6 @@ class FileInstrumentStorage(FileStorageMixin, InstrumentStorage):
         df.loc[:, [self.SYMBOL_FIELD_NAME, self.INSTRUMENT_START_FIELD, self.INSTRUMENT_END_FIELD]].to_csv(
             self.uri, header=False, sep=self.INSTRUMENT_SEP, index=False
         )
-        df.to_csv(self.uri, sep="\t", encoding="utf-8", header=False, index=False)
 
     def clear(self) -> None:
         self._write_instrument(data={})
@@ -287,16 +281,35 @@ class FileFeatureStorage(FileStorageMixin, FeatureStorage):
         super(FileFeatureStorage, self).__init__(instrument, field, freq, **kwargs)
         self._provider_uri = None if provider_uri is None else C.DataPathManager.format_provider_uri(provider_uri)
         self.file_name = f"{instrument.lower()}/{field.lower()}.{freq.lower()}.bin"
+        # Cached file metadata to avoid repeated open/stat on every __getitem__
+        self._meta_cache = None  # (storage_start_index, file_len, file_size)
 
     def clear(self):
+        self._meta_cache = None
         with self.uri.open("wb") as _:
             pass
+
+    def _get_meta(self):
+        """Return (storage_start_index, file_len, file_size) with caching."""
+        if self._meta_cache is not None:
+            return self._meta_cache
+        file_size = self.uri.stat().st_size
+        if file_size < 4:
+            raise ValueError(f"Corrupt feature storage header: path={self.uri}, file_size={file_size}")
+        if file_size % 4 != 0:
+            raise ValueError(f"Corrupt feature storage alignment: path={self.uri}, file_size={file_size}")
+        with self.uri.open("rb") as fp:
+            storage_start_index = int(np.frombuffer(fp.read(4), dtype="<f")[0])
+        file_len = file_size // 4 - 1
+        self._meta_cache = (storage_start_index, file_len, file_size)
+        return self._meta_cache
 
     @property
     def data(self) -> pd.Series:
         return self[:]
 
     def write(self, data_array: Union[List, np.ndarray], index: int = None) -> None:
+        self._meta_cache = None  # invalidate cached metadata
         if len(data_array) == 0:
             logger.info(
                 "len(data_array) == 0, write"
@@ -332,16 +345,14 @@ class FileFeatureStorage(FileStorageMixin, FeatureStorage):
     def start_index(self) -> Union[int, None]:
         if not self.uri.exists():
             return None
-        with self.uri.open("rb") as fp:
-            index = int(np.frombuffer(fp.read(4), dtype="<f")[0])
-        return index
+        return self._get_meta()[0]
 
     @property
     def end_index(self) -> Union[int, None]:
         if not self.uri.exists():
             return None
         # The next  data appending index point will be  `end_index + 1`
-        return self.start_index + len(self) - 1
+        return self._get_meta()[0] + self._get_meta()[1] - 1
 
     def __getitem__(self, i: Union[int, slice]) -> Union[Tuple[int, float], pd.Series]:
         if not self.uri.exists():
@@ -352,28 +363,41 @@ class FileFeatureStorage(FileStorageMixin, FeatureStorage):
             else:
                 raise TypeError(f"type(i) = {type(i)}")
 
-        storage_start_index = self.start_index
-        storage_end_index = self.end_index
-        with self.uri.open("rb") as fp:
-            if isinstance(i, int):
-                if storage_start_index > i:
-                    raise IndexError(f"{i}: start index is {storage_start_index}")
+        storage_start_index, file_len, _ = self._get_meta()
+        storage_end_index = storage_start_index + file_len - 1
+
+        if isinstance(i, int):
+            if storage_start_index > i:
+                raise IndexError(f"{i}: start index is {storage_start_index}")
+            with self.uri.open("rb") as fp:
                 fp.seek(4 * (i - storage_start_index) + 4)
                 return i, struct.unpack("f", fp.read(4))[0]
-            elif isinstance(i, slice):
-                start_index = storage_start_index if i.start is None else i.start
-                end_index = storage_end_index if i.stop is None else i.stop - 1
-                si = max(start_index, storage_start_index)
-                if si > end_index:
-                    return pd.Series(dtype=np.float32)
-                fp.seek(4 * (si - storage_start_index) + 4)
-                # read n bytes
-                count = end_index - si + 1
-                data = np.frombuffer(fp.read(4 * count), dtype="<f")
-                return pd.Series(data, index=pd.RangeIndex(si, si + len(data)))
-            else:
-                raise TypeError(f"type(i) = {type(i)}")
+        elif isinstance(i, slice):
+            start_index = storage_start_index if i.start is None else i.start
+            end_index = storage_end_index if i.stop is None else i.stop - 1
+            si = max(start_index, storage_start_index)
+            if si > end_index:
+                return pd.Series(dtype=np.float32)
+            count = end_index - si + 1
+            offset = 4 * (si - storage_start_index) + 4
+            expected_bytes = 4 * count
+            with self.uri.open("rb") as fp:
+                fp.seek(offset)
+                raw = fp.read(expected_bytes)
+                data = np.frombuffer(raw, dtype="<f")
+            if len(raw) != expected_bytes or len(data) != count:
+                raise ValueError(
+                    "Corrupt feature storage slice: "
+                    f"path={self.uri}, instrument={self.instrument}, field={self.field}, freq={self.freq}, "
+                    f"storage_start_index={storage_start_index}, storage_end_index={storage_end_index}, "
+                    f"request_start={i.start}, request_stop={i.stop}, resolved_start={si}, resolved_end={end_index}, "
+                    f"count={count}, offset={offset}, file_size={self.uri.stat().st_size}, "
+                    f"expected_bytes={expected_bytes}, actual_bytes={len(raw)}, actual_count={len(data)}"
+                )
+            return pd.Series(data, index=pd.RangeIndex(si, si + count))
+        else:
+            raise TypeError(f"type(i) = {type(i)}")
 
     def __len__(self) -> int:
         self.check()
-        return self.uri.stat().st_size // 4 - 1
+        return self._get_meta()[1]

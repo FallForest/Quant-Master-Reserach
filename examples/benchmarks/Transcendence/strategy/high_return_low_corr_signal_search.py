@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -717,8 +717,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--base-run-id", default=DEFAULT_BASE_RUN)
     p.add_argument("--start-date", default=TEST_START)
     p.add_argument("--end-date", default=TEST_END)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--max-discovery-runs", type=int, default=0, help="0 scans all mlruns prediction artifacts.")
     p.add_argument("--max-shortlist", type=int, default=3)
     p.add_argument("--max-abs-corr", type=float, default=0.92)
@@ -934,3 +934,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

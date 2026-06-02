@@ -36,7 +36,7 @@ Below is a typical config file of ``qrun``.
 .. code-block:: YAML
 
     quant_master_init:
-        provider_uri: "~/.quant_master/quant_master_data/cn_data"
+        provider_uri: "~/.quant_master/quant_master_data/tdx_cn_data"
         region: cn
     market: &market csi300
     benchmark: &benchmark SH000300
@@ -173,10 +173,12 @@ At first, the configuration file needs to contain several basic parameters which
 
 .. code-block:: YAML
 
-    provider_uri: "~/.quant_master/quant_master_data/cn_data"
+    provider_uri: "~/.quant_master/quant_master_data/tdx_cn_data"
     region: cn
 
 The meaning of each field is as follows:
+
+The current unified China-market data directory for workflow configs is ``~/.quant_master/quant_master_data/tdx_cn_data``.
 
 - `provider_uri`
     Type: str. The URI of the QuantMaster data. For example, it could be the location where the data loaded by ``get_data.py`` are stored.

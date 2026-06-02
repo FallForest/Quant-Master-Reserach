@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -593,8 +593,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--base-run-id", default=DEFAULT_BASE_RUN)
     p.add_argument("--start-date", default=TEST_START)
     p.add_argument("--end-date", default=TEST_END)
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--fixed-2024-action", default="base40", choices=["base45", "base40", "rank50", "gru45", "base50"])
     p.add_argument("--primary-score", default="ann_mdd", choices=["ir_focus", "ann_mdd", "stability"])
     p.add_argument("--train-min-ir", type=float, default=0.0)
@@ -845,3 +845,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

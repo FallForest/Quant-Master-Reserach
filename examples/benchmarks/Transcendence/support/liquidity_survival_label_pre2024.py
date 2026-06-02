@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 import drawdown_conditional_label_pre2024 as dd
+from quant_master.config import resolve_provider_uri
 
 
 THIS_DIR = Path(__file__).resolve().parent
@@ -299,14 +300,14 @@ def _make_predictions(
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Liquidity survival label 2023-smoke / locked full eval.")
     p.add_argument("--mode", choices=["smoke", "full"], default="smoke")
-    p.add_argument("--provider-uri", default=".qmData/cn_data")
+    p.add_argument("--provider-uri", default="~/.quant_master/quant_master_data/tdx_cn_data")
     p.add_argument("--market", default="csi300")
     p.add_argument(
         "--workflow-config",
         default="workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml",
     )
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--horizon-grid", default="5,10,20")
     p.add_argument("--liquidity-weight-grid", default="0.25,0.5,1.0")
     p.add_argument("--alpha-grid", default="10")
@@ -344,7 +345,7 @@ def main() -> int:
     t0_all = time.perf_counter()
     stamp = _stamp()
     paths = _artifact_paths(str(args.output_prefix), stamp)
-    provider_uri = Path(args.provider_uri).expanduser().resolve()
+    provider_uri = Path(resolve_provider_uri(args.provider_uri, base_dir=dd.REPO_ROOT))
     mode = str(args.mode)
     data_end = TEST_END if mode == "full" else VALID_END
     summary: Dict[str, Any] = {
@@ -701,3 +702,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

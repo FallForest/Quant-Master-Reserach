@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -29,6 +29,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri_in_config
 from quant_master.backtest import backtest as run_backtest
 from quant_master.backtest import get_exchange
 from quant_master.contrib.evaluate import risk_analysis
@@ -153,7 +154,7 @@ def _load_pickle(path: Path) -> Any:
 
 def _load_config(path: Path) -> Dict[str, Any]:
     try:
-        return yaml.safe_load(path.read_text(encoding="utf-8"))
+        return resolve_provider_uri_in_config(yaml.safe_load(path.read_text(encoding="utf-8")), base_dir=path.parent)
     except UnicodeDecodeError:
         return _load_pickle(path)
 
@@ -162,7 +163,7 @@ def _init_quant_master(config: Dict[str, Any]) -> None:
     init_cfg = copy.deepcopy(config.get("quant_master_init", {}))
     if not isinstance(init_cfg, dict):
         init_cfg = {}
-    init_cfg.setdefault("provider_uri", ".qmData/cn_data")
+    init_cfg.setdefault("provider_uri", "~/.quant_master/quant_master_data/tdx_cn_data")
     init_cfg.setdefault("region", "cn")
     quant_master.init(**init_cfg)
 
@@ -747,8 +748,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--start-date", default="2024-01-01")
     p.add_argument("--end-date", default="2026-04-30")
-    p.add_argument("--open-cost", type=float, default=0.0005)
-    p.add_argument("--close-cost", type=float, default=0.0015)
+    p.add_argument("--open-cost", type=float, default=0.0001)
+    p.add_argument("--close-cost", type=float, default=0.0006)
     p.add_argument("--topk", type=int, default=45)
     p.add_argument("--n-drop", type=int, default=4)
     p.add_argument("--mode", choices=["smoke", "full"], default="full")
@@ -1065,3 +1066,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

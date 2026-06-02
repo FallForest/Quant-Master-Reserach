@@ -1,0 +1,30 @@
+16:29:16 [vite] (client) Re-optimizing dependencies because vite config has changed
+
+  VITE v6.4.2  ready in 482 ms
+
+  ➜  Local:   http://127.0.0.1:5174/
+  ➜  press h + enter to show help
+16:30:07 [vite] http proxy error: /api/overview
+Error: connect ENOBUFS 127.0.0.1:5174 - Local (undefined:undefined)
+    at internalConnect (node:net:1115:16)
+    at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+    at node:net:1355:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+16:30:16 [vite] http proxy error: /api/pipeline/status
+Error: connect ENOBUFS 127.0.0.1:5174 - Local (undefined:undefined)
+    at internalConnect (node:net:1115:16)
+    at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+    at node:net:1355:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+16:30:16 [vite] http proxy error: /api/browser/indices
+Error: connect ENOBUFS 127.0.0.1:5174 - Local (undefined:undefined)
+    at internalConnect (node:net:1115:16)
+    at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+    at node:net:1355:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+16:30:16 [vite] http proxy error: /api/browser/stocks
+Error: connect ENOBUFS 127.0.0.1:5174 - Local (undefined:undefined)
+    at internalConnect (node:net:1115:16)
+    at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+    at node:net:1355:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)

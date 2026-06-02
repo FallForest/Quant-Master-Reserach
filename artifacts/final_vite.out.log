@@ -1,0 +1,52 @@
+
+> dev
+> vite --host 127.0.0.1 --port 5173
+
+
+  VITE v6.4.2  ready in 438 ms
+
+  ➜  Local:   http://127.0.0.1:5173/
+19:05:59 [vite] (client) page reload src/router/index.js
+19:05:59 [vite] (client) page reload src/utils/api.js
+19:05:59 [vite] (client) page reload server/routes.py
+19:05:59 [vite] (client) hmr update /src/components/Sidebar.vue, /src/style.css
+19:05:59 [vite] (client) hmr update /src/components/HeaderBar.vue, /src/style.css
+19:06:13 [vite] (client) page reload src/router/index.js
+19:09:04 [vite] (client) page reload src/views/model-lab/OptimalModel.vue
+19:09:25 [vite] (client) hmr update /src/components/HeaderBar.vue, /src/style.css
+19:09:54 [vite] (client) hmr update /src/style.css, /src/views/Portfolio.vue, /src/views/Backtest.vue
+19:12:07 [vite] (client) hmr update /src/style.css
+19:12:54 [vite] (client) page reload src/views/model-lab/BacktestChart.vue
+19:12:54 [vite] (client) page reload src/views/model-lab/ModelCard.vue
+19:12:54 [vite] (client) page reload src/views/model-lab/RegimeAnalysis.vue
+19:12:54 [vite] (client) page reload src/views/model-lab/ResultsMetrics.vue
+19:12:54 [vite] (client) page reload src/views/model-lab/RunHistory.vue
+19:15:18 [vite] (client) page reload server/routes.py
+19:18:19 [vite] (client) hmr update /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/ModelLab.vue, /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/Backtest.vue, /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/Attribution.vue, /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/LiveTrading.vue, /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/ModelPerformance.vue, /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/Optimizer.vue, /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/Portfolio.vue, /src/style.css
+20:37:36 [vite] (client) hmr update /src/views/StockSelection.vue, /src/style.css
+20:37:42 [vite] (client) hmr update /@fs/C:\Users\15728\Desktop\Quant-Master-Research\ui\src\views\model-lab\OptimalModel.vue, /src/style.css
+20:37:51 [vite] (client) page reload server/handlers/model_lab.py
+20:37:51 [vite] (client) page reload server/handlers/model_train.py
+20:37:51 [vite] (client) page reload server/stock_select.py
+20:37:51 [vite] (client) page reload models.yaml
+20:38:11 [vite] (client) page reload src/router/index.js
+20:38:44 [vite] (client) hmr update /src/components/Sidebar.vue, /src/style.css
+20:39:09 [vite] (client) page reload server/routes.py
+20:39:21 [vite] (client) page reload server/handlers/analysis.py
+20:39:32 [vite] (client) hmr update /src/style.css
+20:39:45 [vite] (client) hmr update /src/style.css
+20:40:50 [vite] (client) page reload server/routes.py
+20:41:00 [vite] (client) page reload server/handlers/static.py
+20:41:00 [vite] (client) page reload server/model_catalog.py
+20:41:13 [vite] (client) page reload server/tests/test_endpoints_static.py
+20:41:26 [vite] (client) page reload server/app.py
+20:41:50 [vite] (client) page reload server/tests/conftest.py
+20:41:56 [vite] (client) page reload server/tests/test_endpoints_async.py
+20:46:54 [vite] (client) page reload .server-pid

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -17,12 +17,11 @@ from ruamel.yaml import YAML
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 THIS_DIR = Path(__file__).resolve().parent
-LOCAL_PROVIDER = (REPO_ROOT / ".qmData" / "cn_data").resolve()
-
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import quant_master
+from quant_master.config import resolve_provider_uri, resolve_provider_uri_in_config
 from quant_master.contrib.evaluate import risk_analysis
 from quant_master.model.trainer import task_train
 
@@ -36,8 +35,8 @@ TRAIN_RANGE = ["2012-01-01", "2020-12-31"]
 VALID_RANGE = ["2021-01-01", "2023-12-31"]
 TEST_RANGE = ["2024-01-01", "2026-04-30"]
 SMOKE_TEST_RANGE = ["2024-01-01", "2024-03-31"]
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 HARD_GATE_ROWS = 562
@@ -76,7 +75,7 @@ def _jsonable(x: Any) -> Any:
 def _load_config(path: Path) -> Dict[str, Any]:
     yaml = YAML(typ="safe", pure=True)
     with path.open("r", encoding="utf-8") as f:
-        return yaml.load(f)
+        return resolve_provider_uri_in_config(yaml.load(f), base_dir=path.parent)
 
 
 def _dump_config(config: Dict[str, Any], path: Path) -> None:
@@ -98,7 +97,7 @@ def _find_port_config(config: Dict[str, Any]) -> Dict[str, Any]:
 def _apply_common_overrides(config: Dict[str, Any], mode: str) -> Dict[str, Any]:
     cfg = copy.deepcopy(config)
     cfg.setdefault("quant_master_init", {})
-    cfg["quant_master_init"]["provider_uri"] = str(LOCAL_PROVIDER)
+    cfg["quant_master_init"]["provider_uri"] = str(resolve_provider_uri("~/.quant_master/quant_master_data/tdx_cn_data", base_dir=REPO_ROOT))
     cfg["quant_master_init"].setdefault("region", "cn")
 
     handler_cfg = cfg["task"]["dataset"]["kwargs"]["handler"]["kwargs"]
@@ -311,3 +310,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

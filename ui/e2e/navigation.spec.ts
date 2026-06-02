@@ -2,9 +2,7 @@ import { test, expect } from '@playwright/test'
 
 const routes = [
   { path: '/', title: '总览' },
-  { path: '/pipeline', title: '数据管道' },
   { path: '/browser', title: '数据浏览' },
-  { path: '/factor', title: '因子分析' },
   { path: '/model-lab', title: '模型工坊' },
   { path: '/model-performance', title: '模型绩效' },
   { path: '/stock-select', title: '模型选股' },

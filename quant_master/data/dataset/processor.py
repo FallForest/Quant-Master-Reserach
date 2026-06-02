@@ -32,6 +32,26 @@ def get_group_columns(df: pd.DataFrame, group: Union[Text, None]):
         return df.columns[df.columns.get_loc(group)]
 
 
+def _assign_columns(df: pd.DataFrame, cols, values, processor_name: str):
+    expected_shape = df.loc[:, cols].shape
+    try:
+        result = values if isinstance(values, pd.DataFrame) else pd.DataFrame(values, index=df.index, columns=cols)
+    except ValueError as exc:
+        raise ValueError(
+            f"{processor_name} produced values that cannot align to expected shape {expected_shape}: {exc}"
+        ) from exc
+    if result.shape != expected_shape:
+        raise ValueError(
+            f"{processor_name} produced shape {result.shape}, expected {expected_shape} for target columns"
+        )
+    if not result.index.equals(df.index):
+        raise ValueError(f"{processor_name} produced misaligned index during column assignment")
+    result = result.loc[:, cols]
+    df.loc[:, cols] = result
+    return df
+
+
+
 class Processor(Serializable):
     def fit(self, df: pd.DataFrame = None):
         """
@@ -171,6 +191,11 @@ class ProcessInf(Processor):
 
             data = datetime_groupby_apply(data, process_inf)
             data.sort_index(inplace=True)
+            if not data.index.equals(df.index):
+                raise ValueError(
+                    f"{self.__class__.__name__} changed index during infinity processing: "
+                    f"input_len={len(df)}, output_len={len(data)}"
+                )
             return data
 
         return replace_inf(df)
@@ -186,11 +211,10 @@ class Fillna(Processor):
     def __call__(self, df):
         if self.fields_group is None:
             df.fillna(self.fill_value, inplace=True)
-        else:
-            # this implementation is extremely slow
-            # df.fillna({col: self.fill_value for col in cols}, inplace=True)
-            df[self.fields_group] = df[self.fields_group].fillna(self.fill_value)
-        return df
+            return df
+        cols = get_group_columns(df, self.fields_group)
+        filled = df.loc[:, cols].fillna(self.fill_value)
+        return _assign_columns(df, cols, filled, self.__class__.__name__)
 
 
 class MinMaxNorm(Processor):
@@ -221,8 +245,7 @@ class MinMaxNorm(Processor):
         def normalize(x, min_val=self.min_val, max_val=self.max_val):
             return (x - min_val) / (max_val - min_val)
 
-        df.loc(axis=1)[self.cols] = normalize(df[self.cols].values)
-        return df
+        return _assign_columns(df, self.cols, normalize(df.loc[:, self.cols].to_numpy()), self.__class__.__name__)
 
 
 class ZScoreNorm(Processor):
@@ -255,8 +278,7 @@ class ZScoreNorm(Processor):
         def normalize(x, mean_train=self.mean_train, std_train=self.std_train):
             return (x - mean_train) / std_train
 
-        df.loc(axis=1)[self.cols] = normalize(df[self.cols].values)
-        return df
+        return _assign_columns(df, self.cols, normalize(df.loc[:, self.cols].to_numpy()), self.__class__.__name__)
 
 
 class RobustZScoreNorm(Processor):
@@ -319,7 +341,8 @@ class CSZScoreNorm(Processor):
         with pd.option_context("mode.chained_assignment", None):
             for g in self.fields_group:
                 cols = get_group_columns(df, g)
-                df[cols] = df[cols].groupby("datetime", group_keys=False).apply(self.zscore_func)
+                transformed = df.loc[:, cols].groupby("datetime", group_keys=False).apply(self.zscore_func)
+                _assign_columns(df, cols, transformed, self.__class__.__name__)
         return df
 
 
@@ -352,11 +375,10 @@ class CSRankNorm(Processor):
     def __call__(self, df):
         # try not modify original dataframe
         cols = get_group_columns(df, self.fields_group)
-        t = df[cols].groupby("datetime", group_keys=False).rank(pct=True)
+        t = df.loc[:, cols].groupby("datetime", group_keys=False).rank(pct=True)
         t -= 0.5
         t *= 3.46  # NOTE: towards unit std
-        df[cols] = t
-        return df
+        return _assign_columns(df, cols, t, self.__class__.__name__)
 
 
 class CSZFillna(Processor):
@@ -367,8 +389,8 @@ class CSZFillna(Processor):
 
     def __call__(self, df):
         cols = get_group_columns(df, self.fields_group)
-        df[cols] = df[cols].groupby("datetime", group_keys=False).apply(lambda x: x.fillna(x.mean()))
-        return df
+        transformed = df.loc[:, cols].groupby("datetime", group_keys=False).apply(lambda x: x.fillna(x.mean()))
+        return _assign_columns(df, cols, transformed, self.__class__.__name__)
 
 
 class HashStockFormat(Processor):

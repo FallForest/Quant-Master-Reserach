@@ -63,7 +63,7 @@ Here are some discussions about the price adjusting of QuantMaster.
 .. code-block:: bash
 
     # download 1d
-    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
+    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --region cn
 
     # download 1min
     python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/quant_master_cn_1min --region cn --interval 1min
@@ -74,7 +74,7 @@ In addition to China-Stock data, ``QuantMaster`` also includes a US-Stock datase
 
     python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/us_data --region us
 
-After running the above command, users can find china-stock and us-stock data in ``QuantMaster`` format in the ``~/.quant_master/quant_master_data/cn_data`` directory and ``~/.quant_master/quant_master_data/us_data`` directory respectively.
+After running the above command, users can find china-stock and us-stock data in ``QuantMaster`` format in the ``~/.quant_master/quant_master_data/tdx_cn_data`` directory and ``~/.quant_master/quant_master_data/us_data`` directory respectively. The ``tdx_cn_data`` directory is the current unified China-market data directory.
 
 ``QuantMaster`` also provides the scripts in ``scripts/data_collector`` to help users crawl the latest data on the Internet and convert it to quant_master format.
 
@@ -218,12 +218,12 @@ Checking the health of the data
     for daily data:
         .. code-block:: bash
 
-            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/cn_data
+            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/tdx_cn_data
 
     for 1min data:
         .. code-block:: bash
 
-            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/cn_data_1min --freq 1min
+            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/quant_master_cn_1min --freq 1min
 
 - Of course, you can also add some parameters to adjust the test results.
 
@@ -242,12 +242,12 @@ Checking the health of the data
     for daily data:
         .. code-block:: bash
 
-            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/cn_data --missing_data_num 30055 --large_step_threshold_volume 94485 --large_step_threshold_price 20
+            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/tdx_cn_data --missing_data_num 30055 --large_step_threshold_volume 94485 --large_step_threshold_price 20
 
     for 1min data:
         .. code-block:: bash
 
-            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/cn_data --freq 1min --missing_data_num 35806 --large_step_threshold_volume 3205452000000 --large_step_threshold_price 0.91
+            python scripts/check_data_health.py check_data --quant_master_dir ~/.quant_master/quant_master_data/quant_master_cn_1min --freq 1min --missing_data_num 35806 --large_step_threshold_volume 3205452000000 --large_step_threshold_price 0.91
 
 Stock Pool (Market)
 -------------------
@@ -277,12 +277,12 @@ The `trade unit` defines the unit number of stocks can be used in a trade, and t
 - If users use ``QuantMaster`` in china-stock mode, china-stock data is required. Users can use ``QuantMaster`` in china-stock mode according to the following steps:
     - Download china-stock in quant_master format, please refer to section `QuantMaster Format Dataset <#quant_master-format-dataset>`_.
     - Initialize ``QuantMaster`` in china-stock mode
-        Supposed that users download their QuantMaster format data in the directory ``~/.quant_master/quant_master_data/cn_data``. Users only need to initialize ``QuantMaster`` as follows.
+        Supposed that users download their QuantMaster format data in the directory ``~/.quant_master/quant_master_data/tdx_cn_data``. Users only need to initialize ``QuantMaster`` as follows.
 
         .. code-block:: python
 
             from quant_master.constant import REG_CN
-            quant_master.init(provider_uri='~/.quant_master/quant_master_data/cn_data', region=REG_CN)
+            quant_master.init(provider_uri='~/.quant_master/quant_master_data/tdx_cn_data', region=REG_CN)
 
 
 - If users use ``QuantMaster`` in US-stock mode, US-stock data is required. ``QuantMaster`` also provides a script to download US-stock data. Users can use ``QuantMaster`` in US-stock mode according to the following steps:

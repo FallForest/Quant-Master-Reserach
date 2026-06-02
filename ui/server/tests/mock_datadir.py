@@ -162,6 +162,40 @@ class FakeDataDir:
 class FakeTDXQuote:
     """Canned TDX quote responses for testing."""
 
+    def _get_api(self):
+        return None
+
+    def _parse_symbol(self, symbol):
+        s = symbol.upper()
+        if s.startswith("SZ") or s.startswith("BJ"):
+            return 0, s[2:]
+        if s.startswith("SH"):
+            return 1, s[2:]
+        if s.startswith("6"):
+            return 1, s
+        return 0, s
+
+    def _invalidate(self):
+        pass
+
+    def fetch_quotes(self, symbols):
+        result = {}
+        for sym in symbols:
+            s = sym.upper()
+            prefix = "SH" if s.startswith("SH") or s.startswith("6") else "SZ"
+            code = s[2:] if s.startswith(("SH", "SZ", "BJ")) else s
+            key = prefix + code
+            result[key] = {
+                "price": 10.50,
+                "lastClose": 10.30,
+                "open": 10.35,
+                "high": 10.65,
+                "low": 10.20,
+                "vol": 1234567,
+                "amount": 12962953.5,
+            }
+        return result
+
     def get_quote(self, symbol):
         return {
             "price": 10.50,

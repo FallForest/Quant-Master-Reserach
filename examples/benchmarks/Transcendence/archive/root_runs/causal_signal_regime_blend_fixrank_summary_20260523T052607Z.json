@@ -1,0 +1,148 @@
+{
+  "timestamp_utc": "2026-05-23T05:33:39Z",
+  "task": "causal_signal_side_regime_blend",
+  "verdict": "NO_GO",
+  "hard_gate_pass": false,
+  "protocol": {
+    "selection": "causal t-1 diagnostics select among predeclared signal sources; no test-period parameter search",
+    "candidate_eval_grid": [
+      "dynamic_plain_tk45_nd4",
+      "dynamic_plain_tk50_nd5",
+      "dynamic_sharp_tk45_nd4",
+      "dynamic_sharp_tk50_nd5"
+    ],
+    "warmup_days": 25,
+    "hard_gate": {
+      "ir_gt": 2.9,
+      "annret_gt": 0.27
+    }
+  },
+  "predeclared_strategy_metrics": [
+    {
+      "strategy_id": "base45",
+      "annret": 0.24466463608994524,
+      "ir": 2.799983676714268,
+      "max_drawdown": -0.048125984955537895,
+      "turnover": 0.1749957877001195,
+      "elapsed_sec": 4.837294700000712
+    },
+    {
+      "strategy_id": "base40",
+      "annret": 0.27042493613194185,
+      "ir": 2.806380274751093,
+      "max_drawdown": -0.05202813673085516,
+      "turnover": 0.10151452046087941,
+      "elapsed_sec": 4.158094899999924
+    },
+    {
+      "strategy_id": "base50",
+      "annret": 0.20916029641767864,
+      "ir": 2.450757751180734,
+      "max_drawdown": -0.052498986476546064,
+      "turnover": 0.196678193438942,
+      "elapsed_sec": 5.495440000000599
+    },
+    {
+      "strategy_id": "rank45",
+      "annret": 0.25228736953727765,
+      "ir": 2.8011123683230172,
+      "max_drawdown": -0.05283126363363039,
+      "turnover": 0.1758836189210853,
+      "elapsed_sec": 4.88466470000094
+    },
+    {
+      "strategy_id": "rank50",
+      "annret": 0.23691294334144172,
+      "ir": 2.843382353055036,
+      "max_drawdown": -0.04881506106501719,
+      "turnover": 0.19748264254513845,
+      "elapsed_sec": 5.512568100000863
+    },
+    {
+      "strategy_id": "gru45",
+      "annret": 0.24462956122955612,
+      "ir": 2.9447364812322756,
+      "max_drawdown": -0.0533515559954284,
+      "turnover": 0.17515988123618667,
+      "elapsed_sec": 4.983111399998961
+    }
+  ],
+  "candidate_rows": [
+    {
+      "candidate_id": "dynamic_plain_tk45_nd4",
+      "topk": 45,
+      "n_drop": 4,
+      "ok": true,
+      "error": null,
+      "annret": 0.2337591681693078,
+      "ir": 2.6058861345003437,
+      "max_drawdown": -0.058809174015714505,
+      "turnover": 0.17472743569489355,
+      "elapsed_sec": 4.9755294999995385
+    },
+    {
+      "candidate_id": "dynamic_plain_tk50_nd5",
+      "topk": 50,
+      "n_drop": 5,
+      "ok": true,
+      "error": null,
+      "annret": 0.21292087901940532,
+      "ir": 2.4735507025154293,
+      "max_drawdown": -0.052498986476546064,
+      "turnover": 0.19722531600279938,
+      "elapsed_sec": 5.510384700000941
+    },
+    {
+      "candidate_id": "dynamic_sharp_tk45_nd4",
+      "topk": 45,
+      "n_drop": 4,
+      "ok": true,
+      "error": null,
+      "annret": 0.2337591681693078,
+      "ir": 2.6058861345003437,
+      "max_drawdown": -0.058809174015714505,
+      "turnover": 0.17472743569489355,
+      "elapsed_sec": 4.822634000000107
+    },
+    {
+      "candidate_id": "dynamic_sharp_tk50_nd5",
+      "topk": 50,
+      "n_drop": 5,
+      "ok": true,
+      "error": null,
+      "annret": 0.21292087901940532,
+      "ir": 2.4735507025154293,
+      "max_drawdown": -0.052498986476546064,
+      "turnover": 0.19722531600279938,
+      "elapsed_sec": 5.393315400000574
+    }
+  ],
+  "best_candidate": {
+    "candidate_id": "dynamic_plain_tk45_nd4",
+    "topk": 45,
+    "n_drop": 4,
+    "ok": true,
+    "error": null,
+    "annret": 0.2337591681693078,
+    "ir": 2.6058861345003437,
+    "max_drawdown": -0.058809174015714505,
+    "turnover": 0.17472743569489355,
+    "elapsed_sec": 4.9755294999995385
+  },
+  "selector_counts": {
+    "base40": 252,
+    "gru45": 125,
+    "base45": 71,
+    "rank45": 57,
+    "rank50": 47,
+    "base50": 10
+  },
+  "artifacts": {
+    "summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_signal_regime_blend_fixrank_summary_20260523T052607Z.json",
+    "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_signal_regime_blend_fixrank_summary_20260523T052607Z.md",
+    "selector_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_signal_regime_blend_fixrank_selector_20260523T052607Z.csv",
+    "eval_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_signal_regime_blend_fixrank_eval_20260523T052607Z.csv",
+    "candidate_pred_pkl": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\causal_signal_regime_blend_fixrank_candidate_pred_20260523T052607Z.pkl"
+  },
+  "runtime_sec": 451.3271045999991
+}

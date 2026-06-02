@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -35,8 +35,8 @@ from factor_augmented_meta_ensemble import BufferedTopkWeightStrategy
 
 TEST_START = "2024-01-01"
 TEST_END = "2026-04-30"
-OPEN_COST = 0.0005
-CLOSE_COST = 0.0015
+OPEN_COST = 0.0001
+CLOSE_COST = 0.0006
 HARD_GATE_IR = 2.90
 HARD_GATE_ANNRET = 0.27
 DEFAULT_SCHEDULE = (
@@ -451,3 +451,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

@@ -1,0 +1,162 @@
+{
+  "timestamp_utc": "2026-05-22T15:16:00Z",
+  "source_artifacts": {
+    "lockstep_summary_json": "C:/Users/15728/Desktop/Quant-Master-Research/examples/benchmarks/Transcendence/robust_regime_lockstep_summary_20260522T115719Z.json",
+    "lockstep_audit_json": "C:/Users/15728/Desktop/Quant-Master-Research/examples/benchmarks/Transcendence/robust_regime_lockstep_audit_20260522T115719Z.json",
+    "nonlinear_results_csv": "C:/Users/15728/Desktop/Quant-Master-Research/examples/benchmarks/Transcendence/nonlinear_regime_results_20260522T105005Z.csv"
+  },
+  "hard_gate": {
+    "ir_gt": 2.9,
+    "annret_gt": 0.27
+  },
+  "baseline_strict_before_fix": {
+    "stitched_metrics": {
+      "annret": 0.02031034054187492,
+      "ir": 0.17669234825688596,
+      "max_drawdown": -0.05964488739493712
+    },
+    "note": "previous lockstep summary; 2025 segment failed before the sell epsilon fix was available to the replay chain"
+  },
+  "baseline_strict_after_fix": {
+    "stitched_metrics": {
+      "annret": 0.2518930639300241,
+      "ir": 1.8754870651622841,
+      "max_drawdown": -0.04439603009175652
+    },
+    "gate_gap": {
+      "ir_shortfall": 1.0245129348377158,
+      "annret_shortfall": 0.018106936069975932
+    },
+    "hard_gate_pass": false
+  },
+  "diagnostic_safe_wrapper": {
+    "stitched_metrics": {
+      "annret": 0.25189304157549136,
+      "ir": 1.875486897720126,
+      "max_drawdown": -0.044396031114038476
+    },
+    "gate_gap": {
+      "ir_shortfall": 1.024513102279874,
+      "annret_shortfall": 0.018106958424508657
+    },
+    "hard_gate_pass": false,
+    "wrapper_only": true
+  },
+  "per_period_comparison": [
+    {
+      "select_tag": "2024H1_degraded",
+      "apply_start": "2024-07-01",
+      "apply_end": "2024-12-31",
+      "candidate_id": "1582350971828275816",
+      "baseline_ok": true,
+      "baseline_error": null,
+      "baseline_ir": -4.696811734346832,
+      "baseline_annret": -0.43884595654910397,
+      "baseline_max_drawdown": -0.02474580534630015,
+      "safe_ok": true,
+      "safe_error": null,
+      "safe_ir": -4.696811874699817,
+      "safe_annret": -0.4388459691825224,
+      "safe_max_drawdown": -0.02474580614252401
+    },
+    {
+      "select_tag": "2024",
+      "apply_start": "2025-01-01",
+      "apply_end": "2025-12-31",
+      "candidate_id": "7735252674316944203",
+      "baseline_ok": true,
+      "baseline_error": null,
+      "baseline_ir": 15.472043320502316,
+      "baseline_annret": 3.2955517141742647,
+      "baseline_max_drawdown": -0.0036728148214322104,
+      "safe_ok": true,
+      "safe_error": null,
+      "safe_ir": 15.472043203052028,
+      "safe_annret": 3.295551704442562,
+      "safe_max_drawdown": -0.0036728148260284227
+    },
+    {
+      "select_tag": "up_to_2025",
+      "apply_start": "2026-01-01",
+      "apply_end": "2026-04-30",
+      "candidate_id": "6424147107767003641",
+      "baseline_ok": true,
+      "baseline_error": null,
+      "baseline_ir": 0.9274889101729434,
+      "baseline_annret": 0.10975637244271542,
+      "baseline_max_drawdown": -0.04439603009175648,
+      "safe_ok": true,
+      "safe_error": null,
+      "safe_ir": 0.927488696467668,
+      "safe_annret": 0.10975634704692919,
+      "safe_max_drawdown": -0.0443960311140385
+    }
+  ],
+  "attribution": {
+    "real_bug_fix_effect": {
+      "resolved_events": [
+        {
+          "source": "period_rows",
+          "candidate_id": "7735252674316944203",
+          "select_tag": "2024",
+          "apply_tag": "2025",
+          "apply_start": "2025-01-01",
+          "apply_end": "2025-12-31",
+          "symbol": "SH603296",
+          "only_have": 5161.309634309716,
+          "require": 5161.39746182772,
+          "diff": 0.08782751800390542,
+          "error": "ValueError: only have 5161.309634309716 SH603296, require 5161.39746182772"
+        },
+        {
+          "source": "selection_trace_rows",
+          "candidate_id": "7735252674316944203",
+          "select_tag": "",
+          "apply_tag": "yearly_trace",
+          "apply_start": "",
+          "apply_end": "",
+          "symbol": "SH603296",
+          "only_have": 5161.309634309716,
+          "require": 5161.39746182772,
+          "diff": 0.08782751800390542,
+          "error": "[{\"year\": \"2024\", \"start_date\": \"2024-01-02\", \"end_date\": \"2024-12-31\", \"ir\": 3.0288780078007354, \"annret\": 1.1239491363741623, \"max_drawdown\": -0.14852648532063475, \"turnover\": 0.34840995099018524, \"error\": \"\"}, {\"year\": \"2025\", \"start_date\": \"2025-01-01\", \"end_date\": \"2025-12-31\", \"ir\": NaN, \"annret\": NaN, \"max_drawdown\": NaN, \"turnover\": NaN, \"error\": \"ValueError: only have 5161.309634309716 SH603296, require 5161.39746182772\"}]"
+        }
+      ],
+      "explanation": "The production Position._sell_stock epsilon tolerance removes the micro-oversell crash and restores the 2025 baseline segment to a real strict replay result."
+    },
+    "wrapper_only_effect": {
+      "unresolved_events": [
+        {
+          "source": "selection_trace_rows",
+          "candidate_id": "2183984761579588376",
+          "select_tag": "",
+          "apply_tag": "yearly_trace",
+          "apply_start": "",
+          "apply_end": "",
+          "symbol": "SH688041",
+          "only_have": 161749.71633711216,
+          "require": 161755.56442820685,
+          "diff": 5.848091094696429,
+          "error": "[{\"year\": \"2024\", \"start_date\": \"2024-01-02\", \"end_date\": \"2024-12-31\", \"ir\": 1.3691163461848315, \"annret\": 0.2199696333232129, \"max_drawdown\": -0.08868076692352293, \"turnover\": 0.3268998966959746, \"error\": \"\"}, {\"year\": \"2025\", \"start_date\": \"2025-01-01\", \"end_date\": \"2025-12-31\", \"ir\": NaN, \"annret\": NaN, \"max_drawdown\": NaN, \"turnover\": NaN, \"error\": \"ValueError: only have 161749.71633711216 SH688041, require 161755.56442820685\"}]"
+        }
+      ],
+      "guards": [
+        "min_names_guard",
+        "dynamic_topk_clamp",
+        "fallback_mode=cash",
+        "safe order-generator sell epsilon clip"
+      ],
+      "explanation": "These guards change runtime portfolio construction behavior in the diagnostic script and therefore cannot be counted as production-ready lockstep performance."
+    }
+  },
+  "conclusion": {
+    "epsilon_fix_sufficient": false,
+    "summary": "Sell epsilon fix removes the 2025 crash, but the strict stitched lockstep result remains far below the hard gate; the large uplift appears only under diagnostic wrapper guards."
+  },
+  "artifacts": {
+    "period_csv": "C:/Users/15728/Desktop/Quant-Master-Research/examples/benchmarks/Transcendence/execution_epsilon_fix_recheck_periods_20260522T151307Z.csv",
+    "summary_json": "C:/Users/15728/Desktop/Quant-Master-Research/examples/benchmarks/Transcendence/execution_epsilon_fix_recheck_summary_20260522T151307Z.json",
+    "summary_md": "C:/Users/15728/Desktop/Quant-Master-Research/examples/benchmarks/Transcendence/execution_epsilon_fix_recheck_summary_20260522T151307Z.md",
+    "parse_smoke_json": "C:/Users/15728/Desktop/Quant-Master-Research/examples/benchmarks/Transcendence/execution_epsilon_fix_recheck_parse_smoke_20260522T151307Z.json"
+  }
+}

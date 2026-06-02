@@ -1,0 +1,43 @@
+﻿# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# Analysis parameters for Quant Master regime and equity analysis.
+# OOS window: 2024-05 through 2026-03 (continuous).
+
+data:
+  oos_start: "2024-05-01"
+  oos_end: "2026-03-31"
+  trading_days_per_year: 252
+
+equity:
+  data_path: "artifacts/hard_gate_pass/equity_curves/transcendence_equity_202405_202603.csv"
+  date_column: "date"
+  return_column: "daily_return"
+  benchmark_column: "benchmark"
+
+regime:
+  n_regimes: 3
+  labels: ["bear", "sideways", "bull"]
+  classification_method: "rolling_quantile"
+  rolling_window: 63  # trading days (~3 months)
+
+metrics:
+  rolling_sharpe_window: 252  # 12 months
+  rolling_pnl_window: 252
+  rolling_vol_window: 63
+
+strategy:
+  signal_threshold: 0.3
+  position_limit: 0.92
+
+backtest:
+  reference_gate: "artifacts/hard_gate_pass/lightgbm_alpha360_strict_full_hard_gate_20260524T141522Z.json"
+  reference_report: "artifacts/hard_gate_pass/lightgbm_alpha360_strict_full_test_report_20260524T141522Z.csv"
+  costs:
+    open_cost: 0.0001
+    close_cost: 0.0006
+  gate_thresholds:
+    ir_gt: 2.9
+    annret_gt: 0.27
+    finite_rows_eq: 562
+
