@@ -51,6 +51,8 @@ MEDIUM_SELECTION_GRID_KEYS = (
     "memory_boost_grid",
     "turnover_penalty_grid",
     "risk_penalty_grid",
+    "robust_rank_blend_grid",
+    "prediction_shrinkage_grid",
 )
 
 
@@ -114,6 +116,14 @@ def _find_port_config(config: Dict[str, Any]) -> Dict[str, Any]:
     raise KeyError("cannot find port_analysis_config or PortAnaRecord config")
 
 
+def _protocol_costs_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
+    exchange_kwargs = _find_port_config(config).get("backtest", {}).get("exchange_kwargs", {})
+    return {
+        "open_cost": exchange_kwargs.get("open_cost", OPEN_COST),
+        "close_cost": exchange_kwargs.get("close_cost", CLOSE_COST),
+    }
+
+
 def _test_range_for_mode(mode: str) -> List[str]:
     return list(SMOKE_TEST_RANGE if mode == "smoke" else TEST_RANGE)
 
@@ -146,9 +156,10 @@ def _record_selection_grid_decision(
     reason: str,
     old_value: Any = None,
     new_value: Any = None,
+    path_prefix: str = "task.model.kwargs",
 ) -> None:
     entry = {
-        "path": f"task.model.kwargs.{key}",
+        "path": f"{path_prefix}.{key}",
         "key": key,
         "action": action,
         "reason": reason,
@@ -168,16 +179,27 @@ def _set_grid_with_decision(
     key: str,
     value: Any,
     reason: str,
+    path_prefix: str = "task.model.kwargs",
 ) -> None:
     old_value = model_kwargs.get(key)
-    _set_with_record(budget_overrides, model_kwargs, key, value, f"task.model.kwargs.{key}")
-    _record_selection_grid_decision(selection_grid_decisions, model_kwargs, key, "overridden", reason, old_value, value)
+    _set_with_record(budget_overrides, model_kwargs, key, value, f"{path_prefix}.{key}")
+    _record_selection_grid_decision(
+        selection_grid_decisions,
+        model_kwargs,
+        key,
+        "overridden",
+        reason,
+        old_value,
+        value,
+        path_prefix=path_prefix,
+    )
 
 
 def _preserve_medium_selection_grids(
     selection_grid_decisions: List[Dict[str, Any]],
     model_kwargs: Dict[str, Any],
     keys: tuple[str, ...] = MEDIUM_SELECTION_GRID_KEYS,
+    path_prefix: str = "task.model.kwargs",
 ) -> None:
     for key in keys:
         if key in model_kwargs:
@@ -187,132 +209,44 @@ def _preserve_medium_selection_grids(
                 key,
                 "preserved",
                 "medium preserve_config_windows keeps YAML candidate selection grids",
+                path_prefix=path_prefix,
             )
 
 
-def _apply_budget_overrides(
-    config: Dict[str, Any],
-    mode: str,
-    preserve_config_windows: bool = False,
-) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    budget_overrides: List[Dict[str, Any]] = []
-    selection_grid_decisions: List[Dict[str, Any]] = []
-    model_kwargs = config["task"]["model"]["kwargs"]
-    port_cfg = _find_port_config(config)
+def _regime_horizon_budget_targets(model_kwargs: Dict[str, Any]) -> List[tuple[Dict[str, Any], str]]:
+    base_specs = model_kwargs.get("base_learner_specs")
+    if isinstance(base_specs, list):
+        targets: List[tuple[Dict[str, Any], str]] = []
+        for spec_index, spec in enumerate(base_specs):
+            if str(spec.get("model_type", "")).lower() not in {"regime_horizon", "regime"}:
+                continue
+            nested_kwargs = spec.setdefault("model_kwargs", {})
+            targets.append((nested_kwargs, f"task.model.kwargs.base_learner_specs[{spec_index}].model_kwargs"))
+        return targets
+    anchor_kwargs = model_kwargs.get("anchor_kwargs")
+    if isinstance(anchor_kwargs, dict):
+        return [(anchor_kwargs, "task.model.kwargs.anchor_kwargs")]
+    return [(model_kwargs, "task.model.kwargs")]
 
-    if mode == "smoke":
-        original_specs = model_kwargs.get("horizon_model_specs", [])
-        smoke_specs = original_specs[:2]
-        _record_override(
-            budget_overrides,
-            "task.model.kwargs.horizon_model_specs",
-            original_specs,
-            smoke_specs,
-        )
-        model_kwargs["horizon_model_specs"] = smoke_specs
-        _set_grid_with_decision(
-            budget_overrides,
-            selection_grid_decisions,
-            model_kwargs,
-            "search_step",
-            0.5,
-            "smoke uses quick default candidate search budget",
-        )
-        _set_grid_with_decision(
-            budget_overrides,
-            selection_grid_decisions,
-            model_kwargs,
-            "memory_boost_grid",
-            [0.0],
-            "smoke uses quick default candidate search budget",
-        )
-        _set_with_record(
-            budget_overrides,
-            model_kwargs,
-            "regime_consensus_quantiles",
-            [0.5],
-            "task.model.kwargs.regime_consensus_quantiles",
-        )
-        _set_with_record(
-            budget_overrides,
-            model_kwargs,
-            "regime_disagreement_quantiles",
-            [0.5],
-            "task.model.kwargs.regime_disagreement_quantiles",
-        )
-        _set_with_record(
-            budget_overrides,
-            model_kwargs,
-            "min_regime_samples",
-            120,
-            "task.model.kwargs.min_regime_samples",
-        )
-        max_epochs = 4
-        lgb_rounds = 80
-    elif mode == "medium":
-        if preserve_config_windows:
-            _preserve_medium_selection_grids(selection_grid_decisions, model_kwargs)
-        else:
-            _set_grid_with_decision(
-                budget_overrides,
-                selection_grid_decisions,
-                model_kwargs,
-                "search_step",
-                0.5,
-                "medium without preserve_config_windows uses quick default candidate search budget",
-            )
-            _set_grid_with_decision(
-                budget_overrides,
-                selection_grid_decisions,
-                model_kwargs,
-                "memory_boost_grid",
-                [0.0],
-                "medium without preserve_config_windows uses quick default candidate search budget",
-            )
-            _preserve_medium_selection_grids(
-                selection_grid_decisions,
-                model_kwargs,
-                ("turnover_penalty_grid", "risk_penalty_grid"),
-            )
-        _set_with_record(
-            budget_overrides,
-            model_kwargs,
-            "regime_consensus_quantiles",
-            [0.5],
-            "task.model.kwargs.regime_consensus_quantiles",
-        )
-        _set_with_record(
-            budget_overrides,
-            model_kwargs,
-            "regime_disagreement_quantiles",
-            [0.5],
-            "task.model.kwargs.regime_disagreement_quantiles",
-        )
-        # Keep the full test/backtest window, but cap model-side work for quick candidate checks.
-        _set_with_record(
-            budget_overrides,
-            model_kwargs,
-            "min_regime_samples",
-            0,
-            "task.model.kwargs.min_regime_samples",
-        )
-        max_epochs = 8
-        lgb_rounds = 120
-    else:
-        # With the mandated 2023-only validation split, some predeclared regimes can be sparse.
-        # Learning every regime avoids empty fallback weights without using 2024-2026 data.
-        _set_with_record(
-            budget_overrides,
-            model_kwargs,
-            "min_regime_samples",
-            0,
-            "task.model.kwargs.min_regime_samples",
-        )
-        return budget_overrides, selection_grid_decisions
 
+def _has_outer_selection_budget(model_kwargs: Dict[str, Any]) -> bool:
+    return "base_learner_specs" in model_kwargs or "horizon_model_specs" in model_kwargs
+
+
+def _strategy_supports_n_drop(strategy_cfg: Dict[str, Any]) -> bool:
+    return str(strategy_cfg.get("class", "")).endswith("TopkDropoutStrategy")
+
+
+def _shrink_horizon_model_specs(
+    budget_overrides: List[Dict[str, Any]],
+    model_kwargs: Dict[str, Any],
+    path_prefix: str,
+    max_epochs: int,
+    lgb_rounds: int,
+) -> None:
     for spec_index, spec in enumerate(model_kwargs.get("horizon_model_specs", [])):
         mk = spec.get("model_kwargs", {})
-        path = f"task.model.kwargs.horizon_model_specs[{spec_index}].model_kwargs"
+        path = f"{path_prefix}.horizon_model_specs[{spec_index}].model_kwargs"
         if spec.get("model_type") == "double_ensemble":
             num_models = min(int(mk.get("num_models", 2)), 1)
             _set_with_record(budget_overrides, mk, "num_models", num_models, f"{path}.num_models")
@@ -356,8 +290,168 @@ def _apply_budget_overrides(
                 f"{path}.num_threads",
             )
 
+
+def _apply_budget_overrides(
+    config: Dict[str, Any],
+    mode: str,
+    preserve_config_windows: bool = False,
+) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    budget_overrides: List[Dict[str, Any]] = []
+    selection_grid_decisions: List[Dict[str, Any]] = []
+    model_kwargs = config["task"]["model"]["kwargs"]
+    port_cfg = _find_port_config(config)
+
     if mode == "smoke":
-        strategy_kwargs = port_cfg["strategy"]["kwargs"]
+        regime_targets = _regime_horizon_budget_targets(model_kwargs)
+        for target_kwargs, path_prefix in regime_targets:
+            original_specs = target_kwargs.get("horizon_model_specs", [])
+            smoke_specs = original_specs[:2]
+            _record_override(
+                budget_overrides,
+                f"{path_prefix}.horizon_model_specs",
+                original_specs,
+                smoke_specs,
+            )
+            target_kwargs["horizon_model_specs"] = smoke_specs
+        if _has_outer_selection_budget(model_kwargs):
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                model_kwargs,
+                "search_step",
+                0.5,
+                "smoke uses quick default candidate search budget",
+            )
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                model_kwargs,
+                "memory_boost_grid",
+                [0.0],
+                "smoke uses quick default candidate search budget",
+            )
+        for target_kwargs, path_prefix in regime_targets:
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                target_kwargs,
+                "robust_rank_blend_grid",
+                [0.0],
+                "smoke uses quick default final-control search budget",
+                path_prefix=path_prefix,
+            )
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                target_kwargs,
+                "prediction_shrinkage_grid",
+                [1.0],
+                "smoke uses quick default final-control search budget",
+                path_prefix=path_prefix,
+            )
+            _set_with_record(
+                budget_overrides,
+                target_kwargs,
+                "regime_consensus_quantiles",
+                [0.5],
+                f"{path_prefix}.regime_consensus_quantiles",
+            )
+            _set_with_record(
+                budget_overrides,
+                target_kwargs,
+                "regime_disagreement_quantiles",
+                [0.5],
+                f"{path_prefix}.regime_disagreement_quantiles",
+            )
+            _set_with_record(
+                budget_overrides,
+                target_kwargs,
+                "min_regime_samples",
+                120,
+                f"{path_prefix}.min_regime_samples",
+            )
+        max_epochs = 4
+        lgb_rounds = 80
+    elif mode == "medium":
+        regime_targets = _regime_horizon_budget_targets(model_kwargs)
+        if preserve_config_windows:
+            _preserve_medium_selection_grids(selection_grid_decisions, model_kwargs)
+            for target_kwargs, path_prefix in regime_targets:
+                if target_kwargs is not model_kwargs:
+                    _preserve_medium_selection_grids(selection_grid_decisions, target_kwargs, path_prefix=path_prefix)
+        else:
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                model_kwargs,
+                "search_step",
+                0.5,
+                "medium without preserve_config_windows uses quick default candidate search budget",
+            )
+            _set_grid_with_decision(
+                budget_overrides,
+                selection_grid_decisions,
+                model_kwargs,
+                "memory_boost_grid",
+                [0.0],
+                "medium without preserve_config_windows uses quick default candidate search budget",
+            )
+            _preserve_medium_selection_grids(
+                selection_grid_decisions,
+                model_kwargs,
+                ("turnover_penalty_grid", "risk_penalty_grid"),
+            )
+            for target_kwargs, path_prefix in regime_targets:
+                _preserve_medium_selection_grids(
+                    selection_grid_decisions,
+                    target_kwargs,
+                    ("robust_rank_blend_grid", "prediction_shrinkage_grid"),
+                    path_prefix=path_prefix,
+                )
+        for target_kwargs, path_prefix in regime_targets:
+            _set_with_record(
+                budget_overrides,
+                target_kwargs,
+                "regime_consensus_quantiles",
+                [0.5],
+                f"{path_prefix}.regime_consensus_quantiles",
+            )
+            _set_with_record(
+                budget_overrides,
+                target_kwargs,
+                "regime_disagreement_quantiles",
+                [0.5],
+                f"{path_prefix}.regime_disagreement_quantiles",
+            )
+            # Keep the full test/backtest window, but cap model-side work for quick candidate checks.
+            _set_with_record(
+                budget_overrides,
+                target_kwargs,
+                "min_regime_samples",
+                0,
+                f"{path_prefix}.min_regime_samples",
+            )
+        max_epochs = 8
+        lgb_rounds = 120
+    else:
+        # With the mandated 2023-only validation split, some predeclared regimes can be sparse.
+        # Learning every regime avoids empty fallback weights without using 2024-2026 data.
+        for target_kwargs, path_prefix in _regime_horizon_budget_targets(model_kwargs):
+            _set_with_record(
+                budget_overrides,
+                target_kwargs,
+                "min_regime_samples",
+                0,
+                f"{path_prefix}.min_regime_samples",
+            )
+        return budget_overrides, selection_grid_decisions
+
+    for target_kwargs, path_prefix in _regime_horizon_budget_targets(model_kwargs):
+        _shrink_horizon_model_specs(budget_overrides, target_kwargs, path_prefix, max_epochs, lgb_rounds)
+
+    if mode == "smoke":
+        strategy_cfg = port_cfg["strategy"]
+        strategy_kwargs = strategy_cfg["kwargs"]
         _set_with_record(
             budget_overrides,
             strategy_kwargs,
@@ -365,13 +459,14 @@ def _apply_budget_overrides(
             min(int(strategy_kwargs.get("topk", 30)), 20),
             "port_analysis_config.strategy.kwargs.topk",
         )
-        _set_with_record(
-            budget_overrides,
-            strategy_kwargs,
-            "n_drop",
-            min(int(strategy_kwargs.get("n_drop", 3)), 1),
-            "port_analysis_config.strategy.kwargs.n_drop",
-        )
+        if _strategy_supports_n_drop(strategy_cfg):
+            _set_with_record(
+                budget_overrides,
+                strategy_kwargs,
+                "n_drop",
+                min(int(strategy_kwargs.get("n_drop", 3)), 1),
+                "port_analysis_config.strategy.kwargs.n_drop",
+            )
     return budget_overrides, selection_grid_decisions
 
 
@@ -425,8 +520,11 @@ def _apply_common_overrides(config: Dict[str, Any], mode: str, preserve_config_w
         actual_segments["test"][1],
         "port_analysis_config.backtest.end_time",
     )
-    port_cfg["backtest"]["exchange_kwargs"]["open_cost"] = OPEN_COST
-    port_cfg["backtest"]["exchange_kwargs"]["close_cost"] = CLOSE_COST
+    exchange_kwargs = port_cfg["backtest"].setdefault("exchange_kwargs", {})
+    if "open_cost" not in exchange_kwargs:
+        exchange_kwargs["open_cost"] = OPEN_COST
+    if "close_cost" not in exchange_kwargs:
+        exchange_kwargs["close_cost"] = CLOSE_COST
 
     budget_overrides, selection_grid_decisions = _apply_budget_overrides(cfg, mode, preserve_config_windows)
     cfg["runner_metadata"] = {
@@ -439,6 +537,7 @@ def _apply_common_overrides(config: Dict[str, Any], mode: str, preserve_config_w
         "window_overrides": window_overrides,
         "budget_overrides": budget_overrides,
         "selection_grid_decisions": selection_grid_decisions,
+        "protocol": _protocol_costs_from_config(cfg),
     }
     return cfg
 
@@ -448,7 +547,7 @@ def _metrics_from_report(report: pd.DataFrame) -> Dict[str, Any]:
     if missing:
         raise KeyError(f"report missing required columns: {missing}")
     excess = pd.to_numeric(report["return"] - report["bench"] - report["cost"], errors="coerce")
-    finite_mask = excess.notna() & np.isfinite(excess.astype(float))
+    finite_mask = pd.Series(np.isfinite(excess.to_numpy(dtype=float)), index=excess.index) & excess.notna()
     finite_excess = excess.loc[finite_mask].astype(float)
     if finite_excess.empty:
         raise ValueError("report has no finite net-cost excess return rows")
@@ -619,6 +718,7 @@ def main() -> int:
         base_config = _load_config(Path(args.workflow_config).resolve())
         run_config = _apply_common_overrides(base_config, args.mode, args.preserve_config_windows)
         runner_metadata = copy.deepcopy(run_config.get("runner_metadata", {}))
+        summary["protocol"].update(_protocol_costs_from_config(run_config))
         summary.update(
             {
                 "actual_segments": runner_metadata.get("actual_segments", {}),

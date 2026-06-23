@@ -18,7 +18,7 @@ import pandas as pd
 import yaml
 
 # Ensure repo root is importable when running this file directly.
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -94,6 +94,84 @@ class ScheduledTopkDropoutStrategy(RebalanceMixin, TopkDropoutStrategy):
             return super().generate_trade_decision(execute_result=execute_result)
         finally:
             self.n_drop = orig_n_drop
+
+
+class DrawdownAwareScheduledTopkDropoutStrategy(ScheduledTopkDropoutStrategy):
+    def __init__(
+        self,
+        *,
+        dd_trigger: float = 0.05,
+        dd_full: float = 0.12,
+        min_risk_scale: float = 0.4,
+        min_n_drop: int = 0,
+        n_drop_scale_mode: str = "floor",
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.dd_trigger = max(0.0, float(dd_trigger))
+        self.dd_full = max(self.dd_trigger + 1e-6, float(dd_full))
+        self.min_risk_scale = float(np.clip(min_risk_scale, 0.0, 1.0))
+        self.min_n_drop = int(max(0, min_n_drop))
+        self.n_drop_scale_mode = str(n_drop_scale_mode).lower()
+        self._peak_equity: Optional[float] = None
+        self._latest_risk_scale: float = 1.0
+
+    def _update_risk_scale(self) -> None:
+        try:
+            eq = float(self.trade_position.calculate_value())
+        except Exception:  # noqa: BLE001
+            return
+        if not np.isfinite(eq) or eq <= 0:
+            return
+        if self._peak_equity is None or eq > self._peak_equity:
+            self._peak_equity = eq
+        if self._peak_equity is None or self._peak_equity <= 0:
+            self._latest_risk_scale = 1.0
+            return
+        drawdown = max(0.0, 1.0 - eq / self._peak_equity)
+        if drawdown <= self.dd_trigger:
+            scale = 1.0
+        elif drawdown >= self.dd_full:
+            scale = self.min_risk_scale
+        else:
+            frac = (drawdown - self.dd_trigger) / (self.dd_full - self.dd_trigger)
+            scale = 1.0 - frac * (1.0 - self.min_risk_scale)
+        self._latest_risk_scale = float(np.clip(scale, self.min_risk_scale, 1.0))
+
+    def _scale_n_drop(self, n_drop: int) -> int:
+        raw = max(0.0, float(n_drop) * self._latest_risk_scale)
+        if self.n_drop_scale_mode == "ceil":
+            scaled = int(np.ceil(raw))
+        elif self.n_drop_scale_mode == "round":
+            scaled = int(np.rint(raw))
+        else:
+            scaled = int(np.floor(raw))
+        return int(np.clip(max(self.min_n_drop, scaled), 0, max(0, n_drop)))
+
+    def generate_trade_decision(self, execute_result=None):
+        trade_step = self.trade_calendar.get_trade_step()
+        trade_start_time, _ = self.trade_calendar.get_step_time(trade_step)
+        if not self.should_rebalance(trade_step=trade_step, trade_start_time=trade_start_time):
+            return TradeDecisionWO([], self)
+
+        self._update_risk_scale()
+        orig_n_drop = int(self.n_drop)
+        orig_risk_degree = float(self.risk_degree)
+        scheduled_n_drop = orig_n_drop
+        if self.n_drop_schedule:
+            scheduled_n_drop = int(self.n_drop_schedule[self._rebalance_count % len(self.n_drop_schedule)])
+        self._rebalance_count += 1
+
+        scaled_n_drop = self._scale_n_drop(scheduled_n_drop)
+        if scaled_n_drop <= 0:
+            return TradeDecisionWO([], self)
+        try:
+            self.n_drop = scaled_n_drop
+            self.risk_degree = float(np.clip(orig_risk_degree * self._latest_risk_scale, 0.0, 1.0))
+            return TopkDropoutStrategy.generate_trade_decision(self, execute_result=execute_result)
+        finally:
+            self.n_drop = orig_n_drop
+            self.risk_degree = orig_risk_degree
 
 
 class BufferedTopkWeightStrategy(RebalanceMixin, WeightStrategyBase):
@@ -187,6 +265,53 @@ class BufferedTopkWeightStrategy(RebalanceMixin, WeightStrategyBase):
         return self._calc_weights(ranked_score=ranked, target=target)
 
 
+class ConfidenceScaledBufferedTopkStrategy(BufferedTopkWeightStrategy):
+    def __init__(
+        self,
+        *,
+        confidence_gap_low: float = 0.0,
+        confidence_gap_high: float = 0.5,
+        confidence_min_risk: float = 0.4,
+        confidence_compare_k: int = 20,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.confidence_gap_low = float(confidence_gap_low)
+        self.confidence_gap_high = max(self.confidence_gap_low + 1e-6, float(confidence_gap_high))
+        self.confidence_min_risk = float(np.clip(confidence_min_risk, 0.0, 1.0))
+        self.confidence_compare_k = int(max(self.topk + 1, confidence_compare_k))
+        self._base_risk_degree = float(getattr(self, "risk_degree", 0.95))
+        self._latest_risk_scale = 1.0
+
+    def _update_confidence_scale(self, score) -> None:
+        score_s = self._to_series(score)
+        if score_s.empty or len(score_s) <= self.topk:
+            self._latest_risk_scale = self.confidence_min_risk
+            return
+        ranked = score_s.sort_values(ascending=False)
+        compare_end = min(len(ranked), self.confidence_compare_k)
+        top = ranked.iloc[: self.topk]
+        compare = ranked.iloc[self.topk : compare_end]
+        if compare.empty:
+            self._latest_risk_scale = self.confidence_min_risk
+            return
+        denom = float(ranked.iloc[:compare_end].std(ddof=0))
+        if not np.isfinite(denom) or denom <= 1e-12:
+            self._latest_risk_scale = self.confidence_min_risk
+            return
+        gap = (float(top.mean()) - float(compare.mean())) / denom
+        raw = (gap - self.confidence_gap_low) / (self.confidence_gap_high - self.confidence_gap_low)
+        conf = float(np.clip(raw, 0.0, 1.0))
+        self._latest_risk_scale = self.confidence_min_risk + conf * (1.0 - self.confidence_min_risk)
+
+    def get_risk_degree(self, trade_step=None):
+        return float(np.clip(self._base_risk_degree * self._latest_risk_scale, 0.0, 1.0))
+
+    def generate_target_weight_position(self, score, current, trade_start_time, trade_end_time):
+        self._update_confidence_scale(score)
+        return super().generate_target_weight_position(score, current, trade_start_time, trade_end_time)
+
+
 class DrawdownAwareBufferedTopkWeightStrategy(BufferedTopkWeightStrategy):
     def __init__(
         self,
@@ -244,14 +369,21 @@ class ScanResult:
     topk: int
     hold_topk: int
     n_drop: int
+    hold_thresh: int
     rebalance_mode: str
     rebalance_interval: int
     n_drop_schedule: str
     weight_mode: str
     score_power: float
+    confidence_gap_low: float
+    confidence_gap_high: float
+    confidence_min_risk: float
+    confidence_compare_k: int
     dd_trigger: float
     dd_full: float
     min_risk_scale: float
+    min_n_drop: int
+    n_drop_scale_mode: str
     start_time: str
     end_time: str
     costed_annret: float
@@ -413,12 +545,32 @@ def _build_strategy_object(combo: Dict[str, Any], pred_df, base_strategy_kwargs:
             "n_drop_schedule": combo.get("n_drop_schedule", []),
             "method_sell": base_strategy_kwargs.get("method_sell", "bottom"),
             "method_buy": base_strategy_kwargs.get("method_buy", "top"),
-            "hold_thresh": int(base_strategy_kwargs.get("hold_thresh", 1)),
+            "hold_thresh": int(combo.get("hold_thresh", base_strategy_kwargs.get("hold_thresh", 1))),
             "only_tradable": bool(base_strategy_kwargs.get("only_tradable", False)),
             "forbid_all_trade_at_limit": bool(base_strategy_kwargs.get("forbid_all_trade_at_limit", True)),
         }
         kwargs.update(common_kwargs)
         return ScheduledTopkDropoutStrategy(**kwargs)
+    if combo["family"] == "topk_dropout_derisk":
+        kwargs = {
+            "topk": int(combo["topk"]),
+            "n_drop": int(combo["n_drop"]),
+            "rebalance_mode": str(combo["rebalance_mode"]),
+            "rebalance_interval": int(combo["rebalance_interval"]),
+            "n_drop_schedule": combo.get("n_drop_schedule", []),
+            "method_sell": base_strategy_kwargs.get("method_sell", "bottom"),
+            "method_buy": base_strategy_kwargs.get("method_buy", "top"),
+            "hold_thresh": int(combo.get("hold_thresh", base_strategy_kwargs.get("hold_thresh", 1))),
+            "only_tradable": bool(base_strategy_kwargs.get("only_tradable", False)),
+            "forbid_all_trade_at_limit": bool(base_strategy_kwargs.get("forbid_all_trade_at_limit", True)),
+            "dd_trigger": float(combo["dd_trigger"]),
+            "dd_full": float(combo["dd_full"]),
+            "min_risk_scale": float(combo["min_risk_scale"]),
+            "min_n_drop": int(combo["min_n_drop"]),
+            "n_drop_scale_mode": str(combo["n_drop_scale_mode"]),
+        }
+        kwargs.update(common_kwargs)
+        return DrawdownAwareScheduledTopkDropoutStrategy(**kwargs)
     if combo["family"] == "buffered_weight":
         kwargs = {
             "topk": int(combo["topk"]),
@@ -430,6 +582,21 @@ def _build_strategy_object(combo: Dict[str, Any], pred_df, base_strategy_kwargs:
         }
         kwargs.update(common_kwargs)
         return BufferedTopkWeightStrategy(**kwargs)
+    if combo["family"] == "confidence_buffered":
+        kwargs = {
+            "topk": int(combo["topk"]),
+            "hold_topk": int(combo["hold_topk"]),
+            "weight_mode": str(combo["weight_mode"]),
+            "score_power": float(combo["score_power"]),
+            "rebalance_mode": str(combo["rebalance_mode"]),
+            "rebalance_interval": int(combo["rebalance_interval"]),
+            "confidence_gap_low": float(combo["confidence_gap_low"]),
+            "confidence_gap_high": float(combo["confidence_gap_high"]),
+            "confidence_min_risk": float(combo["confidence_min_risk"]),
+            "confidence_compare_k": int(combo["confidence_compare_k"]),
+        }
+        kwargs.update(common_kwargs)
+        return ConfidenceScaledBufferedTopkStrategy(**kwargs)
     if combo["family"] == "buffered_weight_derisk":
         kwargs = {
             "topk": int(combo["topk"]),
@@ -488,6 +655,7 @@ def _build_combos(args) -> List[Dict[str, Any]]:
     weight_modes = _parse_mode_list(args.weight_modes)
     score_powers = _parse_float_list(args.score_power_grid)
     n_drops = _parse_int_list(args.n_drop_grid)
+    hold_threshes = _parse_int_list(args.hold_thresh_grid)
     n_drop_schedules = _parse_schedule_specs(args.n_drop_schedules)
     rebalance_profiles = _build_rebalance_profiles(
         _parse_mode_list(args.rebalance_modes),
@@ -519,19 +687,123 @@ def _build_combos(args) -> List[Dict[str, Any]]:
 
     for topk in topks:
         for n_drop in n_drops:
-            for mode, interval in rebalance_profiles:
-                for sched in n_drop_schedules:
-                    combos.append(
-                        {
-                            "family": "topk_dropout_sched",
-                            "tag": f"topkdrop_tk{topk}_nd{n_drop}_{mode}_ri{interval}_sch{','.join(map(str, sched)) or 'none'}",
-                            "topk": int(topk),
-                            "n_drop": int(n_drop),
-                            "rebalance_mode": mode,
-                            "rebalance_interval": int(interval),
-                            "n_drop_schedule": list(sched),
-                        }
-                    )
+            for hold_thresh in hold_threshes:
+                for mode, interval in rebalance_profiles:
+                    for sched in n_drop_schedules:
+                        combos.append(
+                            {
+                                "family": "topk_dropout_sched",
+                                "tag": (
+                                    f"topkdrop_tk{topk}_nd{n_drop}_ht{hold_thresh}_{mode}"
+                                    f"_ri{interval}_sch{','.join(map(str, sched)) or 'none'}"
+                                ),
+                                "topk": int(topk),
+                                "n_drop": int(n_drop),
+                                "hold_thresh": int(hold_thresh),
+                                "rebalance_mode": mode,
+                                "rebalance_interval": int(interval),
+                                "n_drop_schedule": list(sched),
+                            }
+                        )
+
+    if args.enable_topk_derisk:
+        topk_derisk_topks = _parse_int_list(args.topk_derisk_topk_grid)
+        topk_derisk_n_drops = _parse_int_list(args.topk_derisk_n_drop_grid)
+        topk_derisk_hold_threshes = _parse_int_list(args.topk_derisk_hold_thresh_grid)
+        topk_derisk_schedules = _parse_schedule_specs(args.topk_derisk_n_drop_schedules)
+        topk_derisk_profiles = _build_rebalance_profiles(
+            _parse_mode_list(args.topk_derisk_rebalance_modes),
+            _parse_int_list(args.topk_derisk_rebalance_interval_grid),
+            args.rebalance_interval,
+        )
+        dd_triggers = _parse_float_list(args.topk_derisk_dd_trigger_grid)
+        dd_fulls = _parse_float_list(args.topk_derisk_dd_full_grid)
+        min_risks = _parse_float_list(args.topk_derisk_min_risk_grid)
+        min_n_drops = _parse_int_list(args.topk_derisk_min_n_drop_grid)
+        scale_modes = _parse_mode_list(args.topk_derisk_n_drop_scale_modes)
+        for topk in topk_derisk_topks:
+            for n_drop in topk_derisk_n_drops:
+                for hold_thresh in topk_derisk_hold_threshes:
+                    for mode, interval in topk_derisk_profiles:
+                        for sched in topk_derisk_schedules:
+                            for dd_trig in dd_triggers:
+                                for dd_full in dd_fulls:
+                                    if dd_full <= dd_trig:
+                                        continue
+                                    for min_risk in min_risks:
+                                        for min_n_drop in min_n_drops:
+                                            for scale_mode in scale_modes:
+                                                combos.append(
+                                                    {
+                                                        "family": "topk_dropout_derisk",
+                                                        "tag": (
+                                                            f"topkdrop_derisk_tk{topk}_nd{n_drop}_ht{hold_thresh}_{mode}"
+                                                            f"_ri{interval}_sch{','.join(map(str, sched)) or 'none'}"
+                                                            f"_dd{dd_trig:.2f}-{dd_full:.2f}_mr{min_risk:.2f}"
+                                                            f"_mnd{min_n_drop}_{scale_mode}"
+                                                        ),
+                                                        "topk": int(topk),
+                                                        "n_drop": int(n_drop),
+                                                        "hold_thresh": int(hold_thresh),
+                                                        "rebalance_mode": mode,
+                                                        "rebalance_interval": int(interval),
+                                                        "n_drop_schedule": list(sched),
+                                                        "dd_trigger": float(dd_trig),
+                                                        "dd_full": float(dd_full),
+                                                        "min_risk_scale": float(min_risk),
+                                                        "min_n_drop": int(min_n_drop),
+                                                        "n_drop_scale_mode": scale_mode,
+                                                    }
+                                                )
+
+    if args.enable_confidence:
+        confidence_topks = _parse_int_list(args.confidence_topk_grid)
+        confidence_gaps = _parse_int_list(args.confidence_hold_gap_grid)
+        confidence_weight_modes = _parse_mode_list(args.confidence_weight_modes)
+        confidence_score_powers = _parse_float_list(args.confidence_score_power_grid)
+        confidence_profiles = _build_rebalance_profiles(
+            _parse_mode_list(args.confidence_rebalance_modes),
+            _parse_int_list(args.confidence_rebalance_interval_grid),
+            args.rebalance_interval,
+        )
+        gap_lows = _parse_float_list(args.confidence_gap_low_grid)
+        gap_highs = _parse_float_list(args.confidence_gap_high_grid)
+        min_risks = _parse_float_list(args.confidence_min_risk_grid)
+        compare_ks = _parse_int_list(args.confidence_compare_k_grid)
+        for topk in confidence_topks:
+            for gap in confidence_gaps:
+                hold_topk = topk + max(0, gap)
+                for mode, interval in confidence_profiles:
+                    for wm in confidence_weight_modes:
+                        for sp in confidence_score_powers:
+                            if wm == "equal":
+                                sp = 1.0
+                            for gap_low in gap_lows:
+                                for gap_high in gap_highs:
+                                    if gap_high <= gap_low:
+                                        continue
+                                    for min_risk in min_risks:
+                                        for compare_k in compare_ks:
+                                            combos.append(
+                                                {
+                                                    "family": "confidence_buffered",
+                                                    "tag": (
+                                                        f"confbuf_tk{topk}_hk{hold_topk}_{wm}_{mode}_ri{interval}"
+                                                        f"_gl{gap_low:.2f}_gh{gap_high:.2f}_mr{min_risk:.2f}"
+                                                        f"_ck{compare_k}_sp{sp:.2f}"
+                                                    ),
+                                                    "topk": int(topk),
+                                                    "hold_topk": int(hold_topk),
+                                                    "weight_mode": wm,
+                                                    "score_power": float(sp),
+                                                    "rebalance_mode": mode,
+                                                    "rebalance_interval": int(interval),
+                                                    "confidence_gap_low": float(gap_low),
+                                                    "confidence_gap_high": float(gap_high),
+                                                    "confidence_min_risk": float(min_risk),
+                                                    "confidence_compare_k": int(compare_k),
+                                                }
+                                            )
 
     if args.enable_derisk:
         derisk_topks = _parse_int_list(args.derisk_topk_grid)
@@ -762,10 +1034,36 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p.add_argument("--weight-modes", default="equal,score")
     p.add_argument("--score-power-grid", default="1.0")
     p.add_argument("--n-drop-grid", default="2,4")
+    p.add_argument("--hold-thresh-grid", default="1")
     p.add_argument("--n-drop-schedules", default="none;2,3")
     p.add_argument("--rebalance-modes", default="weekly,interval")
     p.add_argument("--rebalance-interval-grid", default="5,10")
     p.add_argument("--rebalance-interval", type=int, default=5)
+
+    p.add_argument("--enable-topk-derisk", action="store_true")
+    p.add_argument("--topk-derisk-topk-grid", default="3")
+    p.add_argument("--topk-derisk-n-drop-grid", default="1")
+    p.add_argument("--topk-derisk-hold-thresh-grid", default="2")
+    p.add_argument("--topk-derisk-n-drop-schedules", default="none")
+    p.add_argument("--topk-derisk-rebalance-modes", default="daily")
+    p.add_argument("--topk-derisk-rebalance-interval-grid", default="5")
+    p.add_argument("--topk-derisk-dd-trigger-grid", default="0.08")
+    p.add_argument("--topk-derisk-dd-full-grid", default="0.20")
+    p.add_argument("--topk-derisk-min-risk-grid", default="0.5")
+    p.add_argument("--topk-derisk-min-n-drop-grid", default="0")
+    p.add_argument("--topk-derisk-n-drop-scale-modes", default="floor")
+
+    p.add_argument("--enable-confidence", action="store_true")
+    p.add_argument("--confidence-topk-grid", default="3")
+    p.add_argument("--confidence-hold-gap-grid", default="0")
+    p.add_argument("--confidence-weight-modes", default="equal")
+    p.add_argument("--confidence-score-power-grid", default="1.0")
+    p.add_argument("--confidence-rebalance-modes", default="daily")
+    p.add_argument("--confidence-rebalance-interval-grid", default="5")
+    p.add_argument("--confidence-gap-low-grid", default="0.0")
+    p.add_argument("--confidence-gap-high-grid", default="0.5")
+    p.add_argument("--confidence-min-risk-grid", default="0.4")
+    p.add_argument("--confidence-compare-k-grid", default="20")
 
     p.add_argument("--enable-derisk", action="store_true")
     p.add_argument("--derisk-topk-grid", default="50,55")
@@ -828,6 +1126,7 @@ def main() -> int:
         "tag": "baseline_tk45_nd4_daily",
         "topk": 45,
         "n_drop": 4,
+        "hold_thresh": 1,
         "rebalance_mode": "daily",
         "rebalance_interval": 1,
         "n_drop_schedule": [],
@@ -918,14 +1217,21 @@ def main() -> int:
                     topk=int(combo.get("topk", 0)),
                     hold_topk=int(combo.get("hold_topk", combo.get("topk", 0))),
                     n_drop=int(combo.get("n_drop", 0)),
+                    hold_thresh=int(combo.get("hold_thresh", 0)),
                     rebalance_mode=str(combo.get("rebalance_mode", "")),
                     rebalance_interval=int(combo.get("rebalance_interval", 0)),
                     n_drop_schedule=",".join(str(x) for x in combo.get("n_drop_schedule", [])),
                     weight_mode=str(combo.get("weight_mode", "")),
                     score_power=float(combo.get("score_power", 1.0)),
+                    confidence_gap_low=float(combo.get("confidence_gap_low", 0.0)),
+                    confidence_gap_high=float(combo.get("confidence_gap_high", 0.0)),
+                    confidence_min_risk=float(combo.get("confidence_min_risk", 1.0)),
+                    confidence_compare_k=int(combo.get("confidence_compare_k", 0)),
                     dd_trigger=float(combo.get("dd_trigger", 0.0)),
                     dd_full=float(combo.get("dd_full", 0.0)),
                     min_risk_scale=float(combo.get("min_risk_scale", 1.0)),
+                    min_n_drop=int(combo.get("min_n_drop", 0)),
+                    n_drop_scale_mode=str(combo.get("n_drop_scale_mode", "")),
                     start_time=str(train_start.date()),
                     end_time=str(train_end.date()),
                     costed_annret=float(ev["costed_annret"]),
@@ -1015,14 +1321,21 @@ def main() -> int:
                 topk=int(best_combo.get("topk", 0)),
                 hold_topk=int(best_combo.get("hold_topk", best_combo.get("topk", 0))),
                 n_drop=int(best_combo.get("n_drop", 0)),
+                hold_thresh=int(best_combo.get("hold_thresh", 0)),
                 rebalance_mode=str(best_combo.get("rebalance_mode", "")),
                 rebalance_interval=int(best_combo.get("rebalance_interval", 0)),
                 n_drop_schedule=",".join(str(x) for x in best_combo.get("n_drop_schedule", [])),
                 weight_mode=str(best_combo.get("weight_mode", "")),
                 score_power=float(best_combo.get("score_power", 1.0)),
+                confidence_gap_low=float(best_combo.get("confidence_gap_low", 0.0)),
+                confidence_gap_high=float(best_combo.get("confidence_gap_high", 0.0)),
+                confidence_min_risk=float(best_combo.get("confidence_min_risk", 1.0)),
+                confidence_compare_k=int(best_combo.get("confidence_compare_k", 0)),
                 dd_trigger=float(best_combo.get("dd_trigger", 0.0)),
                 dd_full=float(best_combo.get("dd_full", 0.0)),
                 min_risk_scale=float(best_combo.get("min_risk_scale", 1.0)),
+                min_n_drop=int(best_combo.get("min_n_drop", 0)),
+                n_drop_scale_mode=str(best_combo.get("n_drop_scale_mode", "")),
                 start_time=str(test_start.date()),
                 end_time=str(test_end.date()),
                 costed_annret=float(best_test["costed_annret"]),

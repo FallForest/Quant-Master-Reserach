@@ -1,0 +1,225 @@
+quant_master_init:
+  provider_uri: C:\Users\15728\.quant_master\quant_master_data\tdx_cn_data
+  region: cn
+  kernels: 1
+  joblib_backend: threading
+market: csi300
+benchmark: SH000300
+data_handler_config: &id001
+  start_time: 2012-01-01
+  end_time: 2026-04-30
+  fit_start_time: 2012-01-01
+  fit_end_time: 2020-12-31
+  instruments: csi300
+port_analysis_config: &id004
+  strategy:
+    class: TopkDropoutStrategy
+    module_path: quant_master.contrib.strategy
+    kwargs:
+      signal: <PRED>
+      topk: 3
+      n_drop: 1
+      hold_thresh: 2
+  backtest:
+    start_time: &id002 2024-01-01
+    end_time: &id003 2026-04-30
+    account: 13000
+    benchmark: SH000300
+    exchange_kwargs:
+      limit_threshold: 0.095
+      deal_price: close
+      open_cost: 0.0001
+      close_cost: 0.0006
+      min_cost: 0
+task:
+  model:
+    class: RegimeHorizonCostEnsembleModel
+    module_path: quant_master.contrib.model.regime_horizon_cost_ensemble
+    kwargs:
+      horizon_model_specs:
+      - name: de_h1
+        model_type: double_ensemble
+        horizon: 1
+        model_kwargs:
+          base_model: gbm
+          loss: mse
+          num_models: 1
+          enable_sr: false
+          enable_fs: false
+          alpha1: 1
+          alpha2: 1
+          bins_sr: 10
+          bins_fs: 5
+          decay: 0.5
+          sample_ratios:
+          - 0.8
+          - 0.7
+          - 0.6
+          - 0.5
+          - 0.4
+          sub_weights:
+          - 1
+          epochs: 8
+          colsample_bytree: 0.8879
+          learning_rate: 0.2
+          subsample: 0.8789
+          lambda_l1: 205.6999
+          lambda_l2: 580.9768
+          max_depth: 8
+          num_leaves: 210
+          num_threads: 4
+          verbosity: -1
+          random_state: 42
+      topk: 3
+      search_step: 0.1
+      turnover_penalty: 0.0018
+      turnover_penalty_grid:
+      - 0.0012
+      - 0.0018
+      - 0.0025
+      - 0.0035
+      risk_penalty: 0.0
+      risk_penalty_grid:
+      - 0.0
+      - 0.02
+      - 0.05
+      memory_boost_grid:
+      - 0.0
+      - 0.0025
+      - 0.005
+      - 0.01
+      use_rank_score: false
+      zscore_clip: 100.0
+      neutralize_daily_mean: false
+      enforce_horizon_monotonic: false
+      random_state: 42
+      regime_consensus_quantiles:
+      - 0.5
+      regime_disagreement_quantiles:
+      - 0.5
+      min_regime_samples: 0
+  dataset:
+    class: DatasetH
+    module_path: quant_master.data.dataset
+    kwargs:
+      handler:
+        class: Alpha158
+        module_path: quant_master.contrib.data.handler
+        kwargs: *id001
+      segments:
+        train:
+        - &id005 2012-01-01
+        - &id006 2020-12-31
+        valid:
+        - &id007 2021-01-01
+        - &id008 2023-12-31
+        test:
+        - *id002
+        - *id003
+  record:
+  - class: SignalRecord
+    module_path: quant_master.workflow.record_temp
+    kwargs:
+      model: <MODEL>
+      dataset: <DATASET>
+  - class: SigAnaRecord
+    module_path: quant_master.workflow.record_temp
+    kwargs:
+      ana_long_short: false
+      ann_scaler: 252
+  - class: PortAnaRecord
+    module_path: quant_master.workflow.record_temp
+    kwargs:
+      config: *id004
+runner_metadata:
+  mode: medium
+  preserve_config_windows: true
+  actual_segments:
+    train:
+    - 2012-01-01
+    - 2020-12-31
+    valid:
+    - 2021-01-01
+    - 2023-12-31
+    test:
+    - 2024-01-01
+    - 2026-04-30
+  actual_train:
+  - *id005
+  - *id006
+  actual_valid:
+  - *id007
+  - *id008
+  actual_test:
+  - *id002
+  - *id003
+  window_overrides: []
+  budget_overrides:
+  - path: task.model.kwargs.regime_consensus_quantiles
+    old:
+    new:
+    - 0.5
+  - path: task.model.kwargs.regime_disagreement_quantiles
+    old:
+    new:
+    - 0.5
+  - path: task.model.kwargs.min_regime_samples
+    old:
+    new: 0
+  - path: task.model.kwargs.horizon_model_specs[0].model_kwargs.num_models
+    old: 3
+    new: 1
+  - path: task.model.kwargs.horizon_model_specs[0].model_kwargs.epochs
+    old: 28
+    new: 8
+  - path: task.model.kwargs.horizon_model_specs[0].model_kwargs.sub_weights
+    old:
+    - 1
+    - 1
+    - 1
+    new:
+    - 1
+  - path: task.model.kwargs.horizon_model_specs[0].model_kwargs.enable_sr
+    old: true
+    new: false
+  - path: task.model.kwargs.horizon_model_specs[0].model_kwargs.enable_fs
+    old: true
+    new: false
+  - path: task.model.kwargs.horizon_model_specs[0].model_kwargs.num_threads
+    old: 20
+    new: 4
+  selection_grid_decisions:
+  - path: task.model.kwargs.search_step
+    key: search_step
+    action: preserved
+    reason: medium preserve_config_windows keeps YAML candidate selection grids
+    value: 0.1
+  - path: task.model.kwargs.memory_boost_grid
+    key: memory_boost_grid
+    action: preserved
+    reason: medium preserve_config_windows keeps YAML candidate selection grids
+    value:
+    - 0.0
+    - 0.0025
+    - 0.005
+    - 0.01
+  - path: task.model.kwargs.turnover_penalty_grid
+    key: turnover_penalty_grid
+    action: preserved
+    reason: medium preserve_config_windows keeps YAML candidate selection grids
+    value:
+    - 0.0012
+    - 0.0018
+    - 0.0025
+    - 0.0035
+  - path: task.model.kwargs.risk_penalty_grid
+    key: risk_penalty_grid
+    action: preserved
+    reason: medium preserve_config_windows keeps YAML candidate selection grids
+    value:
+    - 0.0
+    - 0.02
+    - 0.05
+  protocol:
+    open_cost: 0.0001
+    close_cost: 0.0006

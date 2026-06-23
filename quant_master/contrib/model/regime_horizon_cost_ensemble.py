@@ -131,7 +131,7 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.turnover_penalty = (
             float(turnover_penalty)
             if turnover_penalty is not None
-            else (self.turnover_penalty_grid[0] if self.turnover_penalty_grid else 0.0002)
+            else (self.turnover_penalty_grid[0] if self.turnover_penalty_grid else 0.0007)
         )
         self.risk_penalty = (
             float(risk_penalty)

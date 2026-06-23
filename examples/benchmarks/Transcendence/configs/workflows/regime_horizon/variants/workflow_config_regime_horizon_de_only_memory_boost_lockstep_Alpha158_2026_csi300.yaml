@@ -65,7 +65,7 @@ task:
                       random_state: 42
             topk: 45
             search_step: 0.1
-            turnover_penalty: 0.00005
+            turnover_penalty: 0.0007
             risk_penalty: 0.0
             memory_boost_grid: [0.0, 0.0025, 0.005, 0.01]
             use_rank_score: false

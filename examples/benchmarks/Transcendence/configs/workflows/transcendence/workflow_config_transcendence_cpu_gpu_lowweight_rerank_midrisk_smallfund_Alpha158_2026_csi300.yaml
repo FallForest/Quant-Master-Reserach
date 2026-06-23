@@ -1,0 +1,187 @@
+quant_master_init:
+    provider_uri: "~/.quant_master/quant_master_data/tdx_cn_data"
+    region: cn
+    kernels: 1
+    joblib_backend: threading
+market: &market csi300
+benchmark: &benchmark SH000300
+data_handler_config: &data_handler_config
+    start_time: 2008-01-01
+    end_time: 2026-04-30
+    fit_start_time: 2008-01-01
+    fit_end_time: 2018-12-31
+    instruments: *market
+port_analysis_config: &port_analysis_config
+    strategy:
+        class: SoftTopkStrategy
+        module_path: quant_master.contrib.strategy
+        kwargs:
+            signal: <PRED>
+            topk: 3
+            risk_degree: 0.85
+            trade_impact_limit: 0.19
+            selection_rank_buffer: 1
+            selection_max_new_names: 1
+    backtest:
+        start_time: 2024-01-01
+        end_time: 2026-04-30
+        account: 13000
+        benchmark: *benchmark
+        exchange_kwargs:
+            limit_threshold: 0.095
+            deal_price: close
+            open_cost: 0.0001
+            close_cost: 0.0006
+            min_cost: 0
+task:
+    model:
+        class: TranscendenceSignalEnsembleModel
+        module_path: quant_master.contrib.model.transcendence_signal_ensemble
+        kwargs:
+            use_rank_score: true
+            search_step: 0.5
+            max_random_weight_candidates: 1
+            refine_top_weight_candidates: 1
+            topk_grid: [3]
+            n_drop_grid: [1]
+            memory_boost_grid: [0.0]
+            turnover_penalty_grid: [0.0018, 0.0025, 0.0035]
+            volatility_penalty_grid: [0.05, 0.08]
+            open_cost: 0.0001
+            close_cost: 0.0006
+            ir_weight: 1.0
+            annret_weight: 2.25
+            hit_ratio_weight: 0.15
+            max_drawdown_penalty: 1.0
+            ann_scaler: 252
+            random_state: 42
+            weight_constraints:
+                anchor_index: 0
+                max_aux_weight: 0.05
+            manual_weight_candidates:
+                - {regime_horizon_cpu_anchor: 1.0, finite_dnn_aux_cpu_safe: 0.0}
+                - {regime_horizon_cpu_anchor: 0.98, finite_dnn_aux_cpu_safe: 0.02}
+                - {regime_horizon_cpu_anchor: 0.95, finite_dnn_aux_cpu_safe: 0.05}
+            base_learner_specs:
+                - name: regime_horizon_cpu_anchor
+                  model_type: regime_horizon
+                  model_kwargs:
+                      horizon_model_specs:
+                          - name: de_h1
+                            model_type: double_ensemble
+                            horizon: 1
+                            model_kwargs:
+                                base_model: gbm
+                                loss: mse
+                                num_models: 3
+                                enable_sr: true
+                                enable_fs: true
+                                alpha1: 1
+                                alpha2: 1
+                                bins_sr: 10
+                                bins_fs: 5
+                                decay: 0.5
+                                sample_ratios: [0.8, 0.7, 0.6, 0.5, 0.4]
+                                sub_weights: [1, 1, 1]
+                                epochs: 28
+                                colsample_bytree: 0.8879
+                                learning_rate: 0.2
+                                subsample: 0.8789
+                                lambda_l1: 205.6999
+                                lambda_l2: 580.9768
+                                max_depth: 8
+                                num_leaves: 210
+                                num_threads: 16
+                                verbosity: -1
+                                random_state: 42
+                          - name: lgb_h5
+                            model_type: lightgbm
+                            horizon: 5
+                            model_kwargs:
+                                loss: mse
+                                early_stopping_rounds: 80
+                                num_boost_round: 1000
+                                colsample_bytree: 0.8879
+                                learning_rate: 0.03
+                                subsample: 0.8789
+                                lambda_l1: 10.0
+                                lambda_l2: 120.0
+                                max_depth: 8
+                                min_data_in_leaf: 120
+                                num_leaves: 255
+                                num_threads: 16
+                                seed: 42
+                                feature_fraction_seed: 42
+                                bagging_seed: 42
+                                data_random_seed: 42
+                      topk: 3
+                      search_step: 0.1
+                      turnover_penalty: 0.0025
+                      risk_penalty: 0.16
+                      turnover_penalty_grid: [0.0018, 0.0025, 0.0035]
+                      risk_penalty_grid: [0.12, 0.16, 0.22]
+                      memory_boost_grid: [0.0]
+                      robust_rank_blend_grid: [0.0, 0.1]
+                      prediction_shrinkage_grid: [1.0, 0.9]
+                      use_rank_score: true
+                      zscore_clip: 2.35
+                      neutralize_daily_mean: true
+                      enforce_horizon_monotonic: true
+                      monotonic_direction: decreasing
+                      regime_consensus_quantiles: [0.25, 0.5, 0.75]
+                      regime_disagreement_quantiles: [0.5]
+                      min_regime_samples: 500
+                      weight_constraints:
+                          anchor_model: de_h1
+                          min_anchor_weight: 0.94
+                          max_aux_weight: 0.06
+                          model_max_weights:
+                              lgb_h5: 0.06
+                      random_state: 42
+                - name: finite_dnn_aux_cpu_safe
+                  model_type: deep_aux
+                  class: FiniteDNNModelPytorch
+                  module_path: quant_master.contrib.model.finite_dnn
+                  model_kwargs:
+                      input_dim: 158
+                      layers: [32, 8]
+                      lr: 0.001
+                      batch_size: 4096
+                      max_steps: 8
+                      early_stop_rounds: 3
+                      eval_steps: 2
+                      optimizer: adam
+                      loss: mse
+                      GPU: -1
+                      seed: 42
+                      weight_decay: 0.0003
+                      feature_fill_value: 0.0
+                      feature_daily_zscore: true
+                      label_rank: true
+    dataset:
+        class: DatasetH
+        module_path: quant_master.data.dataset
+        kwargs:
+            handler:
+                class: Alpha158
+                module_path: quant_master.contrib.data.handler
+                kwargs: *data_handler_config
+            segments:
+                train: [2008-01-01, 2018-12-31]
+                valid: [2019-01-01, 2023-12-31]
+                test: [2024-01-01, 2026-04-30]
+    record:
+        - class: SignalRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            model: <MODEL>
+            dataset: <DATASET>
+        - class: SigAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            ana_long_short: false
+            ann_scaler: 252
+        - class: PortAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            config: *port_analysis_config

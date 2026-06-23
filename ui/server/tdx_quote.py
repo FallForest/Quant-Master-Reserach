@@ -233,6 +233,27 @@ class TDXQuote:
             return result
         return self._fetch_eastmoney_quotes([symbol]).get(self._normalize_symbol_key(symbol))
 
+    def fetch_today_day_bar_from_eastmoney(self, symbol):
+        """TDX 不可用时，用东方财富实时行情构造当日日 K 线数据。
+
+        Returns:
+            dict | None: {"date", "open", "high", "low", "close", "volume"} 或 None。
+        """
+        from datetime import datetime
+        quotes = self._fetch_eastmoney_quotes([symbol])
+        q = quotes.get(self._normalize_symbol_key(symbol))
+        if not q or q.get("price", 0) <= 0:
+            return None
+        today = datetime.now().strftime("%Y-%m-%d")
+        return {
+            "date": today,
+            "open": round(float(q.get("open", 0) or 0), 2),
+            "high": round(float(q.get("high", 0) or 0), 2),
+            "low": round(float(q.get("low", 0) or 0), 2),
+            "close": round(float(q["price"]), 2),
+            "volume": int(float(q.get("vol", 0) or 0)),
+        }
+
     def get_today_kline(self, symbol):
         """获取当天 1min K 线。"""
         market, code = self._parse_symbol(symbol)

@@ -53,7 +53,6 @@ dependencies = [
   "nbconvert",
   "pyarrow",
   "pydantic-settings",
-  "setuptools-scm",
 ]
 
 [project.optional-dependencies]
@@ -105,6 +104,10 @@ analysis = [
 client = [
   "python-socketio<6",
   "tables",
+]
+ui = [
+  "fastapi",
+  "uvicorn[standard]",
 ]
 
 # In the process of releasing a new version, when checking the manylinux package with twine, an error is reported:

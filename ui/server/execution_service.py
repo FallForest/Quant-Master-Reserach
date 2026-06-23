@@ -11,10 +11,14 @@ from quant_master.contrib.broker.base import BrokerOrderDir, Position
 from quant_master.contrib.broker.execution import A_SHARE_TRADE_UNIT, LiveOrderExecutor, LiveOrderRequest
 from quant_master.contrib.broker.factory import create_broker
 
-from .handlers import position
+from .helpers import normalize_symbol
+from .position_service import enrich_positions, load_positions_file
 
-LIVE_DATA_DIR = Path(__file__).resolve().parent.parent / "live_data"
-EXECUTION_DIR = LIVE_DATA_DIR / "executions"
+from .config import LIVE_DATA_DIR
+
+def _execution_dir() -> Path:
+    return LIVE_DATA_DIR / "executions"
+
 SUPPORTED_BROKERS = ["paper", "tcdll", "tdx", "easytrader", "xiadan"]
 DEFAULT_BROKER_KIND = "paper"
 DEFAULT_DRY_RUN = True
@@ -23,7 +27,7 @@ LIVE_TRADING_ENABLED = False
 
 
 def _ensure_dirs() -> None:
-    EXECUTION_DIR.mkdir(parents=True, exist_ok=True)
+    _execution_dir().mkdir(parents=True, exist_ok=True)
 
 
 def get_execution_config() -> dict[str, Any]:
@@ -66,7 +70,7 @@ def _normalize_trade(trade: dict[str, Any]) -> dict[str, Any] | None:
     if side == "hold":
         return None
 
-    stock_id = position._normalize_symbol(trade.get("stockId") or trade.get("instrument"))
+    stock_id = normalize_symbol(trade.get("stockId") or trade.get("instrument"))
     amount = abs(_int_or_zero(trade.get("amount", trade.get("deltaShares"))))
     price = float(trade.get("price", trade.get("currentPrice", 0)) or 0)
     direction = _parse_side(side)
@@ -138,7 +142,7 @@ def build_order_preview(trades: list[dict[str, Any]], risk: dict[str, Any] | Non
 
 
 def _paper_positions_from_file() -> tuple[float, list[Position]]:
-    enriched = position._enrich_positions(position._load_positions_file())
+    enriched = enrich_positions(load_positions_file())
     cash = float(enriched.get("cash", 0.0) or 0.0)
     items = []
     for pos in enriched.get("positions", []):
@@ -146,7 +150,7 @@ def _paper_positions_from_file() -> tuple[float, list[Position]]:
         price = float(pos.get("currentPrice") or pos.get("costPrice") or 0.0)
         items.append(
             Position(
-                stock_id=position._normalize_symbol(pos.get("instrument")),
+                stock_id=normalize_symbol(pos.get("instrument")),
                 volume=shares,
                 available_volume=shares,
                 cost_price=float(pos.get("costPrice", 0.0) or 0.0),
@@ -184,7 +188,7 @@ def _to_live_requests(orders: list[dict[str, Any]]) -> list[LiveOrderRequest]:
         if direction is None:
             continue
         request = LiveOrderRequest(
-            stock_id=position._normalize_symbol(order.get("stockId") or order.get("instrument")),
+            stock_id=normalize_symbol(order.get("stockId") or order.get("instrument")),
             price=float(order.get("price", 0) or 0),
             amount=int(order.get("amount", 0) or 0),
             direction=direction,
@@ -222,7 +226,7 @@ def _serialize_result(result) -> dict[str, Any]:
 def _write_history(payload: dict[str, Any]) -> None:
     _ensure_dirs()
     stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-    file_path = EXECUTION_DIR / f"{stamp}.json"
+    file_path = _execution_dir() / f"{stamp}.json"
     file_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
@@ -294,7 +298,7 @@ def submit_orders(
 def load_history(limit: int = 30) -> dict[str, Any]:
     _ensure_dirs()
     history = []
-    for path in sorted(EXECUTION_DIR.glob("*.json"), reverse=True)[:limit]:
+    for path in sorted(_execution_dir().glob("*.json"), reverse=True)[:limit]:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except Exception:

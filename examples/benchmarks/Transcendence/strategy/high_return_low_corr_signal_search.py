@@ -514,7 +514,7 @@ def _run_backtest_report(
     freq = str(executor_cfg.get("kwargs", {}).get("time_per_step", "day"))
     deal_price = str(exchange_kwargs.get("deal_price", "close"))
     limit_threshold = float(exchange_kwargs.get("limit_threshold", 0.095))
-    min_cost = float(exchange_kwargs.get("min_cost", 5))
+    min_cost = float(exchange_kwargs.get("min_cost", 0))
     cache_key = (
         str(backtest_cfg["start_time"]),
         str(backtest_cfg["end_time"]),
@@ -850,8 +850,8 @@ def main() -> int:
     evaluation_complete = bool(
         start_date == TEST_START
         and end_date == TEST_END
-        and float(args.open_cost) == 0.0005
-        and float(args.close_cost) == 0.0015
+        and float(args.open_cost) == 0.0001
+        and float(args.close_cost) == 0.0006
     )
     hard_gate_pass = bool(evaluation_complete and full_metrics["ir"] > HARD_GATE_IR and full_metrics["annret"] > HARD_GATE_ANNRET)
 

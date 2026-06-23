@@ -1,22 +1,39 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, onActivated, onDeactivated, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, onActivated, onDeactivated, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api, fmtNum } from '../utils/api'
-import CandlestickChart from '../charts/CandlestickChart'
+import { useKlineDetail } from '../composables/useKlineDetail'
+import { useManagedInterval } from '../composables/useManagedInterval'
+import { useWatchlistStore } from '../stores/watchlistStore'
 import KlineContent from '../components/KlineContent.vue'
 
 const route = useRoute()
 const router = useRouter()
+
+// ---- K-line detail panel ----
+const {
+  selectedSymbol, selectedName, showKline, period, loadingMin, quote,
+  marketOpen, checkMarketStatus,
+  selectStock, setPeriod, closeDetail,
+} = useKlineDetail()
+
+async function handleSelectStock(symbol, name) {
+  if (selectedSymbol.value === symbol && showKline.value) {
+    await handleCloseKline()
+    return
+  }
+  await selectStock(symbol, name)
+}
+
+async function handleCloseKline() {
+  closeDetail()
+  await clearRouteSymbol()
+}
 const allStocks = ref([])
 const searchQuery = ref('')
 const searchInput = ref(null)
 const page = ref(0)
 const pageSize = 50
-const selectedSymbol = ref(null)
-const selectedName = ref('')
-const showKline = ref(false)
-const period = ref('D')
-const loadingMin = ref(false)
 const loadingList = ref(true)
 const loadError = ref(false)
 const lastUpdateDate = ref('--')
@@ -24,18 +41,14 @@ const sortField = ref('')
 const sortAsc = ref(false)
 const syncing = ref(false)
 const syncError = ref('')
+const syncProgress = ref(null)
 const activeListMode = ref('all')
-const watchlistSymbols = ref([])
-const watchlistLoading = ref(false)
-const watchlistError = ref('')
-const watchlistPending = ref({})
-
-const quote = ref({ close: 0, change: 0, changePct: '0' })
-const marketOpen = ref(false)
 
 const indices = ref([])
 
-const watchlistSet = computed(() => new Set(watchlistSymbols.value))
+const watchlistStore = useWatchlistStore()
+const pageTimers = useManagedInterval()
+const watchlistSet = computed(() => new Set(watchlistStore.symbols))
 
 const baseStocks = computed(() => {
   if (activeListMode.value === 'watchlist') {
@@ -44,56 +57,8 @@ const baseStocks = computed(() => {
   return allStocks.value
 })
 
-let chart = null
-let rawDaily = []
-let rawMin1 = []
-let resizeObserver = null
-let currentAbortController = null
-
 let pagePollingStarted = false
 let keydownBound = false
-
-const pageTimers = new Set()
-const detailTimers = new Set()
-const minutePeriods = ['1min']
-const realtimeDayRefreshMs = 5000
-
-function isMinutePeriod(value) {
-  return minutePeriods.includes(value)
-}
-
-function isDailyLikePeriod(value) {
-  return ['D', 'W', 'M'].includes(value)
-}
-
-async function loadDailyKline(symbol, signal) {
-  return api(`/api/browser/kline/${symbol}?freq=1d&includeRealtime=1`, { signal })
-}
-
-function setManagedInterval(timerSet, fn, ms) {
-  const id = setInterval(fn, ms)
-  timerSet.add(id)
-  return id
-}
-
-function clearManagedTimers(timerSet) {
-  for (const id of timerSet) {
-    clearInterval(id)
-  }
-  timerSet.clear()
-}
-
-function checkMarketStatus() {
-  const now = new Date()
-  const shanghaiMs = now.getTime() + 8 * 3600 * 1000
-  const shanghai = new Date(shanghaiMs)
-  const minutes = shanghai.getUTCHours() * 60 + shanghai.getUTCMinutes()
-  const dayOfWeek = shanghai.getUTCDay()
-  const weekday = dayOfWeek >= 1 && dayOfWeek <= 5
-  const morning = minutes >= 570 && minutes < 690
-  const afternoon = minutes >= 780 && minutes < 900
-  marketOpen.value = weekday && (morning || afternoon)
-}
 
 const filtered = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -175,8 +140,9 @@ watch(searchQuery, () => {
   page.value = 0
 })
 
-watch(activeListMode, () => {
+watch(activeListMode, (mode) => {
   page.value = 0
+  if (mode === 'watchlist') searchQuery.value = ''
 })
 
 watch(totalPages, (nextTotal) => {
@@ -191,31 +157,10 @@ watch(() => route.query.symbol, async () => {
 
 async function loadIndices() {
   const data = await api('/api/browser/indices')
-  if (data?.indices) indices.value = data.indices
-}
-
-async function loadWatchlist() {
-  watchlistLoading.value = true
-  watchlistError.value = ''
-  try {
-    const data = await api('/api/watchlist')
-    watchlistSymbols.value = Array.isArray(data?.symbols) ? data.symbols : []
-  } catch {
-    watchlistError.value = '自选列表加载失败'
-  } finally {
-    watchlistLoading.value = false
-  }
-}
-
-function isWatchlisted(symbol) {
-  return watchlistSet.value.has(symbol)
-}
-
-function setWatchlistPending(symbol, pending) {
-  watchlistPending.value = {
-    ...watchlistPending.value,
-    [symbol]: pending,
-  }
+  if (!data?.indices) return
+  // 收盘后 TDX 可能返回全 0 值，跳过不覆盖已有数据
+  if (data.indices.every((idx) => !idx.price)) return
+  indices.value = data.indices
 }
 
 function resolveTargetStockSymbol() {
@@ -250,28 +195,6 @@ async function clearRouteSymbol() {
   await router.replace({ path: '/browser', query: nextQuery })
 }
 
-async function toggleWatchlist(stock, event) {
-  event?.stopPropagation?.()
-  const symbol = stock?.symbol
-  if (!symbol || watchlistPending.value[symbol]) return
-
-  setWatchlistPending(symbol, true)
-  watchlistError.value = ''
-  try {
-    const data = isWatchlisted(symbol)
-      ? await api(`/api/watchlist/${encodeURIComponent(symbol)}`, { method: 'DELETE' })
-      : await api('/api/watchlist', {
-          method: 'POST',
-          body: JSON.stringify({ symbol }),
-        })
-    watchlistSymbols.value = Array.isArray(data?.symbols) ? data.symbols : watchlistSymbols.value
-  } catch {
-    watchlistError.value = isWatchlisted(symbol) ? '移除自选失败' : '添加自选失败'
-  } finally {
-    setWatchlistPending(symbol, false)
-  }
-}
-
 async function loadStocks() {
   loadingList.value = true
   loadError.value = false
@@ -291,6 +214,7 @@ async function loadStocks() {
     }
     syncing.value = statusData?.syncing || false
     syncError.value = statusData?.syncError || ''
+    syncProgress.value = statusData?.syncProgress || null
   } catch {
     loadError.value = true
   } finally {
@@ -302,7 +226,7 @@ async function triggerSync() {
   syncing.value = true
   syncError.value = ''
   try {
-    const resp = await api('/api/sync/trigger', { method: 'POST' })
+    const resp = await api('/api/pipeline/trigger', { method: 'POST' })
     if (!resp?.ok) {
       syncError.value = resp?.error || '同步启动失败'
       syncing.value = false
@@ -314,9 +238,12 @@ async function triggerSync() {
       if (!status?.syncing) {
         clearInterval(poll)
         syncing.value = false
+        syncProgress.value = null
         if (status?.syncError) syncError.value = status.syncError
         if (status?.lastUpdate) lastUpdateDate.value = status.lastUpdate
         loadStocks()
+      } else {
+        syncProgress.value = status?.syncProgress || null
       }
     }, 3000)
   } catch {
@@ -354,8 +281,14 @@ function refreshPagedQuotes(quotes) {
 function startPagePolling() {
   if (pagePollingStarted) return
   pagePollingStarted = true
-  setManagedInterval(pageTimers, loadIndices, 1000)
-  setManagedInterval(pageTimers, async () => {
+  pageTimers.setManagedInterval( async () => {
+    checkMarketStatus()
+    if (!marketOpen.value) return
+    await loadIndices()
+  }, 1000)
+  pageTimers.setManagedInterval( async () => {
+    checkMarketStatus()
+    if (!marketOpen.value) return
     const symbols = paged.value.map((s) => s.symbol).join(',')
     if (!symbols) return
     const data = await api(`/api/browser/quotes?symbols=${symbols}`)
@@ -365,17 +298,13 @@ function startPagePolling() {
 }
 
 function stopPagePolling() {
-  clearManagedTimers(pageTimers)
+  pageTimers.clearManagedTimers()
   pagePollingStarted = false
-}
-
-function stopDetailPolling() {
-  clearManagedTimers(detailTimers)
 }
 
 onMounted(() => {
   loadStocks()
-  loadWatchlist()
+  watchlistStore.load()
   loadIndices()
   startPagePolling()
   bindKeydown()
@@ -383,35 +312,25 @@ onMounted(() => {
 
 // keep-alive: 每次页面可见时启动轮询和键盘监听
 onActivated(() => {
+  watchlistStore.load()
   startPagePolling()
   bindKeydown()
 })
 
-// keep-alive: 页面不可见时停止轮询，节省资源
 onDeactivated(() => {
   stopPagePolling()
-  stopDetailPolling()
   unbindKeydown()
 })
 
-// 组件真正销毁时的清理（keep-alive max 淘汰等场景）
 onUnmounted(() => {
   stopPagePolling()
-  stopDetailPolling()
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-    resizeObserver = null
-  }
-  if (chart) {
-    chart.destroy()
-    chart = null
-  }
+  closeDetail()
   unbindKeydown()
 })
 
 function handleKeydown(event) {
   if (event.key === 'Escape' && showKline.value) {
-    closeKline()
+    handleCloseKline()
     return
   }
   if (event.key === '/' && !event.ctrlKey && !event.metaKey) {
@@ -431,189 +350,6 @@ function handleKeydown(event) {
       nextPage()
     }
   }
-}
-
-async function selectStock(symbol, name) {
-  await navigateToStock(symbol)
-
-  // 取消上一次未完成的请求
-  if (currentAbortController) {
-    currentAbortController.abort()
-  }
-  currentAbortController = new AbortController()
-  const signal = currentAbortController.signal
-
-  stopDetailPolling()
-  selectedSymbol.value = symbol
-  selectedName.value = name || ''
-  showKline.value = true
-
-  await nextTick()
-
-  const dayData = await loadDailyKline(symbol, signal)
-  if (signal.aborted) return
-
-  if (dayData?.kline?.length) {
-    rawDaily = dayData.kline
-    rawMin1 = []
-    updateQuote(dayData.quote)
-    if (isMinutePeriod(period.value)) period.value = 'D'
-    applyPeriod()
-  } else {
-    rawDaily = []
-    rawMin1 = []
-    quote.value = { close: 0, change: 0, changePct: '0' }
-    applyPeriod()
-  }
-
-  setManagedInterval(detailTimers, async () => {
-    if (signal.aborted || selectedSymbol.value !== symbol || !isMinutePeriod(period.value)) return
-    const fresh = await api(`/api/realtime/kline/${symbol}`, { signal })
-    if (signal.aborted || selectedSymbol.value !== symbol) return
-    if (fresh?.kline?.length) {
-      rawMin1 = fresh.kline
-      applyPeriod()
-    }
-  }, 1000)
-
-  checkMarketStatus()
-  setManagedInterval(detailTimers, async () => {
-    if (signal.aborted || selectedSymbol.value !== symbol || !isDailyLikePeriod(period.value)) return
-    const freshDaily = await loadDailyKline(symbol, signal)
-    if (signal.aborted || selectedSymbol.value !== symbol) return
-    if (freshDaily?.kline?.length) {
-      rawDaily = freshDaily.kline
-      if (freshDaily?.quote) updateQuote(freshDaily.quote)
-      applyPeriod()
-    }
-  }, realtimeDayRefreshMs)
-
-  setManagedInterval(detailTimers, async () => {
-    if (signal.aborted || selectedSymbol.value !== symbol) return
-    const realtime = await api(`/api/realtime/quote/${symbol}`, { signal })
-    if (signal.aborted || selectedSymbol.value !== symbol) return
-    if (realtime?.ok && realtime.quote) {
-      const tick = realtime.quote
-      const lastClose = tick.lastClose || 0
-      const change = lastClose > 0 ? +(tick.price - lastClose).toFixed(2) : 0
-      const changePct = lastClose > 0 ? +(change / lastClose * 100).toFixed(2) : '0'
-      quote.value = {
-        close: tick.price,
-        change,
-        changePct: String(changePct),
-        open: tick.open,
-        high: tick.high,
-        low: tick.low,
-        volume: tick.vol,
-        amount: tick.amount,
-        lastClose,
-      }
-    }
-    checkMarketStatus()
-  }, 1000)
-}
-
-function updateQuote(nextQuote) {
-  if (nextQuote) quote.value = nextQuote
-}
-
-function applyPeriod() {
-  const currentPeriod = period.value
-  const isMinute = isMinutePeriod(currentPeriod)
-  const source = isMinute ? rawMin1 : rawDaily
-
-  if (source.length) {
-    const last = source[source.length - 1]
-    const prev = source.length > 1 ? source[source.length - 2] : null
-    const change = prev ? +(last.close - prev.close).toFixed(2) : 0
-    const changePct = prev && prev.close ? +(change / prev.close * 100).toFixed(2) : 0
-    quote.value = { close: last.close, change, changePct: String(changePct) }
-  }
-
-  const data = (currentPeriod === 'D' || currentPeriod === '1min')
-    ? source
-    : aggregateKline(source, currentPeriod)
-  const container = document.getElementById('kline-chart')
-  if (!container) return
-  if (chart) chart.destroy()
-  if (resizeObserver) resizeObserver.disconnect()
-  chart = new CandlestickChart(container)
-  chart.setPeriod(currentPeriod)
-  chart.setData(data)
-
-  resizeObserver = new ResizeObserver(() => {
-    if (chart) chart.resize()
-  })
-  resizeObserver.observe(container)
-}
-
-function aggregateKline(data, mode) {
-  if (!data.length) return []
-  const groups = {}
-  const getKey = mode === 'W'
-    ? (item) => {
-        const date = new Date(item.date)
-        const day = date.getDay()
-        const monday = new Date(date)
-        monday.setDate(date.getDate() - ((day + 6) % 7))
-        return monday.toISOString().slice(0, 10)
-      }
-    : (item) => item.date.slice(0, 7)
-
-  data.forEach((item) => {
-    const key = getKey(item)
-    if (!groups[key]) groups[key] = []
-    groups[key].push(item)
-  })
-
-  return Object.keys(groups).sort().map((key) => {
-    const group = groups[key]
-    return {
-      date: group[group.length - 1].date,
-      open: group[0].open,
-      high: Math.max(...group.map((item) => item.high)),
-      low: Math.min(...group.map((item) => item.low)),
-      close: group[group.length - 1].close,
-      volume: group.reduce((sum, item) => sum + item.volume, 0),
-    }
-  })
-}
-
-async function closeKline() {
-  if (currentAbortController) {
-    currentAbortController.abort()
-    currentAbortController = null
-  }
-  stopDetailPolling()
-  showKline.value = false
-  selectedSymbol.value = null
-  selectedName.value = ''
-  await clearRouteSymbol()
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-    resizeObserver = null
-  }
-  if (chart) {
-    chart.destroy()
-    chart = null
-  }
-}
-
-async function setPeriod(nextPeriod) {
-  period.value = nextPeriod
-  const isMinute = isMinutePeriod(nextPeriod)
-
-  if (isMinute && selectedSymbol.value) {
-    const symbol = selectedSymbol.value
-    loadingMin.value = true
-    const minuteData = await api(`/api/realtime/kline/${symbol}`)
-    loadingMin.value = false
-    if (selectedSymbol.value !== symbol) return
-    rawMin1 = minuteData?.kline?.length ? minuteData.kline : []
-    if (minuteData?.quote) updateQuote(minuteData.quote)
-  }
-
-  applyPeriod()
 }
 
 function chgColor(value) {
@@ -664,7 +400,7 @@ function sortIndicator(field) {
         <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z"/>
         </svg>
-        {{ watchlistSymbols.length }} 自选
+        {{ watchlistStore.symbols.length }} 自选
       </span>
       <div class="relative w-72">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -703,13 +439,29 @@ function sortIndicator(field) {
         {{ syncing ? '同步中...' : '同步数据' }}
       </button>
       <span v-if="syncError" class="text-xs text-red-500">{{ syncError }}</span>
-      <span v-else-if="watchlistError" class="text-xs text-red-500">{{ watchlistError }}</span>
-      <span v-else-if="watchlistLoading" class="text-xs text-slate-400">自选加载中...</span>
+      <span v-else-if="watchlistStore.error" class="text-xs text-red-500">{{ watchlistStore.error }}</span>
+      <span v-else-if="watchlistStore.loading" class="text-xs text-slate-400">自选加载中...</span>
       <div class="flex-1"></div>
       <span v-if="showKline" class="text-xs text-slate-400 flex items-center gap-1.5">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
         实时行情 · 1s 刷新
       </span>
+    </div>
+
+    <!-- 同步进度条 -->
+    <div v-if="syncing && syncProgress" class="flex-shrink-0 bg-amber-50 border-b border-amber-100 px-5 py-2 flex items-center gap-3 text-xs">
+      <svg class="w-3.5 h-3.5 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <span class="text-amber-700">{{ syncProgress.label || '数据同步中...' }}</span>
+      <div v-if="syncProgress.total > 0" class="flex-1 max-w-[200px] bg-amber-200 rounded-full h-1.5">
+        <div
+          class="bg-amber-500 rounded-full h-1.5 transition-all duration-500"
+          :style="{ width: (syncProgress.done / syncProgress.total * 100) + '%' }"
+        ></div>
+      </div>
+      <span v-if="syncProgress.total > 0" class="text-amber-600 font-mono tabular-nums">{{ syncProgress.done }}/{{ syncProgress.total }}</span>
     </div>
 
     <!-- 大盘指数看板 -->
@@ -792,23 +544,23 @@ function sortIndicator(field) {
                 v-for="stock in paged"
                 :key="stock.symbol"
                 :class="['cursor-pointer border-b border-surface-2/60 hover:bg-brand-50/50 transition-all duration-150 group', selectedSymbol === stock.symbol ? 'bg-brand-50/70' : '']"
-                @click="selectStock(stock.symbol, stock.name)"
+                @click="handleSelectStock(stock.symbol, stock.name)"
               >
                 <td class="px-3 py-2.5 text-center">
                   <button
-                    :aria-label="isWatchlisted(stock.symbol) ? '从自选移除' : '添加到自选'"
+                    :aria-label="watchlistStore.isWatchlisted(stock.symbol) ? '从自选移除' : '添加到自选'"
                     :class="[
                       'inline-flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-100',
-                      isWatchlisted(stock.symbol)
+                      watchlistStore.isWatchlisted(stock.symbol)
                         ? 'border-amber-200 bg-amber-50 text-amber-500 hover:bg-amber-100'
                         : 'border-surface-3 text-slate-300 hover:text-amber-400 hover:border-amber-200 hover:bg-amber-50/60',
-                      watchlistPending[stock.symbol] ? 'opacity-60 cursor-wait' : '',
+                      watchlistStore.pending[stock.symbol] ? 'opacity-60 cursor-wait' : '',
                     ]"
-                    :disabled="watchlistPending[stock.symbol]"
+                    :disabled="watchlistStore.pending[stock.symbol]"
                     type="button"
-                    @click="toggleWatchlist(stock, $event)"
+                    @click.stop="watchlistStore.toggle(stock.symbol)"
                   >
-                    <svg class="w-4 h-4" :fill="isWatchlisted(stock.symbol) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" :fill="watchlistStore.isWatchlisted(stock.symbol) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321 1.01l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.386a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.56a.562.562 0 01-.84-.61l1.285-5.386a.563.563 0 00-.182-.557L3.04 10.407a.563.563 0 01.321-1.01l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
                     </svg>
                   </button>
@@ -900,28 +652,28 @@ function sortIndicator(field) {
           :period="period"
           :loadingMin="loadingMin"
           :marketOpen="marketOpen"
-          @close="closeKline"
+          @close="handleCloseKline"
           @set-period="setPeriod"
         />
       </div>
 
-      <Teleport to="body">
-        <div v-if="showKline" class="lg:hidden fixed inset-0 z-50 flex">
-          <div class="absolute inset-0 bg-black/40" @click="closeKline"></div>
-          <div class="relative ml-auto w-full max-w-[560px] bg-white shadow-2xl flex flex-col animate-slide-in-right">
-            <KlineContent
+      <!-- Mobile K-line overlay (always in DOM, hidden via CSS, not Teleport to avoid timing issues) -->
+      <div v-show="showKline" class="lg:hidden fixed inset-0 z-50 flex" style="pointer-events:auto">
+        <div class="absolute inset-0 bg-black/40" @click="handleCloseKline"></div>
+        <div class="relative ml-auto w-full max-w-[560px] bg-white shadow-2xl flex flex-col animate-slide-in-right">
+          <KlineContent
+            chart-id="kline-chart-mobile"
               :symbol="selectedSymbol"
-              :name="selectedName"
-              :quote="quote"
-              :period="period"
-              :loadingMin="loadingMin"
-              :marketOpen="marketOpen"
-              @close="closeKline"
-              @set-period="setPeriod"
-            />
-          </div>
+            :name="selectedName"
+            :quote="quote"
+            :period="period"
+            :loadingMin="loadingMin"
+            :marketOpen="marketOpen"
+            @close="handleCloseKline"
+            @set-period="setPeriod"
+          />
         </div>
-      </Teleport>
+      </div>
     </div>
   </div>
 </template>

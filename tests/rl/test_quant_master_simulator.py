@@ -78,9 +78,9 @@ def get_configs(order: Order) -> Tuple[dict, dict]:
             "buy": ("current", "$askV1"),
             "sell": ("current", "$bidV1"),
         },
-        "open_cost": 0.0005,
-        "close_cost": 0.0015,
-        "min_cost": 5.0,
+        "open_cost": 0.0001,
+        "close_cost": 0.0006,
+        "min_cost": 0,
         "trade_unit": None,
     }
 

@@ -34,7 +34,7 @@ class DynamicMetaEnsembleModel(Model):
         num_regimes: int = 3,
         search_step: float = 0.1,
         min_weight: float = 1e-6,
-        turnover_penalty: float = 0.0002,
+        turnover_penalty: float = 0.0007,
         turnover_boost_grid: Optional[Sequence[float]] = None,
         use_rank_score: bool = True,
         random_state: int = 42,

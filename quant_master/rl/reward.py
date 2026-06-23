@@ -48,38 +48,3 @@ class RewardCombination(Reward):
             total_reward += rew
             self.log(name, rew)
         return total_reward
-
-
-# TODO:
-# reward_factory is disabled for now
-
-# _RegistryConfigReward = RegistryConfig[REWARDS]
-
-
-# @configclass
-# class _WeightedRewardConfig:
-#     weight: float
-#     reward: _RegistryConfigReward
-
-
-# RewardConfig = Union[_RegistryConfigReward, Dict[str, Union[_RegistryConfigReward, _WeightedRewardConfig]]]
-
-
-# def reward_factory(reward_config: RewardConfig) -> Reward:
-#     """
-#     Use this factory to instantiate the reward from config.
-#     Simply using ``reward_config.build()`` might not work because reward can have complex combinations.
-#     """
-#     if isinstance(reward_config, dict):
-#         # as reward combination
-#         rewards = {}
-#         for name, rew in reward_config.items():
-#             if not isinstance(rew, _WeightedRewardConfig):
-#                 # default weight is 1.
-#                 rew = _WeightedRewardConfig(weight=1., rew=rew)
-#             # no recursive build in this step
-#             rewards[name] = (rew.reward.build(), rew.weight)
-#         return RewardCombination(rewards)
-#     else:
-#         # single reward
-#         return reward_config.build()

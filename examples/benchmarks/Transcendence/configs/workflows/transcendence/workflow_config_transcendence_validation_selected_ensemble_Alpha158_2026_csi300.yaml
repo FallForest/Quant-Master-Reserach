@@ -42,7 +42,7 @@ task:
             topk_grid: [45]
             n_drop_grid: [4]
             memory_boost_grid: [0.0, 0.005, 0.01]
-            turnover_penalty_grid: [0.0, 0.00005, 0.0001]
+            turnover_penalty_grid: [0.0, 0.00035, 0.0007]
             volatility_penalty_grid: [0.0]
             open_cost: 0.0001
             close_cost: 0.0006

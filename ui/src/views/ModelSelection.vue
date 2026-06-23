@@ -4,6 +4,8 @@ import { api, fmtNum } from '../utils/api'
 import * as echarts from 'echarts'
 import CandlestickChart from '../charts/CandlestickChart'
 import KlineContent from '../components/KlineContent.vue'
+import { isMinutePeriod, isDailyLikePeriod, aggregateKline, REALTIME_DAY_REFRESH_MS } from '../utils/kline'
+import { useMarketStatus } from '../composables/useMarketStatus'
 
 // ---- 状态 ----
 const loading = ref(true)
@@ -18,6 +20,7 @@ const selectedDate = ref('')
 const topK = ref(20)
 const predictions = ref(null)
 const selectedStock = ref(null)
+const pipelineStatus = ref(null)
 
 // 实时选股
 const liveDate = ref('')
@@ -37,7 +40,7 @@ const showDetailPanel = ref(false)
 const detailLoading = ref(false)
 const loadingMin = ref(false)
 const period = ref('D')
-const marketOpen = ref(false)
+const { marketOpen, checkMarketStatus } = useMarketStatus()
 const quote = ref(createEmptyQuote())
 
 // 指标
@@ -61,16 +64,6 @@ let rawDaily = []
 let rawMin1 = []
 
 const detailTimers = new Set()
-const minutePeriods = ['1min']
-const realtimeDayRefreshMs = 5000
-
-function isMinutePeriod(value) {
-  return minutePeriods.includes(value)
-}
-
-function isDailyLikePeriod(value) {
-  return ['D', 'W', 'M'].includes(value)
-}
 
 async function loadDailyKline(instrument, signal) {
   return api(`/api/browser/kline/${instrument}?freq=1d&includeRealtime=1`, { signal })
@@ -90,7 +83,7 @@ const selectedStockWatchlisted = computed(() => {
   const instrument = selectedStock.value?.instrument
   return instrument ? watchlistSet.value.has(instrument) : false
 })
-const rankingColClass = computed(() => (hasSelectedStock.value ? 'lg:col-span-3' : 'lg:col-span-5'))
+const rankingColClass = computed(() => (hasSelectedStock.value ? 'lg:col-span-2' : 'lg:col-span-5'))
 
 function createEmptyQuote() {
   return {
@@ -153,18 +146,6 @@ function handleResize() {
   detailChart?.resize()
 }
 
-function checkMarketStatus() {
-  const now = new Date()
-  const shanghaiMs = now.getTime() + 8 * 3600 * 1000
-  const shanghai = new Date(shanghaiMs)
-  const minutes = shanghai.getUTCHours() * 60 + shanghai.getUTCMinutes()
-  const dayOfWeek = shanghai.getUTCDay()
-  const weekday = dayOfWeek >= 1 && dayOfWeek <= 5
-  const morning = minutes >= 570 && minutes < 690
-  const afternoon = minutes >= 780 && minutes < 900
-  marketOpen.value = weekday && (morning || afternoon)
-}
-
 onMounted(async () => {
   window.addEventListener('resize', handleResize)
   pageActive = true
@@ -173,6 +154,7 @@ onMounted(async () => {
   liveDate.value = today.toISOString().slice(0, 10)
 
   await loadWatchlist()
+  await loadPipelineStatus()
 
   const modelData = await api('/api/models')
   if (modelData?.models?.length) {
@@ -239,6 +221,26 @@ function predictionDisplayDate(data = predictions.value) {
 function predictionFeatureDate(data = predictions.value) {
   if (!data) return '--'
   return data.featureDate || data.date || selectedDate.value || '--'
+}
+
+function latestMarketDate() {
+  return pipelineStatus.value?.marketEffectiveLastDate || '--'
+}
+
+function latestCalendarDate() {
+  return pipelineStatus.value?.calendarLastDate || '--'
+}
+
+function liveStatusHint() {
+  if (!pipelineStatus.value) return '将基于最新已落盘交易日数据生成候选排名'
+  if (pipelineStatus.value.syncing) return '数据同步进行中，请等待同步完成后再运行下一交易日选股'
+  if (pipelineStatus.value.syncError) return `同步状态异常：${pipelineStatus.value.syncError}`
+  return `最新市场数据日 ${latestMarketDate()}，日历最新日 ${latestCalendarDate()}`
+}
+
+async function loadPipelineStatus() {
+  const data = await api('/api/pipeline/status')
+  if (data && !data.error) pipelineStatus.value = data
 }
 
 async function loadModelData() {
@@ -399,6 +401,12 @@ function applyPeriod() {
     : aggregateKline(source, currentPeriod)
   const container = document.getElementById('kline-chart')
   if (!container) return
+  // 轮询更新时复用已有 chart，避免 DOM 重建导致闪烁和缩放丢失
+  if (detailChart) {
+    detailChart.setPeriod(currentPeriod)
+    detailChart.setData(data)
+    return
+  }
   cleanupDetailChart()
   detailChart = new CandlestickChart(container)
   detailChart.setPeriod(currentPeriod)
@@ -408,38 +416,6 @@ function applyPeriod() {
     if (detailChart) detailChart.resize()
   })
   resizeObserver.observe(container)
-}
-
-function aggregateKline(data, mode) {
-  if (!data.length) return []
-  const groups = {}
-  const getKey = mode === 'W'
-    ? (item) => {
-        const date = new Date(item.date)
-        const day = date.getDay()
-        const monday = new Date(date)
-        monday.setDate(date.getDate() - ((day + 6) % 7))
-        return monday.toISOString().slice(0, 10)
-      }
-    : (item) => item.date.slice(0, 7)
-
-  data.forEach((item) => {
-    const key = getKey(item)
-    if (!groups[key]) groups[key] = []
-    groups[key].push(item)
-  })
-
-  return Object.keys(groups).sort().map((key) => {
-    const group = groups[key]
-    return {
-      date: group[group.length - 1].date,
-      open: group[0].open,
-      high: Math.max(...group.map((item) => item.high)),
-      low: Math.min(...group.map((item) => item.low)),
-      close: group[group.length - 1].close,
-      volume: group.reduce((sum, item) => sum + item.volume, 0),
-    }
-  })
 }
 
 async function setPeriod(nextPeriod) {
@@ -511,7 +487,7 @@ function startDetailPolling(instrument, signal) {
       if (freshDaily?.quote) updateQuote(freshDaily.quote)
       applyPeriod()
     }
-  }, realtimeDayRefreshMs)
+  }, REALTIME_DAY_REFRESH_MS)
 
   setManagedInterval(detailTimers, async () => {
     if (signal.aborted || selectedStock.value?.instrument !== instrument) return
@@ -581,9 +557,13 @@ async function runLivePrediction() {
     } else if (data?.stocks) {
       liveResult.value = data
       predictions.value = data
+      await loadPipelineStatus()
       const datesData = await api(`/api/models/${selectedModel.value}/dates`)
-      availableDates.value = datesData?.dates || []
-      selectedDate.value = data.requestedDate || data.date
+      availableDates.value = mergeAvailableDates(
+        [...(datesData?.dates || []), ...availableDates.value],
+        data.requestedDate || data.featureDate,
+      )
+      selectedDate.value = data.requestedDate || data.featureDate || data.date
       await nextTick()
       renderScoreChart()
       syncSelectedStockFromPredictions()
@@ -721,9 +701,9 @@ function currentModel() {
           <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/>
           </svg>
-          <h3 class="text-sm font-semibold text-slate-600">实时选股</h3>
+          <h3 class="text-sm font-semibold text-slate-600">收盘后生成下一交易日选股</h3>
         </div>
-        <span class="text-[10px] text-slate-400">加载模型 + 数据集，对目标日期运行预测</span>
+        <span class="text-[10px] text-slate-400">基于最新已落盘交易日数据，为目标交易日生成候选排名</span>
         <div class="flex-1"></div>
         <div class="flex items-center gap-2">
           <label class="text-xs text-slate-500">目标日期</label>
@@ -754,6 +734,30 @@ function currentModel() {
         </div>
       </div>
 
+      <div class="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-500 bg-slate-50 rounded-lg px-3 py-2">
+        <span>最新市场数据日 {{ latestMarketDate() }}</span>
+        <span>·</span>
+        <span>日历最新日 {{ latestCalendarDate() }}</span>
+        <span v-if="pipelineStatus?.syncing">· 数据同步中</span>
+        <span v-if="pipelineStatus?.syncError" class="text-danger">· {{ pipelineStatus.syncError }}</span>
+        <span v-if="!pipelineStatus" class="text-slate-400">· {{ liveStatusHint() }}</span>
+      </div>
+      <!-- 同步进度条 -->
+      <div v-if="pipelineStatus?.syncing && pipelineStatus?.syncProgress" class="mt-2 flex items-center gap-3 text-xs bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+        <svg class="w-3.5 h-3.5 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span class="text-amber-700">{{ pipelineStatus.syncProgress.label || '数据同步中...' }}</span>
+        <div v-if="pipelineStatus.syncProgress.total > 0" class="flex-1 max-w-[160px] bg-amber-200 rounded-full h-1.5">
+          <div
+            class="bg-amber-500 rounded-full h-1.5 transition-all duration-500"
+            :style="{ width: (pipelineStatus.syncProgress.done / pipelineStatus.syncProgress.total * 100) + '%' }"
+          ></div>
+        </div>
+        <span v-if="pipelineStatus.syncProgress.total > 0" class="text-amber-600 font-mono tabular-nums">{{ pipelineStatus.syncProgress.done }}/{{ pipelineStatus.syncProgress.total }}</span>
+      </div>
+
       <div v-if="liveError" class="mt-3 flex items-center gap-2 text-xs text-danger bg-danger/5 rounded-lg px-3 py-2">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
@@ -766,10 +770,10 @@ function currentModel() {
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <span v-if="liveResult.dateMapped">
-          实时选股完成 · 交易日 {{ predictionDisplayDate(liveResult) }} · 使用 {{ predictionFeatureDate(liveResult) }} 数据 · 共 {{ liveResult.totalStocks }} 只股票
+          下一交易日候选已生成 · 目标交易日 {{ predictionDisplayDate(liveResult) }} · 使用 {{ predictionFeatureDate(liveResult) }} 收盘数据 · 共 {{ liveResult.totalStocks }} 只股票
         </span>
         <span v-else>
-          实时选股完成 · 交易日 {{ predictionDisplayDate(liveResult) }} · 共 {{ liveResult.totalStocks }} 只股票
+          选股结果已生成 · 交易日 {{ predictionDisplayDate(liveResult) }} · 共 {{ liveResult.totalStocks }} 只股票
         </span>
       </div>
     </div>
@@ -791,7 +795,7 @@ function currentModel() {
 
     <div class="flex flex-wrap items-center gap-3">
       <div class="flex items-center gap-2">
-        <label class="text-xs text-slate-500">选股日期</label>
+        <label class="text-xs text-slate-500">数据日期</label>
         <select
           v-model="selectedDate"
           class="px-2.5 py-1.5 text-sm rounded-lg border border-surface-3 bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none cursor-pointer"
@@ -902,7 +906,7 @@ function currentModel() {
         </div>
       </div>
 
-      <div v-if="hasSelectedStock" class="lg:col-span-2 bg-white rounded-xl border border-surface-3 p-4 flex flex-col gap-4 lg:sticky lg:top-4 self-start lg:max-h-[calc(100vh-7rem)] overflow-x-hidden overflow-y-visible lg:overflow-y-auto">
+      <div v-if="hasSelectedStock" class="lg:col-span-3 bg-white rounded-xl border border-surface-3 p-4 flex flex-col gap-4 lg:sticky lg:top-4 self-start lg:max-h-[calc(100vh-7rem)] overflow-x-hidden overflow-y-visible lg:overflow-y-auto">
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div class="flex flex-wrap items-center gap-2">
@@ -912,17 +916,17 @@ function currentModel() {
             <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
               <span class="inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-brand-600">当前排名 #{{ selectedStockRank }}</span>
               <span class="inline-flex items-center rounded-full bg-surface-2 px-2 py-0.5 text-slate-500">
-                {{ predictions?.source === 'live' ? '实时选股' : '历史预测' }}
+                {{ predictions?.source === 'live' ? '收盘后选股' : '历史预测' }}
               </span>
               <span v-if="watchlistError" class="text-danger">{{ watchlistError }}</span>
             </div>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center gap-2 self-start">
             <button
               type="button"
               :disabled="watchlistPending[selectedStock?.instrument]"
               :class="[
-                'inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-amber-200 cursor-pointer',
+                'inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer',
                 selectedStockWatchlisted
                   ? 'border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100'
                   : 'border-surface-3 bg-white text-slate-600 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600',
@@ -930,7 +934,7 @@ function currentModel() {
               ]"
               @click="toggleSelectedWatchlist"
             >
-              <svg class="h-4 w-4" :fill="selectedStockWatchlisted ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <svg class="h-3.5 w-3.5" :fill="selectedStockWatchlisted ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321 1.01l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.386a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.56a.562.562 0 01-.84-.61l1.285-5.386a.563.563 0 00-.182-.557L3.04 10.407a.563.563 0 01.321-1.01l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>
               </svg>
               {{ selectedStockWatchlisted ? '已在自选' : '加入自选' }}
@@ -986,7 +990,7 @@ function currentModel() {
 
     <div class="bg-white rounded-xl border border-surface-3 p-4">
       <h3 class="text-sm font-semibold text-slate-600 mb-3">
-        Top {{ topK }} 预测分数分布 <span class="text-[10px] font-normal text-slate-400">{{ formatDate(selectedDate) }}</span>
+        Top {{ topK }} 预测分数分布 <span class="text-[10px] font-normal text-slate-400">数据日 {{ formatDate(selectedDate) }}</span>
       </h3>
       <div v-if="loadingPredictions" class="h-[260px]">
         <div class="skeleton w-full h-full rounded-lg"></div>

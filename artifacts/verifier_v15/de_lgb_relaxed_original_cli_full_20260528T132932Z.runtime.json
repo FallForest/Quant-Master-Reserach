@@ -1,9 +1,0 @@
-{
-    "command":  "py -3 -m quant_master.cli.run examples/benchmarks/Transcendence/workflow_config_regime_horizon_de_lgb_relaxed_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml",
-    "exit_code":  0,
-    "runtime_seconds":  365.798,
-    "runtime":  "00:06:05.7976981",
-    "log":  "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\artifacts\\verifier_v15\\de_lgb_relaxed_original_cli_full_20260528T132932Z.log",
-    "started_at":  "20260528T132932Z",
-    "finished_at":  "20260528T133538Z"
-}

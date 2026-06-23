@@ -2,12 +2,14 @@
 import datetime
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
 
+from .calendar_validation import InvalidCalendarError, load_calendar_file, parse_calendar_date
 from .datadir import get_effective_data_dir
+from .stock_cache import build_stock_summary
 from .tdx_quote import TDXQuote
 
 
@@ -15,29 +17,98 @@ PARTIAL_SYNC_COVERAGE_THRESHOLD = 0.8
 MAX_SAMPLE_SYMBOLS = 8
 
 _sync_lock = threading.Lock()
-_sync_status = {"running": False, "lastSync": None, "lastError": None, "lastStats": None}
+_sync_status = {
+    "running": False, "lastSync": None, "lastError": None, "lastStats": None, "runningSince": None,
+    "progressPhase": None, "progressTotal": 0, "progressDone": 0, "progressLabel": None,
+}
+# 同步运行超过此秒数视为失效，允许清除
+STALE_RUNNING_TIMEOUT = 600  # 10 分钟
 
 
 def get_sync_status():
-    """返回同步状态的快照副本（线程安全）。"""
+    """返回同步状态的快照副本（线程安全）。自动检测卡死的 running 标记。"""
     with _sync_lock:
+        stale = (
+            _sync_status["running"]
+            and _sync_status["runningSince"] is not None
+            and (time.time() - _sync_status["runningSince"]) > STALE_RUNNING_TIMEOUT
+        )
+        if stale:
+            _log.warning(
+                "Sync running flag stuck for > %ds, auto-clearing. "
+                "runningSince=%.1f, lastSync=%s, lastError=%s",
+                STALE_RUNNING_TIMEOUT,
+                _sync_status["runningSince"],
+                _sync_status["lastSync"],
+                _sync_status["lastError"],
+            )
+            _sync_status["running"] = False
+            _sync_status["runningSince"] = None
         return dict(_sync_status)
 
 
 def _set_sync_status(**kwargs):
-    """原子更新同步状态字段。"""
+    """原子更新同步状态字段。自动记录 running 的开始/结束时间。"""
     with _sync_lock:
         _sync_status.update(kwargs)
+        if "running" in kwargs:
+            if kwargs["running"] is True:
+                _sync_status["runningSince"] = time.time()
+            elif kwargs["running"] is False:
+                _sync_status["runningSince"] = None
+
+
+def _update_instrument_end_dates(inst_path, symbol_end_dates):
+    """Update quote coverage dates for an instrument file.
+
+    Use this for instruments/all.txt only. Index files such as csi300.txt store
+    membership intervals, not quote coverage, so quote sync must not extend
+    their end_date values.
+    """
+    inst_path = Path(inst_path)
+    if not inst_path.exists() or not symbol_end_dates:
+        return 0
+
+    lines = inst_path.read_text(encoding="utf-8").strip().split("\n")
+    new_lines = []
+    updated_count = 0
+    for line in lines:
+        parts = line.strip().split("\t")
+        if len(parts) >= 3 and parts[0] in symbol_end_dates:
+            new_end = symbol_end_dates[parts[0]]
+            if parts[2] != new_end:
+                parts[2] = new_end
+                updated_count += 1
+        new_lines.append("\t".join(parts))
+    inst_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+    return updated_count
+
+
+def _read_calendar_with_validation(cal_path, strict=False):
+    """Read calendars/day.txt with validation diagnostics."""
+    try:
+        return load_calendar_file(cal_path, strict=strict)
+    except InvalidCalendarError:
+        raise
+    except Exception:
+        return [], None
+
+
+def _calendar_corruption_message(data_dir, result_or_lines):
+    lines = getattr(result_or_lines, "invalid_lines", result_or_lines) or []
+    samples = lines[:3]
+    sample_text = "、".join(f"第 {item.get('line')} 行 {item.get('value')}" for item in samples) or "无非法日期样例"
+    return f"数据日历文件损坏，已暂停同步：{data_dir}/calendars/day.txt，非法日期：{sample_text}"
 
 
 def _get_last_update_date(data_dir):
-    """从 calendars/day.txt 读取最后一条日期。"""
+    """从 calendars/day.txt 读取最后一条有效日期。"""
     cal_path = Path(data_dir) / "calendars" / "day.txt"
     if not cal_path.exists():
         return None
     try:
-        lines = cal_path.read_text(encoding="utf-8").strip().split("\n")
-        return lines[-1].strip() if lines and lines[-1].strip() else None
+        calendar, _ = load_calendar_file(cal_path, strict=False)
+        return calendar[-1] if calendar else None
     except Exception:
         return None
 
@@ -54,114 +125,37 @@ def _empty_health_snapshot(calendar_last_date=None):
         "calendarCoveredEquities": 0,
         "overflowedSymbolCount": 0,
         "sampleOverflowSymbols": [],
+        "calendarHealthy": True,
+        "calendarInvalidLineCount": 0,
+        "sampleInvalidCalendarLines": [],
+        "calendarDuplicateCount": 0,
+        "calendarOrdered": True,
     }
 
 
 
-def _repair_overflow_tail(data_dir, calendar=None, fields=None, dry_run=False):
-    """修复/裁剪超出 calendar 的尾部槽位。"""
-    root = Path(data_dir)
-    if calendar is None:
-        cal_path = root / "calendars" / "day.txt"
-        if not cal_path.exists():
-            return {
-                "repairedSymbols": 0,
-                "overflowedSymbols": 0,
-                "trimmedSymbols": 0,
-                "shiftedSymbols": 0,
-                "sampleRepairedSymbols": [],
-                "sampleOverflowSymbols": [],
-            }
-        calendar = [line.strip() for line in cal_path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    if fields is None:
-        fields = ["open", "high", "low", "close", "volume", "amount", "adjclose", "change", "factor"]
-
-    repaired_symbols = []
-    overflow_symbols = []
-    trimmed_symbols = []
-    shifted_symbols = []
-    for close_path in (root / "features").glob("*/close.day.bin"):
-        raw = np.fromfile(str(close_path), dtype="<f4")
-        if len(raw) < 2:
-            continue
-        start_idx = int(raw[0])
-        arr = raw[1:]
-        overflow = start_idx + len(arr) - len(calendar)
-        if overflow <= 0:
-            continue
-        symbol = close_path.parent.name.upper()
-        overflow_symbols.append(symbol)
-
-        symbol_trimmed = False
-        symbol_shifted = False
-        symbol_changed = False
-        for field in fields:
-            bin_path = close_path.parent / f"{field}.day.bin"
-            if not bin_path.exists() or bin_path.stat().st_size < 8:
-                continue
-            raw_field = np.fromfile(str(bin_path), dtype="<f4")
-            field_start_idx = int(raw_field[0])
-            field_arr = raw_field[1:].astype(np.float32)
-            field_overflow = field_start_idx + len(field_arr) - len(calendar)
-            changed = False
-
-            if field_overflow > 0:
-                field_last_valid_pos = len(calendar) - 1 - field_start_idx
-                if 0 <= field_last_valid_pos < len(field_arr) - 1:
-                    inrange_last = float(field_arr[field_last_valid_pos])
-                    first_over = float(field_arr[field_last_valid_pos + 1])
-                    rest = field_arr[field_last_valid_pos + 2:]
-                    if np.isnan(inrange_last) and not np.isnan(first_over) and not np.any(~np.isnan(rest)):
-                        if not dry_run:
-                            field_arr[field_last_valid_pos] = field_arr[field_last_valid_pos + 1]
-                            field_arr[field_last_valid_pos + 1:] = np.nan
-                        changed = True
-                        symbol_shifted = True
-                if not dry_run:
-                    field_arr = field_arr[:-field_overflow]
-                changed = True
-                symbol_trimmed = True
-
-            if changed:
-                symbol_changed = True
-                if not dry_run:
-                    payload = np.concatenate([
-                        np.array([float(field_start_idx)], dtype=np.float32),
-                        field_arr,
-                    ])
-                    payload.tofile(str(bin_path))
-
-        if symbol_changed:
-            repaired_symbols.append(symbol)
-        if symbol_trimmed:
-            trimmed_symbols.append(symbol)
-        if symbol_shifted:
-            shifted_symbols.append(symbol)
-
-    return {
-        "repairedSymbols": len(repaired_symbols),
-        "overflowedSymbols": len(overflow_symbols),
-        "trimmedSymbols": len(trimmed_symbols),
-        "shiftedSymbols": len(shifted_symbols),
-        "sampleRepairedSymbols": repaired_symbols[:MAX_SAMPLE_SYMBOLS],
-        "sampleOverflowSymbols": overflow_symbols[:MAX_SAMPLE_SYMBOLS],
-    }
 
 
 
 def get_data_health_snapshot(data_dir):
     """扫描本地日线落盘情况，返回日历/全量/股票 universe 的最新覆盖信息。"""
-    calendar_last_date = _get_last_update_date(data_dir)
     cal_path = Path(data_dir) / "calendars" / "day.txt"
     inst_path = Path(data_dir) / "instruments" / "all.txt"
 
     if not cal_path.exists():
         return _empty_health_snapshot(None)
 
+    calendar = []
+    validation = None
+    calendar_last_date = None
     try:
-        calendar = [line.strip() for line in cal_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        calendar, validation = load_calendar_file(cal_path, strict=False)
+        calendar_last_date = calendar[-1] if calendar else None
         if not calendar:
-            return _empty_health_snapshot(None)
+            snapshot = _empty_health_snapshot(None)
+            if validation is not None:
+                snapshot.update(validation.diagnostics())
+            return snapshot
 
         instruments = []
         if inst_path.exists():
@@ -225,9 +219,14 @@ def get_data_health_snapshot(data_dir):
             "overflowedSymbolCount": len(overflow_symbols),
             "sampleOverflowSymbols": overflow_symbols[:MAX_SAMPLE_SYMBOLS],
         })
+        if validation is not None:
+            snapshot.update(validation.diagnostics())
         return snapshot
     except Exception:
-        return _empty_health_snapshot(calendar_last_date)
+        snapshot = _empty_health_snapshot(calendar_last_date)
+        if validation is not None:
+            snapshot.update(validation.diagnostics())
+        return snapshot
 
 
 
@@ -300,6 +299,13 @@ def _build_sync_stats(**kwargs):
         "calendarCoveredEquities": 0,
         "overflowedSymbolCount": 0,
         "sampleOverflowSymbols": [],
+        "calendarHealthy": True,
+        "calendarInvalidLineCount": 0,
+        "sampleInvalidCalendarLines": [],
+        "calendarDuplicateCount": 0,
+        "calendarOrdered": True,
+        "invalidBarDateCount": 0,
+        "sampleInvalidBarDates": [],
         "sampleTargetSymbols": [],
         "sampleStaleSymbols": [],
         "sampleErrors": [],
@@ -309,24 +315,56 @@ def _build_sync_stats(**kwargs):
     return stats
 
 
-def auto_sync_daily(data_dir, data_obj=None):
-    """增量同步日线数据。data_obj 用于清除 calendar 缓存。"""
+def _extend_tail_files(data_dir, calendar, fields, extra_buffer=0):
+    """确保所有 .day.bin 文件长度至少对齐到 calendar 长度+extra_buffer，不足的用 NaN 补齐。"""
+    root = Path(data_dir)
+    calendar_len = len(calendar) + extra_buffer
+    extended_count = 0
+    for close_path in (root / "features").glob("*/close.day.bin"):
+        raw = np.fromfile(str(close_path), dtype="<f4")
+        if len(raw) < 2:
+            continue
+        stock_idx = int(raw[0])
+        arr_len = len(raw) - 1
+        expected_len = calendar_len - stock_idx
+        if expected_len <= 0 or arr_len >= expected_len:
+            continue
+        symbol = close_path.parent.name
+        n_missing = expected_len - arr_len
+        for field in fields:
+            bin_path = close_path.parent / f"{field}.day.bin"
+            if not bin_path.exists():
+                continue
+            with bin_path.open("ab") as fp:
+                np.full(n_missing, np.nan, dtype=np.float32).tofile(fp)
+        extended_count += 1
+    if extended_count:
+        print(f"Auto-sync: extended tail for {extended_count} symbols to match calendar")
+    return extended_count
+
+
+def auto_sync_daily(data_dir, data_obj=None, force=False):
+    """增量同步日线数据。data_obj 用于清除 calendar 缓存。
+
+    Args:
+        force: 为 True 时跳过 now_hour<15 和 _is_trading_day 检查（手动触发时使用）。
+    """
     if get_sync_status()["running"]:
         return
     _set_sync_status(running=True, lastError=None)
     t0 = time.time()
     try:
         data_dir = get_effective_data_dir(data_obj, data_dir)
-        pre_repair_snapshot = get_data_health_snapshot(data_dir)
-        repair_result = {"repairedSymbols": 0, "overflowedSymbols": 0, "sampleRepairedSymbols": [], "sampleOverflowSymbols": []}
-        if pre_repair_snapshot.get("overflowedSymbolCount"):
-            repair_result = _repair_overflow_tail(data_dir)
-            if repair_result.get("repairedSymbols"):
-                print(
-                    f"Auto-sync: repaired overflow tail for {repair_result['repairedSymbols']} symbols "
-                    f"before sync"
-                )
         health_snapshot = get_data_health_snapshot(data_dir)
+        if health_snapshot.get("calendarInvalidLineCount", 0):
+            stats = _build_sync_stats(dataDir=data_dir, **health_snapshot)
+            message = _calendar_corruption_message(
+                data_dir,
+                health_snapshot.get("sampleInvalidCalendarLines", []),
+            )
+            _set_sync_status(lastError=message, lastStats=stats)
+            print(f"Auto-sync: {message}")
+            return
         last_date = health_snapshot["effectiveLastDate"]
         calendar_last_date = health_snapshot["calendarLastDate"]
         today = datetime.date.today().strftime("%Y-%m-%d")
@@ -336,21 +374,30 @@ def auto_sync_daily(data_dir, data_obj=None):
             **health_snapshot,
         )
 
+        # 提前加载日历并补齐尾部缺口，确保文件长度对齐 calendar
+        fields = ["open", "high", "low", "close", "volume", "amount", "adjclose", "change", "factor"]
+        cal_path = Path(data_dir) / "calendars" / "day.txt"
+        cal = []
+        if cal_path.exists():
+            cal, cal_v = load_calendar_file(cal_path, strict=False)
+            if cal:
+                _extend_tail_files(data_dir, cal, fields)
+
         if last_date and last_date >= today:
             print(f"Auto-sync: data already up to date ({last_date})")
             _set_sync_status(lastSync=last_date, lastStats=base_stats)
             return
 
-        if not _is_trading_day():
-            print(f"Auto-sync: today ({today}) is weekend, skipping")
-            _set_sync_status(lastSync=last_date, lastStats=base_stats)
-            return
+        if not force:
+            if not _is_trading_day():
+                print(f"Auto-sync: today ({today}) is weekend, skipping")
+                _set_sync_status(lastSync=last_date, lastStats=base_stats)
+                return
 
-        if now_hour < 15 and last_date and last_date >= (
-            datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d"):
-            print(f"Auto-sync: market not closed yet ({now_hour}:00), skipping")
-            _set_sync_status(lastSync=last_date, lastStats=base_stats)
-            return
+            if now_hour < 15:
+                print(f"Auto-sync: market not closed yet ({now_hour}:00), skipping EOD sync.")
+                _set_sync_status(lastSync=last_date, lastStats=base_stats)
+                return
 
         num_bars = _bars_to_fetch(last_date)
         print(f"Auto-sync: fetching {num_bars} daily bars from TDX (gap since {last_date}) ...")
@@ -373,15 +420,17 @@ def auto_sync_daily(data_dir, data_obj=None):
 
         equity_symbols = [sym for sym in instruments if _is_equity_symbol(sym)]
 
-        cal = []
-        if cal_path.exists():
-            with open(cal_path, encoding="utf-8") as f:
-                cal = [line.strip() for line in f.read().split("\n") if line.strip()]
-
         print(f"Auto-sync: fetching {len(instruments)} symbols from TDX ({len(equity_symbols)} equities) ...")
+        _set_sync_status(
+            progressPhase="fetching", progressTotal=len(instruments), progressDone=0,
+            progressLabel=f"正在从通达信获取 {len(instruments)} 只股票日线数据...",
+        )
 
         NUM_WORKERS = 8
-        fields = ["open", "high", "low", "close", "volume", "amount", "adjclose", "change", "factor"]
+        invalid_bar_dates = []
+        _fetch_counter = [0]  # 共享计数器，各线程处理完一只股票后原子递增
+        _fetch_lock = threading.Lock()
+        _fetch_total = len(instruments)
 
         def _connect():
             from pytdx.hq import TdxHq_API
@@ -413,8 +462,10 @@ def auto_sync_daily(data_dir, data_obj=None):
                         if not bars:
                             continue
                         for idx, bar in enumerate(bars):
-                            bar_date = str(bar.get("datetime", ""))[:10]
+                            raw_bar_date = str(bar.get("datetime", ""))[:10]
+                            bar_date = parse_calendar_date(raw_bar_date)
                             if not bar_date:
+                                invalid_bar_dates.append({"symbol": sym, "value": raw_bar_date})
                                 continue
                             chg = 0.0
                             if idx > 0:
@@ -437,6 +488,11 @@ def auto_sync_daily(data_dir, data_obj=None):
                     except Exception as e:
                         error_buf.append(f"{sym}: {e}")
                         continue
+                    # 每处理完一只股票更新进度
+                    with _fetch_lock:
+                        _fetch_counter[0] += 1
+                        if _fetch_counter[0] % max(1, _fetch_total // 100) == 0:
+                            _set_sync_status(progressDone=_fetch_counter[0], progressLabel=f"正在从通达信获取数据... {_fetch_counter[0]}/{_fetch_total}")
             finally:
                 try:
                     api.disconnect()
@@ -454,8 +510,17 @@ def auto_sync_daily(data_dir, data_obj=None):
                 all_results.append(buf)
                 all_errors.append(err_buf)
                 futs.append(pool.submit(_worker, chunk, buf, err_buf))
-            for f in futs:
-                f.result(timeout=300)
+            while not all(f.done() for f in futs):
+                time.sleep(0.5)
+                with _fetch_lock:
+                    if _fetch_counter[0] > 0:
+                        _set_sync_status(progressDone=_fetch_counter[0])
+                if time.time() - t0 > 300:
+                    print(f"Auto-sync: fetch timed out after 300s, proceeding with partial data")
+                    break
+            # 最后一次刷新
+            with _fetch_lock:
+                _set_sync_status(progressDone=_fetch_counter[0])
 
         worker_errors = []
         for err_buf in all_errors:
@@ -511,6 +576,8 @@ def auto_sync_daily(data_dir, data_obj=None):
                 connectionErrorCount=len(conn_failures),
                 workerErrorCount=len(other_worker_errors),
                 sampleErrors=worker_errors[:MAX_SAMPLE_SYMBOLS],
+                invalidBarDateCount=len(invalid_bar_dates),
+                sampleInvalidBarDates=invalid_bar_dates[:MAX_SAMPLE_SYMBOLS],
             )
             _set_sync_status(lastSync=last_date, lastStats=stats)
             print(f"Auto-sync: no new data ({elapsed:.1f}s)")
@@ -530,7 +597,7 @@ def auto_sync_daily(data_dir, data_obj=None):
         partial_message = None
         if target_sync_date:
             coverage_ratio = (len(equity_with_target_date) / len(equity_symbols)) if equity_symbols else 1.0
-            if coverage_ratio < PARTIAL_SYNC_COVERAGE_THRESHOLD:
+            if not force and coverage_ratio < PARTIAL_SYNC_COVERAGE_THRESHOLD:
                 accepted_new_dates = [d for d in new_date_list if d < target_sync_date]
                 rejected_new_dates = [target_sync_date]
                 partial_message = (
@@ -539,6 +606,7 @@ def auto_sync_daily(data_dir, data_obj=None):
                 )
                 print(f"Auto-sync: {partial_message}")
 
+        accepted_new_dates = [d for d in accepted_new_dates if parse_calendar_date(d)]
         if accepted_new_dates:
             cal.extend(accepted_new_dates)
             cal_path.write_text("\n".join(cal) + "\n", encoding="utf-8")
@@ -547,9 +615,13 @@ def auto_sync_daily(data_dir, data_obj=None):
         accepted_date_set = set(cal)
         nan_vals = tuple([float("nan")] * len(fields))
         total_updated = 0
+        _set_sync_status(
+            progressPhase="writing", progressTotal=len(symbols_with_bars), progressDone=0,
+            progressLabel="正在写入日线数据到本地存储...",
+        )
         symbol_end_dates = {}
-
-        for sym in instruments:
+        update_symbols = sorted(symbols_with_bars)
+        for sym_idx, sym in enumerate(update_symbols):
             bars_dict = {d: vals for d, vals in stock_bars.get(sym, {}).items() if d in accepted_date_set}
             fname = sym.lower()
             sym_dir = features_dir / fname
@@ -600,7 +672,8 @@ def auto_sync_daily(data_dir, data_obj=None):
                     if date_str in bars_dict or any(not np.isnan(float(v)) for v in vals):
                         wrote_any = True
 
-            if wrote_any or bars_dict:
+            if wrote_any or bars_dict or write_start <= write_end:
+                # write_start <= write_end 表示写循环确实执行过，数组可能已被 NaN 扩展，必须写回
                 for field in fields:
                     bin_path = sym_dir / f"{field}.day.bin"
                     payload = np.concatenate([
@@ -618,15 +691,11 @@ def auto_sync_daily(data_dir, data_obj=None):
                         symbol_end_dates[sym] = cal[cal_idx]
                     break
 
-        if inst_path.exists() and symbol_end_dates:
-            lines = inst_path.read_text(encoding="utf-8").strip().split("\n")
-            new_lines = []
-            for line in lines:
-                parts = line.strip().split("\t")
-                if len(parts) >= 3 and parts[0] in symbol_end_dates:
-                    parts[2] = symbol_end_dates[parts[0]]
-                new_lines.append("\t".join(parts))
-            inst_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+            # 定期更新进度（每 100 只）
+            if (sym_idx + 1) % 100 == 0:
+                _set_sync_status(progressDone=sym_idx + 1)
+
+        _update_instrument_end_dates(inst_path, symbol_end_dates)
 
         if data_obj:
             data_obj._calendar_cache.clear()
@@ -653,6 +722,8 @@ def auto_sync_daily(data_dir, data_obj=None):
             sampleTargetSymbols=all_with_target_date[:MAX_SAMPLE_SYMBOLS],
             sampleStaleSymbols=stale_equities[:MAX_SAMPLE_SYMBOLS],
             sampleErrors=worker_errors[:MAX_SAMPLE_SYMBOLS],
+            invalidBarDateCount=len(invalid_bar_dates),
+            sampleInvalidBarDates=invalid_bar_dates[:MAX_SAMPLE_SYMBOLS],
             partial=bool(partial_message),
         )
         latest_real_date = stats["effectiveLastDate"] or latest_real_date
@@ -665,6 +736,10 @@ def auto_sync_daily(data_dir, data_obj=None):
                 f"Auto-sync: partial update after {elapsed:.1f}s, "
                 f"updated={total_updated}, target={target_sync_date}, effective={latest_real_date}"
             )
+            # 局部同步后仍然重建缓存（已更新的股票数据可能被下游使用）
+            if data_obj:
+                _set_sync_status(progressPhase="building_cache", progressTotal=0, progressDone=0, progressLabel="正在构建股票摘要缓存...")
+                build_stock_summary(data_obj)
             return
 
         _set_sync_status(lastSync=latest_real_date, lastStats=stats)
@@ -672,12 +747,16 @@ def auto_sync_daily(data_dir, data_obj=None):
             print(f"Auto-sync: {total_updated} symbols in {elapsed:.1f}s, latest: {latest_real_date}")
         else:
             print(f"Auto-sync: no symbols updated ({elapsed:.1f}s)")
+        # 同步完成后重建股票摘要缓存，下次浏览直接读 JSON 而非逐一遍历 bin
+        if data_obj and total_updated > 0:
+            _set_sync_status(progressPhase="building_cache", progressTotal=0, progressDone=0, progressLabel="正在构建股票摘要缓存...")
+            build_stock_summary(data_obj)
 
     except Exception as e:
         _set_sync_status(lastError=str(e))
         print(f"Auto-sync: error - {e}")
     finally:
-        _set_sync_status(running=False)
+        _set_sync_status(running=False, progressPhase=None, progressTotal=0, progressDone=0, progressLabel=None)
 
 
 def schedule_daily_sync(data_dir, data_obj=None):

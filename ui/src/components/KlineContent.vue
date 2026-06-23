@@ -6,6 +6,10 @@ defineProps({
   period: String,
   loadingMin: Boolean,
   marketOpen: Boolean,
+  chartId: {
+    type: String,
+    default: 'kline-chart',
+  },
 })
 defineEmits(['close', 'set-period'])
 
@@ -108,16 +112,6 @@ const periods = [
         {{ marketOpen ? '交易中' : '休市' }}
       </span>
 
-      <!-- 关闭按钮 -->
-      <button
-        aria-label="关闭K线"
-        class="p-1.5 rounded-lg hover:bg-surface-2 cursor-pointer transition-colors duration-150"
-        @click="$emit('close')"
-      >
-        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
     </div>
 
     <!-- 行情概要 -->
@@ -165,6 +159,6 @@ const periods = [
     </div>
 
     <!-- K线图容器 -->
-    <div id="kline-chart" class="flex-1 min-h-0" />
+    <div :id="chartId" class="flex-1 min-h-0" />
   </div>
 </template>

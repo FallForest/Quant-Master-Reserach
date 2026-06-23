@@ -27,7 +27,7 @@ class ResidualDEnsembleLGBModel(Model):
         residual_early_stopping_rounds: int = 50,
         residual_weight_grid: Optional[Sequence[float]] = None,
         topk: int = 50,
-        turnover_penalty: float = 0.0002,
+        turnover_penalty: float = 0.0007,
         use_rank_score: bool = True,
         random_state: int = 42,
     ):

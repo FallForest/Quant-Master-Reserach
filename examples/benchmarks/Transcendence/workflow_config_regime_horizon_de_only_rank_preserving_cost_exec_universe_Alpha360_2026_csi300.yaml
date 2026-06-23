@@ -17,12 +17,12 @@ port_analysis_config: &port_analysis_config
         module_path: quant_master.contrib.strategy
         kwargs:
             signal: <PRED>
-            topk: 45
-            n_drop: 4
+            topk: 3
+            n_drop: 1
     backtest:
         start_time: 2024-01-01
         end_time: 2026-04-30
-        account: 100000000
+        account: 13000
         benchmark: *benchmark
         exchange_kwargs:
             limit_threshold: 0.095
@@ -63,9 +63,9 @@ task:
                       num_threads: 20
                       verbosity: -1
                       random_state: 42
-            topk: 45
+            topk: 3
             search_step: 0.1
-            turnover_penalty: 0.00005
+            turnover_penalty: 0.0007
             risk_penalty: 0.0
             memory_boost_grid: [0.0, 0.005]
             use_rank_score: false

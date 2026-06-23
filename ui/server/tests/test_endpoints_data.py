@@ -1,6 +1,5 @@
-"""Tests for endpoints that need data (using FakeDataDir via the server fixture)."""
+"""Tests for endpoints that need data (using FakeDataDir via the client fixture)."""
 import pytest
-import requests
 
 from server import app
 
@@ -14,6 +13,9 @@ class _EmptyTDXQuote:
 
     def get_today_kline(self, symbol):
         return []
+
+    def fetch_today_day_bar_from_eastmoney(self, symbol):
+        return None
 
 
 class _FutureDayTDXQuote:
@@ -44,8 +46,8 @@ class _SameDayTDXQuote:
         ]
 
 
-def test_browser_stocks(server_url):
-    r = requests.get(f"{server_url}/api/browser/stocks", timeout=5)
+def test_browser_stocks(client):
+    r = client.get("/api/browser/stocks")
     assert r.status_code == 200
     data = r.json()
     assert "stocks" in data
@@ -55,18 +57,16 @@ def test_browser_stocks(server_url):
         assert "name" in item
 
 
-
-def test_browser_quotes(server_url):
-    r = requests.get(f"{server_url}/api/browser/quotes?symbols=sh600001,sh600002,sh600003", timeout=5)
+def test_browser_quotes(client):
+    r = client.get("/api/browser/quotes?symbols=sh600001,sh600002,sh600003")
     assert r.status_code == 200
     data = r.json()
     assert "quotes" in data
     assert len(data["quotes"]) == 3
 
 
-
-def test_browser_kline(server_url):
-    r = requests.get(f"{server_url}/api/browser/kline/sh600001", timeout=5)
+def test_browser_kline(client):
+    r = client.get("/api/browser/kline/sh600001")
     assert r.status_code == 200
     data = r.json()
     assert "kline" in data
@@ -77,11 +77,10 @@ def test_browser_kline(server_url):
     assert data["realtime"]["included"] is False
 
 
-
-def test_browser_kline_include_realtime_appends_today_bar(monkeypatch, server_url):
+def test_browser_kline_include_realtime_appends_today_bar(monkeypatch, client):
     monkeypatch.setattr(app, "tdx_quote", _FutureDayTDXQuote())
 
-    r = requests.get(f"{server_url}/api/browser/kline/sh600001?freq=1d&includeRealtime=1", timeout=5)
+    r = client.get("/api/browser/kline/sh600001?freq=1d&includeRealtime=1")
     assert r.status_code == 200
     data = r.json()
     assert data["realtime"]["included"] is True
@@ -94,11 +93,10 @@ def test_browser_kline_include_realtime_appends_today_bar(monkeypatch, server_ur
     assert data["quote"]["lastClose"] == data["kline"][-2]["close"]
 
 
-
-def test_browser_kline_include_realtime_replaces_same_day(monkeypatch, server_url):
+def test_browser_kline_include_realtime_replaces_same_day(monkeypatch, client):
     monkeypatch.setattr(app, "tdx_quote", _SameDayTDXQuote())
 
-    r = requests.get(f"{server_url}/api/browser/kline/sh600001?freq=1d&includeRealtime=1", timeout=5)
+    r = client.get("/api/browser/kline/sh600001?freq=1d&includeRealtime=1")
     assert r.status_code == 200
     data = r.json()
     dates = [item["date"] for item in data["kline"]]
@@ -110,12 +108,11 @@ def test_browser_kline_include_realtime_replaces_same_day(monkeypatch, server_ur
     assert data["quote"]["lastClose"] == data["kline"][-2]["close"]
 
 
-
-def test_browser_kline_include_realtime_gracefully_falls_back(monkeypatch, server_url):
+def test_browser_kline_include_realtime_gracefully_falls_back(monkeypatch, client):
     monkeypatch.setattr(app, "tdx_quote", _EmptyTDXQuote())
 
-    historical = requests.get(f"{server_url}/api/browser/kline/sh600001?freq=1d", timeout=5).json()
-    r = requests.get(f"{server_url}/api/browser/kline/sh600001?freq=1d&includeRealtime=1", timeout=5)
+    historical = client.get("/api/browser/kline/sh600001?freq=1d").json()
+    r = client.get("/api/browser/kline/sh600001?freq=1d&includeRealtime=1")
     assert r.status_code == 200
     data = r.json()
     assert data["realtime"]["included"] is False
@@ -123,9 +120,8 @@ def test_browser_kline_include_realtime_gracefully_falls_back(monkeypatch, serve
     assert data["quote"] == historical["quote"]
 
 
-
-def test_overview(server_url):
-    r = requests.get(f"{server_url}/api/overview", timeout=5)
+def test_overview(client):
+    r = client.get("/api/overview")
     assert r.status_code == 200
     data = r.json()
     assert data["stockCount"] == 3
@@ -140,9 +136,8 @@ def test_overview(server_url):
     assert isinstance(data["fieldStats"], list)
 
 
-
-def test_pipeline_global_status(server_url):
-    r = requests.get(f"{server_url}/api/pipeline/status", timeout=5)
+def test_pipeline_global_status(client):
+    r = client.get("/api/pipeline/status")
     assert r.status_code == 200
     data = r.json()
     assert data["lastUpdate"] == "2025-02-20"
@@ -156,42 +151,40 @@ def test_pipeline_global_status(server_url):
     assert "syncStats" in data
 
 
-
-def test_watchlist_crud(server_url):
-    r = requests.get(f"{server_url}/api/watchlist", timeout=5)
+def test_watchlist_crud(client):
+    r = client.get("/api/watchlist")
     assert r.status_code == 200
     data = r.json()
     initial_symbols = list(data["symbols"])
     initial_count = data["count"]
 
-    r = requests.post(f"{server_url}/api/watchlist", json={"symbol": "600001"}, timeout=5)
+    r = client.post("/api/watchlist", json={"symbol": "600001"})
     assert r.status_code == 200
     data = r.json()
     assert data["ok"] is True
     assert "SH600001" in data["symbols"]
     assert data["count"] >= initial_count
 
-    r = requests.post(f"{server_url}/api/watchlist", json={"symbol": "sh600001"}, timeout=5)
+    r = client.post("/api/watchlist", json={"symbol": "sh600001"})
     assert r.status_code == 200
     data = r.json()
     assert data["symbols"].count("SH600001") == 1
 
-    r = requests.post(f"{server_url}/api/watchlist", json={"symbol": "000001"}, timeout=5)
+    r = client.post("/api/watchlist", json={"symbol": "000001"})
     assert r.status_code == 200
     data = r.json()
     assert "SH600001" in data["symbols"]
     assert "SZ000001" in data["symbols"]
 
-    r = requests.delete(f"{server_url}/api/watchlist/600001", timeout=5)
+    r = client.delete("/api/watchlist/600001")
     assert r.status_code == 200
     data = r.json()
     assert data["ok"] is True
     assert "SH600001" not in data["symbols"]
 
 
-
-def test_watchlist_invalid_symbol(server_url):
-    r = requests.post(f"{server_url}/api/watchlist", json={"symbol": ""}, timeout=5)
+def test_watchlist_invalid_symbol(client):
+    r = client.post("/api/watchlist", json={"symbol": ""})
     assert r.status_code == 400
     data = r.json()
     assert data["error"] == "symbol 不能为空"

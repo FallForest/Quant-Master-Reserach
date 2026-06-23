@@ -11,8 +11,13 @@ In ``DelayTrainer``, the first step is only to save some necessary info to model
 ``QuantMaster`` offer two kinds of Trainer, ``TrainerR`` is the simplest way and ``TrainerRM`` is based on TaskManager to help manager tasks lifecycle automatically.
 """
 
+import hashlib
+import json
+import os
 import socket
-from typing import Callable, List, Optional
+import tempfile
+import time
+from typing import Any, Callable, List, Optional
 
 from tqdm.auto import tqdm
 
@@ -33,20 +38,170 @@ from quant_master.workflow.recorder import Recorder
 from quant_master.workflow.task.manage import TaskManager, run_task
 
 
+TRAIN_STAGE_KEY = "train_stage"
+FIT_STATUS_KEY = "fit_status"
+
+
+def _json_safe(value: Any):
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    try:
+        json.dumps(value, sort_keys=True)
+        return value
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def _stable_task_hash(task_config: dict) -> str:
+    task_json = json.dumps(_json_safe(task_config), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(task_json.encode("utf-8")).hexdigest()
+
+
+def _extract_config_identity(config: Any, prefix: str) -> dict:
+    if not isinstance(config, dict):
+        return {}
+    identity = {}
+    for field in ("class", "module_path"):
+        value = config.get(field)
+        if value is not None:
+            identity[f"{prefix}.{field}"] = value
+    return identity
+
+
+def _extract_dataset_metadata(dataset_config: Any) -> dict:
+    metadata = _extract_config_identity(dataset_config, "dataset")
+    if not isinstance(dataset_config, dict):
+        return metadata
+
+    dataset_kwargs = dataset_config.get("kwargs", {})
+    if not isinstance(dataset_kwargs, dict):
+        return metadata
+
+    metadata.update(_extract_config_identity(dataset_kwargs.get("handler"), "handler"))
+
+    segments = dataset_kwargs.get("segments", {})
+    if isinstance(segments, dict):
+        for segment in ("train", "valid", "test"):
+            if segment in segments:
+                metadata[f"segments.{segment}"] = _json_safe(segments[segment])
+    return metadata
+
+
+def _extract_record_metadata(task_config: dict) -> dict:
+    records = task_config.get("record", [])
+    if isinstance(records, dict):
+        records = [records]
+    if not isinstance(records, list):
+        records = []
+
+    record_classes = []
+    for record in records:
+        if isinstance(record, dict):
+            record_class = record.get("class")
+            if record_class is not None:
+                record_classes.append(record_class)
+
+    return {
+        "record.count": len(records),
+        "record.classes": record_classes,
+    }
+
+
+def _build_experiment_metadata(task_config: dict) -> dict:
+    metadata = {}
+    metadata.update(_extract_config_identity(task_config.get("model"), "model"))
+    metadata.update(_extract_dataset_metadata(task_config.get("dataset")))
+    metadata.update(_extract_record_metadata(task_config))
+    metadata["task_hash"] = _stable_task_hash(task_config)
+    return _json_safe(metadata)
+
+
+def _metadata_to_params(metadata: dict) -> dict:
+    params = {}
+    for key, value in metadata.items():
+        if isinstance(value, (dict, list, tuple)):
+            params[key] = json.dumps(_json_safe(value), sort_keys=True)
+        else:
+            params[key] = value
+    return params
+
+
+def _metadata_to_tags(metadata: dict) -> dict:
+    return {key: str(value) for key, value in _metadata_to_params(metadata).items()}
+
+
+def _log_fit_metadata(fit_duration: float, fit_status: str, experiment_summary: dict):
+    experiment_summary["fit_duration_seconds"] = fit_duration
+    experiment_summary["fit_status"] = fit_status
+    R.log_metrics(**{"fit_duration_seconds": fit_duration})
+    R.set_tags(**{FIT_STATUS_KEY: fit_status})
+
+
+def _save_experiment_summary(experiment_summary: dict):
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+        json.dump(_json_safe(experiment_summary), f, sort_keys=True)
+        summary_path = f.name
+    try:
+        R.log_artifact(summary_path)
+    finally:
+        os.remove(summary_path)
+
+
+def _try_log_fit_metadata(fit_duration: float, fit_status: str, experiment_summary: dict):
+    try:
+        _log_fit_metadata(fit_duration, fit_status, experiment_summary)
+    except Exception:
+        experiment_summary["fit_duration_seconds"] = fit_duration
+        experiment_summary["fit_status"] = fit_status
+
+
+def _try_set_tags(**tags):
+    try:
+        R.set_tags(**tags)
+    except Exception:
+        pass
+
+
+def _try_save_experiment_summary(experiment_summary: dict):
+    try:
+        _save_experiment_summary(experiment_summary)
+    except Exception:
+        pass
+
+
 def _log_task_info(task_config: dict):
-    R.log_params(**flatten_dict(task_config))
+    flattened_task = flatten_dict(task_config)
+    R.log_params(**flattened_task)
+    metadata = _build_experiment_metadata(task_config)
+    metadata_params = _metadata_to_params(metadata)
+    R.log_params(**{k: v for k, v in metadata_params.items() if k not in flattened_task})
+    R.set_tags(**_metadata_to_tags(metadata))
     R.save_objects(**{"task": task_config})  # keep the original format and datatype
     R.set_tags(**{"hostname": socket.gethostname()})
 
 
 def _exe_task(task_config: dict):
     rec = R.get_recorder()
+    experiment_summary = _build_experiment_metadata(task_config)
+    experiment_summary["fit_status"] = "running"
     # model & dataset initialization
     model: Model = init_instance_by_config(task_config["model"], accept_types=Model)
     dataset: Dataset = init_instance_by_config(task_config["dataset"], accept_types=Dataset)
     reweighter: Reweighter = task_config.get("reweighter", None)
     # model training
-    auto_filter_kwargs(model.fit)(dataset, reweighter=reweighter)
+    fit_start = time.time()
+    R.set_tags(**{TRAIN_STAGE_KEY: "fit", FIT_STATUS_KEY: "running"})
+    try:
+        auto_filter_kwargs(model.fit)(dataset, reweighter=reweighter)
+    except Exception:
+        fit_duration = time.time() - fit_start
+        _try_log_fit_metadata(fit_duration, "failed", experiment_summary)
+        _try_save_experiment_summary(experiment_summary)
+        raise
+    fit_duration = time.time() - fit_start
+    _try_log_fit_metadata(fit_duration, "success", experiment_summary)
     R.save_objects(**{"params.pkl": model})
     # this dataset is saved for online inference. So the concrete data should not be dumped
     dataset.config(dump_all=False, recursive=True)
@@ -69,6 +224,9 @@ def _exe_task(task_config: dict):
             try_kwargs={"model": model, "dataset": dataset},
         )
         r.generate()
+    experiment_summary["record.count"] = len(records)
+    _try_set_tags(**{TRAIN_STAGE_KEY: "records"})
+    _try_save_experiment_summary(experiment_summary)
 
 
 def begin_task_train(task_config: dict, experiment_name: str, recorder_name: str = None) -> Recorder:

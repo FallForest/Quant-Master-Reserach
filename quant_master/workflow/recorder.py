@@ -355,7 +355,7 @@ class MLflowRecorder(Recorder):
 
         self.log_params(**{"cmd-sys.argv": " ".join(sys.argv)})  # log the command to produce current experiment
         self.log_params(
-            **{k: v for k, v in os.environ.items() if k.startswith("_QLIB_")}
+            **{k: v for k, v in os.environ.items() if k.startswith("_QM_")}
         )  # Log necessary environment variables
         return run
 
@@ -373,7 +373,7 @@ class MLflowRecorder(Recorder):
         ]:
             try:
                 out = subprocess.check_output(cmd, shell=True)
-                self.client.log_text(self.id, out.decode(), fname)  # this behaves same as above
+                self.client.log_text(self.id, out.decode(errors="replace"), fname)  # this behaves same as above
             except subprocess.CalledProcessError:
                 logger.info(f"Fail to log the uncommitted code of $CWD({os.getcwd()}) when run {cmd}.")
 

@@ -297,11 +297,9 @@ class Indicator:
 
         self._trade_calendar = None
 
-    # def reset(self, trade_calendar: TradeCalendarManager):
     def reset(self) -> None:
         self.order_indicator = self.order_indicator_cls()
         self.trade_indicator = OrderedDict()
-        # self._trade_calendar = trade_calendar
 
     def record(self, trade_start_time: Union[str, pd.Timestamp]) -> None:
         self.order_indicator_his[trade_start_time] = self.get_order_indicator()

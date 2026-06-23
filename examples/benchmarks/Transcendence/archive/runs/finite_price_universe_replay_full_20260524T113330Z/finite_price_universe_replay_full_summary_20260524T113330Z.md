@@ -1,8 +1,0 @@
-# Finite Price Universe Replay 20260524T113330Z
-
-- admissible: `True`
-- hard_gate_pass: `False`
-- passed_candidates: `[]`
-- universe_size: `292`
-- excluded_size: `50`
-- artifacts: `{"summary_json": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\finite_price_universe_replay_full_20260524T113330Z\\finite_price_universe_replay_full_summary_20260524T113330Z.json", "summary_md": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\finite_price_universe_replay_full_20260524T113330Z\\finite_price_universe_replay_full_summary_20260524T113330Z.md", "coverage_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\finite_price_universe_replay_full_20260524T113330Z\\finite_price_universe_replay_full_coverage_20260524T113330Z.csv", "excluded_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\finite_price_universe_replay_full_20260524T113330Z\\finite_price_universe_replay_full_excluded_20260524T113330Z.csv", "candidate_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\finite_price_universe_replay_full_20260524T113330Z\\finite_price_universe_replay_full_candidates_20260524T113330Z.csv", "split_csv": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\finite_price_universe_replay_full_20260524T113330Z\\finite_price_universe_replay_full_splits_20260524T113330Z.csv", "out_dir": "C:\\Users\\15728\\Desktop\\Quant-Master-Research\\examples\\benchmarks\\Transcendence\\finite_price_universe_replay_full_20260524T113330Z"}`

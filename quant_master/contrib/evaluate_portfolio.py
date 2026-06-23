@@ -185,16 +185,9 @@ def get_max_drawdown_from_series(r):
     r : pandas.Series
         daily return series
     """
-    # mdd = ((r.cumsum() - r.cumsum().cummax()) / (1 + r.cumsum().cummax())).min()
-
     mdd = (((1 + r).cumprod() - (1 + r).cumprod().cummax()) / ((1 + r).cumprod().cummax())).min()
 
     return mdd
-
-
-def get_turnover_rate():
-    # in backtest
-    pass
 
 
 def get_beta(r, b):

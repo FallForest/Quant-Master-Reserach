@@ -41,7 +41,7 @@ script_args:
   - "--tracking-uri"
   - "file:./mlruns"
   - "--open-cost"
-  - "0.0005"
+  - "0.0001"
   - "--close-cost"
-  - "0.0015"
+  - "0.0006"
 

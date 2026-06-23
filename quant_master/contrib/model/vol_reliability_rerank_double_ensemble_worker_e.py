@@ -34,7 +34,7 @@ class VolReliabilityReRankDEnsembleModel(Model):
         lightgbm_kwargs: Optional[Dict] = None,
         linear_kwargs: Optional[Dict] = None,
         topk: int = 50,
-        turnover_penalty: float = 0.0002,
+        turnover_penalty: float = 0.0007,
         blend_search_step: float = 0.1,
         reliability_power_grid: Optional[Sequence[float]] = None,
         rel_coef_grid: Optional[Sequence[float]] = None,

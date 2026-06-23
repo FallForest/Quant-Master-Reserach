@@ -36,7 +36,7 @@ task:
         module_path: quant_master.contrib.model.residual_double_ensemble_lgb
         kwargs:
             topk: 50
-            turnover_penalty: 0.0002
+            turnover_penalty: 0.0007
             residual_weight_grid: [-0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0]
             residual_num_boost_round: 500
             residual_early_stopping_rounds: 50

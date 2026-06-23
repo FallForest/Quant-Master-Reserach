@@ -60,6 +60,8 @@ def _base_config() -> dict[str, Any]:
                     "memory_boost_grid": [0.0, 0.005],
                     "turnover_penalty_grid": [0.0, 0.0005, 0.001],
                     "risk_penalty_grid": [0.0, 0.05],
+                    "robust_rank_blend_grid": [0.0, 0.15, 0.3],
+                    "prediction_shrinkage_grid": [1.0, 0.9, 0.8],
                     "regime_consensus_quantiles": [0.4, 0.5, 0.6],
                     "regime_disagreement_quantiles": [0.4, 0.5, 0.6],
                     "min_regime_samples": 240,
@@ -151,6 +153,26 @@ def test_apply_validation_metrics_records_missing_reason_without_fabricating_val
     assert summary["rank_ic_missing_reason"] == "missing pred or label"
 
 
+def test_metrics_from_report_uses_index_aligned_finite_mask() -> None:
+    report = pd.DataFrame(
+        {
+            "return": [0.0, 0.01, np.nan, 0.02],
+            "bench": [0.0, 0.001, 0.002, 0.003],
+            "cost": [0.0, 0.0001, 0.0002, 0.0003],
+            "turnover": [0.0, 0.5, 0.6, 0.7],
+        },
+        index=pd.to_datetime(["2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"]),
+    )
+
+    metrics = runner._metrics_from_report(report)
+
+    assert metrics["rows"] == 4
+    assert metrics["finite_rows"] == 3
+    assert metrics["nonfinite_rows"] == 1
+    assert math.isclose(metrics["turnover"], (0.0 + 0.5 + 0.7) / 3.0)
+    assert math.isfinite(metrics["costed_annret"])
+
+
 def test_summary_metadata_jsonable_handles_dates_timestamps_and_numpy_scalars() -> None:
     summary = {
         "status": "ok",
@@ -191,6 +213,32 @@ def test_preserve_config_windows_keeps_yaml_segments_and_records_metadata() -> N
     assert cfg["runner_metadata"]["actual_segments"] == expected_segments
 
 
+def test_common_overrides_falls_back_to_default_costs_when_yaml_costs_missing() -> None:
+    cfg = runner._apply_common_overrides(_base_config(), mode="medium", preserve_config_windows=True)
+    exchange_kwargs = cfg["port_analysis_config"]["backtest"]["exchange_kwargs"]
+
+    assert exchange_kwargs["open_cost"] == runner.OPEN_COST
+    assert exchange_kwargs["close_cost"] == runner.CLOSE_COST
+    assert cfg["runner_metadata"]["protocol"]["open_cost"] == runner.OPEN_COST
+    assert cfg["runner_metadata"]["protocol"]["close_cost"] == runner.CLOSE_COST
+
+
+def test_common_overrides_preserves_yaml_costs_in_run_config_and_metadata() -> None:
+    base_config = _base_config()
+    base_config["port_analysis_config"]["backtest"]["exchange_kwargs"] = {
+        "open_cost": 0.00012,
+        "close_cost": 0.00045,
+    }
+
+    cfg = runner._apply_common_overrides(base_config, mode="medium", preserve_config_windows=True)
+    exchange_kwargs = cfg["port_analysis_config"]["backtest"]["exchange_kwargs"]
+
+    assert exchange_kwargs["open_cost"] == 0.00012
+    assert exchange_kwargs["close_cost"] == 0.00045
+    assert cfg["runner_metadata"]["protocol"]["open_cost"] == 0.00012
+    assert cfg["runner_metadata"]["protocol"]["close_cost"] == 0.00045
+
+
 def test_medium_preserve_config_windows_keeps_candidate_selection_grids() -> None:
     cfg = runner._apply_common_overrides(_base_config(), mode="medium", preserve_config_windows=True)
     model_kwargs = cfg["task"]["model"]["kwargs"]
@@ -203,11 +251,15 @@ def test_medium_preserve_config_windows_keeps_candidate_selection_grids() -> Non
     assert model_kwargs["memory_boost_grid"] == [0.0, 0.005]
     assert model_kwargs["turnover_penalty_grid"] == [0.0, 0.0005, 0.001]
     assert model_kwargs["risk_penalty_grid"] == [0.0, 0.05]
+    assert model_kwargs["robust_rank_blend_grid"] == [0.0, 0.15, 0.3]
+    assert model_kwargs["prediction_shrinkage_grid"] == [1.0, 0.9, 0.8]
     assert set(decisions) == {
         "search_step",
         "memory_boost_grid",
         "turnover_penalty_grid",
         "risk_penalty_grid",
+        "robust_rank_blend_grid",
+        "prediction_shrinkage_grid",
     }
     assert all(decision["action"] == "preserved" for decision in decisions.values())
     assert decisions["memory_boost_grid"]["value"] == [0.0, 0.005]
@@ -217,6 +269,8 @@ def test_medium_preserve_config_windows_keeps_candidate_selection_grids() -> Non
             "task.model.kwargs.memory_boost_grid",
             "task.model.kwargs.turnover_penalty_grid",
             "task.model.kwargs.risk_penalty_grid",
+            "task.model.kwargs.robust_rank_blend_grid",
+            "task.model.kwargs.prediction_shrinkage_grid",
         }
         for change in cfg["runner_metadata"]["budget_overrides"]
     )
@@ -247,6 +301,8 @@ def test_medium_uses_full_test_window_with_low_budget_overrides() -> None:
     assert model_kwargs["memory_boost_grid"] == [0.0]
     assert model_kwargs["turnover_penalty_grid"] == [0.0, 0.0005, 0.001]
     assert model_kwargs["risk_penalty_grid"] == [0.0, 0.05]
+    assert model_kwargs["robust_rank_blend_grid"] == [0.0, 0.15, 0.3]
+    assert model_kwargs["prediction_shrinkage_grid"] == [1.0, 0.9, 0.8]
     assert model_kwargs["regime_consensus_quantiles"] == [0.5]
     assert model_kwargs["regime_disagreement_quantiles"] == [0.5]
     assert len(specs) == 2
@@ -268,6 +324,8 @@ def test_medium_uses_full_test_window_with_low_budget_overrides() -> None:
         "memory_boost_grid",
         "turnover_penalty_grid",
         "risk_penalty_grid",
+        "robust_rank_blend_grid",
+        "prediction_shrinkage_grid",
     }
     assert decisions["search_step"]["action"] == "overridden"
     assert decisions["search_step"]["old"] == 0.1
@@ -277,3 +335,48 @@ def test_medium_uses_full_test_window_with_low_budget_overrides() -> None:
     assert decisions["memory_boost_grid"]["new"] == [0.0]
     assert decisions["turnover_penalty_grid"]["action"] == "preserved"
     assert decisions["risk_penalty_grid"]["action"] == "preserved"
+    assert decisions["robust_rank_blend_grid"]["action"] == "preserved"
+    assert decisions["prediction_shrinkage_grid"]["action"] == "preserved"
+
+
+def test_smoke_uses_single_point_final_control_grids() -> None:
+    cfg = runner._apply_common_overrides(_base_config(), mode="smoke", preserve_config_windows=True)
+    model_kwargs = cfg["task"]["model"]["kwargs"]
+    decisions = {
+        decision["key"]: decision
+        for decision in cfg["runner_metadata"]["selection_grid_decisions"]
+    }
+
+    assert model_kwargs["search_step"] == 0.5
+    assert model_kwargs["memory_boost_grid"] == [0.0]
+    assert model_kwargs["robust_rank_blend_grid"] == [0.0]
+    assert model_kwargs["prediction_shrinkage_grid"] == [1.0]
+    assert decisions["robust_rank_blend_grid"]["action"] == "overridden"
+    assert decisions["robust_rank_blend_grid"]["old"] == [0.0, 0.15, 0.3]
+    assert decisions["robust_rank_blend_grid"]["new"] == [0.0]
+    assert decisions["prediction_shrinkage_grid"]["action"] == "overridden"
+    assert decisions["prediction_shrinkage_grid"]["old"] == [1.0, 0.9, 0.8]
+    assert decisions["prediction_shrinkage_grid"]["new"] == [1.0]
+
+
+def test_smoke_does_not_inject_n_drop_into_weight_based_strategies() -> None:
+    base_config = _base_config()
+    base_config["port_analysis_config"]["strategy"] = {
+        "class": "SoftTopkStrategy",
+        "module_path": "quant_master.contrib.strategy",
+        "kwargs": {
+            "topk": 3,
+            "risk_degree": 1.0,
+            "trade_impact_limit": 0.3333333333,
+        },
+    }
+
+    cfg = runner._apply_common_overrides(base_config, mode="smoke", preserve_config_windows=True)
+    strategy_kwargs = cfg["port_analysis_config"]["strategy"]["kwargs"]
+
+    assert strategy_kwargs["topk"] == 3
+    assert "n_drop" not in strategy_kwargs
+    assert not any(
+        change["path"] == "port_analysis_config.strategy.kwargs.n_drop"
+        for change in cfg["runner_metadata"]["budget_overrides"]
+    )

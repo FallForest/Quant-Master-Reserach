@@ -57,9 +57,44 @@ tags
 mlruns_tmp/
 
 # Experiment outputs
-examples/benchmarks/Transcendence/*.json
-examples/benchmarks/Transcendence/*.csv
-examples/benchmarks/Transcendence/*.md
+examples/benchmarks/Transcendence/**/*.json
+examples/benchmarks/Transcendence/**/*.csv
+examples/benchmarks/Transcendence/**/*.md
+examples/benchmarks/Transcendence/**/archive/
 
 # Reports
 reports/
+
+# Runtime artifacts & logs
+artifacts/
+data/log/
+live_data/
+*.log
+*.pcap
+
+# UI runtime
+ui/.vite-pid
+ui/.server-pid
+ui/dist/
+ui/test-results/
+ui/server/_train_logs/
+
+# Binaries and security
+*.dll
+*.exe
+*.pem
+
+# Claude agent worktrees
+.claude/worktrees/
+.claude/plans/
+.claude/tmp_*.py
+
+# Node.js
+node_modules/
+
+# Local app metadata / caches
+ui/.claude/
+ui/server/pred_cache/
+
+# Empty placeholder dirs
+design-system/

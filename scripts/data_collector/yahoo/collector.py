@@ -29,7 +29,7 @@ from quant_master.constant import REG_CN as REGION_CN
 CUR_DIR = Path(__file__).resolve().parent
 sys.path.append(str(CUR_DIR.parent.parent))
 
-from dump_bin import DumpDataUpdate, verify_dump
+from dump_bin import DumpDataAll, DumpDataUpdate, verify_dump
 from data_collector.base import BaseCollector, BaseNormalize, BaseRun, Normalize
 from data_collector.utils import (
     deco_retry,
@@ -867,7 +867,14 @@ class Run(BaseRun):
                     f"end_date: {end} is greater than the maximum supported open upper bound {max_end.strftime('%Y-%m-%d')}."
                 )
 
-        super(Run, self).download_data(max_collector_count, delay, start, end, check_data_length, limit_nums)
+        super(Run, self).download_data(
+            max_collector_count,
+            delay,
+            start,
+            end,
+            check_data_length,
+            limit_nums,
+        )
 
     def normalize_data(
         self,
@@ -1051,7 +1058,6 @@ class Run(BaseRun):
         )
         for _index in index_list:
             get_instruments(str(quant_master_data_1d_dir), _index, market_index=f"{_region}_index")
-
 
 if __name__ == "__main__":
     fire.Fire(Run)

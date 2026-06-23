@@ -5,7 +5,7 @@ import fire
 import pkg_resources
 from pathlib import Path
 
-QLIB_PATH = Path(__file__).absolute().resolve().parent.parent
+QUANT_MASTER_PATH = Path(__file__).absolute().resolve().parent.parent
 
 
 class InfoCollector:

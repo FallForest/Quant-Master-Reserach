@@ -22,7 +22,7 @@ class LowTurnoverDEnsembleModel(Model):
         self,
         double_ensemble_kwargs: Optional[Dict] = None,
         topk: int = 50,
-        turnover_penalty: float = 0.0002,
+        turnover_penalty: float = 0.0007,
         turnover_boost_grid: Optional[Sequence[float]] = None,
         use_rank_score: bool = True,
         random_state: int = 42,

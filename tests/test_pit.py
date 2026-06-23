@@ -25,8 +25,8 @@ pd.set_option("display.max_columns", None)
 DATA_DIR = Path(__file__).parent.joinpath("test_pit_data")
 SOURCE_DIR = DATA_DIR.joinpath("stock_data/source")
 SOURCE_DIR.mkdir(exist_ok=True, parents=True)
-QLIB_DIR = DATA_DIR.joinpath("quant_master_data")
-QLIB_DIR.mkdir(exist_ok=True, parents=True)
+QUANT_MASTER_DIR = DATA_DIR.joinpath("quant_master_data")
+QUANT_MASTER_DIR.mkdir(exist_ok=True, parents=True)
 
 
 class TestPIT(unittest.TestCase):
@@ -36,7 +36,7 @@ class TestPIT(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cn_data_dir = str(QLIB_DIR.joinpath("cn_data").resolve())
+        cn_data_dir = str(QUANT_MASTER_DIR.joinpath("cn_data").resolve())
         pit_dir = str(SOURCE_DIR.joinpath("pit").resolve())
         pit_normalized_dir = str(SOURCE_DIR.joinpath("pit_normalized").resolve())
         GetData().quant_master_data(
@@ -64,7 +64,7 @@ class TestPIT(unittest.TestCase):
 
     def setUp(self):
         # quant_master.init(kernels=1)  # NOTE: set kernel to 1 to make it debug easier
-        provider_uri = str(QLIB_DIR.joinpath("cn_data").resolve())
+        provider_uri = str(QUANT_MASTER_DIR.joinpath("cn_data").resolve())
         quant_master.init(provider_uri=provider_uri)
 
     def to_str(self, obj):

@@ -17,18 +17,18 @@ port_analysis_config: &port_analysis_config
         module_path: quant_master.contrib.strategy
         kwargs:
             signal: <PRED>
-            topk: 30
-            n_drop: 3
+            topk: 3
+            n_drop: 1
     backtest:
         start_time: 2024-01-01
         end_time: 2026-04-30
-        account: 100000000
+        account: 13000
         benchmark: *benchmark
         exchange_kwargs:
             limit_threshold: 0.095
             deal_price: close
-            open_cost: 0.0006
-            close_cost: 0.0018
+            open_cost: 0.0001
+            close_cost: 0.0006
             min_cost: 0
 task:
     model:
@@ -91,9 +91,9 @@ task:
                       alpha: 2.0
                       fit_intercept: false
                       include_valid: false
-            topk: 30
+            topk: 3
             search_step: 0.1
-            turnover_penalty: 0.00025
+            turnover_penalty: 0.0007
             risk_penalty: 0.08
             memory_boost_grid: [0.0, 0.01, 0.02, 0.03, 0.05]
             use_rank_score: true

@@ -1,31 +1,73 @@
 """模型服务层：从 MLflow 加载实验记录，提供选股查询接口。"""
+import bisect
 import json
 import logging
 import pickle
 import threading
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import mlflow.tracking
 import pandas as pd
 
 from quant_master.data import D
+from quant_master.data.cache import H
+from quant_master.data.data import ProviderBackendMixin
 from quant_master.data.dataset import DatasetH
 from quant_master.data.dataset.handler import DataHandlerLP
 from quant_master.utils import lazy_sort_index
 
 from . import app
+from .calendar_validation import InvalidCalendarError
 from .datadir import describe_trading_day, get_effective_data_dir, get_trading_calendar
-from .sync import get_data_health_snapshot
+from .sync import get_data_health_snapshot, get_sync_status
 
 logger = logging.getLogger(__name__)
+# 确保 logger 有 handler 输出到控制台（main.py 通过 uvicorn 启动时不会设 basicConfig）
+if not logger.handlers:
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(logging.INFO)
 
 # 项目根目录下的 mlruns
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-_MLRUNS_URI = "file:" + str(_PROJECT_ROOT / "mlruns")
+from .config import LIVE_DATA_DIR, MLRUNS_URI, PROJECT_ROOT
 _REGISTRY_PATH = Path(__file__).parent / "model_registry.json"
 _PRED_LOCAL_DIR = Path(__file__).parent / "pred_cache"
+_INDEX_SIZE_LIMITS = {
+    "csi100": (80, 130),
+    "csi300": (250, 350),
+    "csi500": (430, 570),
+    "csi800": (700, 900),
+    "csi1000": (900, 1100),
+}
+_INSTRUMENT_PARAM_KEYS = (
+    "dataset.kwargs.handler.kwargs.instruments",
+    "task.dataset.kwargs.handler.kwargs.instruments",
+    "instruments",
+)
+
+
+def drop_invalid_live_predictions(df, market):
+    """Drop live prediction groups whose daily size violates the declared index universe."""
+    limits = _INDEX_SIZE_LIMITS.get(str(market).lower()) if market else None
+    if not limits or not isinstance(df, pd.DataFrame) or "source" not in df.columns:
+        return df, 0
+    if not isinstance(df.index, pd.MultiIndex) or df.index.nlevels < 2:
+        return df, 0
+
+    lower, upper = limits
+    date_index = df.index.get_level_values(0)
+    live_mask = df["source"].eq("live")
+    if not live_mask.any():
+        return df, 0
+
+    live_counts = df.loc[live_mask].groupby(date_index[live_mask]).size()
+    bad_dates = live_counts[(live_counts < lower) | (live_counts > upper)].index
+    if len(bad_dates) == 0:
+        return df, 0
+
+    bad_mask = live_mask & date_index.isin(bad_dates)
+    return df.loc[~bad_mask].copy(), int(bad_mask.sum())
 
 
 class ModelService:
@@ -65,7 +107,7 @@ class ModelService:
     def __init__(self, registry_path=None):
         self._registry_path = Path(registry_path) if registry_path else _REGISTRY_PATH
         self._registry = self._load_registry()
-        self._client = mlflow.tracking.MlflowClient(tracking_uri=_MLRUNS_URI)
+        self._client = mlflow.tracking.MlflowClient(tracking_uri=MLRUNS_URI)
         self.data = app.data
         self._pred_cache = {}   # alias → DataFrame (历史预测)
         self._info_cache = {}   # alias → dict
@@ -76,6 +118,69 @@ class ModelService:
     # ------------------------------------------------------------------
     # 内部工具
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _calendar_error_message(exc: InvalidCalendarError):
+        return exc.to_user_message()
+
+    @staticmethod
+    def _next_weekday(date_value):
+        candidate = pd.Timestamp(date_value) + timedelta(days=1)
+        while candidate.weekday() >= 5:
+            candidate += timedelta(days=1)
+        return candidate
+
+
+
+    def _validate_live_prediction_timing(self, requested_date, feature_date, trading_dates, snapshot):
+        requested_ts = pd.Timestamp(requested_date)
+        feature_ts = pd.Timestamp(feature_date)
+        sync_status = get_sync_status()
+        requested_str = requested_ts.strftime("%Y-%m-%d")
+        feature_str = feature_ts.strftime("%Y-%m-%d")
+
+        if requested_ts <= feature_ts:
+            return {
+                "allowed": True,
+                "mode": "same_day",
+                "message": "",
+                "syncing": bool(sync_status.get("running")),
+            }
+
+        # requested > feature：校验是否紧挨 feature 的下一个交易日
+        feature_info = describe_trading_day(feature_str, trading_dates)
+        expected_next = feature_info.get("next")
+        if not expected_next:
+            expected_next = self._next_weekday(feature_ts).strftime("%Y-%m-%d")
+        if requested_str != expected_next:
+            raise ValueError(
+                f"目标交易日 {requested_str} 不是数据日 {feature_str} 的下一个交易日，"
+                "当前仅支持收盘后生成下一交易日选股。"
+            )
+
+        # 数据是否足够覆盖 feature_date（替代硬性时间门禁）
+        market_effective = snapshot.get("marketEffectiveLastDate")
+        if not market_effective or pd.Timestamp(market_effective) < feature_ts:
+            if sync_status.get("running"):
+                raise ValueError("数据同步正在进行中，请等待同步完成后再运行下一交易日选股。")
+            raise ValueError(
+                f"最新市场有效数据尚未推进到 {feature_str}，请先完成当日收盘数据同步后再运行下一交易日选股。"
+            )
+
+        # 同步标记卡死但数据已到位，允许通过
+        if sync_status.get("running"):
+            logger.warning(
+                "Sync is marked running but data is already fresh (%s >= %s), "
+                "allowing prediction to proceed.",
+                market_effective, feature_str,
+            )
+
+        return {
+            "allowed": True,
+            "mode": "next_trading_day",
+            "message": f"目标交易日 {requested_str} 将使用 {feature_str} 收盘数据生成。",
+            "syncing": False,
+        }
 
     def _load_registry(self):
         if not self._registry_path.exists():
@@ -111,6 +216,15 @@ class ModelService:
         if local_path.is_file():
             df = pd.read_pickle(local_path)
             if isinstance(df.index, pd.MultiIndex):
+                market = self._declared_universe(alias)
+                df, dropped_rows = drop_invalid_live_predictions(df, market)
+                if dropped_rows:
+                    logger.warning(
+                        "Dropped %d invalid live prediction rows for '%s' from local cache (market=%s)",
+                        dropped_rows,
+                        alias,
+                        market,
+                    )
                 with self._lock:
                     self._pred_cache[alias] = df
                 logger.info("Loaded pred.pkl from local cache for '%s': %d rows", alias, len(df))
@@ -145,9 +259,111 @@ class ModelService:
     def _prediction_cache_path(alias):
         return _PRED_LOCAL_DIR / f"{alias}_pred.pkl"
 
+    @staticmethod
+    def _normalize_instruments(values):
+        return {str(value).upper() for value in values}
+
+    @staticmethod
+    def _validate_market_size(market, count, context):
+        limits = _INDEX_SIZE_LIMITS.get(str(market).lower())
+        if not limits:
+            return
+        lower, upper = limits
+        if count < lower or count > upper:
+            raise ValueError(
+                f"Universe guard failed: {context} for {market} resolved to {count} instruments, "
+                f"outside expected range [{lower}, {upper}]. Refusing to persist live prediction."
+            )
+
+    def _clear_runtime_universe_caches(self, alias=None):
+        """Clear process caches that may hold stale instrument memberships."""
+        try:
+            H["i"].clear()
+        except Exception:
+            logger.exception("Failed to clear quant_master instrument cache")
+        with self._lock:
+            if alias:
+                self._dataset_cache.pop(alias, None)
+                self._pred_cache.pop(alias, None)
+            else:
+                self._dataset_cache.clear()
+                self._pred_cache.clear()
+
+    def _declared_universe(self, alias, entry=None, run=None):
+        entry = entry or self._registry.get(alias, {})
+        registry_market = None
+        for key in ("instruments", "universe"):
+            value = entry.get(key)
+            if isinstance(value, str) and value.strip():
+                registry_market = value.strip().lower()
+                break
+
+        if run is None:
+            try:
+                run, _ = self._get_run(alias)
+            except Exception:
+                return registry_market
+        params = getattr(getattr(run, "data", None), "params", {}) or {}
+        run_market = None
+        for key in _INSTRUMENT_PARAM_KEYS:
+            value = params.get(key)
+            if isinstance(value, str) and value.strip():
+                run_market = value.strip().lower()
+                break
+
+        if registry_market and run_market and registry_market != run_market:
+            raise ValueError(
+                f"Universe guard failed: model '{alias}' registry declares {registry_market}, "
+                f"but MLflow run declares {run_market}."
+            )
+        return registry_market or run_market
+
+    def _expected_universe_for_date(self, market, feature_date):
+        market = str(market).lower()
+        feature_date = pd.Timestamp(feature_date)
+        H["i"].clear()
+        instruments = D.instruments(market)
+        expected = D.list_instruments(
+            instruments,
+            start_time=feature_date,
+            end_time=feature_date,
+            freq="day",
+            as_list=True,
+        )
+        expected_set = self._normalize_instruments(expected)
+        self._validate_market_size(market, len(expected_set), f"data provider universe on {feature_date:%Y-%m-%d}")
+        return expected_set
+
+    def _validate_live_prediction_universe(self, alias, day_data, feature_date):
+        run, entry = self._get_run(alias)
+        market = self._declared_universe(alias, entry=entry, run=run)
+        if not market or market == "all":
+            return None
+
+        actual_set = self._normalize_instruments(day_data.index)
+        self._validate_market_size(market, len(actual_set), f"prediction result on {pd.Timestamp(feature_date):%Y-%m-%d}")
+
+        try:
+            expected_set = self._expected_universe_for_date(market, feature_date)
+        except ValueError:
+            self._clear_runtime_universe_caches(alias)
+            raise
+
+        missing = sorted(expected_set - actual_set)
+        extra = sorted(actual_set - expected_set)
+        if missing or extra:
+            self._clear_runtime_universe_caches(alias)
+            raise ValueError(
+                f"Universe guard failed: model '{alias}' declares {market}, but prediction universe does not match "
+                f"{pd.Timestamp(feature_date):%Y-%m-%d}. expected={len(expected_set)}, actual={len(actual_set)}, "
+                f"missing={len(missing)}, extra={len(extra)}."
+            )
+        return {"market": market, "expected": len(expected_set), "actual": len(actual_set)}
+
     def _persist_live_predictions(self, alias, day_data, requested_date, feature_date, resolved):
         persist_date = pd.Timestamp(requested_date)
         persist_date_str = persist_date.strftime("%Y-%m-%d")
+        requested_date_str = pd.Timestamp(requested_date).strftime("%Y-%m-%d")
         feature_date_str = pd.Timestamp(feature_date).strftime("%Y-%m-%d")
 
         persist_df = day_data.copy()
@@ -159,7 +375,7 @@ class ModelService:
         persist_df.index = pd.Index([str(instrument).upper() for instrument in persist_df.index], name="instrument")
         persist_df.insert(0, "date", persist_date)
         persist_df = persist_df.reset_index().set_index(["date", "instrument"]).sort_index()
-        persist_df["requested_date"] = persist_date_str
+        persist_df["requested_date"] = requested_date_str
         persist_df["feature_date"] = feature_date_str
         persist_df["date_mapped"] = bool(resolved.get("dateMapped"))
         persist_df["source"] = "live"
@@ -172,8 +388,10 @@ class ModelService:
         if not isinstance(history_df.index, pd.MultiIndex):
             raise ValueError(f"Prediction cache for '{alias}' must have MultiIndex (datetime, instrument)")
 
-        history_dates = history_df.index.get_level_values(0)
-        history_df = history_df.loc[history_dates != persist_date]
+        if "source" in history_df.columns:
+            live_mask = history_df["source"].eq("live")
+            same_feature_mask = history_df.index.get_level_values(0) == persist_date
+            history_df = history_df.loc[~(live_mask & same_feature_mask)]
         merged_df = pd.concat([history_df, persist_df], axis=0, sort=False).sort_index()
 
         with self._lock:
@@ -183,7 +401,7 @@ class ModelService:
         logger.info(
             "Persisted live predictions for '%s': requested=%s, feature=%s, rows=%d, path=%s",
             alias,
-            persist_date_str,
+            requested_date_str,
             feature_date_str,
             len(persist_df),
             cache_path,
@@ -253,7 +471,11 @@ class ModelService:
     def _get_live_data_status(self):
         effective_dir = get_effective_data_dir(self.data)
         snapshot = get_data_health_snapshot(effective_dir)
-        trading_dates = get_trading_calendar(self.data, freq="day")
+        sync_status = get_sync_status()
+        try:
+            trading_dates = get_trading_calendar(self.data, freq="day")
+        except InvalidCalendarError as exc:
+            raise ValueError(self._calendar_error_message(exc)) from exc
         latest_calendar_date = snapshot.get("calendarLastDate") or (trading_dates[-1] if trading_dates else None)
         feature_date = (
             snapshot.get("marketEffectiveLastDate")
@@ -263,6 +485,7 @@ class ModelService:
         return {
             "effectiveDir": effective_dir,
             "snapshot": snapshot,
+            "syncStatus": sync_status,
             "tradingDates": trading_dates,
             "latestCalendarDate": latest_calendar_date,
             "featureDate": feature_date,
@@ -289,8 +512,28 @@ class ModelService:
         if feature_ts > requested_date:
             raise ValueError(trading_info["message"])
 
-        message = ""
-        if mapped:
+        # 与原生 quant_master 语义一致：预测目标日 T 始终使用 T-1 的数据
+        # 参见 quant_master/contrib/online/operator.py:64  get_pre_trading_date(trade_date)
+        if not mapped and requested_date == feature_ts:
+            prev_date = trading_info.get("previous")
+            if prev_date is not None:
+                prev_ts = pd.Timestamp(prev_date)
+                if prev_ts < requested_date:
+                    feature_ts = prev_ts
+                    mapped = True
+                    logger.info(
+                        "Mapped same-day requested_date %s to previous trading day %s",
+                        requested_str, prev_date,
+                    )
+
+        timing = self._validate_live_prediction_timing(
+            requested_date=requested_date,
+            feature_date=feature_ts,
+            trading_dates=status["tradingDates"],
+            snapshot=status["snapshot"],
+        )
+        message = timing.get("message", "")
+        if mapped and not message:
             message = (
                 f"目标交易日 {requested_str} 超出本地可用数据范围，"
                 f"已使用最近可用数据日 {feature_ts.strftime('%Y-%m-%d')} 生成选股结果。"
@@ -301,6 +544,8 @@ class ModelService:
             "featureDate": feature_ts,
             "dateMapped": mapped,
             "message": message,
+            "timingMode": timing.get("mode"),
+            "syncing": timing.get("syncing", False),
             "latestCalendarDate": status["latestCalendarDate"],
             "marketEffectiveLastDate": status["snapshot"].get("marketEffectiveLastDate"),
             "effectiveLastDate": status["snapshot"].get("effectiveLastDate"),
@@ -309,12 +554,8 @@ class ModelService:
     def _ensure_handler_data(self, dataset, target_date=None):
         """确保 handler 在反序列化后拥有 _infer / _learn 等处理后数据。
 
-        Serializable.__getstate__ 默认跳过 '_' 前缀属性（dump_all=False），
-        导致 pickle 恢复的 handler 可能缺少 _data/_infer/_learn。
-
-        Args:
-            dataset: DatasetH 对象
-            target_date: 实际用于生成预测的特征日期，如果提供且超过 handler.end_time，则自动延长
+        不走 setup_data(IT_LS) 路线——该模式会从 pickle 属性重新初始化 handler，
+        覆盖手动修改。改为直接清缓存后调用 feature-only 加载。
         """
         handler = getattr(dataset, "handler", None)
         if handler is None:
@@ -325,68 +566,63 @@ class ModelService:
         if not needs_rebuild and target_date is not None:
             max_infer_date = handler._infer.index.get_level_values(0).max()
             if target_date > max_infer_date:
-                logger.info("Feature date %s > max infer date %s, rebuilding", target_date, max_infer_date)
                 needs_rebuild = True
 
         if not needs_rebuild:
             return
 
+        # 清 feature storage 缓存，确保读到的文件长度是最新的
+        with ProviderBackendMixin._storage_cache_lock:
+            ProviderBackendMixin._storage_cache.clear()
+
         if not isinstance(dataset, DatasetH) or not isinstance(handler, DataHandlerLP):
             raise RuntimeError(
-                f"无法为 {type(handler).__name__} 重建 _infer 数据：仅支持 DatasetH/DataHandlerLP 反序列化重建。"
+                f"无法为 {type(handler).__name__} 重建 _infer 数据："
+                "仅支持 DatasetH/DataHandlerLP。"
             )
 
         start_time = getattr(handler, "start_time", None)
         end_time = getattr(handler, "end_time", None)
+
+        # clamp end_time 到 calendar 范围，防止 pickle 中 2026-12-31 导致请求超出 calendar
         if target_date is not None and (end_time is None or target_date > pd.Timestamp(end_time)):
             end_time = target_date
+        cal_list = D.calendar(freq="day")
+        if end_time is not None and len(cal_list):
+            cal_last = str(cal_list[-1])[:10]
+            if pd.Timestamp(end_time) > pd.Timestamp(cal_last):
+                end_time = cal_last
 
-        handler_kwargs = {"start_time": start_time, "end_time": end_time}
-        config_kwargs = {"handler_kwargs": handler_kwargs}
-        if target_date is not None:
-            target_str = pd.Timestamp(target_date).strftime("%Y-%m-%d")
-            config_kwargs["segments"] = {"test": (target_str, target_str)}
+        # 推理阶段只需要足够计算 rolling 窗口的历史数据，不需要 2012 年起全量
+        # Alpha158 最大滚动窗口 60 天，留余量用 90 天
+        if target_date is not None and start_time is not None:
+            min_start = (pd.Timestamp(target_date) - timedelta(days=90)).strftime("%Y-%m-%d")
+            if pd.Timestamp(start_time) < pd.Timestamp(min_start):
+                start_time = min_start
 
-        logger.info(
-            "Rebuilding handler data for %s via dataset.setup_data(init_type=%s), start=%s, end=%s",
-            type(handler).__name__,
-            DataHandlerLP.IT_LS,
-            start_time,
-            end_time,
-        )
+        handler.end_time = end_time
+        if hasattr(handler, "data_loader") and hasattr(handler.data_loader, "end_time"):
+            handler.data_loader.end_time = end_time
 
-        setup_exc = None
-        rebuilt_with_feature_only = False
-        try:
-            dataset.config(**config_kwargs)
-            dataset.setup_data(handler_kwargs={"init_type": DataHandlerLP.IT_LS})
-        except Exception as exc:
-            setup_exc = exc
-            logger.warning("dataset.setup_data(init_type=%s) failed: %s", DataHandlerLP.IT_LS, exc)
-            try:
-                with self._feature_only_loader(handler) as enabled:
-                    if not enabled:
-                        raise
-                    logger.info(
-                        "Retrying infer rebuild for %s with feature-only loader fields, start=%s, end=%s",
-                        type(handler).__name__,
-                        start_time,
-                        end_time,
-                    )
-                    self._rebuild_feature_only_infer(handler, start_time, end_time)
-                    rebuilt_with_feature_only = True
-            except Exception:
-                pass
+        # 直接 feature-only 重建（不经过 IT_LS 的父类重新初始化，避免覆盖手动修改）
+        with self._feature_only_loader(handler):
+            self._rebuild_feature_only_infer(handler, start_time, end_time)
 
         rebuilt_infer = getattr(handler, "_infer", None)
         if rebuilt_infer is None:
             raise RuntimeError(
                 f"无法为 {type(handler).__name__} 重建 _infer 数据。"
-                f"dataset.setup_data(init_type={DataHandlerLP.IT_LS}) 原始错误: {setup_exc}。"
-                f"请检查数据路径是否正确（provider_uri），以及数据文件是否存在。"
-            ) from setup_exc
-        if rebuilt_with_feature_only:
-            logger.info("Feature-only infer rebuild succeeded for %s", type(handler).__name__)
+            )
+
+        # 日期截断检查——数据加载成功但最大日期不够：让 _predict_or_fallback 处理
+        if target_date is not None:
+            max_infer_date = rebuilt_infer.index.get_level_values(0).max()
+            if pd.Timestamp(target_date) > max_infer_date:
+                logger.warning(
+                    "Feature-only rebuild truncated: max_infer_date=%s < target=%s. "
+                    "Prediction may fall back to earlier date.",
+                    max_infer_date, target_date,
+                )
 
     def _load_dataset(self, alias, target_date=None):
         """加载并缓存 DatasetH 对象。"""
@@ -549,6 +785,77 @@ class ModelService:
             "dateRange": info["dateRange"],
         }
 
+    def _predict_or_fallback(self, model, dataset, feature_date, requested_date, alias):
+        """尝试在 feature_date 上预测，若结果为空则回退到最近可用交易日的预测。
+
+        Returns:
+            Tuple of (pd.DataFrame with column 'score', pd.Timestamp actual_feature_date).
+        """
+        for attempt in range(2):
+            segment = slice(feature_date, feature_date)
+            logger.info(
+                "Running live prediction for '%s': requested=%s, feature=%s (attempt=%d)",
+                alias,
+                requested_date.strftime("%Y-%m-%d"),
+                feature_date.strftime("%Y-%m-%d"),
+                attempt,
+            )
+
+            pred = model.predict(dataset, segment=segment)
+
+            if isinstance(pred, pd.Series):
+                pred = pred.to_frame("score")
+
+            if not pred.empty:
+                pred_dates = pred.index.get_level_values(0)
+                logger.info(
+                    "Predict for '%s' returned %d rows, dates %s ~ %s, target=%s",
+                    alias, len(pred), pred_dates.min(), pred_dates.max(), feature_date,
+                )
+                if feature_date in pred_dates:
+                    return pred.loc[feature_date], feature_date
+                    return pred.loc[feature_date], feature_date
+
+                available_dates = pred_dates.unique().sort_values()
+                logger.warning(
+                    "Prediction for '%s': feature_date %s not in results. "
+                    "Available dates: %s. Attempting fallback.",
+                    alias,
+                    feature_date,
+                    ", ".join(d.strftime("%Y-%m-%d") for d in available_dates[-5:]),
+                )
+                # 结果中有其他日期，尝试用当前 segment 能取到的最后一个日期
+                if len(available_dates) > 0:
+                    fallback_date = available_dates[-1]
+                    if fallback_date < feature_date:
+                        logger.info(
+                            "Fallback for '%s': using %s instead of %s",
+                            alias, fallback_date, feature_date,
+                        )
+                        return pred.loc[fallback_date], fallback_date
+
+            # pred is empty — try previous trading day
+            if attempt == 0:
+                status = self._get_live_data_status()
+                trading_dates = status.get("tradingDates", [])
+                feature_str = feature_date.strftime("%Y-%m-%d")
+                idx = bisect.bisect_left(trading_dates, feature_str)
+                previous_date = trading_dates[idx - 1] if idx > 0 else None
+                if previous_date is not None:
+                    logger.warning(
+                        "Empty prediction for '%s' on %s, falling back to %s",
+                        alias, feature_str, previous_date,
+                    )
+                    feature_date = pd.Timestamp(previous_date)
+                    # 需要让 dataset handler 重建以覆盖回退日期
+                    self._ensure_handler_data(dataset, target_date=feature_date)
+                    continue
+
+            raise ValueError(
+                f"No prediction generated for feature date {feature_date.strftime('%Y-%m-%d')}. "
+                "The date may be outside the dataset's available data range or is not a trading day."
+            )
+
     def run_prediction(self, alias, date, top_k=30):
         """实时运行模型预测：加载模型 + 数据集，对目标日期调用 predict。
 
@@ -588,36 +895,13 @@ class ModelService:
         model = self._load_model(alias)
         dataset = self._load_dataset(alias, target_date=feature_date)
 
-        segment = slice(feature_date, feature_date)
-        logger.info(
-            "Running live prediction for '%s': requested=%s, feature=%s",
-            alias,
-            requested_date.strftime("%Y-%m-%d"),
-            feature_date.strftime("%Y-%m-%d"),
+        pred, actual_feature_date = self._predict_or_fallback(
+            model, dataset, feature_date, requested_date, alias,
         )
 
-        pred = model.predict(dataset, segment=segment)
-
-        if isinstance(pred, pd.Series):
-            pred = pred.to_frame("score")
-
-        if pred.empty:
-            raise ValueError(
-                f"No prediction generated for feature date {feature_date.strftime('%Y-%m-%d')}. "
-                "The date may be outside the dataset's available data range or is not a trading day."
-            )
-
-        pred_dates = pred.index.get_level_values(0)
-        if feature_date not in pred_dates:
-            available_dates = pred_dates.unique().sort_values()
-            raise ValueError(
-                "Prediction result does not include the resolved feature date "
-                f"{feature_date.strftime('%Y-%m-%d')}. Available dates: "
-                f"{', '.join(d.strftime('%Y-%m-%d') for d in available_dates[-5:])}"
-            )
-
-        day_data = pred.loc[feature_date].sort_values("score", ascending=False)
-        self._persist_live_predictions(alias, day_data, requested_date, feature_date, resolved)
+        day_data = pred.sort_values("score", ascending=False)
+        self._validate_live_prediction_universe(alias, day_data, actual_feature_date)
+        self._persist_live_predictions(alias, day_data, requested_date, actual_feature_date, resolved)
         top_k = min(top_k, len(day_data))
 
         stocks = []
@@ -633,15 +917,25 @@ class ModelService:
             })
 
         all_scores = day_data["score"]
-        feature_date_str = feature_date.strftime("%Y-%m-%d")
+        feature_date_str = actual_feature_date.strftime("%Y-%m-%d")
         requested_date_str = requested_date.strftime("%Y-%m-%d")
+
+        date_mapped = resolved["dateMapped"] or actual_feature_date != feature_date
+        if actual_feature_date != feature_date:
+            response_message = (
+                f"目标交易日 {requested_date_str} 的特征数据尚未就绪，"
+                f"已使用最近可用数据日 {actual_feature_date.strftime('%Y-%m-%d')} 生成选股结果。"
+            )
+        else:
+            response_message = resolved["message"]
 
         return {
             "date": requested_date_str,
             "requestedDate": requested_date_str,
             "featureDate": feature_date_str,
-            "dateMapped": resolved["dateMapped"],
-            "message": resolved["message"],
+            "dateMapped": date_mapped,
+            "message": response_message,
+            "timingMode": resolved.get("timingMode"),
             "topK": top_k,
             "stocks": stocks,
             "totalStocks": len(day_data),
@@ -652,11 +946,11 @@ class ModelService:
                 "max": round(float(all_scores.max()), 4),
             },
             "source": "live",
-            "resolvedFromDate": feature_date_str,
             "diagnostics": {
                 "latestCalendarDate": resolved["latestCalendarDate"],
                 "effectiveLastDate": resolved["effectiveLastDate"],
                 "marketEffectiveLastDate": resolved["marketEffectiveLastDate"],
+                "syncing": resolved.get("syncing", False),
             },
         }
 

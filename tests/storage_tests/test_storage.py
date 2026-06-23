@@ -6,6 +6,8 @@ from pathlib import Path
 from collections.abc import Iterable
 
 import numpy as np
+import pytest
+from quant_master.config import C
 from quant_master.tests import TestAutoData
 
 from quant_master.data.storage.file_storage import (
@@ -14,10 +16,11 @@ from quant_master.data.storage.file_storage import (
     FileFeatureStorage as FeatureStorage,
 )
 
+
 _file_name = Path(__file__).name.split(".")[0]
 DATA_DIR = Path(__file__).parent.joinpath(f"{_file_name}_data")
-QLIB_DIR = DATA_DIR.joinpath("quant_master")
-QLIB_DIR.mkdir(exist_ok=True, parents=True)
+QUANT_MASTER_DIR = DATA_DIR.joinpath("quant_master")
+QUANT_MASTER_DIR.mkdir(exist_ok=True, parents=True)
 
 
 class TestStorage(TestAutoData):
@@ -168,3 +171,24 @@ class TestStorage(TestAutoData):
             print(feature[:].empty)
         with self.assertRaises(ValueError):
             print(feature.data.empty)
+
+
+def test_feature_storage_short_read_reports_corruption_type(tmp_path):
+    provider = tmp_path / "provider"
+    feature_dir = provider / "features" / "sz000157"
+    feature_dir.mkdir(parents=True)
+    (provider / "calendars").mkdir()
+    (provider / "instruments").mkdir()
+    (provider / "calendars" / "day.txt").write_text("2026-06-01\n2026-06-02\n2026-06-03\n", encoding="utf-8")
+    (provider / "instruments" / "all.txt").write_text("SZ000157\t2026-06-01\t2026-06-03\n", encoding="utf-8")
+    np.array([0, 1, 2], dtype="<f4").tofile(str(feature_dir / "high.day.bin"))
+
+    C["mount_path"] = {"day": None}
+    feature = FeatureStorage(instrument="SZ000157", field="high", freq="day", provider_uri={"day": str(provider)})
+    with pytest.raises(ValueError) as exc_info:
+        feature[0:3]
+
+    message = str(exc_info.value)
+    assert "Corrupt feature storage slice" in message
+    assert "corruption_type=right_tail_gap" in message
+    assert "missing_bytes=4" in message

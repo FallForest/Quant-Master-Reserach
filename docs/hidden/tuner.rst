@@ -38,7 +38,7 @@ We write a simple configuration example as following,
 
     experiment:
         name: tuner_experiment
-        tuner_class: QLibTuner
+        tuner_class: QMTuner
     quant_master_client:
         auto_mount: False
         logging_level: INFO
@@ -152,7 +152,7 @@ Usually it should contain the following content:
 
     experiment:
         name: tuner_experiment
-        tuner_class: QLibTuner
+        tuner_class: QMTuner
 
 Also, there are some optional fields. The meaning of each field is as follows:
 
@@ -163,7 +163,7 @@ Also, there are some optional fields. The meaning of each field is as follows:
     The saving path, str type, the program will construct the experiment directory in this path. The default value is the path where configuration locate.
 
 - `tuner_class`
-    The class of tuner, str type, must be an already implemented model, such as `QLibTuner` in `quant_master`, or a custom tuner, but it must be a subclass of `quant_master.contrib.tuner.Tuner`, the default value is `QLibTuner`.
+    The class of tuner, str type, must be an already implemented model, such as `QMTuner` in `quant_master`, or a custom tuner, but it must be a subclass of `quant_master.contrib.tuner.Tuner`, the default value is `QMTuner`.
 
 - `tuner_module_path`
     The module path, str type, absolute url is also supported, indicates the path of the implementation of tuner. The default value is `quant_master.contrib.tuner.tuner`

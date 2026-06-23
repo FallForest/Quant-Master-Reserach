@@ -36,7 +36,7 @@ task:
         module_path: quant_master.contrib.model.low_turnover_double_ensemble
         kwargs:
             topk: 50
-            turnover_penalty: 0.0002
+            turnover_penalty: 0.0007
             turnover_boost_grid: [0.0, 0.005, 0.01, 0.015, 0.02, 0.03, 0.05]
             use_rank_score: True
             random_state: 42

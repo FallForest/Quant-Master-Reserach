@@ -35,7 +35,7 @@ from ..utils.pickle_utils import restricted_pickle_load
 
 from ..log import get_module_logger
 from .base import Feature
-from .ops import Operators  # pylint: disable=W0611  # noqa: F401
+from .ops import Operators  # noqa: F401 — side-effect: registers expression operators on import
 
 
 class QuantMasterCacheException(RuntimeError):
@@ -222,7 +222,7 @@ class MemCacheExpire:
 
 
 class CacheUtils:
-    LOCK_ID = "QLIB"
+    LOCK_ID = "QM"
     _visit_locks = {}
     _visit_locks_guard = threading.Lock()
 
@@ -1300,8 +1300,6 @@ class DatasetURICache(DatasetCache):
             )
             # cache uri
             MemCacheExpire.set_cache(H["f"], uri, uri)
-            # cache DataFrame
-            # HZ['f'][uri] = df.copy()
             get_module_logger("cache").debug(f"get feature from {C.dataset_provider}")
         else:
             df = DiskDatasetCache.read_data_from_cache(mnt_feature_uri, start_time, end_time, fields)

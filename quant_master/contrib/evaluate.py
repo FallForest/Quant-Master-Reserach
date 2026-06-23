@@ -222,9 +222,9 @@ def backtest_daily(
                 "freq": freq,
                 "limit_threshold": None, # limit_threshold is None, using C.limit_threshold
                 "deal_price": None, # deal_price is None, using C.deal_price
-                "open_cost": 0.0005,
-                "close_cost": 0.0015,
-                "min_cost": 5,
+                "open_cost": 0.0001,
+                "close_cost": 0.0006,
+                "min_cost": 0,
             }
 
     pos_type : str
@@ -249,9 +249,9 @@ def backtest_daily(
         "freq": freq,
         "limit_threshold": None,
         "deal_price": None,
-        "open_cost": 0.0005,
-        "close_cost": 0.0015,
-        "min_cost": 5,
+        "open_cost": 0.0001,
+        "close_cost": 0.0006,
+        "min_cost": 0,
     }
     if exchange_kwargs is not None:
         _exchange_kwargs.update(exchange_kwargs)

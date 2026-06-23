@@ -49,7 +49,7 @@ task:
             sub_weights: [1, 1, 1]
             epochs: 28
             topk: 50
-            turnover_penalty: 0.0002
+            turnover_penalty: 0.0007
             label_rank_weight: 0.5
             stability_weight: 0.3
             trajectory_weight: 1.0

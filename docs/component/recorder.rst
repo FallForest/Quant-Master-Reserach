@@ -130,9 +130,9 @@ Here is a simple example of what is done in ``PortAnaRecord``, which users can r
         "account": 100000000,
         "benchmark": BENCHMARK,
         "deal_price": "close",
-        "open_cost": 0.0005,
-        "close_cost": 0.0015,
-        "min_cost": 5,
+        "open_cost": 0.0001,
+        "close_cost": 0.0006,
+        "min_cost": 0,
     }
 
     strategy = TopkDropoutStrategy(**STRATEGY_CONFIG)

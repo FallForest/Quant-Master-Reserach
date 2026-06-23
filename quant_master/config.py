@@ -53,7 +53,7 @@ class QSettings(BaseSettings):
     provider_uri: str = "~/.quant_master/quant_master_data/tdx_cn_data"
 
     model_config = SettingsConfigDict(
-        env_prefix="QLIB_",
+        env_prefix="QUANT_MASTER_",
         env_nested_delimiter="_",
     )
 

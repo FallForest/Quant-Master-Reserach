@@ -1,7 +1,4 @@
-import requests
-
-
-def test_execution_preview(server_url):
+def test_execution_preview(client):
     payload = {
         "trades": [
             {"instrument": "SH600001", "name": "Test A", "side": "buy", "deltaShares": 800, "currentPrice": 10.0},
@@ -9,7 +6,7 @@ def test_execution_preview(server_url):
             {"instrument": "SH600003", "name": "Hold", "side": "hold", "deltaShares": 0, "currentPrice": 9.0},
         ]
     }
-    r = requests.post(f"{server_url}/api/execution/preview", json=payload, timeout=5)
+    r = client.post("/api/execution/preview", json=payload)
     assert r.status_code == 200
     data = r.json()
     assert data["summary"]["totalOrders"] == 2
@@ -21,12 +18,12 @@ def test_execution_preview(server_url):
     assert data["orders"][1]["valid"] is True
 
 
-def test_execution_preview_rejects_order_value_limit(server_url):
+def test_execution_preview_rejects_order_value_limit(client):
     payload = {
         "trades": [{"instrument": "SH600001", "side": "buy", "deltaShares": 800, "currentPrice": 10.0}],
         "risk": {"maxOrderValue": 5000},
     }
-    r = requests.post(f"{server_url}/api/execution/preview", json=payload, timeout=5)
+    r = client.post("/api/execution/preview", json=payload)
     assert r.status_code == 200
     data = r.json()
     assert data["orders"][0]["valid"] is False

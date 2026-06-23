@@ -212,9 +212,9 @@ class NestedDecisionExecutionWorkflow:
                 "freq": "1min",
                 "limit_threshold": 0.095,
                 "deal_price": "close",
-                "open_cost": 0.0005,
-                "close_cost": 0.0015,
-                "min_cost": 5,
+                "open_cost": 0.0001,
+                "close_cost": 0.0006,
+                "min_cost": 0,
             },
         },
     }

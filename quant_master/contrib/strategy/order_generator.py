@@ -8,6 +8,7 @@ This order generator is for strategies based on WeightStrategyBase
 from ...backtest.position import Position
 from ...backtest.exchange import Exchange
 
+import math
 import pandas as pd
 import copy
 
@@ -131,6 +132,7 @@ class OrderGenWInteract(OrderGenerator):
                 start_time=trade_start_time,
                 end_time=trade_end_time,
             )
+            target_amount_dict = _finite_positive_amounts(target_amount_dict)
         order_list = trade_exchange.generate_order_for_target_amount_position(
             target_position=target_amount_dict,
             current_position=current_amount_dict,
@@ -138,6 +140,14 @@ class OrderGenWInteract(OrderGenerator):
             end_time=trade_end_time,
         )
         return order_list
+
+
+def _finite_positive_amounts(amount_dict: dict) -> dict:
+    return {
+        stock_id: amount
+        for stock_id, amount in amount_dict.items()
+        if amount is not None and math.isfinite(float(amount)) and float(amount) > 0.0
+    }
 
 
 class OrderGenWOInteract(OrderGenerator):

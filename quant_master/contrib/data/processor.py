@@ -1,7 +1,71 @@
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 
 from ...log import TimeInspector
 from ...data.dataset.processor import Processor, _assign_columns, get_group_columns
+
+
+class USMarketFeatureJoin(Processor):
+    """Append date-level US market factors to every instrument sample."""
+
+    def __init__(self, factor_path, fields_group="feature", fill_value=0.0):
+        self.factor_path = str(factor_path)
+        self.fields_group = fields_group
+        self.fill_value = fill_value
+        self._factor_df = None
+
+    def _load_factor_df(self) -> pd.DataFrame:
+        if self._factor_df is not None:
+            return self._factor_df
+        path = Path(self.factor_path).expanduser()
+        if not path.exists():
+            raise FileNotFoundError(f"US market factor file does not exist: {path}")
+        if path.suffix.lower() == ".parquet":
+            df = pd.read_parquet(path)
+        elif path.suffix.lower() == ".csv":
+            df = pd.read_csv(path, index_col=0, parse_dates=True)
+        else:
+            raise ValueError(f"Unsupported US market factor file type: {path.suffix}")
+        df = df.copy()
+        df.index = pd.DatetimeIndex(pd.to_datetime(df.index)).normalize()
+        df = df.sort_index()
+        df = df.loc[:, ~df.columns.duplicated()]
+        self._factor_df = df
+        return df
+
+    @staticmethod
+    def _datetime_index(df: pd.DataFrame) -> pd.DatetimeIndex:
+        if isinstance(df.index, pd.MultiIndex):
+            if "datetime" in df.index.names:
+                values = df.index.get_level_values("datetime")
+            else:
+                values = df.index.get_level_values(0)
+        else:
+            values = df.index
+        return pd.DatetimeIndex(pd.to_datetime(values)).normalize()
+
+    def __call__(self, df: pd.DataFrame):
+        factors = self._load_factor_df()
+        dates = self._datetime_index(df)
+        aligned = factors.reindex(dates)
+        if self.fill_value is not None:
+            aligned = aligned.fillna(self.fill_value)
+        aligned = aligned.replace([np.inf, -np.inf], np.nan)
+        if self.fill_value is not None:
+            aligned = aligned.fillna(self.fill_value)
+        aligned.index = df.index
+
+        if isinstance(df.columns, pd.MultiIndex):
+            new_columns = pd.MultiIndex.from_product([[self.fields_group], aligned.columns])
+            aligned.columns = new_columns
+            overlap = df.columns.intersection(aligned.columns)
+        else:
+            overlap = df.columns.intersection(aligned.columns)
+        if len(overlap) > 0:
+            df = df.drop(columns=overlap)
+        return pd.concat([df, aligned], axis=1)
 
 
 class ConfigSectionProcessor(Processor):

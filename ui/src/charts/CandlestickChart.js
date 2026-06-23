@@ -41,7 +41,8 @@ export default class CandlestickChart {
     }
 
     this.data = []
-    this.visibleCount = 120
+    this.defaultVisibleCount = 120
+    this.visibleCount = this.defaultVisibleCount
     this.offset = 0
     this.hoverIdx = -1
     this.period = 'D'
@@ -72,12 +73,71 @@ export default class CandlestickChart {
   }
 
   setData(raw) {
-    this.data = raw
-    this.visibleCount = Math.min(this.visibleCount, this.data.length)
-    this.offset = Math.max(0, this.data.length - this.visibleCount)
+    const next = this._normalizeBars(raw)
+    const prevDataLen = this.data.length
+    const prevVisible = this.visibleCount
+    const prevOffset = this.offset
+
+    this.data = next
+
+    // 数据刷新（新增或持平）时保留用户的缩放/滚动位置
+    if (this._wasInitialized && next.length >= prevDataLen && prevDataLen > 0) {
+      const added = next.length - prevDataLen
+      const newMax = Math.max(0, next.length - this.visibleCount)
+      this.offset = added > 0
+        ? Math.min(prevOffset + added, newMax)
+        : Math.min(prevOffset, newMax)
+      this.visibleCount = Math.min(prevVisible, Math.max(next.length, 1))
+    } else {
+      // 首次加载或周期切换：重置到尾部默认可见量
+      this.visibleCount = Math.min(this.defaultVisibleCount, this.data.length || this.defaultVisibleCount)
+      this.offset = Math.max(0, this.data.length - this.visibleCount)
+    }
+
+    this._wasInitialized = true
     this.hoverIdx = -1
     this._computeMA()
     this.draw()
+  }
+
+  _normalizeBars(raw) {
+    if (!Array.isArray(raw)) return []
+    const bars = []
+    for (const item of raw) {
+      if (!item || typeof item !== 'object') continue
+      const open = this._toNumber(item.open)
+      const high = this._toNumber(item.high)
+      const low = this._toNumber(item.low)
+      const close = this._toNumber(item.close)
+      const volume = this._toNumber(item.volume ?? 0, 0)
+      const bar = {
+        date: item.date ?? '',
+        open,
+        high,
+        low,
+        close,
+        volume,
+      }
+      if (!this._isValidBar(bar)) continue
+      bars.push(bar)
+    }
+    return bars
+  }
+
+  _toNumber(value, fallback = NaN) {
+    if (value === '' || value == null) return fallback
+    const n = Number(value)
+    return Number.isFinite(n) ? n : fallback
+  }
+
+  _isValidBar(bar) {
+    if (!bar?.date) return false
+    if (![bar.open, bar.high, bar.low, bar.close].every(Number.isFinite)) return false
+    if (bar.high < bar.low) return false
+    if (bar.high < Math.max(bar.open, bar.close)) bar.high = Math.max(bar.open, bar.close)
+    if (bar.low > Math.min(bar.open, bar.close)) bar.low = Math.min(bar.open, bar.close)
+    if (!Number.isFinite(bar.volume)) bar.volume = 0
+    return true
   }
 
   setPeriod(p) { this.period = p }
@@ -206,11 +266,19 @@ export default class CandlestickChart {
     if (!count) return
 
     const gap = chartW / count
-    const candleW = Math.max(1, gap * 0.65)
+    const candleW = Math.max(3, Math.min(18, gap * 0.65))
 
     const { minP, maxP, maxV } = this._priceRange(visible)
-    const yScale = (p) => top + chartH * (1 - (p - minP) / (maxP - minP))
+    const range = Math.max(maxP - minP, 1e-6)
+    const yScale = (p) => top + chartH * (1 - (p - minP) / range)
     const xScale = (i) => left + i * gap + gap / 2
+
+    if (count < 3) {
+      ctx.fillStyle = '#64748B'
+      ctx.font = '12px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('历史数据不足，K 线已按最小宽度展示', this.W / 2, top + 18)
+    }
 
     ctx.clearRect(0, 0, this.W, this.mainH)
     ctx.fillStyle = this.theme.bg
@@ -334,14 +402,19 @@ export default class CandlestickChart {
   _priceRange(visible) {
     let minP = Infinity, maxP = -Infinity, maxV = 0
     visible.forEach(d => {
+      if (!Number.isFinite(d?.low) || !Number.isFinite(d?.high) || !Number.isFinite(d?.open) || !Number.isFinite(d?.close)) return
       if (d.low < minP) minP = d.low
       if (d.high > maxP) maxP = d.high
-      if (d.volume > maxV) maxV = d.volume
+      if (Number.isFinite(d.volume) && d.volume > maxV) maxV = d.volume
       ;[5, 10, 20].forEach(n => {
         const ma = d[`ma${n}`]
         if (ma != null) { if (ma < minP) minP = ma; if (ma > maxP) maxP = ma }
       })
     })
+    if (!Number.isFinite(minP) || !Number.isFinite(maxP)) {
+      minP = 0
+      maxP = 1
+    }
     const range = maxP - minP || 1
     return {
       minP: minP - range * 0.05,
@@ -388,6 +461,8 @@ export default class CandlestickChart {
     }
 
     // 竖线 + 标签
+    const padLeft = this.PADDING.left
+    const padRight = this.PADDING.right
     let prevLabelX = -Infinity
     for (const m of labels) {
       const x = Math.round(minuteToX(m)) + 0.5
@@ -398,7 +473,7 @@ export default class CandlestickChart {
       const mm = m % 60
       const label = `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
       if (x - prevLabelX >= 40) {
-        const safeX = Math.max(left + 18, Math.min(this.W - this.PADDING.right - 18, x))
+        const safeX = Math.max(padLeft + 18, Math.min(this.W - padRight - 18, x))
         ctx.fillText(label, safeX, this.mainH - 2)
         prevLabelX = x
       }

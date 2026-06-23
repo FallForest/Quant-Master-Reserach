@@ -19,13 +19,13 @@ from dump_bin import DumpDataAll, DumpDataFix
 DATA_DIR = Path(__file__).parent.joinpath("test_dump_data")
 SOURCE_DIR = DATA_DIR.joinpath("source")
 SOURCE_DIR.mkdir(exist_ok=True, parents=True)
-QLIB_DIR = DATA_DIR.joinpath("quant_master")
-QLIB_DIR.mkdir(exist_ok=True, parents=True)
+QUANT_MASTER_DIR = DATA_DIR.joinpath("quant_master")
+QUANT_MASTER_DIR.mkdir(exist_ok=True, parents=True)
 
 
 class TestDumpData(unittest.TestCase):
     FIELDS = "open,close,high,low,volume".split(",")
-    QLIB_FIELDS = list(map(lambda x: f"${x}", FIELDS))
+    QUANT_MASTER_FIELDS = list(map(lambda x: f"${x}", FIELDS))
     DUMP_DATA = None
     STOCK_NAMES = None
 
@@ -35,9 +35,9 @@ class TestDumpData(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         GetData().download_data(file_name="csv_data_cn.zip", target_dir=SOURCE_DIR)
-        TestDumpData.DUMP_DATA = DumpDataAll(data_path=SOURCE_DIR, quant_master_dir=QLIB_DIR, include_fields=cls.FIELDS)
+        TestDumpData.DUMP_DATA = DumpDataAll(data_path=SOURCE_DIR, quant_master_dir=QUANT_MASTER_DIR, include_fields=cls.FIELDS)
         TestDumpData.STOCK_NAMES = list(map(lambda x: x.name[:-4].upper(), SOURCE_DIR.glob("*.csv")))
-        provider_uri = str(QLIB_DIR.resolve())
+        provider_uri = str(QUANT_MASTER_DIR.resolve())
         quant_master.init(
             provider_uri=provider_uri,
             expression_cache=None,
@@ -55,7 +55,7 @@ class TestDumpData(unittest.TestCase):
         ori_calendars = set(
             map(
                 pd.Timestamp,
-                pd.read_csv(QLIB_DIR.joinpath("calendars", "day.txt"), header=None).loc[:, 0].values,
+                pd.read_csv(QUANT_MASTER_DIR.joinpath("calendars", "day.txt"), header=None).loc[:, 0].values,
             )
         )
         res_calendars = set(D.calendar())
@@ -67,19 +67,19 @@ class TestDumpData(unittest.TestCase):
         assert len(ori_ins - res_ins) == len(ori_ins - res_ins) == 0, "dump instruments failed"
 
     def test_3_dump_features(self):
-        df = D.features(self.STOCK_NAMES, self.QLIB_FIELDS)
+        df = D.features(self.STOCK_NAMES, self.QUANT_MASTER_FIELDS)
         TestDumpData.SIMPLE_DATA = df.loc(axis=0)[self.STOCK_NAMES[0], :]
         self.assertFalse(df.dropna().empty, "features data failed")
-        self.assertListEqual(list(df.columns), self.QLIB_FIELDS, "features columns failed")
+        self.assertListEqual(list(df.columns), self.QUANT_MASTER_FIELDS, "features columns failed")
 
     def test_4_dump_features_simple(self):
         stock = self.STOCK_NAMES[0]
         dump_data = DumpDataFix(
-            data_path=SOURCE_DIR.joinpath(f"{stock.lower()}.csv"), quant_master_dir=QLIB_DIR, include_fields=self.FIELDS
+            data_path=SOURCE_DIR.joinpath(f"{stock.lower()}.csv"), quant_master_dir=QUANT_MASTER_DIR, include_fields=self.FIELDS
         )
         dump_data.dump()
 
-        df = D.features([stock], self.QLIB_FIELDS)
+        df = D.features([stock], self.QUANT_MASTER_FIELDS)
 
         self.assertEqual(len(df), len(TestDumpData.SIMPLE_DATA), "dump features simple failed")
         self.assertTrue(np.isclose(df.dropna(), self.SIMPLE_DATA.dropna()).all(), "dump features simple failed")

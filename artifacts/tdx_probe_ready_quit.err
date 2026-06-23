@@ -1,8 +1,0 @@
-Loading Tc.dll path=C:\Users\15728\Desktop\Quant-Master-Research\scripts\Tc.dll work_dir=C:\Users\15728\Desktop\Quant-Master-Research\scripts
-Tc.dll loaded at 10000000 live_enabled=0
-Functions resolved:
-  TC_GetVersion=10075820 TC_GetJyStatus=10075A20 TC_Login=100766B0
-  TC_CreateAll=10075EC0 TC_DoGridJy=100762D0 TC_GetLoginRet=100759E0
-CALL_BEGIN function=TC_Uninit
-CALL_END function=TC_Uninit
-

@@ -49,7 +49,7 @@ class PipelineExperimentConfig:
             os.makedirs(self.estimator_ex_dir)
         # Get the tuner type
         self.tuner_module_path = config.get("tuner_module_path", "quant_master.contrib.tuner.tuner")
-        self.tuner_class = config.get("tuner_class", "QLibTuner")
+        self.tuner_class = config.get("tuner_class", "QMTuner")
         # Save the tuner experiment for further view
         tuner_ex_config_path = os.path.join(self.tuner_ex_dir, "tuner_config.yaml")
         with open(tuner_ex_config_path, "w") as fp:

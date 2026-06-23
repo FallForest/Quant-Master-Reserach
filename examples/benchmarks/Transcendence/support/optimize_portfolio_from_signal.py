@@ -208,7 +208,7 @@ def _run_one_scan(
     freq = str(executor_cfg.get("kwargs", {}).get("time_per_step", "day"))
     limit_threshold = float(exchange_kwargs.get("limit_threshold", 0.095))
     deal_price = str(exchange_kwargs.get("deal_price", "close"))
-    min_cost = float(exchange_kwargs.get("min_cost", 5))
+    min_cost = float(exchange_kwargs.get("min_cost", 0))
     cache_key = (
         str(backtest_cfg["start_time"]),
         str(backtest_cfg["end_time"]),
@@ -444,8 +444,8 @@ def main() -> int:
     base_topk = int(strategy_kwargs.get("topk", 50))
     base_n_drop = int(strategy_kwargs.get("n_drop", 5))
     exchange_kwargs = base_port_cfg["backtest"].get("exchange_kwargs", {})
-    base_open_cost = float(exchange_kwargs.get("open_cost", 0.0005))
-    base_close_cost = float(exchange_kwargs.get("close_cost", 0.0015))
+    base_open_cost = float(exchange_kwargs.get("open_cost", 0.0001))
+    base_close_cost = float(exchange_kwargs.get("close_cost", 0.0006))
     open_costs = _parse_float_list(args.open_cost_grid) if args.open_cost_grid else [base_open_cost]
     close_costs = _parse_float_list(args.close_cost_grid) if args.close_cost_grid else [base_close_cost]
 

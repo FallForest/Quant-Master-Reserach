@@ -38,7 +38,7 @@ from ..utils import (
     get_period_list,
 )
 from ..utils.paral import ParallelExt
-from .ops import Operators  # pylint: disable=W0611  # noqa: F401
+from .ops import Operators  # noqa: F401 — side-effect: registers expression operators on import
 
 
 class ProviderBackendMixin:
@@ -700,7 +700,16 @@ class LocalCalendarProvider(CalendarProvider, ProviderBackendMixin):
             else:
                 raise
 
-        return [pd.Timestamp(x) for x in backend_obj]
+        timestamps = []
+        for idx, value in enumerate(backend_obj):
+            try:
+                timestamps.append(pd.Timestamp(value))
+            except Exception as exc:
+                raise ValueError(
+                    f"Invalid provider calendar entry at index {idx}: {value!r} "
+                    f"(freq={freq}, future={future})"
+                ) from exc
+        return timestamps
 
 
 class LocalInstrumentProvider(InstrumentProvider, ProviderBackendMixin):
@@ -803,18 +812,6 @@ class LocalPITProvider(PITProvider):
         field = str(field).lower()[2:]
         instrument = code_to_fname(instrument)
 
-        # {For acceleration
-        # start_index, end_index, cur_index = kwargs["info"]
-        # if cur_index == start_index:
-        #     if not hasattr(self, "all_fields"):
-        #         self.all_fields = []
-        #     self.all_fields.append(field)
-        #     if not hasattr(self, "period_index"):
-        #         self.period_index = {}
-        #     if field not in self.period_index:
-        #         self.period_index[field] = {}
-        # For acceleration}
-
         if not field.endswith("_q") and not field.endswith("_a"):
             raise ValueError("period field must ends with '_q' or '_a'")
         quarterly = field.endswith("_q")
@@ -849,22 +846,12 @@ class LocalPITProvider(PITProvider):
             period_list = period_list[max(0, len(period_list) + start_index - 1) : len(period_list) + end_index]
         value = np.full((len(period_list),), np.nan, dtype=VALUE_DTYPE)
         for i, p in enumerate(period_list):
-            # last_period_index = self.period_index[field].get(period)  # For acceleration
             value[i], now_period_index = read_period_data(
-                index_path, data_path, p, cur_time_int, quarterly  # , last_period_index  # For acceleration
+                index_path, data_path, p, cur_time_int, quarterly
             )
-            # self.period_index[field].update({period: now_period_index})  # For acceleration
         # NOTE: the index is period_list; So it may result in unexpected values(e.g. nan)
         # when calculation between different features and only part of its financial indicator is published
         series = pd.Series(value, index=period_list, dtype=VALUE_DTYPE)
-
-        # {For acceleration
-        # if cur_index == end_index:
-        #     self.all_fields.remove(field)
-        #     if not len(self.all_fields):
-        #         del self.all_fields
-        #         del self.period_index
-        # For acceleration}
 
         return series
 

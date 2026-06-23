@@ -1,0 +1,126 @@
+quant_master_init:
+    provider_uri: "~/.quant_master/quant_master_data/tdx_cn_data"
+    region: cn
+    kernels: 1
+    joblib_backend: threading
+market: &market csi300
+benchmark: &benchmark SH000300
+data_handler_config: &data_handler_config
+    start_time: 2012-01-01
+    end_time: 2026-04-30
+    fit_start_time: 2012-01-01
+    fit_end_time: 2020-12-31
+    instruments: *market
+port_analysis_config: &port_analysis_config
+    strategy:
+        class: TopkDropoutStrategy
+        module_path: quant_master.contrib.strategy
+        kwargs:
+            signal: <PRED>
+            topk: 3
+            n_drop: 1
+            hold_thresh: 2
+    backtest:
+        start_time: 2024-01-01
+        end_time: 2026-04-30
+        account: 13000
+        benchmark: *benchmark
+        exchange_kwargs:
+            limit_threshold: 0.095
+            deal_price: close
+            open_cost: 0.0001
+            close_cost: 0.0006
+            min_cost: 0
+task:
+    model:
+        class: RegimeHorizonCostEnsembleModel
+        module_path: quant_master.contrib.model.regime_horizon_cost_ensemble
+        kwargs:
+            horizon_model_specs:
+                - name: de_h1
+                  model_type: double_ensemble
+                  horizon: 1
+                  model_kwargs: &de_model_kwargs
+                      base_model: gbm
+                      loss: mse
+                      num_models: 1
+                      enable_sr: false
+                      enable_fs: false
+                      alpha1: 1
+                      alpha2: 1
+                      bins_sr: 10
+                      bins_fs: 5
+                      decay: 0.5
+                      sample_ratios: [0.8, 0.7, 0.6, 0.5, 0.4]
+                      sub_weights: [1]
+                      epochs: 4
+                      colsample_bytree: 0.8879
+                      learning_rate: 0.2
+                      subsample: 0.8789
+                      lambda_l1: 205.6999
+                      lambda_l2: 580.9768
+                      max_depth: 8
+                      num_leaves: 210
+                      num_threads: 4
+                      verbosity: -1
+                      random_state: 42
+                - name: de_h5
+                  model_type: double_ensemble
+                  horizon: 5
+                  model_kwargs:
+                      <<: *de_model_kwargs
+                      random_state: 57
+            topk: 3
+            search_step: 0.1
+            turnover_penalty: 0.0018
+            turnover_penalty_grid: [0.0012, 0.0018, 0.0025, 0.0035]
+            risk_penalty: 0.0
+            risk_penalty_grid: [0.0, 0.02, 0.05]
+            memory_boost_grid: [0.0]
+            use_rank_score: false
+            zscore_clip: 100.0
+            neutralize_daily_mean: false
+            enforce_horizon_monotonic: false
+            weight_constraints:
+                anchor_model: de_h1
+                min_anchor_weight: 0.7
+                max_aux_weight: 0.3
+            objective_label_mode: rank_decile_spread
+            objective_horizon_days: [1, 5, 10]
+            objective_horizon_weights: [0.6, 0.3, 0.1]
+            objective_market_relative: true
+            objective_vol_adjust: true
+            objective_vol_window: 20
+            objective_vol_floor: 0.0001
+            objective_rank_power: 1.0
+            objective_decile: 0.1
+            objective_decile_scale: 0.25
+            objective_clip: 6.0
+            random_state: 42
+    dataset:
+        class: DatasetH
+        module_path: quant_master.data.dataset
+        kwargs:
+            handler:
+                class: Alpha158
+                module_path: quant_master.contrib.data.handler
+                kwargs: *data_handler_config
+            segments:
+                train: [2012-01-01, 2020-12-31]
+                valid: [2021-01-01, 2023-12-31]
+                test: [2024-01-01, 2026-04-30]
+    record:
+        - class: SignalRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            model: <MODEL>
+            dataset: <DATASET>
+        - class: SigAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            ana_long_short: false
+            ann_scaler: 252
+        - class: PortAnaRecord
+          module_path: quant_master.workflow.record_temp
+          kwargs:
+            config: *port_analysis_config

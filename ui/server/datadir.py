@@ -7,6 +7,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .calendar_validation import load_calendar_file
+
 _log = logging.getLogger(__name__)
 
 DEFAULT_DATA_DIR = Path("~/.quant_master/quant_master_data/tdx_cn_data")
@@ -106,8 +108,8 @@ class DataDir:
             if not path.exists():
                 self._calendar_cache[freq] = []
             else:
-                with open(path, encoding="utf-8") as f:
-                    self._calendar_cache[freq] = f.read().strip().split("\n")
+                calendar, _ = load_calendar_file(path, strict=True)
+                self._calendar_cache[freq] = calendar
         return self._calendar_cache[freq]
 
     def _sym_to_dir(self, symbol):

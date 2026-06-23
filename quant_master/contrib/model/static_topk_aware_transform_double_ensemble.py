@@ -22,7 +22,7 @@ class StaticTopKAwareTransformDEnsembleModel(Model):
         self,
         double_ensemble_kwargs: Optional[Dict] = None,
         topk: int = 50,
-        turnover_penalty: float = 0.0002,
+        turnover_penalty: float = 0.0007,
         gamma_grid: Optional[Sequence[float]] = None,
         uplift_grid: Optional[Sequence[float]] = None,
         tau_grid: Optional[Sequence[float]] = None,

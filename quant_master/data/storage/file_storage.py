@@ -386,13 +386,17 @@ class FileFeatureStorage(FileStorageMixin, FeatureStorage):
                 raw = fp.read(expected_bytes)
                 data = np.frombuffer(raw, dtype="<f")
             if len(raw) != expected_bytes or len(data) != count:
+                file_size = self.uri.stat().st_size
+                missing_bytes = max(0, offset + expected_bytes - file_size)
+                corruption_type = "right_tail_gap" if missing_bytes and len(raw) + missing_bytes == expected_bytes else "short_read"
                 raise ValueError(
                     "Corrupt feature storage slice: "
                     f"path={self.uri}, instrument={self.instrument}, field={self.field}, freq={self.freq}, "
                     f"storage_start_index={storage_start_index}, storage_end_index={storage_end_index}, "
                     f"request_start={i.start}, request_stop={i.stop}, resolved_start={si}, resolved_end={end_index}, "
-                    f"count={count}, offset={offset}, file_size={self.uri.stat().st_size}, "
-                    f"expected_bytes={expected_bytes}, actual_bytes={len(raw)}, actual_count={len(data)}"
+                    f"count={count}, offset={offset}, file_size={file_size}, "
+                    f"expected_bytes={expected_bytes}, actual_bytes={len(raw)}, actual_count={len(data)}, "
+                    f"corruption_type={corruption_type}, missing_bytes={missing_bytes}"
                 )
             return pd.Series(data, index=pd.RangeIndex(si, si + count))
         else:

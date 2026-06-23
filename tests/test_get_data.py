@@ -12,8 +12,8 @@ from quant_master.tests.data import GetData
 DATA_DIR = Path(__file__).parent.joinpath("test_get_data")
 SOURCE_DIR = DATA_DIR.joinpath("source")
 SOURCE_DIR.mkdir(exist_ok=True, parents=True)
-QLIB_DIR = DATA_DIR.joinpath("quant_master")
-QLIB_DIR.mkdir(exist_ok=True, parents=True)
+QUANT_MASTER_DIR = DATA_DIR.joinpath("quant_master")
+QUANT_MASTER_DIR.mkdir(exist_ok=True, parents=True)
 
 
 class TestGetData(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestGetData(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        provider_uri = str(QLIB_DIR.resolve())
+        provider_uri = str(QUANT_MASTER_DIR.resolve())
         quant_master.init(
             provider_uri=provider_uri,
             expression_cache=None,
@@ -34,7 +34,7 @@ class TestGetData(unittest.TestCase):
 
     def test_0_quant_master_data(self):
         GetData().quant_master_data(
-            name="quant_master_data_simple", target_dir=QLIB_DIR, region="cn", interval="1d", delete_old=False, exists_skip=True
+            name="quant_master_data_simple", target_dir=QUANT_MASTER_DIR, region="cn", interval="1d", delete_old=False, exists_skip=True
         )
         df = D.features(D.instruments("csi300"), self.FIELDS)
         self.assertListEqual(list(df.columns), self.FIELDS, "get quant_master data failed")

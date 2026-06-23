@@ -48,7 +48,7 @@ class QuantMasterLogger(metaclass=MetaLogger):
         return self.logger.__getattribute__(name)
 
 
-class _QLibLoggerManager:
+class _QMicLoggerManager:
     def __init__(self):
         self._loggers = {}
 
@@ -80,7 +80,7 @@ class _QLibLoggerManager:
         return module_logger
 
 
-get_module_logger = _QLibLoggerManager()
+get_module_logger = _QMicLoggerManager()
 
 
 class TimeInspector:

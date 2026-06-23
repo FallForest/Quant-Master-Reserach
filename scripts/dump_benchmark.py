@@ -5,10 +5,10 @@ import pandas as pd
 from pathlib import Path
 from loguru import logger
 
-QLIB_DIR = Path.home() / ".quant_master" / "quant_master_data" / "tdx_cn_data"
-FEATURES_DIR = QLIB_DIR / "features"
-CALENDARS_DIR = QLIB_DIR / "calendars"
-INSTRUMENTS_DIR = QLIB_DIR / "instruments"
+QUANT_MASTER_DIR = Path.home() / ".quant_master" / "quant_master_data" / "tdx_cn_data"
+FEATURES_DIR = QUANT_MASTER_DIR / "features"
+CALENDARS_DIR = QUANT_MASTER_DIR / "calendars"
+INSTRUMENTS_DIR = QUANT_MASTER_DIR / "instruments"
 
 INDEX_BENCH_URL = (
     "http://push2his.eastmoney.com/api/qt/stock/kline/get"

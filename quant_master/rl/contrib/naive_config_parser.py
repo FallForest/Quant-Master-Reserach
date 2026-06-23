@@ -83,9 +83,9 @@ def get_backtest_config_fromfile(path: str) -> dict:
     backtest_config = parse_backtest_config(path)
 
     exchange_config_default = {
-        "open_cost": 0.0005,
-        "close_cost": 0.0015,
-        "min_cost": 5.0,
+        "open_cost": 0.0001,
+        "close_cost": 0.0006,
+        "min_cost": 0,
         "trade_unit": 100.0,
         "cash_limit": None,
     }

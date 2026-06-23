@@ -21,7 +21,7 @@ class CostAwareDEnsembleModel(DEnsembleModel):
         self,
         *args,
         topk: int = 50,
-        turnover_penalty: float = 0.0002,
+        turnover_penalty: float = 0.0007,
         label_rank_weight: float = 0.5,
         stability_weight: float = 0.3,
         trajectory_weight: float = 1.0,

@@ -37,7 +37,7 @@ task:
         kwargs:
             stack_metric: topk_turnover
             topk: 50
-            turnover_penalty: 0.0002
+            turnover_penalty: 0.0007
             min_residual_improvement: 0.0002
             use_rank_score: False
             residual_weight_grid: [-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0]

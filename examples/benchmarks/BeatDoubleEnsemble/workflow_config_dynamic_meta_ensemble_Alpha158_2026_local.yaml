@@ -38,7 +38,7 @@ task:
             topk: 50
             num_regimes: 3
             search_step: 0.1
-            turnover_penalty: 0.0002
+            turnover_penalty: 0.0007
             turnover_boost_grid: [0.0]
             use_rank_score: True
             random_state: 42

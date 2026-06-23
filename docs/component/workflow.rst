@@ -62,9 +62,9 @@ Below is a typical config file of ``qrun``.
             exchange_kwargs:
                 limit_threshold: 0.095
                 deal_price: close
-                open_cost: 0.0005
-                close_cost: 0.0015
-                min_cost: 5
+                open_cost: 0.0001
+                close_cost: 0.0006
+                min_cost: 0
     task:
         model:
             class: LGBModel
@@ -290,9 +290,9 @@ The following script is the configuration of `backtest` and the `strategy` used 
             account: 100000000
             benchmark: *benchmark
             deal_price: close
-            open_cost: 0.0005
-            close_cost: 0.0015
-            min_cost: 5
+            open_cost: 0.0001
+            close_cost: 0.0006
+            min_cost: 0
 
 For more information about the meaning of each field in configuration of `strategy` and `backtest`, users can look up the documents: `Strategy <../component/strategy.html>`_ and `Backtest <../component/backtest.html>`_.
 

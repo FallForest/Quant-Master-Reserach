@@ -53,14 +53,16 @@ class TranscendenceSignalEnsembleModel(Model):
         memory_boost_grid: Optional[Sequence[float]] = None,
         turnover_penalty_grid: Optional[Sequence[float]] = None,
         volatility_penalty_grid: Optional[Sequence[float]] = None,
-        open_cost: float = 0.0005,
-        close_cost: float = 0.0015,
+        open_cost: float = 0.0001,
+        close_cost: float = 0.0006,
         ir_weight: float = 1.0,
         annret_weight: float = 3.0,
         hit_ratio_weight: float = 0.15,
         max_drawdown_penalty: float = 0.25,
         ann_scaler: int = 252,
         random_state: int = 42,
+        manual_weight_candidates: Optional[Sequence[Union[Sequence[float], Dict[str, float]]]] = None,
+        weight_constraints: Optional[Dict] = None,
     ):
         if not 0 < float(search_step) <= 1:
             raise ValueError("search_step must be in (0, 1].")
@@ -90,6 +92,8 @@ class TranscendenceSignalEnsembleModel(Model):
         self.ann_scaler = int(ann_scaler)
         self.random_state = int(random_state)
         self.rng = np.random.default_rng(self.random_state)
+        self.manual_weight_candidates = list(manual_weight_candidates or [])
+        self.weight_constraints = dict(weight_constraints or {})
 
         self.specs = self._parse_specs(base_learner_specs)
         self.models: Dict[str, Model] = {}
@@ -101,6 +105,7 @@ class TranscendenceSignalEnsembleModel(Model):
         self.best_turnover_penalty: float = float(self.turnover_penalty_grid[0])
         self.best_volatility_penalty: float = float(self.volatility_penalty_grid[0])
         self.validation_summary: Dict[str, float] = {}
+        self.weight_candidate_diagnostics: List[Dict[str, float]] = []
         self.fitted = False
 
     def fit(self, dataset: DatasetH):
@@ -141,7 +146,14 @@ class TranscendenceSignalEnsembleModel(Model):
                     volatility_penalty=0.0,
                 )
                 fold_objs.append(self._portfolio_objective(metrics))
-            quick_rows.append((float(np.mean(fold_objs)), weight))
+            quick_score = float(np.mean(fold_objs))
+            quick_rows.append((quick_score, weight))
+            self.weight_candidate_diagnostics.append(
+                {
+                    "quick_objective": quick_score,
+                    **{f"weight_{name}": float(w) for name, w in zip(self.model_order, weight)},
+                }
+            )
 
         quick_rows.sort(key=lambda x: x[0], reverse=True)
         refine_n = min(self.refine_top_weight_candidates, len(quick_rows))
@@ -301,8 +313,14 @@ class TranscendenceSignalEnsembleModel(Model):
         return pred, y
 
     def _weight_candidates(self, n_models: int) -> Iterable[np.ndarray]:
+        for arr in self._manual_weight_candidates(n_models):
+            if self._candidate_satisfies_weight_constraints(arr, n_models):
+                yield arr
+
         if n_models == 1:
-            yield np.array([1.0], dtype=float)
+            arr = np.array([1.0], dtype=float)
+            if self._candidate_satisfies_weight_constraints(arr, n_models):
+                yield arr
             return
 
         yielded = set()
@@ -312,6 +330,8 @@ class TranscendenceSignalEnsembleModel(Model):
             if key in yielded:
                 return None
             yielded.add(key)
+            if not self._candidate_satisfies_weight_constraints(arr, n_models):
+                return None
             return arr
 
         equal_w = np.ones(n_models, dtype=float) / n_models
@@ -338,6 +358,41 @@ class TranscendenceSignalEnsembleModel(Model):
             out = _try_emit(arr)
             if out is not None:
                 yield out
+
+    def _candidate_satisfies_weight_constraints(self, arr: np.ndarray, n_models: int) -> bool:
+        if not self.weight_constraints:
+            return True
+
+        max_aux_weight = self.weight_constraints.get("max_aux_weight")
+        if max_aux_weight is None:
+            return True
+
+        aux_indices = self.weight_constraints.get("aux_indices")
+        if aux_indices is None:
+            anchor_index = int(self.weight_constraints.get("anchor_index", 0))
+            aux_indices = [idx for idx in range(n_models) if idx != anchor_index]
+
+        limit = float(max_aux_weight)
+        for idx in aux_indices:
+            if int(idx) < 0 or int(idx) >= n_models:
+                raise ValueError(f"weight_constraints aux index {idx} is out of range for {n_models} models.")
+            if float(arr[int(idx)]) > limit + 1e-12:
+                return False
+        return True
+
+    def _manual_weight_candidates(self, n_models: int) -> Iterable[np.ndarray]:
+        for raw in self.manual_weight_candidates:
+            if isinstance(raw, dict):
+                arr = np.array([float(raw.get(name, 0.0)) for name in self.model_order], dtype=float)
+            else:
+                arr = np.array(list(raw), dtype=float)
+            if arr.shape != (n_models,):
+                raise ValueError(
+                    f"manual_weight_candidates entries must contain {n_models} weights; got shape {arr.shape}."
+                )
+            if not np.isfinite(arr).all() or (arr < 0).any() or arr.sum() <= 0:
+                raise ValueError("manual_weight_candidates values must be finite, non-negative, and sum positive.")
+            yield arr / arr.sum()
 
     @staticmethod
     def _grid_simplex_weights(n_models: int, step: float) -> Iterable[np.ndarray]:
