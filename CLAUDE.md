@@ -59,7 +59,7 @@ python scripts/data_collector/yahoo/collector.py update_data_to_bin --quant_mast
 ## Architecture
 
 ### Global Singletons
-- **`C`** (`quant_master.config`): Global configuration — data URIs, Redis, MLflow, region settings. Env vars use `QLIB_` prefix.
+- **`C`** (`quant_master.config`): Global configuration — data URIs, Redis, MLflow, region settings. Env vars use `QUANT_MASTER_` prefix.
 - **`D`** (`quant_master.data`): Data accessor wrapping `LocalProvider` or `ClientProvider`. Primary API: `D.features(instruments, fields)`.
 - **`R`** (`quant_master.workflow`): Experiment recorder wrapper around `QuantMasterRecorder` (MLflow-backed).
 - **`H`** (`quant_master.data.cache`): Cache manager.
