@@ -1,5 +1,5 @@
 quant_master_init:
-  provider_uri: "~/.quant_master/quant_master_data/cn_data"
+  provider_uri: "~/.quant_master/quant_master_data/tdx_cn_data"
   region: cn
 
 data_loader_config: &data_loader_config

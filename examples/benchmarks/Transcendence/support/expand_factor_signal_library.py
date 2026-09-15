@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 from __future__ import annotations
 
 import argparse
@@ -364,7 +364,7 @@ def _eval_topk_combo(
         strategy=strategy,
         executor=executor_cfg,
         benchmark=benchmark,
-        account=bcfg.get("account", 100000000),
+        account=bcfg.get("account", 10583.43),
         exchange_kwargs=exch_cfg,
         pos_type=bcfg.get("pos_type", "Position"),
     )

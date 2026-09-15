@@ -207,7 +207,7 @@ class NestedDecisionExecutionWorkflow:
         "backtest": {
             "start_time": "2020-09-20",
             "end_time": "2021-05-20",
-            "account": 100000000,
+            "account": 10583.43,
             "exchange_kwargs": {
                 "freq": "1min",
                 "limit_threshold": 0.095,
@@ -221,7 +221,7 @@ class NestedDecisionExecutionWorkflow:
 
     def _init_quant_master(self):
         """initialize quant_master"""
-        provider_uri_day = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+        provider_uri_day = "~/.quant_master/quant_master_data/tdx_cn_data"  # target_dir
         GetData().quant_master_data(target_dir=provider_uri_day, region=REG_CN, version="v2", exists_skip=True)
         provider_uri_1min = HIGH_FREQ_CONFIG.get("provider_uri")
         GetData().quant_master_data(

@@ -48,8 +48,8 @@ class Exchange:
         subscribe_fields: list = [],
         limit_threshold: Union[Tuple[str, str], float, None] = None,
         volume_threshold: Union[tuple, dict, None] = None,
-        open_cost: float = 0.0015,   # NOTE: CN A-share default; override via YAML backtest config
-        close_cost: float = 0.0025,  # NOTE: CN A-share default; override via YAML backtest config
+        open_cost: float = 0.00011,  # commission plus Shanghai transfer-fee approximation
+        close_cost: float = 0.00061, # commission, stamp duty, plus Shanghai transfer-fee approximation
         min_cost: float = 5.0,       # NOTE: CN A-share default; override via YAML backtest config
         impact_cost: float = 0.0,
         extra_quote: pd.DataFrame = None,

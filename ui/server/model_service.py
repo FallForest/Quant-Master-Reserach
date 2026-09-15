@@ -451,6 +451,8 @@ class ModelService:
             "robust_rank_blend_grid": [0.0],
             "prediction_shrinkage_grid": [1.0],
             "_final_score_control_grid_opt_in": False,
+            "regime_market_dispersion_thresholds": [],
+            "regime_market_signal_thresholds": [],
         }
         for attr, default in _MODEL_DEFAULTS.items():
             if not hasattr(model, attr):
@@ -952,6 +954,99 @@ class ModelService:
                 "marketEffectiveLastDate": resolved["marketEffectiveLastDate"],
                 "syncing": resolved.get("syncing", False),
             },
+        }
+
+    def predict_custom_stock(self, alias, instrument, date=None):
+        """对模型股票池外的个股进行评分（如深圳华强不在 CSI300 中）。
+
+        此方法临时扩展 handler 的 instruments 范围，重建特征数据后运行预测。
+        预测完成后从缓存中移除修改后的数据集，不影响后续正常预测。
+        """
+        requested = pd.Timestamp(date) if date else self._get_latest_available_day()
+        resolved = self._resolve_live_prediction_dates(requested)
+        feature_date = resolved["featureDate"]
+
+        model = self._load_model(alias)
+
+        # 从 MLflow 重新加载 dataset（不使用缓存，避免污染）
+        _, entry = self._get_run(alias)
+        dataset = self._load_artifact(entry["run_id"], "dataset")
+        handler = getattr(dataset, "handler", None)
+        if handler is None:
+            raise ValueError("Dataset has no handler")
+
+        # 从模型注册信息中获取原始股票池，加上目标股票
+        info = self.get_model_info(alias)
+        market = info.get("params", {}).get("instruments", "csi300")
+        data_dir = get_effective_data_dir(self.data)
+        inst_path = Path(data_dir) / "instruments" / f"{market}.txt"
+        if not inst_path.exists():
+            inst_path = Path(data_dir) / "instruments" / "all.txt"
+        if not inst_path.exists():
+            raise ValueError(f"Instrument file not found: {inst_path}")
+
+        base_symbols = []
+        with open(inst_path, encoding="utf-8") as f:
+            for line in f:
+                parts = line.strip().split("\t")
+                if len(parts) >= 1 and parts[0]:
+                    base_symbols.append(parts[0])
+
+        custom_instruments = list(base_symbols)
+        if instrument not in custom_instruments:
+            custom_instruments.append(instrument)
+        logger.info(
+            "Custom prediction for %s: expanding model instruments from %d to %d (+1 stock)",
+            instrument, len(base_symbols), len(custom_instruments),
+        )
+
+        handler.instruments = custom_instruments
+
+        # 清空 handler 缓存并重建特征
+        for attr in ["_data", "_infer", "_learn", "_processed"]:
+            if hasattr(handler, attr):
+                setattr(handler, attr, None)
+
+        self._ensure_handler_data(dataset, target_date=feature_date)
+
+        # 运行预测
+        pred, actual_feature_date = self._predict_or_fallback(
+            model, dataset, feature_date, resolved["requestedDate"], alias,
+        )
+
+        names = self.data.get_names() if self.data is not None else {}
+        code6 = instrument[2:] if instrument.startswith(("SH", "SZ")) else instrument
+
+        # 提取目标股票评分
+        if instrument in pred.index:
+            score_row = pred.loc[instrument]
+            score = float(score_row["score"]) if isinstance(score_row, pd.Series) else float(score_row)
+        else:
+            score = None
+
+        all_scores = pred["score"]
+        rank = None
+        if score is not None:
+            positions = all_scores.sort_values(ascending=False)
+            match = positions[positions.index == instrument]
+            if len(match):
+                rank = int(positions.index.get_loc(match.index[0])) + 1
+
+        return {
+            "instrument": instrument,
+            "name": names.get(code6) or instrument,
+            "score": round(score, 4) if score is not None else None,
+            "rank": rank,
+            "totalStocks": len(pred),
+            "featureDate": actual_feature_date.strftime("%Y-%m-%d"),
+            "requestedDate": resolved["requestedDate"].strftime("%Y-%m-%d"),
+            "scoreStats": {
+                "mean": round(float(all_scores.mean()), 4),
+                "std": round(float(all_scores.std()), 4),
+                "min": round(float(all_scores.min()), 4),
+                "max": round(float(all_scores.max()), 4),
+            },
+            "outsideUniverse": True,
         }
 
 

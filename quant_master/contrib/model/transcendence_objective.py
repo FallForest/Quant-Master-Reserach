@@ -61,6 +61,7 @@ def build_objective_label_frame(
     out = label_df.copy()
     source_col = out.columns[0]
     out.loc[:, source_col] = target.to_numpy(dtype=out[source_col].dtype, na_value=np.nan)
+    out = _mask_incomplete_tail(out, max(horizons) + 1)
     return out
 
 
@@ -145,11 +146,28 @@ def _forward_window_mean(series: pd.Series, window: int) -> pd.Series:
     out = np.empty(n, dtype=float)
 
     for i in range(n):
-        j = min(i + window, n)
+        j = i + window
+        if j > n:
+            out[i] = np.nan
+            continue
         denom = cvalid[j] - cvalid[i]
         if denom <= 0:
             out[i] = np.nan
         else:
             out[i] = (csum[j] - csum[i]) / denom
 
-    return pd.Series(out, index=series.index).fillna(series)
+    return pd.Series(out, index=series.index)
+
+
+def _mask_incomplete_tail(frame: pd.DataFrame, tail_rows: int) -> pd.DataFrame:
+    out = frame.copy()
+    tail_rows = max(int(tail_rows), 0)
+    if out.empty or tail_rows == 0:
+        return out
+    if isinstance(out.index, pd.MultiIndex):
+        inst_level = "instrument" if "instrument" in out.index.names else out.index.names[-1]
+        tail_mask = out.groupby(level=inst_level, sort=False).cumcount(ascending=False) < tail_rows
+        out.loc[tail_mask, :] = np.nan
+    else:
+        out.iloc[-tail_rows:, :] = np.nan
+    return out

@@ -68,6 +68,7 @@ class RegimeHorizonCostEnsembleModel(Model):
         monotonic_direction: str = "decreasing",
         regime_consensus_quantiles: Optional[Sequence[float]] = None,
         regime_disagreement_quantiles: Optional[Sequence[float]] = None,
+        regime_market_quantiles: Optional[Sequence[float]] = None,
         min_regime_samples: int = 600,
         random_state: int = 42,
         primary_feature_set: Optional[str] = None,
@@ -175,6 +176,7 @@ class RegimeHorizonCostEnsembleModel(Model):
         else:
             self.regime_consensus_quantiles = list(regime_consensus_quantiles or [0.33, 0.67])
             self.regime_disagreement_quantiles = list(regime_disagreement_quantiles or [0.5])
+        self.regime_market_quantiles = list(regime_market_quantiles) if regime_market_quantiles else []
         self.min_regime_samples = min_regime_samples
         self.random_state = random_state
         self.objective_label_mode = str(objective_label_mode or "raw").strip().lower()
@@ -217,6 +219,8 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.regime_weights: Dict[int, Dict[str, float]] = {}
         self.regime_consensus_thresholds: List[float] = []
         self.regime_disagreement_thresholds: List[float] = []
+        self.regime_market_dispersion_thresholds: List[float] = []
+        self.regime_market_signal_thresholds: List[float] = []
         self.num_regimes: int = 1
         self.memory_boost: float = 0.0
         self.fitted = False
@@ -242,7 +246,8 @@ class RegimeHorizonCostEnsembleModel(Model):
             "quick_smoke": quick_smoke,
         }
         self.unused_config_keys.extend([k for k, v in reserved_but_unused.items() if v is not None])
-        self.unused_config_keys.extend(sorted(kwargs.keys()))
+        if kwargs:
+            raise ValueError(f"Unsupported RegimeHorizonCostEnsembleModel config keys: {sorted(kwargs)}")
         self.unused_config_keys = sorted(set(self.unused_config_keys))
         if self.unused_config_keys:
             self.logger.warning(
@@ -258,19 +263,13 @@ class RegimeHorizonCostEnsembleModel(Model):
             horizon_dataset = _HorizonLabelDataset(
                 dataset,
                 horizon=spec.horizon,
-                objective_kwargs=self._objective_kwargs() if self.objective_enabled else None,
+                objective_kwargs=self._objective_kwargs(model_horizon=spec.horizon) if self.objective_enabled else None,
             )
             model.fit(horizon_dataset)
             self.models[spec.name] = model
 
         valid_pred_raw = self._predict_frame(dataset, "valid")
-        valid_label_df = dataset.prepare("valid", col_set=["label"], data_key=DataHandlerLP.DK_L)["label"]
-        if self.objective_enabled:
-            valid_label_df = build_objective_label_frame(
-                _HorizonLabelDataset._to_label_frame(valid_label_df),
-                base_horizon=self._objective_valid_horizon(),
-                **self._objective_kwargs(),
-            )
+        valid_label_df = self._prepare_selection_label(dataset, "valid")
         valid_pred_raw, valid_label_df = self._align_prediction_and_label(valid_pred_raw, valid_label_df)
         valid_label = pd.Series(self._squeeze_label(valid_label_df), index=valid_label_df.index)
         valid_pred = self._prepare_prediction_scores(valid_pred_raw)
@@ -283,6 +282,8 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.logger.info("Regime weights: %s", self.regime_weights)
         self.logger.info("Regime thresholds (consensus): %s", self.regime_consensus_thresholds)
         self.logger.info("Regime thresholds (disagreement): %s", self.regime_disagreement_thresholds)
+        self.logger.info("Regime thresholds (market_dispersion): %s", self.regime_market_dispersion_thresholds)
+        self.logger.info("Regime thresholds (market_signal): %s", self.regime_market_signal_thresholds)
         self.logger.info(
             "Selected penalties: turnover_penalty=%s, risk_penalty=%s",
             self.turnover_penalty,
@@ -295,6 +296,25 @@ class RegimeHorizonCostEnsembleModel(Model):
         )
         self.logger.info("Memory boost: %s", self.memory_boost)
         self.fitted = True
+
+    def _prepare_selection_label(self, dataset: DatasetH, segment: str) -> pd.DataFrame:
+        """Load unprocessed returns for portfolio-aware validation objectives."""
+        try:
+            raw_label = dataset.prepare(segment, col_set=["label"], data_key=DataHandlerLP.DK_R)
+        except (AttributeError, KeyError, ValueError) as exc:
+            raise ValueError(
+                "RegimeHorizonCostEnsembleModel requires raw labels for cost-aware model selection; "
+                "configure the data handler with drop_raw=False."
+            ) from exc
+
+        label_df = _HorizonLabelDataset._to_label_frame(raw_label)
+        if self.objective_enabled:
+            label_df = build_objective_label_frame(
+                label_df,
+                base_horizon=self._objective_valid_horizon(),
+                **self._objective_kwargs(),
+            )
+        return _mask_incomplete_tail(label_df, self._objective_valid_horizon() + 1).dropna(how="all")
 
     def _fit_penalty_and_weights(self, valid_pred: pd.DataFrame, valid_label: pd.Series, regimes: pd.Series):
         best_state = None
@@ -337,11 +357,16 @@ class RegimeHorizonCostEnsembleModel(Model):
             return 1
         return max(int(spec.horizon) for spec in self.model_specs)
 
-    def _objective_kwargs(self) -> Dict:
+    def _objective_kwargs(self, model_horizon: Optional[int] = None) -> Dict:
+        horizon_days = self.objective_horizon_days
+        horizon_weights = self.objective_horizon_weights
+        if model_horizon is not None:
+            horizon_days = [int(model_horizon)]
+            horizon_weights = [1.0]
         return {
             "mode": self.objective_label_mode,
-            "horizon_days": self.objective_horizon_days,
-            "horizon_weights": self.objective_horizon_weights,
+            "horizon_days": horizon_days,
+            "horizon_weights": horizon_weights,
             "market_relative": self.objective_market_relative,
             "vol_adjust": self.objective_vol_adjust,
             "vol_window": self.objective_vol_window,
@@ -513,17 +538,36 @@ class RegimeHorizonCostEnsembleModel(Model):
             },
         ]
         specs = list(default_specs if specs is None else specs)
+        if not specs:
+            raise ValueError("horizon_model_specs must not be empty.")
         parsed_specs = []
+        seen_names = set()
+        supported_model_types = {"double_ensemble", "de", "lightgbm", "lgb", "lgbm", "linear", "lin"}
         for i, raw in enumerate(specs):
+            if not isinstance(raw, dict):
+                raise ValueError(f"horizon_model_specs[{i}] must be a mapping.")
+            unknown_keys = sorted(set(raw) - {"name", "model_type", "horizon", "model_kwargs"})
+            if unknown_keys:
+                raise ValueError(f"Unsupported horizon_model_specs[{i}] keys: {unknown_keys}")
             horizon = int(raw.get("horizon", 1))
             if horizon <= 0:
                 raise ValueError("horizon must be positive.")
+            name = str(raw.get("name", f"model_{i}"))
+            if name in seen_names:
+                raise ValueError(f"Duplicate model spec name: {name}")
+            seen_names.add(name)
+            model_type = str(raw.get("model_type", "double_ensemble")).lower()
+            if model_type not in supported_model_types:
+                raise ValueError(f"Unsupported model_type in horizon_model_specs[{i}]: {model_type}")
+            model_kwargs = raw.get("model_kwargs", {})
+            if not isinstance(model_kwargs, dict):
+                raise ValueError(f"horizon_model_specs[{i}].model_kwargs must be a mapping.")
             parsed_specs.append(
                 _ModelSpec(
-                    name=str(raw.get("name", f"model_{i}")),
-                    model_type=str(raw.get("model_type", "double_ensemble")).lower(),
+                    name=name,
+                    model_type=model_type,
                     horizon=horizon,
-                    model_kwargs=dict(raw.get("model_kwargs", {})),
+                    model_kwargs=dict(model_kwargs),
                 )
             )
         return parsed_specs
@@ -608,7 +652,22 @@ class RegimeHorizonCostEnsembleModel(Model):
         self.regime_disagreement_thresholds = self._quantile_thresholds(
             daily_feat["disagreement"], self.regime_disagreement_quantiles
         )
-        self.num_regimes = (len(self.regime_consensus_thresholds) + 1) * (len(self.regime_disagreement_thresholds) + 1)
+        if self.regime_market_quantiles:
+            market_disp_quantiles = self.regime_market_quantiles
+            market_signal_quantiles = self.regime_market_quantiles
+            self.regime_market_dispersion_thresholds = self._quantile_thresholds(
+                daily_feat["market_dispersion"], market_disp_quantiles
+            )
+            self.regime_market_signal_thresholds = self._quantile_thresholds(
+                daily_feat["market_signal"], market_signal_quantiles
+            )
+        else:
+            self.regime_market_dispersion_thresholds = []
+            self.regime_market_signal_thresholds = []
+        d_bins = len(self.regime_disagreement_thresholds) + 1
+        m_bins = len(self.regime_market_dispersion_thresholds) + 1
+        s_bins = len(self.regime_market_signal_thresholds) + 1
+        self.num_regimes = (len(self.regime_consensus_thresholds) + 1) * d_bins * m_bins * s_bins
 
     def _learn_regime_weights(
         self,
@@ -689,16 +748,35 @@ class RegimeHorizonCostEnsembleModel(Model):
         if not isinstance(pred_frame.index, pd.MultiIndex):
             return pd.Series(np.zeros(len(pred_frame), dtype=int), index=pred_frame.index)
         daily_feat = self._daily_regime_features(pred_frame)
-        n_disagreement_bins = len(self.regime_disagreement_thresholds) + 1
+        d_bins = len(self.regime_disagreement_thresholds) + 1
+        m_bins = len(self.regime_market_dispersion_thresholds) + 1
+        s_bins = len(self.regime_market_signal_thresholds) + 1
         consensus_bin = np.searchsorted(
             self.regime_consensus_thresholds, daily_feat["consensus"].values, side="right"
         ).astype(int)
         disagreement_bin = np.searchsorted(
             self.regime_disagreement_thresholds, daily_feat["disagreement"].values, side="right"
         ).astype(int)
-        daily_regimes = pd.Series(
-            consensus_bin * n_disagreement_bins + disagreement_bin, index=daily_feat.index, dtype=int
-        )
+        if m_bins > 1 or s_bins > 1:
+            market_disp_bin = np.searchsorted(
+                self.regime_market_dispersion_thresholds, daily_feat["market_dispersion"].values, side="right"
+            ).astype(int)
+            market_sig_bin = np.searchsorted(
+                self.regime_market_signal_thresholds, daily_feat["market_signal"].values, side="right"
+            ).astype(int)
+            daily_regimes = pd.Series(
+                consensus_bin * (d_bins * m_bins * s_bins)
+                + disagreement_bin * (m_bins * s_bins)
+                + market_disp_bin * s_bins
+                + market_sig_bin,
+                index=daily_feat.index,
+                dtype=int,
+            )
+        else:
+            # Backward-compatible path: no market features, same as original 2D regime system
+            daily_regimes = pd.Series(
+                consensus_bin * d_bins + disagreement_bin, index=daily_feat.index, dtype=int
+            )
         date_level = self._date_level(pred_frame.index)
         row_dates = pred_frame.index.get_level_values(date_level)
         return pd.Series(daily_regimes.reindex(row_dates).fillna(0).values.astype(int), index=pred_frame.index)
@@ -706,16 +784,31 @@ class RegimeHorizonCostEnsembleModel(Model):
     def _daily_regime_features(self, pred_frame: pd.DataFrame) -> pd.DataFrame:
         if not isinstance(pred_frame.index, pd.MultiIndex):
             zero = pd.Series([0.0], index=pd.Index([0]))
-            return pd.DataFrame({"consensus": zero, "disagreement": zero})
+            return pd.DataFrame({"consensus": zero, "disagreement": zero, "market_dispersion": zero, "market_signal": zero})
 
         date_level = self._date_level(pred_frame.index)
-        pred_z = self._cross_sectional_zscore(pred_frame.fillna(0.0))
+        pred_filled = pred_frame.fillna(0.0)
+        pred_z = self._cross_sectional_zscore(pred_filled)
         consensus = pred_z.mean(axis=1).groupby(level=date_level).std().fillna(0.0)
         disagreement = pred_z.std(axis=1).groupby(level=date_level).mean().fillna(0.0)
-        out = pd.DataFrame({"consensus": consensus, "disagreement": disagreement})
+        # Market-level features from raw (non-z-scored) predictions
+        market_dispersion = pred_filled.std(axis=1).groupby(level=date_level).mean().fillna(0.0)
+        market_signal = pred_filled.mean(axis=1).groupby(level=date_level).mean().fillna(0.0)
+        out = pd.DataFrame({
+            "consensus": consensus,
+            "disagreement": disagreement,
+            "market_dispersion": market_dispersion,
+            "market_signal": market_signal,
+        })
         return out.replace([np.inf, -np.inf], np.nan).fillna(0.0)
 
     def _topk_cost_objective(self, score: pd.Series, label: pd.Series) -> float:
+        """Compute top-k portfolio objective with turnover and risk penalties.
+
+        The objective is: mean_return - turnover_penalty * turnover - risk_penalty * std.
+        Higher turnover_penalty values penalize trading more aggressively,
+        encouraging the model to find low-turnover alpha strategies.
+        """
         common_index = score.index.intersection(label.index)
         if len(common_index) == 0:
             return float("-inf")
@@ -1231,7 +1324,9 @@ class _HorizonLabelDataset:
         if not isinstance(df, pd.DataFrame):
             return df
         label_df = self._label_cache[segment].reindex(df.index)
-        return self._replace_label_columns(df, label_df)
+        updated = self._replace_label_columns(df, label_df)
+        valid_index = label_df.dropna(how="all").index
+        return updated.loc[updated.index.isin(valid_index)]
 
     @staticmethod
     def _replace_label_columns(df: pd.DataFrame, label_df: pd.DataFrame) -> pd.DataFrame:
@@ -1301,9 +1396,10 @@ class _HorizonLabelDataset:
         if label_df.empty:
             return label_df.copy()
         if objective_kwargs:
-            return build_objective_label_frame(label_df, base_horizon=horizon, **objective_kwargs)
+            out = build_objective_label_frame(label_df, base_horizon=horizon, **objective_kwargs)
+            return _mask_incomplete_tail(out, horizon + 1)
         if horizon <= 1:
-            return label_df.copy()
+            return _mask_incomplete_tail(label_df.copy(), horizon + 1)
 
         label_s = label_df.iloc[:, 0].astype(float)
         if isinstance(label_s.index, pd.MultiIndex):
@@ -1318,7 +1414,23 @@ class _HorizonLabelDataset:
         target_dtype = out.iloc[:, 0].dtype
         aligned = label_h.reindex(label_df.index)
         out.iloc[:, 0] = aligned.to_numpy(dtype=target_dtype, na_value=np.nan)
+        return _mask_incomplete_tail(out, horizon + 1)
+
+
+def _mask_incomplete_tail(frame: pd.DataFrame, tail_rows: int) -> pd.DataFrame:
+    """Mask rows whose forward return window would cross a segment boundary."""
+
+    out = frame.copy()
+    tail_rows = max(int(tail_rows), 0)
+    if out.empty or tail_rows == 0:
         return out
+    if isinstance(out.index, pd.MultiIndex):
+        inst_level = "instrument" if "instrument" in out.index.names else out.index.names[-1]
+        tail_mask = out.groupby(level=inst_level, sort=False).cumcount(ascending=False) < tail_rows
+        out.loc[tail_mask, :] = np.nan
+    else:
+        out.iloc[-tail_rows:, :] = np.nan
+    return out
 
 
 def _forward_window_mean(series: pd.Series, window: int) -> pd.Series:
@@ -1336,12 +1448,14 @@ def _forward_window_mean(series: pd.Series, window: int) -> pd.Series:
     out = np.empty(n, dtype=float)
 
     for i in range(n):
-        j = min(i + window, n)
+        j = i + window
+        if j > n:
+            out[i] = np.nan
+            continue
         denom = cvalid[j] - cvalid[i]
         if denom <= 0:
             out[i] = np.nan
         else:
             out[i] = (csum[j] - csum[i]) / denom
 
-    out_s = pd.Series(out, index=series.index)
-    return out_s.fillna(series)
+    return pd.Series(out, index=series.index)

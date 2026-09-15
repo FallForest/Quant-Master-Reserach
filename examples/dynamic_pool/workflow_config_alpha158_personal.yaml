@@ -1,0 +1,44 @@
+# Example training workflow using the point-in-time personal dynamic pool.
+# Build/update the pool first with scripts/update_personal_dynamic_pool.py.
+
+quant_master_init:
+  provider_uri: "C:/Users/15728/.quant_master/quant_master_data/tdx_cn_data"
+  region: cn
+
+experiment_name: alpha158_personal_dynamic_pool
+market: &market personal_dynamic_pool
+benchmark: &benchmark SH000300
+
+data_handler_config: &data_handler_config
+  start_time: 2018-01-01
+  end_time: 2026-08-07
+  fit_start_time: 2018-01-01
+  fit_end_time: 2024-12-31
+  instruments: *market
+
+task:
+  model:
+    class: LGBModel
+    module_path: quant_master.contrib.model.gbdt
+    kwargs:
+      loss: mse
+      max_depth: 8
+      learning_rate: 0.05
+  dataset:
+    class: DatasetH
+    module_path: quant_master.data.dataset
+    kwargs:
+      handler:
+        class: Alpha158
+        module_path: quant_master.contrib.data.handler
+        kwargs: *data_handler_config
+      segments:
+        train: [2018-01-01, 2022-12-31]
+        valid: [2023-01-01, 2024-12-31]
+        test: [2025-01-01, 2026-08-07]
+  record:
+    - class: SignalRecord
+      module_path: quant_master.workflow.record_temp
+      kwargs:
+        model: <MODEL>
+        dataset: <DATASET>

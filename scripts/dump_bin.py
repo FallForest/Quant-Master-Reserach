@@ -618,9 +618,18 @@ def verify_dump(quant_master_dir: str, expected_end_date: str = None, freq: str 
         return False
     cal_lines = cal_path.read_text().strip().split("\n")
     last_cal_date = cal_lines[-1].strip() if cal_lines else ""
-    if expected_end_date and last_cal_date != expected_end_date:
-        logger.error(f"verify: last calendar date {last_cal_date} != expected {expected_end_date}")
-        all_pass = False
+    if expected_end_date:
+        if freq == "day":
+            calendar_ok = last_cal_date == expected_end_date
+        else:
+            last_cal_ts = pd.Timestamp(last_cal_date)
+            expected_end_ts = pd.Timestamp(expected_end_date)
+            calendar_ok = last_cal_ts <= expected_end_ts and expected_end_ts - last_cal_ts <= pd.Timedelta(days=10)
+        if not calendar_ok:
+            logger.error(f"verify: last calendar date {last_cal_date} is not consistent with expected {expected_end_date}")
+            all_pass = False
+        else:
+            logger.info(f"verify: calendar OK (last date: {last_cal_date})")
     else:
         logger.info(f"verify: calendar OK (last date: {last_cal_date})")
 

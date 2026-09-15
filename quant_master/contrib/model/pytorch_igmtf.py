@@ -15,7 +15,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from .pytorch_utils import count_parameters
+from .pytorch_utils import count_parameters, deepcopy_state_dict
 from ...model.base import Model
 from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
@@ -309,7 +309,7 @@ class IGMTF(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.igmtf_model.state_dict()
+                best_param = deepcopy_state_dict(self.igmtf_model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

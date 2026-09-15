@@ -1,0 +1,43 @@
+MLflow retained runs
+====================
+
+Format: experiment_id run_id reason
+
+# Current prediction-strength baselines.
+457532558267789136 14b591380f794128b1faea32bf1e6e50 current_tree_oof_v3
+422909391216209057 e28664ad14254799aeea05302324694e current_gru_rank_holdout
+
+# Runs consumed directly by retained research source or workflow metadata.
+779842942239182279 05ef8bd12e0e407f9fdf0cad3ef72652 source_dependency
+984329077332834218 0ed35c572e104ddab555a8af6a7fe981 source_dependency
+984329077332834218 1a085ff9b5a34f408a44ad74055fc5da source_dependency
+987291175305461822 29864d9c5d00463b9fdbc065c10b0093 source_dependency
+984329077332834218 2ac6ebc249bf42e5a9f83c6ca0725941 source_dependency
+979093413273148577 3e594f3ffafb47ffa36491c3f04f2afa source_dependency
+263430607566050262 4a98f99bdb6848bab789ff6c46d0a1ff source_dependency
+984329077332834218 5003b27b4683400e8d67a3209433cc24 source_dependency
+984329077332834218 587bba6200be43e68cf02f59d1b7f890 source_dependency
+984329077332834218 6feaa8c5b0fc437784592bb7b534d710 source_dependency
+984329077332834218 7406e47063e9479cb34d300b9ed03bad source_dependency
+984329077332834218 773bd6d8413b4bb0b388a63a6b5b6a86 source_dependency
+984329077332834218 94a52e5949104218ab2a3b4cd84dce08 source_dependency
+984329077332834218 ae0980136de44dc58a0b9d3f7d947363 source_dependency
+984329077332834218 bc641cef654441d2bf0c7008e6c90458 source_dependency
+984329077332834218 bcbecf55a3924357ba93fc55b1140e99 source_dependency
+663421623398938249 d4526da7854245af954fc99cf02963f0 source_dependency
+984329077332834218 e2300230e0994a1a9ccbbd3bc4606d97 source_dependency
+
+# Model currently registered by the UI.
+470527302441544145 e612e7a68aa64b3eaec266384321dbea ui_model_registry
+
+# Non-dominated historical evidence retained for comparison.
+984329077332834218 3cf079d80f36412bab1645d6d6cbebcb cost_ir_champion
+984329077332834218 a055b29036984be6bb9db8bb909bf4e4 liquidity_rankic_ir_pareto
+984329077332834218 d17c255015ff47788189341d213190e9 seed57_robustness
+
+Retention rules
+---------------
+- Add a run before introducing a hard-coded dependency on its artifacts.
+- Keep current trusted-data baselines and non-dominated comparison evidence.
+- Remove failed, stale-running, smoke, UI backtest, and superseded runs unless listed above.
+- Review this file whenever retained source or the UI model registry changes.

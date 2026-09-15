@@ -1,4 +1,4 @@
-﻿# Regime Horizon Cost Ensemble + Causal Regime Switch Strategy
+# Regime Horizon Cost Ensemble + Causal Regime Switch Strategy
 # 杩欎笉鏄竴涓?qrun 閰嶇疆锛岃€屾槸涓€涓?meta-config锛屽憡璇夊悗绔浣曡繍琛?regime_switch_stability_eval.py
 type: regime_switch
 name: "Regime Switch Ensemble"
@@ -10,8 +10,8 @@ description: >
 tracking_uri: "file:./mlruns"
 
 # 鎵ц鍙傛暟
-open_cost: 0.0001
-close_cost: 0.0006
+open_cost: 0.00011
+close_cost: 0.00061
 
 # 6 涓€欓€夌瓥鐣?candidate_strategies:
   - id: baseline_7406_default_tk45_nd4_daily

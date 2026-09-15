@@ -33,7 +33,7 @@ pip install -r requirements.txt
 
   - get data: `python scripts/get_data.py quant_master_data`
   - parameters:
-    - `target_dir`: save dir, by default *~/.quant_master/quant_master_data/cn_data*
+    - `target_dir`: save dir, by default *~/.quant_master/quant_master_data/tdx_cn_data*
     - `version`: dataset version, value from [`v1`, `v2`], by default `v1`
       - `v2` end date is *2021-06*, `v1` end date is *2020-09*
       - If users want to incrementally update data, they need to use yahoo collector to [collect data from scratch](#collector-yahoofinance-data-to-quant_master).
@@ -45,7 +45,7 @@ pip install -r requirements.txt
   - examples:
     ```bash
     # cn 1d
-    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --region cn
+    python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --region cn
     # cn 1min
     python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data_1min --region cn --interval 1min
     # us 1d
@@ -128,7 +128,7 @@ pip install -r requirements.txt
         python collector.py normalize_data --source_dir ~/.quant_master/stock_data/source/cn_data --normalize_dir ~/.quant_master/stock_data/source/cn_1d_nor --region CN --interval 1d
 
         # normalize 1min cn
-        python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --source_dir ~/.quant_master/stock_data/source/cn_data_1min --normalize_dir ~/.quant_master/stock_data/source/cn_1min_nor --region CN --interval 1min
+        python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data --source_dir ~/.quant_master/stock_data/source/cn_data_1min --normalize_dir ~/.quant_master/stock_data/source/cn_1min_nor --region CN --interval 1min
 
         # normalize 1d br
         python scripts/data_collector/yahoo/collector.py normalize_data --source_dir ~/.quant_master/stock_data/source/br_data --normalize_dir ~/.quant_master/stock_data/source/br_1d_nor --region BR --interval 1d
@@ -155,7 +155,7 @@ pip install -r requirements.txt
      - examples:
        ```bash
        # dump 1d cn
-       python dump_bin.py dump_all --data_path ~/.quant_master/stock_data/source/cn_1d_nor --quant_master_dir ~/.quant_master/quant_master_data/cn_data --freq day --exclude_fields date,symbol --file_suffix .csv
+       python dump_bin.py dump_all --data_path ~/.quant_master/stock_data/source/cn_1d_nor --quant_master_dir ~/.quant_master/quant_master_data/tdx_cn_data --freq day --exclude_fields date,symbol --file_suffix .csv
        # dump 1min cn
        python dump_bin.py dump_all --data_path ~/.quant_master/stock_data/source/cn_1min_nor --quant_master_dir ~/.quant_master/quant_master_data/cn_data_1min --freq 1min --exclude_fields date,symbol --file_suffix .csv
        ```
@@ -202,7 +202,7 @@ pip install -r requirements.txt
 
   # 1d data cn
   # freq=day, freq default day
-  quant_master.init(provider_uri="~/.quant_master/quant_master_data/cn_data", region="cn")
+  quant_master.init(provider_uri="~/.quant_master/quant_master_data/tdx_cn_data", region="cn")
   df = D.features(D.instruments("all"), ["$close"], freq="day")
 
   # 1min data cn

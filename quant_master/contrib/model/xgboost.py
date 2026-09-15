@@ -10,12 +10,14 @@ from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
 from ...model.interpret.base import FeatureInt
 from ...data.dataset.weight import Reweighter
+from .rank_aware import normalize_target_mode, prepare_tree_target
 
 
 class XGBModel(Model, FeatureInt):
     """XGBModel Model"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, target_mode="raw", **kwargs):
+        self.target_mode = normalize_target_mode(target_mode)
         self._params = {}
         self._params.update(kwargs)
         self.model = None
@@ -35,14 +37,8 @@ class XGBModel(Model, FeatureInt):
             col_set=["feature", "label"],
             data_key=DataHandlerLP.DK_L,
         )
-        x_train, y_train = df_train["feature"], df_train["label"]
-        x_valid, y_valid = df_valid["feature"], df_valid["label"]
-
-        # Lightgbm need 1D array as its label
-        if y_train.values.ndim == 2 and y_train.values.shape[1] == 1:
-            y_train_1d, y_valid_1d = np.squeeze(y_train.values), np.squeeze(y_valid.values)
-        else:
-            raise ValueError("XGBoost doesn't support multi-label training")
+        x_train, y_train = df_train["feature"], prepare_tree_target(df_train["label"], self.target_mode)
+        x_valid, y_valid = df_valid["feature"], prepare_tree_target(df_valid["label"], self.target_mode)
 
         if reweighter is None:
             w_train = None
@@ -53,8 +49,8 @@ class XGBModel(Model, FeatureInt):
         else:
             raise ValueError("Unsupported reweighter type.")
 
-        dtrain = xgb.DMatrix(x_train.values, label=y_train_1d, weight=w_train)
-        dvalid = xgb.DMatrix(x_valid.values, label=y_valid_1d, weight=w_valid)
+        dtrain = xgb.DMatrix(x_train.values, label=y_train.to_numpy(), weight=w_train)
+        dvalid = xgb.DMatrix(x_valid.values, label=y_valid.to_numpy(), weight=w_valid)
         self.model = xgb.train(
             self._params,
             dtrain=dtrain,

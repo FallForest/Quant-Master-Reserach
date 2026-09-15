@@ -199,7 +199,7 @@ def report_graph(report_df: pd.DataFrame, show_notebook: bool = True) -> [list, 
                 backtest_config = {
                     "start_time": "2017-01-01",
                     "end_time": "2020-08-01",
-                    "account": 100000000,
+                    "account": 10583.43,
                     "benchmark": CSI300_BENCH,
                     "exchange_kwargs": {
                         "freq": FREQ,

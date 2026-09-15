@@ -20,7 +20,7 @@ class RollingDataWorkflow:
 
     def _init_quant_master(self):
         """initialize quant_master"""
-        provider_uri = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+        provider_uri = "~/.quant_master/quant_master_data/tdx_cn_data"  # target_dir
         GetData().quant_master_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
         quant_master.init(provider_uri=provider_uri, region=REG_CN)
 

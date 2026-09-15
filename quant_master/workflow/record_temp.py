@@ -164,15 +164,28 @@ class SignalRecord(RecordTemp):
     This is the Signal Record class that generates the signal prediction. This class inherits the ``RecordTemp`` class.
     """
 
-    def __init__(self, model=None, dataset=None, recorder=None):
+    def __init__(self, model=None, dataset=None, recorder=None, segments=None):
         super().__init__(recorder=recorder)
         self.model = model
         self.dataset = dataset
+        self.segmented_artifacts = segments is not None
+        self.segments = self._normalize_segments(segments)
 
     @staticmethod
-    def generate_label(dataset):
+    def _normalize_segments(segments):
+        if segments is None:
+            return ("test",)
+        if isinstance(segments, str):
+            segments = (segments,)
+        segments = tuple(dict.fromkeys(segments))
+        if not segments or any(segment not in {"valid", "test"} for segment in segments):
+            raise ValueError("SignalRecord segments must contain 'valid' and/or 'test'.")
+        return segments
+
+    @staticmethod
+    def generate_label(dataset, segment="test"):
         with class_casting(dataset, DatasetH):
-            params = dict(segments="test", col_set="label", data_key=DataHandlerLP.DK_R)
+            params = dict(segments=segment, col_set="label", data_key=DataHandlerLP.DK_R)
             try:
                 # Assume the backend handler is DataHandlerLP
                 raw_label = dataset.prepare(**params)
@@ -189,25 +202,49 @@ class SignalRecord(RecordTemp):
         return raw_label
 
     def generate(self, **kwargs):
-        # generate prediction
-        pred = self.model.predict(self.dataset)
-        if isinstance(pred, pd.Series):
-            pred = pred.to_frame("score")
-        self.save(**{"pred.pkl": pred})
+        objects = {}
+        for segment in self.segments:
+            if self.segments == ("test",):
+                # Preserve compatibility with custom models that only accept ``predict(dataset)``.
+                pred = self.model.predict(self.dataset)
+            else:
+                pred = self.model.predict(self.dataset, segment=segment)
+            if isinstance(pred, pd.Series):
+                pred = pred.to_frame("score")
+            objects[f"pred_{segment}.pkl"] = pred
+            if segment == "test":
+                objects["pred.pkl"] = pred
 
-        logger.info(
-            f"Signal record 'pred.pkl' has been saved as the artifact of the Experiment {self.recorder.experiment_id}"
-        )
-        # print out results
-        pprint(f"The following are prediction results of the {type(self.model).__name__} model.")
-        pprint(pred.head(5))
+            if isinstance(self.dataset, DatasetH):
+                raw_label = self.generate_label(self.dataset, segment=segment)
+                objects[f"label_{segment}.pkl"] = raw_label
+                if segment == "test":
+                    objects["label.pkl"] = raw_label
 
-        if isinstance(self.dataset, DatasetH):
-            raw_label = self.generate_label(self.dataset)
-            self.save(**{"label.pkl": raw_label})
+            logger.info(
+                f"Signal record for segment '{segment}' has been generated for Experiment "
+                f"{self.recorder.experiment_id}"
+            )
+            pprint(f"The following are {segment} prediction results of the {type(self.model).__name__} model.")
+            pprint(pred.head(5))
+
+        self.save(**objects)
+        set_tags = getattr(self.recorder, "set_tags", None)
+        if callable(set_tags):
+            set_tags(**{"signal.artifact_schema": "segmented-v1", "signal.segments": ",".join(self.segments)})
 
     def list(self):
-        return ["pred.pkl", "label.pkl"]
+        # Dependency checks temporarily cast another record class to
+        # SignalRecord without running this initializer.
+        if not getattr(self, "segmented_artifacts", False):
+            return ["pred.pkl", "label.pkl"]
+        paths = []
+        segments = getattr(self, "segments", ("test",))
+        for segment in segments:
+            paths.extend([f"pred_{segment}.pkl", f"label_{segment}.pkl"])
+        if "test" in segments:
+            paths.extend(["pred.pkl", "label.pkl"])
+        return paths
 
 
 class ACRecordTemp(RecordTemp):
@@ -301,34 +338,66 @@ class SigAnaRecord(ACRecordTemp):
 
     artifact_path = "sig_analysis"
     depend_cls = SignalRecord
+    legacy_metric_names = (
+        "IC",
+        "ICIR",
+        "Rank IC",
+        "Rank ICIR",
+        "Long-Short Ann Return",
+        "Long-Short Ann Sharpe",
+        "Long-Avg Ann Return",
+        "Long-Avg Ann Sharpe",
+    )
 
-    def __init__(self, recorder, ana_long_short=False, ann_scaler=252, label_col=0, skip_existing=False):
+    def __init__(
+        self, recorder, ana_long_short=False, ann_scaler=252, label_col=0, skip_existing=False, segments=None
+    ):
         super().__init__(recorder=recorder, skip_existing=skip_existing)
         self.ana_long_short = ana_long_short
         self.ann_scaler = ann_scaler
         self.label_col = label_col
+        self.segmented_artifacts = segments is not None
+        self.segments = SignalRecord._normalize_segments(segments)
 
-    def _generate(self, label: Optional[pd.DataFrame] = None, **kwargs):
-        """
-        Parameters
-        ----------
-        label : Optional[pd.DataFrame]
-            Label should be a dataframe.
-        """
-        pred = self.load("pred.pkl")
+    def _load_segment_artifact(self, kind, segment):
+        try:
+            return self.load(f"{kind}_{segment}.pkl")
+        except LoadObjectError:
+            if segment == "test":
+                return self.load(f"{kind}.pkl")
+            raise
+
+    def _segment_analysis(self, segment, label=None):
+        pred = self._load_segment_artifact("pred", segment)
         if label is None:
-            label = self.load("label.pkl")
+            label = self._load_segment_artifact("label", segment)
         if label is None or not isinstance(label, pd.DataFrame) or label.empty:
-            logger.warning(f"Empty label.")
-            return
+            logger.warning(f"Empty label for segment '{segment}'.")
+            return {}, {}
         ic, ric = calc_ic(pred.iloc[:, 0], label.iloc[:, self.label_col])
+        ic = ic.replace([np.inf, -np.inf], np.nan)
+        ric = ric.replace([np.inf, -np.inf], np.nan)
+        ic_valid = ic.dropna()
+        ric_valid = ric.dropna()
+        with np.errstate(divide="ignore", invalid="ignore"):
+            icir_daily = ic_valid.mean() / ic_valid.std()
+            ricir_daily = ric_valid.mean() / ric_valid.std()
         metrics = {
-            "IC": ic.mean(),
-            "ICIR": ic.mean() / ic.std(),
-            "Rank IC": ric.mean(),
-            "Rank ICIR": ric.mean() / ric.std(),
+            "IC": ic_valid.mean(),
+            "ICIR": icir_daily,
+            "Rank IC": ric_valid.mean(),
+            "Rank ICIR": ricir_daily,
+            "ICIR_daily": icir_daily,
+            "ICIR_annualized": icir_daily * self.ann_scaler**0.5,
+            "Rank_ICIR_daily": ricir_daily,
+            "Rank_ICIR_annualized": ricir_daily * self.ann_scaler**0.5,
+            "IC_effective_days": int(len(ic_valid)),
+            "Rank_IC_effective_days": int(len(ric_valid)),
+            "IC_positive_day_ratio": float((ic_valid > 0).mean()) if len(ic_valid) else np.nan,
+            "Rank_IC_positive_day_ratio": float((ric_valid > 0).mean()) if len(ric_valid) else np.nan,
         }
-        objects = {"ic.pkl": ic, "ric.pkl": ric}
+        metrics.update(self._yearly_ic_metrics(ic_valid, ric_valid))
+        objects = {f"ic_{segment}.pkl": ic, f"ric_{segment}.pkl": ric}
         if self.ana_long_short:
             long_short_r, long_avg_r = calc_long_short_return(pred.iloc[:, 0], label.iloc[:, self.label_col])
             metrics.update(
@@ -341,18 +410,83 @@ class SigAnaRecord(ACRecordTemp):
             )
             objects.update(
                 {
-                    "long_short_r.pkl": long_short_r,
-                    "long_avg_r.pkl": long_avg_r,
+                    f"long_short_r_{segment}.pkl": long_short_r,
+                    f"long_avg_r_{segment}.pkl": long_avg_r,
                 }
             )
-        self.recorder.log_metrics(**metrics)
-        pprint(metrics)
+        if segment == "test":
+            objects.update(
+                {
+                    "ic.pkl": ic,
+                    "ric.pkl": ric,
+                    **(
+                        {"long_short_r.pkl": long_short_r, "long_avg_r.pkl": long_avg_r}
+                        if self.ana_long_short
+                        else {}
+                    ),
+                }
+            )
+        return metrics, objects
+
+    @staticmethod
+    def _yearly_ic_metrics(ic, ric):
+        metrics = {}
+        years = sorted(set(pd.to_datetime(ic.index).year) | set(pd.to_datetime(ric.index).year))
+        for year in years:
+            ic_year = ic[pd.to_datetime(ic.index).year == year]
+            ric_year = ric[pd.to_datetime(ric.index).year == year]
+            metrics[f"year.{year}.IC"] = ic_year.mean() if len(ic_year) else np.nan
+            metrics[f"year.{year}.Rank_IC"] = ric_year.mean() if len(ric_year) else np.nan
+        return metrics
+
+    def _generate(self, label: Optional[pd.DataFrame] = None, **kwargs):
+        """
+        Parameters
+        ----------
+        label : Optional[pd.DataFrame]
+            Label should be a dataframe.
+        """
+        all_metrics = {}
+        objects = {}
+        for segment in self.segments:
+            segment_label = label if len(self.segments) == 1 else None
+            metrics, segment_objects = self._segment_analysis(segment, segment_label)
+            all_metrics.update(
+                {f"signal.{segment}.{name.replace(' ', '_')}": value for name, value in metrics.items()}
+            )
+            if segment == "test":
+                all_metrics.update({name: metrics[name] for name in self.legacy_metric_names if name in metrics})
+            objects.update(segment_objects)
+        self.recorder.log_metrics(**all_metrics)
+        set_tags = getattr(self.recorder, "set_tags", None)
+        if callable(set_tags):
+            set_tags(
+                **{
+                    "signal.analysis_schema": "segmented-v2",
+                    "signal.analysis_segments": ",".join(self.segments),
+                    "signal.icir_daily_formula": "mean(daily_ic)/std(daily_ic)",
+                    "signal.icir_annualized_formula": "ICIR_daily*sqrt(ann_scaler)",
+                    "signal.icir_ann_scaler": self.ann_scaler,
+                }
+            )
+        pprint(all_metrics)
         return objects
 
     def list(self):
-        paths = ["ic.pkl", "ric.pkl"]
-        if self.ana_long_short:
-            paths.extend(["long_short_r.pkl", "long_avg_r.pkl"])
+        if not self.segmented_artifacts:
+            paths = ["ic.pkl", "ric.pkl"]
+            if self.ana_long_short:
+                paths.extend(["long_short_r.pkl", "long_avg_r.pkl"])
+            return paths
+        paths = []
+        for segment in self.segments:
+            paths.extend([f"ic_{segment}.pkl", f"ric_{segment}.pkl"])
+            if self.ana_long_short:
+                paths.extend([f"long_short_r_{segment}.pkl", f"long_avg_r_{segment}.pkl"])
+        if "test" in self.segments:
+            paths.extend(["ic.pkl", "ric.pkl"])
+            if self.ana_long_short:
+                paths.extend(["long_short_r.pkl", "long_avg_r.pkl"])
         return paths
 
 
@@ -407,7 +541,7 @@ class PortAnaRecord(ACRecordTemp):
                 "backtest": {
                     "start_time": None,
                     "end_time": None,
-                    "account": 100000000,
+                    "account": 10583.43,
                     "benchmark": None,
                     "exchange_kwargs": {
                         "limit_threshold": 0.095,

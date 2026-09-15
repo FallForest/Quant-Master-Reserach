@@ -1,0 +1,20 @@
+# Handler fragment for minute-bar feature experiments.
+# Configure provider_uri for the selected minute frequency in the parent workflow.
+handler:
+    class: HighFreqGeneralHandler
+    module_path: quant_master.contrib.data.highfreq_handler
+    kwargs:
+        instruments: csi300
+        day_length: 48  # 5-minute bars in a 240-minute CN trading session
+        freq: 5min
+        columns: ["$open", "$high", "$low", "$close", "$vwap"]
+        # Bar offsets: current, 30 minutes, 60 minutes, and same time yesterday.
+        lags: [0, 6, 12, 48]
+        # Optional minute-bar feature families; omitted means no extra families.
+        feature_families: [momentum, realized_volatility, volume_distribution, intraday_shape]
+        feature_windows:
+            momentum: [6, 12, 48]
+            realized_volatility: [6, 12]
+            volume_distribution: [6, 48]
+            intraday_shape: [12, 48]
+        label: ["Ref($close, -2) / Ref($close, -1) - 1"]

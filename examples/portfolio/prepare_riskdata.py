@@ -47,6 +47,6 @@ def prepare_data(riskdata_root="./riskdata", T=240, start_time="2016-01-01"):
 if __name__ == "__main__":
     import quant_master
 
-    quant_master.init(provider_uri="~/.quant_master/quant_master_data/cn_data")
+    quant_master.init(provider_uri="~/.quant_master/quant_master_data/tdx_cn_data")
 
     prepare_data()

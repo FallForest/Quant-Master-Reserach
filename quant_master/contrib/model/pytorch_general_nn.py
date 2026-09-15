@@ -16,7 +16,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from quant_master.data.dataset.weight import Reweighter
 
-from .pytorch_utils import count_parameters
+from .pytorch_utils import count_parameters, deepcopy_state_dict
 from ...model.base import Model
 from ...data.dataset import DatasetH, TSDatasetH
 from ...data.dataset.handler import DataHandlerLP
@@ -62,12 +62,7 @@ class GeneralPTNN(Model):
         GPU=0,
         seed=None,
         pt_model_uri="quant_master.contrib.model.pytorch_gru_ts.GRUModel",
-        pt_model_kwargs={
-            "d_feat": 6,
-            "hidden_size": 64,
-            "num_layers": 2,
-            "dropout": 0.0,
-        },
+        pt_model_kwargs=None,
     ):
         # Set logger.
         self.logger = get_module_logger("GeneralPTNN")
@@ -86,8 +81,20 @@ class GeneralPTNN(Model):
         self.n_jobs = n_jobs
         self.seed = seed
 
-        self.pt_model_uri, self.pt_model_kwargs = pt_model_uri, pt_model_kwargs
-        self.dnn_model = init_instance_by_config({"class": pt_model_uri, "kwargs": pt_model_kwargs})
+        if pt_model_kwargs is None and pt_model_uri == "quant_master.contrib.model.pytorch_gru_ts.GRUModel":
+            pt_model_kwargs = {
+                "d_feat": 6,
+                "hidden_size": 64,
+                "num_layers": 2,
+                "dropout": 0.0,
+            }
+        self.pt_model_uri = pt_model_uri
+        self.pt_model_kwargs = dict(pt_model_kwargs or {})
+        self._uses_input_dim = (
+            self.pt_model_uri == "quant_master.contrib.model.pytorch_nn.Net"
+            or "input_dim" in self.pt_model_kwargs
+        )
+        self.input_dim = self.pt_model_kwargs.get("input_dim")
 
         self.logger.info(
             "GeneralPTNN parameters setting:"
@@ -118,7 +125,7 @@ class GeneralPTNN(Model):
                 weight_decay,
                 seed,
                 pt_model_uri,
-                pt_model_kwargs,
+                self.pt_model_kwargs,
             )
         )
 
@@ -126,22 +133,54 @@ class GeneralPTNN(Model):
             np.random.seed(self.seed)
             torch.manual_seed(self.seed)
 
+        if self.optimizer not in {"adam", "gd"}:
+            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+
+        self.dnn_model = None
+        self.train_optimizer = None
+        self.lr_scheduler = None
+        self.fitted = False
+        if not self._uses_input_dim or self.input_dim is not None:
+            self._build_network(self.input_dim)
+
+    def _build_network(self, input_dim=None) -> None:
+        if self._uses_input_dim:
+            input_dim = int(input_dim)
+            if input_dim <= 0:
+                raise ValueError("input_dim must be positive.")
+            self.input_dim = input_dim
+            self.pt_model_kwargs["input_dim"] = input_dim
+
+        self.dnn_model = init_instance_by_config({"class": self.pt_model_uri, "kwargs": self.pt_model_kwargs})
+        self.dnn_model.to(self.device)
         self.logger.info("model:\n{:}".format(self.dnn_model))
         self.logger.info("model size: {:.4f} MB".format(count_parameters(self.dnn_model)))
 
-        if optimizer.lower() == "adam":
-            self.train_optimizer = optim.Adam(self.dnn_model.parameters(), lr=self.lr, weight_decay=weight_decay)
-        elif optimizer.lower() == "gd":
-            self.train_optimizer = optim.SGD(self.dnn_model.parameters(), lr=self.lr, weight_decay=weight_decay)
+        if self.optimizer == "adam":
+            self.train_optimizer = optim.Adam(self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            self.train_optimizer = optim.SGD(self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
-        # === ReduceLROnPlateau learning rate scheduler ===
         self.lr_scheduler = ReduceLROnPlateau(
             self.train_optimizer, mode="min", factor=0.5, patience=5, min_lr=1e-6, threshold=1e-5
         )
-        self.fitted = False
-        self.dnn_model.to(self.device)
+
+    def _ensure_feature_dim(self, feature_width: int) -> None:
+        if not self._uses_input_dim:
+            return
+        feature_width = int(feature_width)
+        if self.input_dim is None:
+            self._build_network(feature_width)
+        elif feature_width != int(self.input_dim):
+            raise ValueError(
+                f"pt_model_kwargs.input_dim={self.input_dim} does not match feature width={feature_width}."
+            )
+
+    @staticmethod
+    def _prepared_feature_width(data) -> int:
+        if hasattr(data, "data_arr"):
+            return int(data.data_arr.shape[-1] - 1)
+        return int(data["feature"].shape[1])
 
     @property
     def use_gpu(self):
@@ -246,6 +285,8 @@ class GeneralPTNN(Model):
         self.logger.info(f"Valid samples: {len(dl_valid)}")
         if dl_train.empty or dl_valid.empty:
             raise ValueError("Empty data from dataset, please check your dataset config.")
+        self._ensure_feature_dim(self._prepared_feature_width(dl_train))
+        self._ensure_feature_dim(self._prepared_feature_width(dl_valid))
 
         if reweighter is None:
             wl_train = np.ones(len(dl_train))
@@ -311,12 +352,12 @@ class GeneralPTNN(Model):
             self.lr_scheduler.step(val_score)
 
             if step == 0:
-                best_param = self.dnn_model.state_dict()
+                best_param = deepcopy_state_dict(self.dnn_model)
             if val_score < best_score:
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.dnn_model.state_dict()
+                best_param = deepcopy_state_dict(self.dnn_model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:
@@ -341,6 +382,7 @@ class GeneralPTNN(Model):
 
         dl_test = dataset.prepare("test", col_set=["feature", "label"], data_key=DataHandlerLP.DK_I)
         self.logger.info(f"Test samples: {len(dl_test)}")
+        self._ensure_feature_dim(self._prepared_feature_width(dl_test))
 
         if isinstance(dataset, TSDatasetH):
             dl_test.config(fillna_type="ffill+bfill")  # process nan brought by dataloader

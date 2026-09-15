@@ -76,22 +76,28 @@ download_data  →  normalize  →  dump_bin  →  verify  →  index_compositio
 | `delay` | float | 0.1 | 每次请求间隔秒数，防止被 Yahoo 限流 |
 | `check_data_length` | int | None | 数据长度阈值，低于此值的股票会重试下载 |
 | `exists_skip` | bool | False | 如果数据集已存在，跳过初始下载 |
+| `skip_names` | bool | False | 跳过 CN 股票名称文件刷新 |
+| `skip_index` | bool | False | 跳过指数行情及指数成分文件刷新 |
+| `skip_pool` | bool | False | 跳过个人动态股票池刷新 |
+
+行情二进制通过校验后，会在数据目录写入 `update_manifest.json`，记录每个阶段的
+`success`、`skipped` 或 `failed` 状态。名称、指数和股票池属于派生阶段，失败不会回滚已经校验通过的行情数据。
 
 ### CLI 调用
 
 ```bash
 # 基本用法：增量更新到最新
 python scripts/data_collector/yahoo/collector.py update_data_to_bin \
-  --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data
+  --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data
 
 # 指定截止日期
 python scripts/data_collector/yahoo/collector.py update_data_to_bin \
-  --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data \
+  --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data \
   --end_date 2026-05-22
 
 # 调整并发和延迟
 python scripts/data_collector/yahoo/collector.py update_data_to_bin \
-  --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data \
+  --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data \
   --max_workers 8 \
   --delay 0.2
 ```

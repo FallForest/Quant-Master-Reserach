@@ -2,6 +2,7 @@
 import pytest
 
 from server import app
+from server.routers import browser
 
 
 class _EmptyTDXQuote:
@@ -55,6 +56,21 @@ def test_browser_stocks(client):
     for item in data["stocks"]:
         assert "symbol" in item
         assert "name" in item
+
+
+def test_browser_stocks_cache_miss_returns_metadata_without_reading_bars(monkeypatch, client):
+    started = []
+    monkeypatch.setattr(browser, "load_stock_summary", lambda expected_count=None: None)
+    monkeypatch.setattr(browser, "start_cache_refresh", lambda data: started.append(data) or True)
+
+    r = client.get("/api/browser/stocks")
+
+    assert r.status_code == 200
+    data = r.json()
+    assert data["cacheRefreshing"] is True
+    assert len(data["stocks"]) == 3
+    assert all("close" not in item for item in data["stocks"])
+    assert started
 
 
 def test_browser_quotes(client):

@@ -19,6 +19,7 @@ from ...model.base import Model
 from ...data.dataset.handler import DataHandlerLP
 from ...model.utils import ConcatDataset
 from ...data.dataset.weight import Reweighter
+from .pytorch_utils import deepcopy_state_dict
 
 
 class LSTM(Model):
@@ -258,7 +259,7 @@ class LSTM(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.LSTM_model.state_dict()
+                best_param = deepcopy_state_dict(self.LSTM_model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

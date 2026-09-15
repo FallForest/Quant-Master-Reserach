@@ -1,0 +1,64 @@
+BASE_CONFIG_PATH: workflow_config_purged_oof_stacking_Alpha168_tdx_small_mid.yaml
+
+experiment_name: purged_oof_stacking_alpha168_tdx_personal_under40_v1
+
+market: &market personal_a_share_pit_v1
+personal_pool_filter: &personal_pool_filter
+    - filter_type: ExpressionDFilter
+      rule_expression: "And(And(Ge($close/($factor+1e-12),2),Le($close/($factor+1e-12),40)),And(And(Gt($volume,0),Gt($amount,0)),And(Ge(Mean(Ref($amount,1),20),10000000),Ge(Count(Ref($close,1),120),120))))"
+      filter_start_time: null
+      filter_end_time: null
+      keep: false
+
+universe_contract:
+    version: 1
+    signal_time: after_close
+    structural_universe: personal_a_share_pit_v1
+    enabled_boards: [main]
+    min_entry_price_cny: 2.0
+    max_entry_price_cny: 40.0
+    price_expression: "$close/($factor+1e-12)"
+    execution_price_recheck_required: true
+    execution_price_cap_applies_to: buy_only
+    trade_unit_shares: 100
+    exact_pit_security_master: false
+    residual_survivorship_bias: true
+
+data_preflight:
+    market: *market
+    filter_pipe: *personal_pool_filter
+    feature_set: alpha158_amount_flow
+    expected_feature_columns: 168
+    min_universe_size: 2500
+    max_universe_size: 3200
+    min_eligible_size: 1900
+    max_eligible_size: 2900
+    min_eligible_ratio: 0.70
+    max_eligible_ratio: 0.95
+    min_feature_dir_coverage: 0.99
+    anchor_dates: [2018-12-28, 2020-12-31, 2022-12-30, 2023-12-29, 2024-12-31, 2026-06-08]
+    feature_sample_start: 2023-07-03
+    feature_sample_end: 2023-09-28
+    feature_sample_size: 8
+
+held_out_prediction_gate:
+    min_rank_ic: 0.05
+    min_rank_icir: 0.40
+    min_yearly_rank_ic: 0.02
+    min_daily_rows: 1900
+
+task:
+    model:
+        kwargs:
+            fold_dataset_config:
+                kwargs:
+                    handler:
+                        kwargs:
+                            instruments: *market
+                            filter_pipe: *personal_pool_filter
+    dataset:
+        kwargs:
+            handler:
+                kwargs:
+                    instruments: *market
+                    filter_pipe: *personal_pool_filter

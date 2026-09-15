@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Optional
 
 import fire
@@ -26,6 +27,12 @@ class DataHealthChecker:
         large_step_threshold_price=0.5,
         large_step_threshold_volume=3,
         missing_data_num=0,
+        require_nonconstant_factor=False,
+        constant_factor_ratio_threshold=0.95,
+        universe=None,
+        universe_check_date=None,
+        max_active_universe_size=None,
+        fail_fast=False,
     ):
         assert csv_path or quant_master_dir, "One of csv_path or quant_master_dir should be provided."
         assert not (csv_path and quant_master_dir), "Only one of csv_path or quant_master_dir should be provided."
@@ -36,7 +43,13 @@ class DataHealthChecker:
         self.large_step_threshold_price = large_step_threshold_price
         self.large_step_threshold_volume = large_step_threshold_volume
         self.missing_data_num = missing_data_num
-        self.quant_master_dir = os.path.abspath(os.path.expanduser(quant_master_dir))
+        self.require_nonconstant_factor = require_nonconstant_factor
+        self.constant_factor_ratio_threshold = constant_factor_ratio_threshold
+        self.universe = universe
+        self.universe_check_date = universe_check_date
+        self.max_active_universe_size = max_active_universe_size
+        self.fail_fast = fail_fast
+        self.quant_master_dir = os.path.abspath(os.path.expanduser(quant_master_dir)) if quant_master_dir else None
 
         if csv_path:
             assert os.path.isdir(csv_path), f"{csv_path} should be a directory."
@@ -67,7 +80,6 @@ class DataHealthChecker:
                 inplace=True,
             )
             self.data[instrument] = df
-        print(df)
 
     # NOTE:
     # This check is added due to a known issue in QuantMaster where feature paths
@@ -195,6 +207,8 @@ class DataHealthChecker:
             if "factor" not in df.columns:
                 result_dict["instruments"].append(filename)
                 result_dict["missing_factor_col"].append(True)
+                result_dict["missing_factor_data"].append(False)
+                continue
             if df["factor"].isnull().all():
                 if filename in result_dict["instruments"]:
                     result_dict["missing_factor_data"].append(True)
@@ -210,18 +224,90 @@ class DataHealthChecker:
             logger.info(f"✅ The `factor` column already exists and is not empty.")
             return None
 
+    def check_constant_factor(self) -> Optional[pd.DataFrame]:
+        """Report instruments whose available adjustment factor is always one."""
+        if not self.require_nonconstant_factor:
+            return None
+
+        eligible = 0
+        constant_one = 0
+        for instrument, df in self.data.items():
+            if "factor" not in df.columns:
+                continue
+            values = pd.to_numeric(df["factor"], errors="coerce").dropna()
+            if values.empty:
+                continue
+            eligible += 1
+            if not values.empty and values.eq(1.0).all():
+                constant_one += 1
+        ratio = constant_one / eligible if eligible else 0.0
+        if eligible and ratio >= float(self.constant_factor_ratio_threshold):
+            return pd.DataFrame(
+                [
+                    {
+                        "checked_instruments": eligible,
+                        "constant_one_instruments": constant_one,
+                        "constant_one_ratio": ratio,
+                    }
+                ],
+                index=["factor"],
+            )
+        logger.info(f"Always-one adjustment factor ratio is {ratio:.2%} ({constant_one}/{eligible}).")
+        return None
+
+    def check_active_universe_size(self) -> Optional[pd.DataFrame]:
+        """Check one universe snapshot from the read-only instruments file."""
+        if self.max_active_universe_size is None:
+            return None
+        if not self.quant_master_dir or not self.universe:
+            raise ValueError("`quant_master_dir` and `universe` are required for the universe-size check.")
+
+        instrument_path = Path(self.quant_master_dir) / "instruments" / f"{self.universe.lower()}.txt"
+        if not instrument_path.is_file():
+            raise FileNotFoundError(f"Universe file does not exist: {instrument_path}")
+        frame = pd.read_csv(instrument_path, sep="\t", names=["instrument", "start_time", "end_time"])
+        frame["start_time"] = pd.to_datetime(frame["start_time"], errors="coerce")
+        frame["end_time"] = pd.to_datetime(frame["end_time"], errors="coerce")
+        frame = frame.dropna(subset=["instrument", "start_time", "end_time"])
+        if frame.empty:
+            raise ValueError(f"Universe file has no valid intervals: {instrument_path}")
+
+        check_date = pd.Timestamp(self.universe_check_date) if self.universe_check_date else frame["end_time"].max()
+        active = frame.loc[
+            (frame["start_time"] <= check_date) & (frame["end_time"] >= check_date), "instrument"
+        ].nunique()
+        if active > int(self.max_active_universe_size):
+            return pd.DataFrame(
+                [{"universe": self.universe, "date": check_date.date(), "active_instruments": active}]
+            ).set_index("universe")
+        logger.info(f"{self.universe} has {active} active instruments on {check_date.date()}.")
+        return None
+
     def check_data(self):
         check_missing_data_result = self.check_missing_data()
         check_large_step_changes_result = self.check_large_step_changes()
         check_required_columns_result = self.check_required_columns()
         check_missing_factor_result = self.check_missing_factor()
         check_features_dir_case_result = self.check_features_dir_lowercase()
+        check_constant_factor_result = self.check_constant_factor()
+        check_universe_size_result = self.check_active_universe_size()
+        results = {
+            "missing_data": check_missing_data_result,
+            "large_step_changes": check_large_step_changes_result,
+            "required_columns": check_required_columns_result,
+            "missing_factor": check_missing_factor_result,
+            "features_dir_case": check_features_dir_case_result,
+            "constant_factor": check_constant_factor_result,
+            "active_universe_size": check_universe_size_result,
+        }
         if (
             check_missing_data_result is not None
             or check_large_step_changes_result is not None
             or check_required_columns_result is not None
             or check_missing_factor_result is not None
             or check_features_dir_case_result is not None
+            or check_constant_factor_result is not None
+            or check_universe_size_result is not None
         ):
             print(f"\nSummary of data health check ({len(self.data)} files checked):")
             print("-------------------------------------------------")
@@ -242,6 +328,16 @@ class DataHealthChecker:
                     f"Some subdirectories under `{os.path.join(self.quant_master_dir, 'features')}` contain uppercase letters, please rename them to lowercase manually."
                 )
                 print(check_features_dir_case_result)
+            if isinstance(check_constant_factor_result, pd.DataFrame):
+                logger.warning("Adjustment factor is always one for some instruments; prices may be unadjusted.")
+                print(check_constant_factor_result)
+            if isinstance(check_universe_size_result, pd.DataFrame):
+                logger.warning("The active universe exceeds the configured maximum size.")
+                print(check_universe_size_result)
+            if self.fail_fast:
+                failed = [name for name, result in results.items() if result is not None]
+                raise RuntimeError(f"Data health check failed: {', '.join(failed)}")
+        return results
 
 
 if __name__ == "__main__":

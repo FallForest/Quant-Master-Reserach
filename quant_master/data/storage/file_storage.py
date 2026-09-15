@@ -374,7 +374,10 @@ class FileFeatureStorage(FileStorageMixin, FeatureStorage):
                 return i, struct.unpack("f", fp.read(4))[0]
         elif isinstance(i, slice):
             start_index = storage_start_index if i.start is None else i.start
-            end_index = storage_end_index if i.stop is None else i.stop - 1
+            # A feature file only covers the instrument's actual lifetime.  Dataset
+            # queries commonly use a later global end date, so clip the slice to
+            # the available tail before validating the physical read.
+            end_index = storage_end_index if i.stop is None else min(i.stop - 1, storage_end_index)
             si = max(start_index, storage_start_index)
             if si > end_index:
                 return pd.Series(dtype=np.float32)

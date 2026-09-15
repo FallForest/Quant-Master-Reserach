@@ -16,7 +16,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from quant_master.contrib.model.pytorch_gru import GRUModel
 from quant_master.contrib.model.pytorch_lstm import LSTMModel
-from quant_master.contrib.model.pytorch_utils import count_parameters
+from quant_master.contrib.model.pytorch_utils import count_parameters, deepcopy_state_dict
 from quant_master.data.dataset import DatasetH
 from quant_master.data.dataset.handler import DataHandlerLP
 from quant_master.log import get_module_logger
@@ -333,7 +333,7 @@ class ADD(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.ADD_model.state_dict()
+                best_param = deepcopy_state_dict(self.ADD_model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:
@@ -407,7 +407,7 @@ class ADD(Model):
 
         self.bootstrap_fit(x_train, y_train, m_train, x_valid, y_valid, m_valid)
 
-        best_param = self.ADD_model.state_dict()
+        best_param = deepcopy_state_dict(self.ADD_model)
         save_path = get_or_create_path(save_path)
         torch.save(best_param, save_path)
         if self.use_gpu:

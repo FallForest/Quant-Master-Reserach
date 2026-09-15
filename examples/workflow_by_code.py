@@ -18,7 +18,7 @@ from quant_master.tests.config import CSI300_BENCH, CSI300_GBDT_TASK
 
 if __name__ == "__main__":
     # use default data
-    provider_uri = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+    provider_uri = "~/.quant_master/quant_master_data/tdx_cn_data"  # target_dir
     GetData().quant_master_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
     quant_master.init(provider_uri=provider_uri, region=REG_CN)
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         "backtest": {
             "start_time": "2017-01-01",
             "end_time": "2020-08-01",
-            "account": 100000000,
+            "account": 10583.43,
             "benchmark": CSI300_BENCH,
             "exchange_kwargs": {
                 "freq": "day",

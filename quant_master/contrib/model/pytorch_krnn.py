@@ -18,6 +18,7 @@ import torch.optim as optim
 from ...model.base import Model
 from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
+from .pytorch_utils import deepcopy_state_dict
 
 ########################################################################
 ########################################################################
@@ -466,7 +467,7 @@ class KRNN(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.krnn_model.state_dict()
+                best_param = deepcopy_state_dict(self.krnn_model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

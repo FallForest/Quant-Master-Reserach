@@ -23,7 +23,10 @@ const quickActions = [
 
 // 数据分布
 const fieldStats = ref([])
+const coverageMatrix = ref(null)
+const hasCompleteness = ref(false)
 let completenessChart = null
+let completenessObserver = null
 
 onMounted(async () => {
   const data = await api('/api/overview')
@@ -31,10 +34,16 @@ onMounted(async () => {
     stats.value[0].value = data.stockCount || '--'
     stats.value[1].value = data.calendarDays || '--'
     stats.value[2].value = data.effectiveLastDate || data.lastUpdate || '--'
-    stats.value[3].value = data.equityCount ? (data.equityCoverageAtLastDate * 100).toFixed(1) : '--'
+    stats.value[3].value = data.equityCount ? (data.equityCoverageAtLastDate * 100).toFixed(2) : '--'
 
     if (data.fieldStats) {
       fieldStats.value = data.fieldStats
+    }
+
+    const matrix = data.coverageMatrix
+    if (matrix?.months?.length && matrix?.fields?.length) {
+      coverageMatrix.value = matrix
+      hasCompleteness.value = matrix.values.some(row => row.some(v => v != null))
     }
   }
 
@@ -44,22 +53,22 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  completenessObserver?.disconnect()
   completenessChart?.dispose()
 })
 
 function renderCompletenessChart() {
+  if (!hasCompleteness.value) return
   const el = document.getElementById('completeness-chart')
   if (!el) return
   completenessChart = echarts.init(el)
 
-  // Demo data completeness heatmap
-  const fields = ['open', 'high', 'low', 'close', 'volume', 'amount', 'adjclose', 'factor']
-  const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+  const { months, fields, values } = coverageMatrix.value
+  const monthLabels = months.map(m => `${m.slice(5)}月`)
   const data = []
-  fields.forEach((f, i) => {
-    months.forEach((m, j) => {
-      const val = +(95 + Math.random() * 5).toFixed(1)
-      data.push([j, i, val])
+  fields.forEach((_, i) => {
+    values[i].forEach((v, j) => {
+      data.push([j, i, v])
     })
   })
 
@@ -69,13 +78,14 @@ function renderCompletenessChart() {
       borderColor: '#1E40AF',
       textStyle: { color: '#F8FAFC', fontFamily: 'Fira Code, monospace', fontSize: 12 },
       formatter(p) {
-        return `${fields[p.data[1]]} · ${months[p.data[0]]}<br/>完整度: <b>${p.data[2]}%</b>`
+        const v = p.data[2]
+        return `${fields[p.data[1]]} · ${months[p.data[0]]}<br/>完整度: <b>${v == null ? '无数据' : v + '%'}</b>`
       },
     },
     grid: { left: 70, right: 20, top: 10, bottom: 30 },
     xAxis: {
       type: 'category',
-      data: months,
+      data: monthLabels,
       axisLabel: { color: '#94A3B8', fontSize: 10 },
       axisLine: { lineStyle: { color: '#E2E8F0' } },
       axisTick: { show: false },
@@ -88,7 +98,7 @@ function renderCompletenessChart() {
       axisTick: { show: false },
     },
     visualMap: {
-      min: 90,
+      min: 0,
       max: 100,
       show: false,
       inRange: { color: ['#FEE2E2', '#FEF3C7', '#D1FAE5', '#10B981'] },
@@ -101,11 +111,19 @@ function renderCompletenessChart() {
         color: '#475569',
         fontSize: 9,
         fontFamily: 'Fira Code',
-        formatter: p => `${p.data[2]}%`,
+        formatter: p => (p.data[2] == null ? '' : `${p.data[2]}%`),
       },
       itemStyle: { borderColor: '#fff', borderWidth: 2, borderRadius: 3 },
     }],
   })
+
+  // 挂载瞬间容器宽度可能还是 0，此时 ECharts 会画出一张空 canvas；布局完成后再补 resize。
+  if (typeof ResizeObserver !== 'undefined') {
+    completenessObserver = new ResizeObserver(() => completenessChart?.resize())
+    completenessObserver.observe(el)
+  } else {
+    requestAnimationFrame(() => completenessChart?.resize())
+  }
 }
 </script>
 
@@ -158,6 +176,8 @@ function renderCompletenessChart() {
     <div class="bg-white rounded-xl border border-surface-3 p-5">
       <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">数据完整度</h2>
       <div v-if="loading" class="w-full h-[200px]"><div class="skeleton w-full h-full rounded-lg"></div></div>
+      <div v-else-if="!hasCompleteness"
+           class="w-full h-[200px] flex items-center justify-center text-sm text-slate-400">暂无数据</div>
       <div v-else id="completeness-chart" class="w-full h-[200px]"></div>
       <div v-if="!loading" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-slate-600">
         <div class="rounded-lg bg-surface-1/60 border border-surface-3 px-4 py-3">

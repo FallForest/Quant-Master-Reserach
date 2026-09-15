@@ -40,7 +40,7 @@ class TestPIT(unittest.TestCase):
         pit_dir = str(SOURCE_DIR.joinpath("pit").resolve())
         pit_normalized_dir = str(SOURCE_DIR.joinpath("pit_normalized").resolve())
         GetData().quant_master_data(
-            name="quant_master_data_simple", target_dir=cn_data_dir, region="cn", delete_old=False, exists_skip=True
+            name="quant_master_data", target_dir=cn_data_dir, region="cn", delete_old=False, exists_skip=True
         )
         GetData().quant_master_data(name="quant_master_data", target_dir=pit_dir, region="pit", delete_old=False, exists_skip=True)
 

@@ -65,9 +65,7 @@ class TestNN(TestAutoData):
                 batch_size=32,
                 n_jobs=0,
                 pt_model_uri="quant_master.contrib.model.pytorch_nn.Net",  # it is a MLP
-                pt_model_kwargs={
-                    "input_dim": 3,
-                },
+                pt_model_kwargs={},
             ),
         ]
 

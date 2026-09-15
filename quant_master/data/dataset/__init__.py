@@ -116,10 +116,43 @@ class DatasetH(Dataset):
                         'outsample': ("2017-01-01", "2020-08-01",),
                     }
         """
+        self._validate_handler_config_fit_end_time(handler, segments)
         self.handler: DataHandler = init_instance_by_config(handler, accept_types=DataHandler)
         self.segments = segments.copy()
+        self._validate_processor_fit_end_time()
         self.fetch_kwargs = copy(fetch_kwargs)
         super().__init__(**kwargs)
+
+    @staticmethod
+    def _validate_handler_config_fit_end_time(handler, segments):
+        """Validate declarative handler configs before they load or fit any data."""
+        if not isinstance(handler, dict) or "train" not in segments:
+            return
+        train_segment = segments["train"]
+        fit_end_time = handler.get("kwargs", {}).get("fit_end_time")
+        if fit_end_time is None or len(train_segment) < 2 or train_segment[1] is None:
+            return
+        if pd.Timestamp(fit_end_time) > pd.Timestamp(train_segment[1]):
+            raise ValueError(
+                f"handler.fit_end_time ({fit_end_time}) must not be later than the train segment end "
+                f"({train_segment[1]})."
+            )
+
+    def _validate_processor_fit_end_time(self):
+        """Prevent fitted preprocessing statistics from seeing past the training segment."""
+        train_segment = self.segments.get("train")
+        if train_segment is None or len(train_segment) < 2 or train_segment[1] is None:
+            return
+
+        train_end = pd.Timestamp(train_segment[1])
+        processors = self.handler.get_all_processors() if isinstance(self.handler, DataHandlerLP) else []
+        for processor in processors:
+            fit_end_time = getattr(processor, "fit_end_time", None)
+            if fit_end_time is not None and pd.Timestamp(fit_end_time) > train_end:
+                raise ValueError(
+                    f"{processor.__class__.__name__}.fit_end_time ({fit_end_time}) must not be later than "
+                    f"the train segment end ({train_segment[1]})."
+                )
 
     def config(self, handler_kwargs: dict = None, **kwargs):
         """
@@ -143,6 +176,7 @@ class DatasetH(Dataset):
             self.handler.config(**handler_kwargs)
         if "segments" in kwargs:
             self.segments = deepcopy(kwargs.pop("segments"))
+        self._validate_processor_fit_end_time()
         super().config(**kwargs)
 
     def setup_data(self, handler_kwargs: dict = None, **kwargs):

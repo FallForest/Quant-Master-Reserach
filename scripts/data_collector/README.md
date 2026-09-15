@@ -4,6 +4,8 @@
 
 Scripts for data collection
 
+Common interface reference: [docs/common_interfaces.md](../../docs/common_interfaces.md).
+
 - yahoo: get *US/CN* stock data from *Yahoo Finance*
 - fund: get fund data from *http://fund.eastmoney.com*
 - cn_index: get *CN index* from *http://www.csindex.com.cn*, *CSI300*/*CSI100*

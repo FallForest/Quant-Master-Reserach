@@ -99,7 +99,7 @@ class TRAModel(Model):
             np.random.seed(seed)
             torch.manual_seed(seed)
 
-        self.model_config = model_config
+        self.model_config = dict(model_config)
         self.tra_config = tra_config
         self.model_type = model_type
         self.lr = lr
@@ -131,7 +131,24 @@ class TRAModel(Model):
             if SummaryWriter is not None:
                 self._writer = SummaryWriter(log_dir=self.logdir)
 
-        self._init_model()
+        self.model = None
+        self.tra = None
+        self.optimizer = None
+        self.fitted = False
+        self.global_step = -1
+        if self.model_config.get("input_size") is not None:
+            self._init_model()
+
+    def _ensure_model_input_size(self, dataset: MTSDatasetH) -> None:
+        feature_width = int(dataset.input_size or dataset._data.shape[1])
+        configured_width = self.model_config.get("input_size")
+        if configured_width is None:
+            self.model_config["input_size"] = feature_width
+            self._init_model()
+        elif int(configured_width) != feature_width:
+            raise ValueError(
+                f"model_config.input_size={configured_width} does not match dataset feature width={feature_width}."
+            )
 
     def _init_model(self):
         self.logger.info("init TRAModel...")
@@ -415,6 +432,7 @@ class TRAModel(Model):
     def fit(self, dataset, evals_result=dict()):
         assert isinstance(dataset, MTSDatasetH), "TRAModel only supports `quant_master.contrib.data.dataset.MTSDatasetH`"
 
+        self._ensure_model_input_size(dataset)
         train_set, valid_set, test_set = dataset.prepare(["train", "valid", "test"])
 
         self.fitted = True
@@ -501,6 +519,7 @@ class TRAModel(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
 
+        self._ensure_model_input_size(dataset)
         test_set = dataset.prepare(segment)
 
         metrics, preds, _, _ = self.test_epoch(-1, test_set, return_pred=True)

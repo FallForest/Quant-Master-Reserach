@@ -1,0 +1,404 @@
+{
+  "market": "csi300",
+  "benchmark": "SH000300",
+  "train": [
+    "2016-01-01",
+    "2020-12-31"
+  ],
+  "valid": [
+    "2021-01-01",
+    "2023-12-31"
+  ],
+  "selection_policy": "same Rank IC sign; rank by min(abs(train Rank IC), abs(valid Rank IC))",
+  "redundancy_policy": {
+    "min_stable_rank_ic": 0.005,
+    "max_abs_rank_corr": 0.8
+  },
+  "recommended_features": [
+    {
+      "feature": "MSP_IDIO_VOL20",
+      "stable_rank_ic": 0.02144234683557249,
+      "direction": "negative",
+      "closest_selected_feature": null,
+      "closest_selected_rank_corr": 0.0
+    },
+    {
+      "feature": "MSP_CORWIN_SCHULTZ20",
+      "stable_rank_ic": 0.014036639692715283,
+      "direction": "negative",
+      "closest_selected_feature": "MSP_IDIO_VOL20",
+      "closest_selected_rank_corr": 0.6626972689991731
+    },
+    {
+      "feature": "MSP_UPLIMIT10_DIST",
+      "stable_rank_ic": 0.00810470833925428,
+      "direction": "positive",
+      "closest_selected_feature": "MSP_IDIO_VOL20",
+      "closest_selected_rank_corr": -0.271400615906639
+    },
+    {
+      "feature": "MSP_ROLL_SPREAD20",
+      "stable_rank_ic": 0.007906225151918972,
+      "direction": "negative",
+      "closest_selected_feature": "MSP_CORWIN_SCHULTZ20",
+      "closest_selected_rank_corr": 0.2888761725486741
+    },
+    {
+      "feature": "MSP_DOWNLIMIT10_DIST",
+      "stable_rank_ic": 0.006533511208120757,
+      "direction": "positive",
+      "closest_selected_feature": "MSP_UPLIMIT10_DIST",
+      "closest_selected_rank_corr": -0.47119148838869873
+    }
+  ],
+  "metadata": {
+    "MSP_ROLL_SPREAD20": {
+      "family": "roll_spread",
+      "window": 20,
+      "data_requirements": [
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_CORWIN_SCHULTZ20": {
+      "family": "corwin_schultz_spread",
+      "window": 20,
+      "data_requirements": [
+        "high",
+        "low"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_PARKINSON20": {
+      "family": "parkinson_volatility",
+      "window": 20,
+      "data_requirements": [
+        "high",
+        "low"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_GARMAN_KLASS20": {
+      "family": "garman_klass_volatility",
+      "window": 20,
+      "data_requirements": [
+        "open",
+        "high",
+        "low",
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_ROGERS_SATCHELL20": {
+      "family": "rogers_satchell_volatility",
+      "window": 20,
+      "data_requirements": [
+        "open",
+        "high",
+        "low",
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_ZERO_RET20": {
+      "family": "price_staleness",
+      "window": 20,
+      "data_requirements": [
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_UPLIMIT10_DIST": {
+      "family": "price_limit_distance",
+      "window": 1,
+      "data_requirements": [
+        "high",
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_DOWNLIMIT10_DIST": {
+      "family": "price_limit_distance",
+      "window": 1,
+      "data_requirements": [
+        "low",
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_RET_AUTOCORR20": {
+      "family": "return_dependence",
+      "window": 20,
+      "data_requirements": [
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_JUMP_SHARE20": {
+      "family": "jump_risk",
+      "window": 20,
+      "data_requirements": [
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy"
+    },
+    "MSP_MARKET_BETA20": {
+      "family": "benchmark_risk",
+      "window": 20,
+      "data_requirements": [
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy:SH000300"
+    },
+    "MSP_IDIO_VOL20": {
+      "family": "benchmark_risk",
+      "window": 20,
+      "data_requirements": [
+        "close"
+      ],
+      "available_lag": 0,
+      "source": "tdx_daily_proxy:SH000300"
+    }
+  },
+  "features": [
+    {
+      "feature": "MSP_IDIO_VOL20",
+      "same_sign": true,
+      "stable_rank_ic": 0.02144234683557249,
+      "train": {
+        "coverage": 1.0,
+        "days": 1218,
+        "ic": 0.0024227092346692787,
+        "rank_ic": -0.02144234683557249,
+        "rank_ic_ir": -1.7014181887653712
+      },
+      "valid": {
+        "coverage": 1.0,
+        "days": 727,
+        "ic": 0.003506807352238587,
+        "rank_ic": -0.03714608867506212,
+        "rank_ic_ir": -3.0516705055716087
+      }
+    },
+    {
+      "feature": "MSP_ROGERS_SATCHELL20",
+      "same_sign": true,
+      "stable_rank_ic": 0.020894691410590967,
+      "train": {
+        "coverage": 0.885682079933348,
+        "days": 1218,
+        "ic": 0.0048313774324155005,
+        "rank_ic": -0.020894691410590967,
+        "rank_ic_ir": -1.4606789720608406
+      },
+      "valid": {
+        "coverage": 0.9621295479552957,
+        "days": 727,
+        "ic": 0.0008653038912273349,
+        "rank_ic": -0.04170505527891072,
+        "rank_ic_ir": -2.952046561449592
+      }
+    },
+    {
+      "feature": "MSP_GARMAN_KLASS20",
+      "same_sign": true,
+      "stable_rank_ic": 0.019593018572849678,
+      "train": {
+        "coverage": 0.885682079933348,
+        "days": 1218,
+        "ic": 0.009162470306257747,
+        "rank_ic": -0.019593018572849678,
+        "rank_ic_ir": -1.346679999497295
+      },
+      "valid": {
+        "coverage": 0.9621295479552957,
+        "days": 727,
+        "ic": 0.003079726298967367,
+        "rank_ic": -0.040840630027762635,
+        "rank_ic_ir": -2.8715015770016783
+      }
+    },
+    {
+      "feature": "MSP_PARKINSON20",
+      "same_sign": true,
+      "stable_rank_ic": 0.01886284344889673,
+      "train": {
+        "coverage": 0.8710970619226152,
+        "days": 1218,
+        "ic": 0.011259386753348938,
+        "rank_ic": -0.01886284344889673,
+        "rank_ic_ir": -1.2746989993886773
+      },
+      "valid": {
+        "coverage": 0.961465712441005,
+        "days": 727,
+        "ic": 0.0047525613546479575,
+        "rank_ic": -0.04002779450144883,
+        "rank_ic_ir": -2.8027857344771845
+      }
+    },
+    {
+      "feature": "MSP_CORWIN_SCHULTZ20",
+      "same_sign": true,
+      "stable_rank_ic": 0.014036639692715283,
+      "train": {
+        "coverage": 0.885682079933348,
+        "days": 1218,
+        "ic": 0.004957024881423161,
+        "rank_ic": -0.014036639692715283,
+        "rank_ic_ir": -1.1963578322361503
+      },
+      "valid": {
+        "coverage": 0.9621295479552957,
+        "days": 727,
+        "ic": -0.0007236361016020689,
+        "rank_ic": -0.03410995607822466,
+        "rank_ic_ir": -2.8600292207276903
+      }
+    },
+    {
+      "feature": "MSP_UPLIMIT10_DIST",
+      "same_sign": true,
+      "stable_rank_ic": 0.00810470833925428,
+      "train": {
+        "coverage": 0.8620255335832782,
+        "days": 1218,
+        "ic": -0.015563283365620002,
+        "rank_ic": 0.00810470833925428,
+        "rank_ic_ir": 0.8113412678990457
+      },
+      "valid": {
+        "coverage": 0.9603062737002919,
+        "days": 727,
+        "ic": -0.000905655664484557,
+        "rank_ic": 0.023980433328051266,
+        "rank_ic_ir": 2.2914653556784805
+      }
+    },
+    {
+      "feature": "MSP_ROLL_SPREAD20",
+      "same_sign": true,
+      "stable_rank_ic": 0.007906225151918972,
+      "train": {
+        "coverage": 0.885682079933348,
+        "days": 1218,
+        "ic": -0.003449517769773283,
+        "rank_ic": -0.007906225151918972,
+        "rank_ic_ir": -1.0904290996366535
+      },
+      "valid": {
+        "coverage": 0.9621295479552957,
+        "days": 727,
+        "ic": -0.005157529907545961,
+        "rank_ic": -0.012221868472279993,
+        "rank_ic_ir": -1.8844139099290804
+      }
+    },
+    {
+      "feature": "MSP_DOWNLIMIT10_DIST",
+      "same_sign": true,
+      "stable_rank_ic": 0.006533511208120757,
+      "train": {
+        "coverage": 0.8620255335832782,
+        "days": 1218,
+        "ic": 0.0156620475877235,
+        "rank_ic": 0.006533511208120757,
+        "rank_ic_ir": 0.6272584202696803
+      },
+      "valid": {
+        "coverage": 0.9603062737002919,
+        "days": 727,
+        "ic": -0.0019356978704700815,
+        "rank_ic": 0.010680617435106884,
+        "rank_ic_ir": 0.9203485400799435
+      }
+    },
+    {
+      "feature": "MSP_RET_AUTOCORR20",
+      "same_sign": true,
+      "stable_rank_ic": 0.0019394016150062372,
+      "train": {
+        "coverage": 0.8700041657477517,
+        "days": 1218,
+        "ic": 0.006220105662676673,
+        "rank_ic": 0.004838898306187227,
+        "rank_ic_ir": 0.69935753747396
+      },
+      "valid": {
+        "coverage": 0.9611929033255431,
+        "days": 727,
+        "ic": 0.005965872701201124,
+        "rank_ic": 0.0019394016150062372,
+        "rank_ic_ir": 0.2990351550297959
+      }
+    },
+    {
+      "feature": "MSP_ZERO_RET20",
+      "same_sign": true,
+      "stable_rank_ic": 0.0008410854778479098,
+      "train": {
+        "coverage": 0.885682079933348,
+        "days": 1218,
+        "ic": -0.005621586197514968,
+        "rank_ic": 0.0008410854778479098,
+        "rank_ic_ir": 0.10530754457227057
+      },
+      "valid": {
+        "coverage": 0.9621295479552957,
+        "days": 727,
+        "ic": 0.007749683439348303,
+        "rank_ic": 0.02825879538835001,
+        "rank_ic_ir": 3.0157636494561277
+      }
+    },
+    {
+      "feature": "MSP_JUMP_SHARE20",
+      "same_sign": true,
+      "stable_rank_ic": 0.0001253850328443726,
+      "train": {
+        "coverage": 0.885682079933348,
+        "days": 1218,
+        "ic": 0.001180490575132909,
+        "rank_ic": 0.0035668509860481115,
+        "rank_ic_ir": 0.6315661064194364
+      },
+      "valid": {
+        "coverage": 0.9621295479552957,
+        "days": 727,
+        "ic": 0.004446019798887116,
+        "rank_ic": 0.0001253850328443726,
+        "rank_ic_ir": 0.022547023519418636
+      }
+    },
+    {
+      "feature": "MSP_MARKET_BETA20",
+      "same_sign": false,
+      "stable_rank_ic": 0.0,
+      "train": {
+        "coverage": 0.870310470729496,
+        "days": 1218,
+        "ic": 0.010866186841692351,
+        "rank_ic": 0.005690606462377897,
+        "rank_ic_ir": 0.4245550852140668
+      },
+      "valid": {
+        "coverage": 0.9612838396973638,
+        "days": 727,
+        "ic": 0.001372464868273831,
+        "rank_ic": -0.012122381222531382,
+        "rank_ic_ir": -0.8844667664667704
+      }
+    }
+  ]
+}

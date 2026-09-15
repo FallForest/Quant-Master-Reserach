@@ -18,7 +18,7 @@ from ...data.dataset.handler import DataHandlerLP
 from ...log import get_module_logger
 from ...model.base import Model
 from ...utils import get_or_create_path
-from .pytorch_utils import count_parameters
+from .pytorch_utils import count_parameters, deepcopy_state_dict
 
 
 class GRU(Model):
@@ -48,6 +48,8 @@ class GRU(Model):
         batch_size=2000,
         early_stop=20,
         loss="mse",
+        rank_loss_weight=0.5,
+        min_rank_samples=3,
         optimizer="adam",
         GPU=0,
         seed=None,
@@ -69,8 +71,14 @@ class GRU(Model):
         self.early_stop = early_stop
         self.optimizer = optimizer.lower()
         self.loss = loss
+        self.rank_loss_weight = float(rank_loss_weight)
+        self.min_rank_samples = int(min_rank_samples)
         self.device = torch.device("cuda:%d" % (GPU) if torch.cuda.is_available() and GPU >= 0 else "cpu")
         self.seed = seed
+        if not 0.0 <= self.rank_loss_weight <= 1.0:
+            raise ValueError("rank_loss_weight must be between 0 and 1.")
+        if self.min_rank_samples < 2:
+            raise ValueError("min_rank_samples must be at least 2.")
 
         self.logger.info(
             "GRU parameters setting:"
@@ -85,6 +93,8 @@ class GRU(Model):
             "\nearly_stop : {}"
             "\noptimizer : {}"
             "\nloss_type : {}"
+            "\nrank_loss_weight : {}"
+            "\nmin_rank_samples : {}"
             "\nvisible_GPU : {}"
             "\nuse_GPU : {}"
             "\nseed : {}".format(
@@ -99,6 +109,8 @@ class GRU(Model):
                 early_stop,
                 optimizer.lower(),
                 loss,
+                rank_loss_weight,
+                min_rank_samples,
                 GPU,
                 self.use_gpu,
                 seed,
@@ -136,21 +148,90 @@ class GRU(Model):
         loss = (pred - label) ** 2
         return torch.mean(loss)
 
+    @property
+    def uses_rank_loss(self):
+        return self.loss in {"rank_ic", "mse_rank_ic"}
+
+    def rank_ic_loss(self, pred, label):
+        """Differentiable daily cross-sectional correlation loss.
+
+        The validation metric remains actual Spearman RankIC. Pearson correlation is
+        used here because sorting/ranking is not differentiable.
+        """
+
+        pred = pred.reshape(-1)
+        label = label.reshape(-1)
+        mask = torch.isfinite(pred) & torch.isfinite(label)
+        pred = pred[mask]
+        label = label[mask]
+        if pred.numel() < self.min_rank_samples:
+            return pred.sum() * 0.0
+        pred = pred - pred.mean()
+        label = label - label.mean()
+        denominator = torch.linalg.vector_norm(pred) * torch.linalg.vector_norm(label)
+        if denominator.detach().item() <= torch.finfo(pred.dtype).eps:
+            return pred.sum() * 0.0
+        return 1.0 - torch.sum(pred * label) / denominator
+
     def loss_fn(self, pred, label):
+        pred = pred.reshape(-1)
+        label = label.reshape(-1)
         mask = ~torch.isnan(label)
 
         if self.loss == "mse":
             return self.mse(pred[mask], label[mask])
+        if self.loss == "rank_ic":
+            return self.rank_ic_loss(pred, label)
+        if self.loss == "mse_rank_ic":
+            mse_loss = self.mse(pred[mask], label[mask])
+            rank_loss = self.rank_ic_loss(pred, label)
+            return (1.0 - self.rank_loss_weight) * mse_loss + self.rank_loss_weight * rank_loss
 
         raise ValueError("unknown loss `%s`" % self.loss)
 
     def metric_fn(self, pred, label):
-        mask = torch.isfinite(label)
-
         if self.metric in ("", "loss"):
-            return -self.loss_fn(pred[mask], label[mask])
+            return -self.loss_fn(pred, label)
 
         raise ValueError("unknown metric `%s`" % self.metric)
+
+    def _daily_batch_indices(self, index, shuffle=False):
+        if not isinstance(index, pd.MultiIndex):
+            raise ValueError("RankIC loss and metric require a MultiIndex with a datetime level.")
+        date_level = "datetime" if "datetime" in index.names else index.names[0]
+        dates = index.get_level_values(date_level)
+        positions = pd.Series(np.arange(len(index)), index=dates)
+        batches = [group.to_numpy() for _, group in positions.groupby(level=0, sort=False)]
+        if shuffle:
+            np.random.shuffle(batches)
+        return batches
+
+    def _batch_indices(self, index, shuffle=False):
+        if self.uses_rank_loss:
+            return self._daily_batch_indices(index, shuffle=shuffle)
+        indices = np.arange(len(index))
+        if shuffle:
+            np.random.shuffle(indices)
+        return [indices[i : i + self.batch_size] for i in range(0, len(indices), self.batch_size)]
+
+    def daily_rank_ic(self, pred, label, index):
+        if not isinstance(index, pd.MultiIndex):
+            raise ValueError("RankIC metric requires a MultiIndex with a datetime level.")
+        date_level = "datetime" if "datetime" in index.names else index.names[0]
+        values = pd.DataFrame({"pred": pred, "label": label}, index=index).replace([np.inf, -np.inf], np.nan)
+        rank_ic = []
+        for _, daily in values.groupby(level=date_level, sort=False):
+            daily = daily.dropna()
+            if (
+                len(daily) < self.min_rank_samples
+                or daily["pred"].nunique() < 2
+                or daily["label"].nunique() < 2
+            ):
+                continue
+            value = daily["pred"].corr(daily["label"], method="spearman")
+            if np.isfinite(value):
+                rank_ic.append(float(value))
+        return float(np.mean(rank_ic)) if rank_ic else float("-inf")
 
     def train_epoch(self, x_train, y_train):
         x_train_values = x_train.values
@@ -158,12 +239,9 @@ class GRU(Model):
 
         self.gru_model.train()
 
-        indices = np.arange(len(x_train_values))
-        np.random.shuffle(indices)
-
-        for i in range(0, len(indices), self.batch_size):
-            feature = torch.from_numpy(x_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_train_values[indices[i : i + self.batch_size]]).float().to(self.device)
+        for indices in self._batch_indices(x_train.index, shuffle=True):
+            feature = torch.from_numpy(x_train_values[indices]).float().to(self.device)
+            label = torch.from_numpy(y_train_values[indices]).float().to(self.device)
 
             pred = self.gru_model(feature)
             loss = self.loss_fn(pred, label)
@@ -182,22 +260,29 @@ class GRU(Model):
 
         scores = []
         losses = []
+        pred_values = np.full(len(x_values), np.nan, dtype=float)
+        label_values = np.full(len(y_values), np.nan, dtype=float)
 
-        indices = np.arange(len(x_values))
-
-        for i in range(0, len(indices), self.batch_size):
-            feature = torch.from_numpy(x_values[indices[i : i + self.batch_size]]).float().to(self.device)
-            label = torch.from_numpy(y_values[indices[i : i + self.batch_size]]).float().to(self.device)
+        for indices in self._batch_indices(data_x.index, shuffle=False):
+            feature = torch.from_numpy(x_values[indices]).float().to(self.device)
+            label = torch.from_numpy(y_values[indices]).float().to(self.device)
 
             with torch.no_grad():
                 pred = self.gru_model(feature)
                 loss = self.loss_fn(pred, label)
                 losses.append(loss.item())
+                pred_values[indices] = pred.detach().cpu().numpy()
+                label_values[indices] = label.detach().cpu().numpy()
 
-                score = self.metric_fn(pred, label)
-                scores.append(score.item())
+                if self.metric not in {"rank_ic", "rankic"}:
+                    score = self.metric_fn(pred, label)
+                    scores.append(score.item())
 
-        return np.mean(losses), np.mean(scores)
+        if self.metric in {"rank_ic", "rankic"}:
+            score = self.daily_rank_ic(pred_values, label_values, data_x.index)
+        else:
+            score = np.mean(scores)
+        return np.mean(losses), score
 
     def fit(
         self,
@@ -243,7 +328,7 @@ class GRU(Model):
         self.logger.info("training...")
         self.fitted = True
 
-        best_param = self.gru_model.state_dict()
+        best_param = deepcopy_state_dict(self.gru_model)
         for step in range(self.n_epochs):
             self.logger.info("Epoch%d:", step)
             self.logger.info("training...")
@@ -262,12 +347,16 @@ class GRU(Model):
                     best_score = val_score
                     stop_steps = 0
                     best_epoch = step
-                    best_param = self.gru_model.state_dict()
+                    best_param = deepcopy_state_dict(self.gru_model)
                 else:
                     stop_steps += 1
                     if stop_steps >= self.early_stop:
                         self.logger.info("early stop")
                         break
+            elif train_score > best_score:
+                best_score = train_score
+                best_epoch = step
+                best_param = deepcopy_state_dict(self.gru_model)
 
         self.logger.info("best score: %.6lf @ %d" % (best_score, best_epoch))
         self.gru_model.load_state_dict(best_param)

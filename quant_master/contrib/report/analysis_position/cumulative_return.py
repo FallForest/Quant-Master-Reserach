@@ -201,7 +201,7 @@ def cumulative_return_graph(
                 # backtest parameters
                 bparas = {}
                 bparas['limit_threshold'] = 0.095
-                bparas['account'] = 1000000000
+                bparas['account'] = 10583.43
 
                 sparas = {}
                 sparas['topk'] = 50

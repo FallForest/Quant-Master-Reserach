@@ -28,43 +28,6 @@ except ModuleNotFoundError:
         "ModuleNotFoundError. MetaEnsembleModel is skipped. (optional: maybe installing sklearn can fix it.)"
     )
 try:
-    from .dynamic_meta_ensemble import DynamicMetaEnsembleModel
-except ModuleNotFoundError:
-    DynamicMetaEnsembleModel = None
-    print(
-        "ModuleNotFoundError. DynamicMetaEnsembleModel is skipped. "
-        "(optional: maybe installing lightgbm and sklearn can fix it.)"
-    )
-try:
-    from .low_turnover_double_ensemble import LowTurnoverDEnsembleModel
-except ModuleNotFoundError:
-    LowTurnoverDEnsembleModel = None
-    print("ModuleNotFoundError. LowTurnoverDEnsembleModel is skipped. (optional: maybe installing lightgbm can fix it.)")
-try:
-    from .residual_double_ensemble_lgb import ResidualDEnsembleLGBModel
-except ModuleNotFoundError:
-    ResidualDEnsembleLGBModel = None
-    print("ModuleNotFoundError. ResidualDEnsembleLGBModel is skipped. (optional: maybe installing lightgbm can fix it.)")
-try:
-    from .multiseed_double_ensemble import MultiSeedDEnsembleModel
-except ModuleNotFoundError:
-    MultiSeedDEnsembleModel = None
-    print("ModuleNotFoundError. MultiSeedDEnsembleModel is skipped. (optional: maybe installing lightgbm can fix it.)")
-try:
-    from .cost_aware_double_ensemble import CostAwareDEnsembleModel
-except ModuleNotFoundError:
-    CostAwareDEnsembleModel = None
-    print("ModuleNotFoundError. CostAwareDEnsembleModel is skipped. (optional: maybe installing lightgbm can fix it.)")
-try:
-    from .tree_cn_lstm_rl import TreeCnLstmRLModel
-    from .double_ensemble_residual_cn_lstm import DoubleEnsembleResidualCnLstmModel
-except ModuleNotFoundError:
-    TreeCnLstmRLModel, DoubleEnsembleResidualCnLstmModel = None, None
-    print(
-        "ModuleNotFoundError. TreeCnLstmRLModel and DoubleEnsembleResidualCnLstmModel are skipped. "
-        "(optional: maybe installing lightgbm and pytorch can fix it.)"
-    )
-try:
     from .pretrained_signal import PretrainedSignalModel
 except ModuleNotFoundError:
     PretrainedSignalModel = None
@@ -109,10 +72,12 @@ except ModuleNotFoundError:
     pytorch_classes = ()
     print("ModuleNotFoundError.  PyTorch models are skipped (optional: maybe installing pytorch can fix it).")
 try:
+    from .cost_aware_transcendence_hybrid import CostAwareTranscendenceHybrid
     from .regime_horizon_cost_ensemble import RegimeHorizonCostEnsembleModel
     from .transcendence_hybrid import TranscendenceHybridModel
     from .transcendence_signal_ensemble import TranscendenceSignalEnsembleModel
 except ModuleNotFoundError:
+    CostAwareTranscendenceHybrid = None
     RegimeHorizonCostEnsembleModel = None
     TranscendenceHybridModel = None
     TranscendenceSignalEnsembleModel = None
@@ -134,13 +99,6 @@ all_model_classes = (
     LGBModel,
     AdaptiveEnsembleModel,
     MetaEnsembleModel,
-    DynamicMetaEnsembleModel,
-    LowTurnoverDEnsembleModel,
-    ResidualDEnsembleLGBModel,
-    MultiSeedDEnsembleModel,
-    CostAwareDEnsembleModel,
-    TreeCnLstmRLModel,
-    DoubleEnsembleResidualCnLstmModel,
     PretrainedSignalModel,
     XGBModel,
     LinearModel,

@@ -15,22 +15,17 @@ from quant_master.data.storage import CalendarStorage, InstrumentStorage, Featur
 
 class TestAutoData(unittest.TestCase):
     _setup_kwargs = {}
-    provider_uri = "~/.quant_master/quant_master_data/cn_data_simple"  # target_dir
-    provider_uri_1day = "~/.quant_master/quant_master_data/cn_data"  # target_dir
+    provider_uri = "~/.quant_master/quant_master_data/tdx_cn_data"  # target_dir
+    provider_uri_1day = provider_uri
     provider_uri_1min = "~/.quant_master/quant_master_data/cn_data_1min"
 
     @classmethod
-    def setUpClass(cls, enable_1d_type="simple", enable_1min=False) -> None:
+    def setUpClass(cls, enable_1d_type="full", enable_1min=False) -> None:
         # use default data
-
-        if enable_1d_type == "simple":
-            provider_uri_day = cls.provider_uri
-            name_day = "quant_master_data_simple"
-        elif enable_1d_type == "full":
-            provider_uri_day = cls.provider_uri_1day
-            name_day = "quant_master_data"
-        else:
+        if enable_1d_type != "full":
             raise NotImplementedError(f"This type of input is not supported")
+        provider_uri_day = cls.provider_uri_1day
+        name_day = "quant_master_data"
 
         GetData().quant_master_data(
             name=name_day,
@@ -63,7 +58,7 @@ class TestAutoData(unittest.TestCase):
 
 class TestOperatorData(TestAutoData):
     @classmethod
-    def setUpClass(cls, enable_1d_type="simple", enable_1min=False) -> None:
+    def setUpClass(cls, enable_1d_type="full", enable_1min=False) -> None:
         # use default data
         super().setUpClass(enable_1d_type, enable_1min)
         nameDFilter = NameDFilter(name_rule_re="SH600110")

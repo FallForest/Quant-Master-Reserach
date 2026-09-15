@@ -10,7 +10,7 @@ pip install -r requirements.txt
 ## fill 1min data
 
 ```bash
-python fill_cn_1min_data.py --data_1min_dir ~/.quant_master/csv_data/cn_data_1min --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data
+python fill_cn_1min_data.py --data_1min_dir ~/.quant_master/csv_data/cn_data_1min --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data
 ```
 
 ## Parameters

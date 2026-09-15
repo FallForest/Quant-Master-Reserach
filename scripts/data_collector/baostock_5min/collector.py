@@ -307,13 +307,13 @@ class Run(BaseRun):
         quant_master_data_1d_dir cannot be None, normalize 5min needs to use 1d data;
 
             quant_master_data_1d can be obtained like this:
-                $ python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --interval 1d --region cn --version v3
+                $ python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --interval 1d --region cn --version v3
             or:
                 download 1d data, reference: https://github.com/microsoft/quant_master/tree/main/scripts/data_collector/yahoo#1d-from-yahoo
 
         Examples
         ---------
-            $ python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --normalize_dir ~/.quant_master/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
+            $ python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --normalize_dir ~/.quant_master/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
         """
         if quant_master_data_1d_dir is None or not Path(quant_master_data_1d_dir).expanduser().exists():
             raise ValueError(

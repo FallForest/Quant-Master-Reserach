@@ -27,6 +27,7 @@ def test_candidate_gate_passes_strict_baseline_without_requiring_sota() -> None:
 
     assert result["verdict"] == "PASS"
     assert result["passed"] is True
+    assert result["checks"]["model_signal_gate"]["passed"] is True
     assert result["checks"]["strict_model_baseline"]["passed"] is True
     assert result["checks"]["aspirational_portfolio_sota"]["passed"] is False
     assert result["checks"]["aspirational_portfolio_sota"]["required_for_pass"] is False
@@ -51,6 +52,8 @@ def test_candidate_gate_fails_missing_cost_field() -> None:
     assert result["verdict"] == "NO_GO"
     assert "missing required field: costed_annret" in result["failures"]
     assert any("cost fields present" in failure for failure in result["failures"])
+    assert result["checks"]["model_signal_gate"]["passed"] is True
+    assert result["checks"]["portfolio_confirmation"]["passed"] is False
 
 
 def test_candidate_gate_fails_nonfinite_rows() -> None:
@@ -164,8 +167,8 @@ def test_candidate_gate_missing_alias_metrics_still_fails_closed() -> None:
     result = evaluate_candidate_gate(summary)
 
     assert result["verdict"] == "NO_GO"
-    assert "missing required field: ic" in result["failures"]
-    assert "missing required field: rank_ic" in result["failures"]
+    assert "missing required field: signal.ic" in result["failures"]
+    assert "missing required field: signal.rank_ic" in result["failures"]
 
 
 def _overlay_summary() -> dict:
@@ -241,8 +244,33 @@ def test_candidate_gate_overlay_fails_missing_ic_closed() -> None:
     result = evaluate_candidate_gate(summary)
 
     assert result["verdict"] == "NO_GO"
-    assert "missing required field: ic" in result["failures"]
-    assert "missing required field: rank_ic" in result["failures"]
+    assert "missing required field: signal.ic" in result["failures"]
+    assert "missing required field: signal.rank_ic" in result["failures"]
+
+
+def test_candidate_gate_requires_valid_and_test_signal_splits_when_present() -> None:
+    metrics = _passing_metrics()
+    metrics["signal_metrics"] = {
+        "valid": {"ic": 0.026, "rank_ic": 0.027},
+        "test": {"ic": 0.024, "rank_ic": 0.028},
+    }
+
+    result = evaluate_candidate_gate(metrics)
+
+    assert result["verdict"] == "NO_GO"
+    assert result["checks"]["model_signal_gate"]["passed"] is False
+    assert "signal_metrics.test.IC 0.024 must be >= 0.025" in result["failures"]
+
+
+def test_candidate_gate_marks_model_pass_when_portfolio_fails() -> None:
+    metrics = _passing_metrics()
+    metrics["costed_ir"] = 1.0
+
+    result = evaluate_candidate_gate(metrics)
+
+    assert result["verdict"] == "NO_GO"
+    assert result["checks"]["model_signal_gate"]["passed"] is True
+    assert result["checks"]["portfolio_confirmation"]["passed"] is False
 
 
 def test_candidate_gate_require_sota_blocks_when_sota_not_met() -> None:

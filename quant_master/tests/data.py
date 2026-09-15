@@ -38,7 +38,7 @@ class GetData:
         ----------
         file_name: str
             The name of the file to be downloaded.
-            The file name can be accompanied by a version number, (e.g.: v2/quant_master_data_simple_cn_1d_latest.zip),
+            The file name can be accompanied by a version number, (e.g.: v2/quant_master_data_cn_1d_latest.zip),
             if no version number is attached, it will be downloaded from v0 by default.
         """
         return f"{self.REMOTE_URL}/{file_name}" if "/" in file_name else f"{self.REMOTE_URL}/v0/{file_name}"
@@ -81,7 +81,7 @@ class GetData:
             data save directory
         file_name: str
             dataset name, needs to endwith .zip, value from [rl_data.zip, csv_data_cn.zip, ...]
-            may contain folder names, for example: v2/quant_master_data_simple_cn_1d_latest.zip
+            may contain folder names, for example: v2/quant_master_data_cn_1d_latest.zip
         delete_old: bool
             delete an existing directory, by default True
 
@@ -155,7 +155,7 @@ class GetData:
     def quant_master_data(
         self,
         name="quant_master_data",
-        target_dir="~/.quant_master/quant_master_data/cn_data",
+        target_dir="~/.quant_master/quant_master_data/tdx_cn_data",
         version=None,
         interval="1d",
         region="cn",
@@ -169,7 +169,7 @@ class GetData:
         target_dir: str
             data save directory
         name: str
-            dataset name, value from [quant_master_data, quant_master_data_simple], by default quant_master_data
+            dataset name, currently only quant_master_data is supported
         version: str
             data version, value from [v1, ...], by default None(use script to specify version)
         interval: str
@@ -184,7 +184,7 @@ class GetData:
         Examples
         ---------
         # get 1d data
-        python get_data.py quant_master_data --name quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --interval 1d --region cn
+        python get_data.py quant_master_data --name quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --interval 1d --region cn
         When this command is run, the data will be downloaded from this link: https://quant_masterpublic.blob.core.windows.net/data/default/stock_data/v2/quant_master_data_cn_1d_latest.zip?{token}
 
         # get 1min data
@@ -193,6 +193,9 @@ class GetData:
         -------
 
         """
+        if name != "quant_master_data":
+            raise ValueError("Only the canonical quant_master_data dataset is supported")
+
         if exists_skip and exists_quant_master_data(target_dir):
             logger.warning(
                 f"Data already exists: {target_dir}, the data download will be skipped\n"

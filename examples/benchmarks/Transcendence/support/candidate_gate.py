@@ -12,13 +12,18 @@ STRICT_BASELINE_COSTED_IR = 2.7999836767
 STRICT_BASELINE_COSTED_ANNRET = 0.2446646361
 REQUIRED_FINITE_ROWS = 562
 REQUIRED_NONFINITE_ROWS = 0
-MIN_IC = 0.020
-MIN_RANK_IC = 0.020
+MIN_IC = 0.025
+MIN_RANK_IC = 0.025
 
 SOTA_COSTED_IR = 3.0230019402
 SOTA_COSTED_ANNRET = 0.3878544155
 SOTA_MAX_DRAWDOWN = -0.047723
 DEFAULT_MDD_MATERIAL_MARGIN = 0.0005
+REFERENCE_SIGNAL_BASELINES = {
+    "linear_alpha158_csi300": {"ic": 0.0397, "rank_ic": 0.0472},
+    "lightgbm_alpha158_csi300": {"ic": 0.0448, "rank_ic": 0.0469},
+    "rhce_v1_alpha158_csi300": {"ic": 0.020278991972318843, "rank_ic": 0.012818998778067211},
+}
 
 PASS = "PASS"
 NO_GO = "NO_GO"
@@ -298,6 +303,8 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
             ("costed_ir",),
             ("test_metrics", "costed_ir"),
             ("test_metrics", "ir"),
+            ("portfolio_metrics", "test", "costed_ir"),
+            ("portfolio_metrics", "test", "ir"),
             ("metrics", "test_2024_2026", "costed_ir"),
             ("metrics", "test_2024_2026", "ir"),
             ("metrics", "verification_2024_2026", "costed_ir"),
@@ -314,6 +321,8 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
             ("costed_annret",),
             ("test_metrics", "costed_annret"),
             ("test_metrics", "annret"),
+            ("portfolio_metrics", "test", "costed_annret"),
+            ("portfolio_metrics", "test", "annret"),
             ("metrics", "test_2024_2026", "costed_annret"),
             ("metrics", "test_2024_2026", "annret"),
             ("metrics", "verification_2024_2026", "costed_annret"),
@@ -333,6 +342,8 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
             ("test_metrics", "max_drawdown"),
             ("test_metrics", "mdd"),
             ("test_metrics", "MDD"),
+            ("portfolio_metrics", "test", "max_drawdown"),
+            ("portfolio_metrics", "test", "mdd"),
             ("metrics", "test_2024_2026", "max_drawdown"),
             ("metrics", "test_2024_2026", "mdd"),
             ("metrics", "test_2024_2026", "MDD"),
@@ -349,6 +360,7 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
         (
             ("turnover",),
             ("test_metrics", "turnover"),
+            ("portfolio_metrics", "test", "turnover"),
             ("metrics", "test_2024_2026", "turnover"),
             ("verification_metrics", "turnover"),
         ),
@@ -359,6 +371,7 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
             ("finite_rows",),
             ("test_finite_rows",),
             ("test_metrics", "finite_rows"),
+            ("portfolio_metrics", "test", "finite_rows"),
             ("full_hard_gate", "finite_rows_actual"),
             ("metrics", "test_2024_2026", "finite_rows"),
             ("verification_metrics", "finite_rows"),
@@ -370,6 +383,7 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
             ("nonfinite_rows",),
             ("test_nonfinite_rows",),
             ("test_metrics", "nonfinite_rows"),
+            ("portfolio_metrics", "test", "nonfinite_rows"),
             ("full_hard_gate", "nonfinite_rows_actual"),
             ("metrics", "test_2024_2026", "nonfinite_rows"),
             ("verification_metrics", "nonfinite_rows"),
@@ -399,6 +413,9 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
             ("signal", "ic"),
             ("signal", "ic_mean"),
             ("signal", "IC"),
+            ("signal_metrics", "test", "ic"),
+            ("signal_metrics", "test", "ic_mean"),
+            ("signal_metrics", "test", "IC"),
             ("baseline_signal", "ic"),
             ("baseline_signal", "ic_mean"),
             ("baseline_signal", "IC"),
@@ -456,6 +473,11 @@ def normalize_metrics(data: Dict[str, Any]) -> Dict[str, Any]:
             ("signal", "RankIC"),
             ("signal", "RankIC_mean"),
             ("signal", "Rank IC"),
+            ("signal_metrics", "test", "rank_ic"),
+            ("signal_metrics", "test", "rank_ic_mean"),
+            ("signal_metrics", "test", "rankic"),
+            ("signal_metrics", "test", "rankic_mean"),
+            ("signal_metrics", "test", "Rank IC"),
             ("baseline_signal", "rank_ic"),
             ("baseline_signal", "rank_ic_mean"),
             ("baseline_signal", "rankic"),
@@ -576,6 +598,58 @@ def _missing_failures(metrics: Dict[str, Any], required_fields: Sequence[str]) -
     return failures
 
 
+def _signal_gate_splits(data: Dict[str, Any], metrics: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    signal_metrics = data.get("signal_metrics")
+    if _is_mapping(signal_metrics):
+        splits: Dict[str, Dict[str, Any]] = {}
+        for split in ("valid", "test"):
+            raw_split = signal_metrics.get(split)
+            if _is_mapping(raw_split):
+                split_metrics = normalize_metrics(raw_split)
+                splits[split] = {
+                    "ic": split_metrics.get("ic"),
+                    "rank_ic": split_metrics.get("rank_ic"),
+                    "sources": {
+                        "ic": f"signal_metrics.{split}.{split_metrics['sources'].get('ic', '')}",
+                        "rank_ic": f"signal_metrics.{split}.{split_metrics['sources'].get('rank_ic', '')}",
+                    },
+                }
+            else:
+                splits[split] = {"ic": None, "rank_ic": None, "sources": {}}
+        return splits
+
+    return {
+        "single": {
+            "ic": metrics.get("ic"),
+            "rank_ic": metrics.get("rank_ic"),
+            "sources": {
+                "ic": metrics["sources"].get("ic", ""),
+                "rank_ic": metrics["sources"].get("rank_ic", ""),
+            },
+        }
+    }
+
+
+def _signal_gate_failures(
+    signal_splits: Dict[str, Dict[str, Any]],
+    thresholds: CandidateGateThresholds,
+) -> List[str]:
+    failures: List[str] = []
+    for split, values in signal_splits.items():
+        ic = values.get("ic")
+        rank_ic = values.get("rank_ic")
+        prefix = "signal" if split == "single" else f"signal_metrics.{split}"
+        if ic is None:
+            failures.append(f"missing required field: {prefix}.ic")
+        elif not ic >= thresholds.min_ic:
+            failures.append(f"{prefix}.IC {_fmt(ic)} must be >= {_fmt(thresholds.min_ic)}")
+        if rank_ic is None:
+            failures.append(f"missing required field: {prefix}.rank_ic")
+        elif not rank_ic >= thresholds.min_rank_ic:
+            failures.append(f"{prefix}.RankIC {_fmt(rank_ic)} must be >= {_fmt(thresholds.min_rank_ic)}")
+    return failures
+
+
 def evaluate_candidate_gate(
     data: Dict[str, Any],
     *,
@@ -584,31 +658,26 @@ def evaluate_candidate_gate(
 ) -> Dict[str, Any]:
     metrics = normalize_metrics(data)
     failures: List[str] = []
-    baseline_failures: List[str] = []
-    minimum_failures: List[str] = []
+    signal_failures: List[str] = []
+    portfolio_failures: List[str] = []
     integrity_failures: List[str] = []
     sota_failures: List[str] = []
 
-    minimum_failures.extend(_missing_failures(metrics, ("ic", "rank_ic", "costed_ir", "costed_annret")))
+    signal_splits = _signal_gate_splits(data, metrics)
+    signal_failures.extend(_signal_gate_failures(signal_splits, thresholds))
     integrity_failures.extend(_missing_failures(metrics, ("finite_rows", "nonfinite_rows", "leakage_check")))
-
-    ic = metrics.get("ic")
-    if ic is not None and not ic >= thresholds.min_ic:
-        minimum_failures.append(f"IC {_fmt(ic)} must be >= {_fmt(thresholds.min_ic)}")
-    rank_ic = metrics.get("rank_ic")
-    if rank_ic is not None and not rank_ic >= thresholds.min_rank_ic:
-        minimum_failures.append(f"RankIC {_fmt(rank_ic)} must be >= {_fmt(thresholds.min_rank_ic)}")
+    portfolio_failures.extend(_missing_failures(metrics, ("costed_ir", "costed_annret")))
     if not metrics.get("cost_fields_present"):
-        minimum_failures.append("cost fields present check failed: costed_ir and costed_annret are required")
+        portfolio_failures.append("cost fields present check failed: costed_ir and costed_annret are required")
 
     costed_ir = metrics.get("costed_ir")
     if costed_ir is not None and not costed_ir > thresholds.strict_costed_ir_gt:
-        baseline_failures.append(
+        portfolio_failures.append(
             f"costed_ir {_fmt(costed_ir)} must be > strict baseline {_fmt(thresholds.strict_costed_ir_gt)}"
         )
     costed_annret = metrics.get("costed_annret")
     if costed_annret is not None and not costed_annret > thresholds.strict_costed_annret_gt:
-        baseline_failures.append(
+        portfolio_failures.append(
             "costed_annret "
             f"{_fmt(costed_annret)} must be > strict baseline {_fmt(thresholds.strict_costed_annret_gt)}"
         )
@@ -648,8 +717,8 @@ def evaluate_candidate_gate(
     if not metrics.get("turnover_explained"):
         sota_failures.append("turnover explained check failed: provide turnover or turnover_explained")
 
-    failures.extend(minimum_failures)
-    failures.extend(baseline_failures)
+    failures.extend(signal_failures)
+    failures.extend(portfolio_failures)
     failures.extend(integrity_failures)
     if require_sota:
         failures.extend(sota_failures)
@@ -660,18 +729,38 @@ def evaluate_candidate_gate(
         "passed": verdict == PASS,
         "failures": failures,
         "checks": {
-            "hard_minimum": {
-                "passed": not minimum_failures,
-                "failures": minimum_failures,
+            "model_signal_gate": {
+                "passed": not signal_failures,
+                "failures": signal_failures,
                 "thresholds": {
                     "ic_gte": thresholds.min_ic,
                     "rank_ic_gte": thresholds.min_rank_ic,
+                },
+                "reference_baselines": REFERENCE_SIGNAL_BASELINES,
+                "splits": signal_splits,
+            },
+            # Backward-compatible alias for older callers.
+            "hard_minimum": {
+                "passed": not signal_failures,
+                "failures": signal_failures,
+                "thresholds": {
+                    "ic_gte": thresholds.min_ic,
+                    "rank_ic_gte": thresholds.min_rank_ic,
+                },
+            },
+            "portfolio_confirmation": {
+                "passed": not portfolio_failures,
+                "failures": portfolio_failures,
+                "required_for_pass": True,
+                "thresholds": {
+                    "costed_ir_gt": thresholds.strict_costed_ir_gt,
+                    "costed_annret_gt": thresholds.strict_costed_annret_gt,
                     "cost_fields_present": True,
                 },
             },
             "strict_model_baseline": {
-                "passed": not baseline_failures and not integrity_failures,
-                "failures": baseline_failures + integrity_failures,
+                "passed": not portfolio_failures and not integrity_failures,
+                "failures": portfolio_failures + integrity_failures,
                 "thresholds": {
                     "costed_ir_gt": thresholds.strict_costed_ir_gt,
                     "costed_annret_gt": thresholds.strict_costed_annret_gt,

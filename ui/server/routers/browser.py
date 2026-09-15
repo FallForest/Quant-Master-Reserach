@@ -18,6 +18,7 @@ from ..dependencies import get_data
 from ..helpers import _last_non_nan, _prev_non_nan_nonzero, normalize_day_str, normalize_symbol, truthy_param
 from ..schemas import WatchlistAddRequest
 from ..stock_cache import load_stock_summary
+from ..sync import start_cache_refresh
 from ..sync import get_data_health_snapshot
 from ..tdx_quote import TDXQuote
 
@@ -159,43 +160,30 @@ def _with_realtime_day_bar(symbol, freq, start, end, kline_data):
 
 @router.get("/browser/stocks")
 def stocks(data: DataDir = Depends(get_data)):
+    instruments = data.get_instruments()
     # 尝试预计算缓存（内存 → JSON 文件），可提速 10~50×
-    cached = load_stock_summary()
+    cached = load_stock_summary(expected_count=len(instruments))
     if cached is not None:
         return {"stocks": cached}
 
-    # 降级：逐个读取 bin 文件（缓存尚未就绪时的首次加载）
-    _log.warning("Stock summary cache miss, falling back to per-stock binary reads")
+    # 缓存首次生成时只返回轻量元数据，避免在请求线程逐只读取全部
+    # close/volume 文件。摘要任务完成后，前端会自动重新加载列表。
+    _log.info("Stock summary cache miss, returning metadata while cache builds")
     names = data.get_names()
-    instruments = data.get_instruments()
     result = []
     for sym, start, end in instruments:
         code6 = sym[2:] if len(sym) >= 3 and sym[:2] in ("SZ", "SH", "BJ") else sym
         name = names.get(code6, "")
-        _, close_vals = data.read_field(sym, "close", "day")
         item = {"symbol": sym, "name": name, "startDate": start, "endDate": end}
-        if close_vals is not None and len(close_vals) > 0:
-            raw_c = _last_non_nan(close_vals)
-            if raw_c is not None:
-                c = round(raw_c, 2)
-                item["close"] = c
-                prev = _prev_non_nan_nonzero(close_vals, len(close_vals) - 1)
-                if prev is not None:
-                    item["change"] = round(c - prev, 2)
-                    item["changePct"] = round((c - prev) / prev * 100, 2)
-        _, vol_vals = data.read_field(sym, "volume", "day")
-        if vol_vals is not None and len(vol_vals) > 0:
-            raw_v = _last_non_nan(vol_vals)
-            if raw_v is not None:
-                item["volume"] = int(raw_v)
         result.append(item)
 
-    # 后台异步构建缓存，下次访问就不慢了
-    import threading
-    from ..stock_cache import build_stock_summary
-    threading.Thread(target=build_stock_summary, args=(data,), daemon=True).start()
+    # 复用统一的后台任务，避免启动预热与首个请求重复构建。
+    start_cache_refresh(data)
 
-    return {"stocks": result}
+    return {
+        "stocks": result,
+        "cacheRefreshing": True,
+    }
 
 
 @router.get("/browser/quotes")
@@ -346,6 +334,59 @@ def realtime_kline(symbol: str):
     return {"kline": [], "quote": {}}
 
 
+_COVERAGE_FIELDS = ("open", "high", "low", "close", "volume", "amount", "adjclose", "factor")
+_COVERAGE_SAMPLE = 30
+
+
+def _build_coverage_matrix(data, sample_size=_COVERAGE_SAMPLE):
+    """按 字段×月份 统计真实完整度（非 NaN 占比，0-100）。
+
+    bin 文件只存有值的部分，data[0] 是它在日历中的起始下标，据此把每个值对回日期。
+    抽样 N 只股票计算：全量算要读 5221×8 个文件，首屏会明显变慢。
+    """
+    empty = {"months": [], "fields": [], "values": []}
+    if data is None:
+        return empty
+    try:
+        cal = data.read_calendar("day")
+    except InvalidCalendarError:
+        return empty
+    instruments = data.get_instruments()
+    if not cal or not instruments:
+        return empty
+
+    step = max(1, len(instruments) // sample_size)
+    sampled = instruments[::step][:sample_size]
+
+    months = sorted({d[:7] for d in cal})
+    month_pos = {m: j for j, m in enumerate(months)}
+    n_months = len(months)
+
+    values = []
+    for field in _COVERAGE_FIELDS:
+        valid = [0] * n_months
+        total = [0] * n_months
+        for sym, _, _ in sampled:
+            start, arr = data.read_field(sym, field, "day")
+            if start is None or arr is None:
+                continue
+            for offset, value in enumerate(arr):
+                pos = start + offset
+                if pos >= len(cal):
+                    break
+                j = month_pos.get(cal[pos][:7])
+                if j is None:
+                    continue
+                total[j] += 1
+                if not np.isnan(float(value)):
+                    valid[j] += 1
+        values.append([
+            round(valid[j] / total[j] * 100, 1) if total[j] else None
+            for j in range(n_months)
+        ])
+    return {"months": months, "fields": list(_COVERAGE_FIELDS), "values": values}
+
+
 @router.get("/overview")
 def overview(data: DataDir = Depends(get_data)):
     instruments = data.get_instruments() if data else []
@@ -400,6 +441,7 @@ def overview(data: DataDir = Depends(get_data)):
         "calendarOrdered": health.get("calendarOrdered", True),
         "completeness": completeness,
         "fieldStats": field_stats,
+        "coverageMatrix": _build_coverage_matrix(data),
     }
 
 

@@ -489,6 +489,8 @@ class DataHandlerLP(DataHandler):
             Whether to drop the raw data
         """
 
+        load_only = bool(kwargs.pop("load_only", False))
+
         # Setup preprocessor
         self.infer_processors = []  # for lint
         self.learn_processors = []  # for lint
@@ -505,7 +507,11 @@ class DataHandlerLP(DataHandler):
 
         self.process_type = process_type
         self.drop_raw = drop_raw
+        if load_only:
+            kwargs["init_data"] = False
         super().__init__(instruments, start_time, end_time, data_loader, **kwargs)
+        if load_only:
+            DataHandler.setup_data(self)
 
     def get_all_processors(self):
         return self.shared_processors + self.infer_processors + self.learn_processors

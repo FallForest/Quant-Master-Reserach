@@ -31,6 +31,8 @@ sys.path.append(str(CUR_DIR.parent.parent))
 
 from dump_bin import DumpDataAll, DumpDataUpdate, verify_dump
 from data_collector.base import BaseCollector, BaseNormalize, BaseRun, Normalize
+from data_collector.pool_integration import update_personal_pool_after_data_update
+from data_collector.update_manifest import write_update_manifest
 from data_collector.utils import (
     deco_retry,
     get_calendar_list,
@@ -62,6 +64,7 @@ class YahooCollector(BaseCollector):
         delay=0,
         check_data_length: int = None,
         limit_nums: int = None,
+        download_index: bool = True,
     ):
         """
 
@@ -97,6 +100,7 @@ class YahooCollector(BaseCollector):
             check_data_length=check_data_length,
             limit_nums=limit_nums,
         )
+        self.download_index = download_index
 
         self.init_datetime()
 
@@ -241,7 +245,8 @@ class YahooCollector(BaseCollector):
     def collector_data(self):
         """collector data"""
         super(YahooCollector, self).collector_data()
-        self.download_index_data()
+        if getattr(self, "download_index", True):
+            self.download_index_data()
 
     @abc.abstractmethod
     def download_index_data(self):
@@ -825,6 +830,7 @@ class Run(BaseRun):
         end=None,
         check_data_length=None,
         limit_nums=None,
+        download_index=True,
     ):
         """download data from Internet
 
@@ -874,6 +880,7 @@ class Run(BaseRun):
             end,
             check_data_length,
             limit_nums,
+            download_index=download_index,
         )
 
     def normalize_data(
@@ -905,7 +912,7 @@ class Run(BaseRun):
         Examples
         ---------
             $ python collector.py normalize_data --source_dir ~/.quant_master/stock_data/source --normalize_dir ~/.quant_master/stock_data/normalize --region cn --interval 1d
-            $ python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --source_dir ~/.quant_master/stock_data/source_cn_1min --normalize_dir ~/.quant_master/stock_data/normalize_cn_1min --region CN --interval 1min
+            $ python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data --source_dir ~/.quant_master/stock_data/source_cn_1min --normalize_dir ~/.quant_master/stock_data/normalize_cn_1min --region CN --interval 1min
         """
         if self.interval.lower() == "1min":
             if quant_master_data_1d_dir is None or not Path(quant_master_data_1d_dir).expanduser().exists():
@@ -940,6 +947,14 @@ class Run(BaseRun):
         check_data_length: int = None,
         delay: float = 0.1,
         exists_skip: bool = False,
+        update_personal_pool: bool = False,
+        personal_pool_date: str = None,
+        personal_pool_start_date: str = None,
+        personal_pool_end_date: str = None,
+        personal_pool_output_name: str = "personal_dynamic_pool",
+        skip_names: bool = False,
+        skip_index: bool = False,
+        skip_pool: bool = False,
     ):
         """update yahoo data to bin
 
@@ -956,6 +971,22 @@ class Run(BaseRun):
             time.sleep(delay), default 1
         exists_skip: bool
             exists skip, by default False
+        update_personal_pool: bool
+            Update the personal PIT training pool after the binary dump succeeds.
+        personal_pool_date: str
+            Update one exact trading date in the personal pool.
+        personal_pool_start_date: str
+            Inclusive range start date for the personal pool update.
+        personal_pool_end_date: str
+            Inclusive range end date for the personal pool update.
+        personal_pool_output_name: str
+            Output instrument file name without extension.
+        skip_names: bool
+            Skip the optional stock-name cache refresh.
+        skip_index: bool
+            Skip index downloads and constituent refreshes.
+        skip_pool: bool
+            Skip the personal-pool refresh even when enabled.
         Notes
         -----
             If the data in quant_master_data_dir is incomplete, np.nan will be populated to trading_date for the previous trading day
@@ -993,13 +1024,16 @@ class Run(BaseRun):
         # Use a generous max_collector_count so the download phase is not the bottleneck.
         # Floor it at 4, and cap at max_workers (with a sensible upper limit for Yahoo).
         _mc = min(max(download_workers, 4), 12)
-        self.download_data(
-            max_collector_count=_mc,
-            delay=delay,
-            start=trading_date,
-            end=end_date,
-            check_data_length=check_data_length,
-        )
+        download_kwargs = {
+            "max_collector_count": _mc,
+            "delay": delay,
+            "start": trading_date,
+            "end": end_date,
+            "check_data_length": check_data_length,
+        }
+        if skip_index:
+            download_kwargs["download_index"] = False
+        self.download_data(**download_kwargs)
         # Keep normalize/dump at the requested concurrency, with a sensible floor.
         self.max_workers = (
             max(multiprocessing.cpu_count() - 2, 4)
@@ -1034,9 +1068,18 @@ class Run(BaseRun):
         # clean up intermediate CSVs
         self._cleanup_intermediate_files()
 
-        # fetch and write stock names
         _region = self.region.lower()
-        if _region == "cn":
+        stages = {
+            "download": "success",
+            "normalize": "success",
+            "dump": "success",
+            "verify": "success",
+            "names": "skipped" if skip_names else ("success" if _region == "cn" else "not_applicable"),
+            "index": "skipped" if skip_index else "success",
+            "pool": "skipped",
+        }
+        # Fetch and write stock names. This is independent of verified data.
+        if _region == "cn" and not skip_names:
             try:
                 names = get_stock_names()
                 names_path = Path(quant_master_data_1d_dir) / "instruments" / "names.txt"
@@ -1045,19 +1088,68 @@ class Run(BaseRun):
                         f.write(f"{code}\t{name}\n")
                 logger.info(f"Wrote {len(names)} stock names to {names_path}")
             except Exception as e:
+                stages["names"] = "failed"
                 logger.warning(f"Failed to fetch stock names (non-fatal): {e}")
+        pool_result = None
+        if update_personal_pool and not skip_pool:
+            try:
+                pool_result = update_personal_pool_after_data_update(
+                    provider_uri=quant_master_data_1d_dir,
+                    region=_region,
+                    storage_freq="day",
+                    enabled=True,
+                    update_date=personal_pool_date,
+                    start_date=personal_pool_start_date,
+                    end_date=personal_pool_end_date,
+                    output_name=personal_pool_output_name,
+                )
+                stages["pool"] = "success"
+                logger.info(
+                    "Updated personal dynamic pool {} -> {} ({} trading days, {}..{})",
+                    pool_result.output_path,
+                    pool_result.metadata_path,
+                    pool_result.trading_days,
+                    pool_result.update_start,
+                    pool_result.update_end,
+                )
+            except Exception as e:
+                stages["pool"] = "failed"
+                logger.warning(f"Personal dynamic pool update failed (non-fatal): {e}")
 
-        # parse index
-        _region = self.region.lower()
-        if _region not in ["cn", "us"]:
-            logger.warning(f"Unsupported region: region={_region}, component downloads will be ignored")
-            return
-        index_list = ["CSI100", "CSI300"] if _region == "cn" else ["SP500", "NASDAQ100", "DJIA", "SP400"]
-        get_instruments = getattr(
-            importlib.import_module(f"data_collector.{_region}_index.collector"), "get_instruments"
+        # Index constituents are derived data and can be decoupled from the
+        # core quote update for faster, retryable runs.
+        if not skip_index:
+            _region = self.region.lower()
+            if _region not in ["cn", "us"]:
+                logger.warning(f"Unsupported region: region={_region}, component downloads will be ignored")
+            else:
+                try:
+                    index_list = ["CSI100", "CSI300"] if _region == "cn" else ["SP500", "NASDAQ100", "DJIA", "SP400"]
+                    get_instruments = getattr(
+                        importlib.import_module(f"data_collector.{_region}_index.collector"), "get_instruments"
+                    )
+                    for _index in index_list:
+                        get_instruments(str(quant_master_data_1d_dir), _index, market_index=f"{_region}_index")
+                except Exception as e:
+                    stages["index"] = "failed"
+                    logger.warning(f"Index constituent refresh failed (non-fatal): {e}")
+
+        manifest = write_update_manifest(
+            quant_master_data_1d_dir,
+            source="yahoo",
+            interval=self.interval,
+            storage_freq="day",
+            start_date=trading_date,
+            end_date=end_date,
+            stages=stages,
+            options={
+                "skip_names": skip_names,
+                "skip_index": skip_index,
+                "skip_pool": skip_pool,
+                "update_personal_pool": update_personal_pool,
+            },
         )
-        for _index in index_list:
-            get_instruments(str(quant_master_data_1d_dir), _index, market_index=f"{_region}_index")
+        return manifest
 
 if __name__ == "__main__":
     fire.Fire(Run)

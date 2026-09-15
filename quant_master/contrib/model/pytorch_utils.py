@@ -1,7 +1,15 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+import copy
+
 import torch.nn as nn
+
+
+def deepcopy_state_dict(model: nn.Module):
+    """Snapshot model state without retaining live references to its tensors."""
+
+    return copy.deepcopy(model.state_dict())
 
 
 def count_parameters(models_or_parameters, unit="m"):

@@ -71,10 +71,7 @@ class DNNModelPytorch(Model):
         init_model=None,
         eval_train_metric=False,
         pt_model_uri="quant_master.contrib.model.pytorch_nn.Net",
-        pt_model_kwargs={
-            "input_dim": 360,
-            "layers": (256,),
-        },
+        pt_model_kwargs=None,
         valid_key=DataHandlerLP.DK_L,
         # TODO: Infer Key is a more reasonable key. But it requires more detailed processing on label processing
     ):
@@ -99,6 +96,14 @@ class DNNModelPytorch(Model):
         self.data_parall = data_parall
         self.eval_train_metric = eval_train_metric
         self.valid_key = valid_key
+        self.pt_model_uri = pt_model_uri
+        self.pt_model_kwargs = dict(pt_model_kwargs or {})
+        self.input_dim = self.pt_model_kwargs.get("input_dim")
+        self._uses_input_dim = (
+            self.pt_model_uri == "quant_master.contrib.model.pytorch_nn.Net" or self.input_dim is not None
+        )
+        self._scheduler_spec = scheduler
+        self._external_model = init_model is not None
 
         self.best_step = None
 
@@ -117,7 +122,7 @@ class DNNModelPytorch(Model):
             f"\nweight_decay : {weight_decay}"
             f"\nenable data parall : {self.data_parall}"
             f"\npt_model_uri: {pt_model_uri}"
-            f"\npt_model_kwargs: {pt_model_kwargs}"
+            f"\npt_model_kwargs: {self.pt_model_kwargs}"
         )
 
         if self.seed is not None:
@@ -128,25 +133,45 @@ class DNNModelPytorch(Model):
             raise NotImplementedError("loss {} is not supported!".format(loss))
         self._scorer = mean_squared_error if loss == "mse" else roc_auc_score
 
-        if init_model is None:
-            self.dnn_model = init_instance_by_config({"class": pt_model_uri, "kwargs": pt_model_kwargs})
+        if self.optimizer not in {"adam", "gd"}:
+            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
 
+        self.dnn_model = init_model
+        self.train_optimizer = None
+        self.scheduler = None
+        self.fitted = False
+        if self.dnn_model is not None:
+            self._initialize_training_components()
+        elif self.input_dim is not None:
+            self._build_network(self.input_dim)
+        elif not self._uses_input_dim:
+            self.dnn_model = init_instance_by_config({"class": self.pt_model_uri, "kwargs": self.pt_model_kwargs})
             if self.data_parall:
-                self.dnn_model = DataParallel(self.dnn_model).to(self.device)
-        else:
-            self.dnn_model = init_model
+                self.dnn_model = DataParallel(self.dnn_model)
+            self._initialize_training_components()
 
+    def _build_network(self, input_dim: int) -> None:
+        input_dim = int(input_dim)
+        if input_dim <= 0:
+            raise ValueError("input_dim must be positive.")
+        self.input_dim = input_dim
+        self.pt_model_kwargs["input_dim"] = input_dim
+        self.dnn_model = init_instance_by_config({"class": self.pt_model_uri, "kwargs": self.pt_model_kwargs})
+        if self.data_parall:
+            self.dnn_model = DataParallel(self.dnn_model)
+        self._initialize_training_components()
+
+    def _initialize_training_components(self) -> None:
+        self.dnn_model.to(self.device)
         self.logger.info("model:\n{:}".format(self.dnn_model))
         self.logger.info("model size: {:.4f} MB".format(count_parameters(self.dnn_model)))
 
-        if optimizer.lower() == "adam":
+        if self.optimizer == "adam":
             self.train_optimizer = optim.Adam(self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
-        elif optimizer.lower() == "gd":
-            self.train_optimizer = optim.SGD(self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            self.train_optimizer = optim.SGD(self.dnn_model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
-        if scheduler == "default":
+        if self._scheduler_spec == "default":
             # In torch version 2.7.0, the verbose parameter has been removed. Reference Link:
             # https://github.com/pytorch/pytorch/pull/147301/files#diff-036a7470d5307f13c9a6a51c3a65dd014f00ca02f476c545488cd856bea9bcf2L1313
             if version.parse(str(torch.__version__).split("+", maxsplit=1)[0]) <= version.parse("2.6.0"):
@@ -175,13 +200,23 @@ class DNNModelPytorch(Model):
                     min_lr=0.00001,
                     eps=1e-08,
                 )
-        elif scheduler is None:
+        elif self._scheduler_spec is None:
             self.scheduler = None
         else:
-            self.scheduler = scheduler(optimizer=self.train_optimizer)
+            self.scheduler = self._scheduler_spec(optimizer=self.train_optimizer)
 
-        self.fitted = False
-        self.dnn_model.to(self.device)
+    def _ensure_feature_dim(self, feature_width: int) -> None:
+        if not self._uses_input_dim:
+            return
+        feature_width = int(feature_width)
+        if self.input_dim is None:
+            if self._external_model:
+                return
+            self._build_network(feature_width)
+        elif feature_width != int(self.input_dim):
+            raise ValueError(
+                f"pt_model_kwargs.input_dim={self.input_dim} does not match feature width={feature_width}."
+            )
 
     @property
     def use_gpu(self):
@@ -207,6 +242,7 @@ class DNNModelPytorch(Model):
                     seg, col_set=["feature", "label"], data_key=self.valid_key if seg == "valid" else DataHandlerLP.DK_L
                 )
                 all_df["x"][seg] = df["feature"]
+                self._ensure_feature_dim(all_df["x"][seg].shape[1])
                 all_df["y"][seg] = df["label"].copy()  # We have to use copy to remove the reference to release mem
                 if reweighter is None:
                     all_df["w"][seg] = pd.DataFrame(np.ones_like(all_df["y"][seg].values), index=df.index)
@@ -383,6 +419,7 @@ class DNNModelPytorch(Model):
         if not self.fitted:
             raise ValueError("model is not fitted yet!")
         x_test_pd = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        self._ensure_feature_dim(x_test_pd.shape[1])
         preds = self._nn_predict(x_test_pd)
         return pd.Series(preds.reshape(-1), index=x_test_pd.index)
 

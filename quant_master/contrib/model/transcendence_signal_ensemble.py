@@ -53,8 +53,8 @@ class TranscendenceSignalEnsembleModel(Model):
         memory_boost_grid: Optional[Sequence[float]] = None,
         turnover_penalty_grid: Optional[Sequence[float]] = None,
         volatility_penalty_grid: Optional[Sequence[float]] = None,
-        open_cost: float = 0.0001,
-        close_cost: float = 0.0006,
+        open_cost: float = 0.00011,
+        close_cost: float = 0.00061,
         ir_weight: float = 1.0,
         annret_weight: float = 3.0,
         hit_ratio_weight: float = 0.15,
@@ -279,7 +279,13 @@ class TranscendenceSignalEnsembleModel(Model):
         return pred_frame.fillna(0.0)
 
     def _prepare_label_series(self, dataset: DatasetH, segment: Union[Text, slice]) -> pd.Series:
-        raw_label = dataset.prepare(segment, col_set=["label"], data_key=DataHandlerLP.DK_L)
+        try:
+            raw_label = dataset.prepare(segment, col_set=["label"], data_key=DataHandlerLP.DK_R)
+        except (AttributeError, KeyError, ValueError) as exc:
+            raise ValueError(
+                "TranscendenceSignalEnsembleModel requires raw labels for portfolio-aware validation; "
+                "configure the data handler with drop_raw=False."
+            ) from exc
         label_df = self._to_label_frame(raw_label)
         label = pd.to_numeric(label_df.iloc[:, 0], errors="coerce")
         return label.replace([np.inf, -np.inf], np.nan).fillna(0.0)

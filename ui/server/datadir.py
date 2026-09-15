@@ -138,6 +138,11 @@ class DataDir:
     def get_instruments(self):
         """Read ``instruments/all.txt`` and return ``[(symbol, start, end), ...]``."""
         path = self.root / "instruments" / "all.txt"
+        # A fresh data directory may not have metadata until the first sync
+        # discovers the exchange universe. Treat that as an empty snapshot so
+        # API callers can show a loading state instead of returning HTTP 500.
+        if not path.exists():
+            return []
         result = []
         with open(path, encoding="utf-8") as f:
             for line in f:

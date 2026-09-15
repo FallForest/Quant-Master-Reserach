@@ -20,6 +20,7 @@ from ...data.dataset.handler import DataHandlerLP
 from ...log import get_module_logger
 from ...model.base import Model
 from ...utils import get_or_create_path
+from .pytorch_utils import deepcopy_state_dict
 
 
 class TFTModel(Model):
@@ -186,7 +187,7 @@ class TFTModel(Model):
         stop_steps = 0
         best_score = -np.inf
         best_epoch = 0
-        best_param = self.model.state_dict()
+        best_param = deepcopy_state_dict(self.model)
         evals_result["train"] = []
         evals_result["valid"] = []
 
@@ -208,7 +209,7 @@ class TFTModel(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.model.state_dict()
+                best_param = deepcopy_state_dict(self.model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

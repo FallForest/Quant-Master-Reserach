@@ -1,12 +1,19 @@
-from typing import List, Tuple
+import re
+from typing import Dict, Iterable, List, Mapping, Tuple
 
 from quant_master.contrib.data.handler import (
-    _DEFAULT_INFER_PROCESSORS,
     _DEFAULT_LEARN_PROCESSORS,
     check_transform_proc,
 )
 from quant_master.contrib.data.loader import Alpha158DL
 from quant_master.data.dataset.handler import DataHandlerLP
+
+
+_TRANSCENDENCE_DEFAULT_INFER_PROCESSORS = [
+    {"class": "ProcessInf", "kwargs": {}},
+    {"class": "ZScoreNorm", "kwargs": {}},
+    {"class": "Fillna", "kwargs": {"fields_group": "feature"}},
+]
 
 
 class TranscendenceAlpha(DataHandlerLP):
@@ -18,7 +25,7 @@ class TranscendenceAlpha(DataHandlerLP):
         start_time=None,
         end_time=None,
         freq="day",
-        infer_processors=_DEFAULT_INFER_PROCESSORS,
+        infer_processors=_TRANSCENDENCE_DEFAULT_INFER_PROCESSORS,
         learn_processors=_DEFAULT_LEARN_PROCESSORS,
         fit_start_time=None,
         fit_end_time=None,
@@ -27,10 +34,17 @@ class TranscendenceAlpha(DataHandlerLP):
         inst_processors=None,
         include_alpha158_base=True,
         benchmark=None,
+        index_exposures: Iterable[str] = (),
+        industry_exposures: Mapping[str, str] = None,
+        exposure_windows: Iterable[int] = (20, 60),
         **kwargs,
     ):
         self.include_alpha158_base = include_alpha158_base
         self.benchmark = benchmark
+        self.index_exposures = self._validate_exposure_instruments(index_exposures, "index_exposures")
+        self.industry_exposures = self._validate_industry_exposures(industry_exposures or {})
+        self.exposure_windows = self._validate_exposure_windows(exposure_windows)
+        self._validate_exposure_labels()
 
         infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
         learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
@@ -202,7 +216,81 @@ class TranscendenceAlpha(DataHandlerLP):
                 )
                 add(f"TX_IDIO_VOL_{d}", f"Std({ret}, {d})-Abs(Cov({ret}, {mret}, {d}))")
 
+        # 7) configurable index and industry exposures.  Instruments are
+        # resolved through ChangeInstrument, keeping the feature path causal
+        # and compatible with the local provider.  ``industry_exposures`` is a
+        # mapping from a stable label (e.g. ``bank``) to an index instrument.
+        exposure_specs = [("IDX", str(inst), str(inst)) for inst in self.index_exposures]
+        exposure_specs.extend(("IND", label, inst) for label, inst in self.industry_exposures.items())
+        for kind, label, instrument in exposure_specs:
+            safe_label = re.sub(r"[^A-Za-z0-9]+", "_", label).strip("_").upper() or "EXPOSURE"
+            market_ret = f"ChangeInstrument({instrument!r},$close/(Ref($close,1)+1e-12)-1)"
+            for d in self.exposure_windows:
+                add(
+                    f"TX_{kind}_EXCESS_RET_{safe_label}_{d}",
+                    f"Mean({ret},{d})-ChangeInstrument({instrument!r},Mean({ret},{d}))",
+                )
+                add(
+                    f"TX_{kind}_BETA_{safe_label}_{d}",
+                    f"Cov({ret},{market_ret},{d})/(Var({market_ret},{d})+1e-12)",
+                )
+
         return fields, names
+
+    @staticmethod
+    def _validate_exposure_instruments(values: Iterable[str], name: str) -> Tuple[str, ...]:
+        if values is None:
+            return ()
+        if isinstance(values, str):
+            values = (values,)
+        try:
+            raw_values = tuple(values)
+        except TypeError as exc:
+            raise ValueError(f"{name} must contain non-empty instrument symbols") from exc
+        if any(not isinstance(value, str) for value in raw_values):
+            raise ValueError(f"{name} must contain non-empty instrument symbols")
+        result = tuple(value.strip() for value in raw_values)
+        if any(not v or re.fullmatch(r"[A-Za-z0-9._^-]+", v) is None for v in result):
+            raise ValueError(f"{name} must contain non-empty instrument symbols")
+        return result
+
+    @classmethod
+    def _validate_industry_exposures(cls, values: Mapping[str, str]) -> Dict[str, str]:
+        if not isinstance(values, Mapping):
+            raise ValueError("industry_exposures must be a mapping of label to instrument")
+        result = {}
+        for key, value in values.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                raise ValueError("industry_exposures must map string labels to instrument symbols")
+            label, instrument = key.strip(), value.strip()
+            if not label:
+                raise ValueError("industry_exposures labels must be non-empty strings")
+            if not instrument or re.fullmatch(r"[A-Za-z0-9._^-]+", instrument) is None:
+                raise ValueError("industry_exposures values must be valid instrument symbols")
+            result[label] = instrument
+        return result
+
+    @staticmethod
+    def _validate_exposure_windows(values: Iterable[int]) -> Tuple[int, ...]:
+        if isinstance(values, int) and not isinstance(values, bool):
+            values = (values,)
+        if isinstance(values, (str, bytes)):
+            raise ValueError("exposure_windows must contain positive integers")
+        try:
+            result = tuple(values)
+        except TypeError as exc:
+            raise ValueError("exposure_windows must contain positive integers") from exc
+        if not result or any(not isinstance(v, int) or isinstance(v, bool) or v <= 0 for v in result):
+            raise ValueError("exposure_windows must contain positive integers")
+        if len(set(result)) != len(result):
+            raise ValueError("exposure_windows must not contain duplicate values")
+        return result
+
+    def _validate_exposure_labels(self) -> None:
+        labels = list(self.index_exposures) + list(self.industry_exposures)
+        normalized = [re.sub(r"[^A-Za-z0-9]+", "_", label).strip("_").upper() or "EXPOSURE" for label in labels]
+        if len(set(normalized)) != len(normalized):
+            raise ValueError("index_exposures and industry_exposures must have distinct normalized labels")
 
     @staticmethod
     def get_label_config():

@@ -33,7 +33,7 @@ class DummyStrategy(BaseStrategy):
 
 
 def create_router(selector, default_strategy="first"):
-    TestAutoData.setUpClass(enable_1d_type="simple")
+    TestAutoData.setUpClass(enable_1d_type="full")
     trade_calendar = TradeCalendarManager(freq="day", start_time="2005-01-04", end_time="2005-01-06")
     common_infra = CommonInfrastructure(trade_account=DummyAccount(), trade_exchange=object())
     level_infra = LevelInfrastructure(trade_calendar=trade_calendar, common_infra=common_infra, executor=object())
@@ -50,7 +50,7 @@ def create_router(selector, default_strategy="first"):
 
 
 def create_family_router(selector=None):
-    TestAutoData.setUpClass(enable_1d_type="simple")
+    TestAutoData.setUpClass(enable_1d_type="full")
     trade_calendar = TradeCalendarManager(freq="day", start_time="2005-01-04", end_time="2005-01-06")
     common_infra = CommonInfrastructure(trade_account=DummyAccount(), trade_exchange=object())
     level_infra = LevelInfrastructure(trade_calendar=trade_calendar, common_infra=common_infra, executor=object())

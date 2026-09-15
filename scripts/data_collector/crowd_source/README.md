@@ -19,7 +19,7 @@ The packaged docker runtime is hosted on dockerhub: https://hub.docker.com/repos
 User can download data in quant_master bin format and use it directly: https://github.com/chenditc/investment_data/releases/latest
 ```bash
 wget https://github.com/chenditc/investment_data/releases/latest/download/quant_master_bin.tar.gz
-tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/cn_data --strip-components=2
+tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/tdx_cn_data --strip-components=2
 ```
 
 ### Option 2: Generate quant_master data from dolthub

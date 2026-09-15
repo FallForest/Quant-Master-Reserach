@@ -10,6 +10,7 @@ from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
 from ...model.interpret.base import FeatureInt
 from ...log import get_module_logger
+from .rank_aware import DailyRankICEval, RANK_TARGET_MODE, normalize_target_mode, prepare_tree_target
 
 
 class DEnsembleModel(Model, FeatureInt):
@@ -32,6 +33,8 @@ class DEnsembleModel(Model, FeatureInt):
         epochs=100,
         early_stopping_rounds=None,
         random_state=None,
+        target_mode="raw",
+        rank_eval=None,
         **kwargs,
     ):
         self.base_model = base_model  # "gbm" or "mlp", specifically, we use lgbm for "gbm"
@@ -60,6 +63,18 @@ class DEnsembleModel(Model, FeatureInt):
         self.sub_features = []  # the features for each sub model in the form of pandas.Index
         self.params = {"objective": loss}
         self.params.update(kwargs)
+        self.target_mode = normalize_target_mode(target_mode)
+        if self.target_mode == RANK_TARGET_MODE and loss != "mse":
+            raise ValueError("target_mode='cs_rank' requires loss='mse'.")
+        self.rank_eval = self.target_mode == RANK_TARGET_MODE if rank_eval is None else bool(rank_eval)
+        if self.rank_eval:
+            self.params.setdefault("metric", "None")
+        if random_state is not None:
+            for seed_param in ("seed", "feature_fraction_seed", "bagging_seed", "data_random_seed"):
+                self.params.setdefault(seed_param, random_state)
+        sampling_fraction = self.params.get("bagging_fraction", self.params.get("subsample", 1.0))
+        if float(sampling_fraction) < 1.0:
+            self.params.setdefault("bagging_freq", 1)
         self.loss = loss
         self.early_stopping_rounds = early_stopping_rounds
         self.random_state = random_state
@@ -71,7 +86,8 @@ class DEnsembleModel(Model, FeatureInt):
         )
         if df_train.empty or df_valid.empty:
             raise ValueError("Empty data from dataset, please check your dataset config.")
-        x_train, y_train = df_train["feature"], df_train["label"]
+        x_train = df_train["feature"]
+        y_train = prepare_tree_target(df_train["label"], self.target_mode)
         # initialize the sample weights
         N, F = x_train.shape
         weights = pd.Series(np.ones(N, dtype=float))
@@ -114,30 +130,34 @@ class DEnsembleModel(Model, FeatureInt):
             callbacks.append(lgb.early_stopping(self.early_stopping_rounds))
             self.logger.info("Training with early_stopping...")
 
+        valid_sets = [dvalid] if self.rank_eval else [dtrain, dvalid]
+        valid_names = ["valid"] if self.rank_eval else ["train", "valid"]
         model = lgb.train(
             self.params,
             dtrain,
             num_boost_round=self.epochs,
-            valid_sets=[dtrain, dvalid],
-            valid_names=["train", "valid"],
+            valid_sets=valid_sets,
+            valid_names=valid_names,
             callbacks=callbacks,
+            feval=(
+                DailyRankICEval({id(dtrain): df_train.index, id(dvalid): df_valid.index})
+                if self.rank_eval
+                else None
+            ),
         )
-        evals_result["train"] = list(evals_result["train"].values())[0]
+        if "train" in evals_result:
+            evals_result["train"] = list(evals_result["train"].values())[0]
         evals_result["valid"] = list(evals_result["valid"].values())[0]
         return model
 
     def _prepare_data_gbm(self, df_train, df_valid, weights, features):
-        x_train, y_train = df_train["feature"].loc[:, features], df_train["label"]
-        x_valid, y_valid = df_valid["feature"].loc[:, features], df_valid["label"]
+        x_train = df_train["feature"].loc[:, features]
+        x_valid = df_valid["feature"].loc[:, features]
+        y_train = prepare_tree_target(df_train["label"], self.target_mode)
+        y_valid = prepare_tree_target(df_valid["label"], self.target_mode)
 
-        # Lightgbm need 1D array as its label
-        if y_train.values.ndim == 2 and y_train.values.shape[1] == 1:
-            y_train, y_valid = np.squeeze(y_train.values), np.squeeze(y_valid.values)
-        else:
-            raise ValueError("LightGBM doesn't support multi-label training")
-
-        dtrain = lgb.Dataset(x_train, label=y_train, weight=weights)
-        dvalid = lgb.Dataset(x_valid, label=y_valid)
+        dtrain = lgb.Dataset(x_train, label=y_train.to_numpy(), weight=weights)
+        dvalid = lgb.Dataset(x_valid, label=y_valid.to_numpy())
         return dtrain, dvalid
 
     def sample_reweight(self, loss_curve, loss_values, k_th):
@@ -184,7 +204,8 @@ class DEnsembleModel(Model, FeatureInt):
         :return: res_feat: in the form of pandas.Index
 
         """
-        x_train, y_train = df_train["feature"], df_train["label"]
+        x_train = df_train["feature"]
+        y_train = prepare_tree_target(df_train["label"], self.target_mode)
         features = x_train.columns
         N, F = x_train.shape
         g = pd.DataFrame({"g_value": np.zeros(F, dtype=float)})
@@ -202,7 +223,7 @@ class DEnsembleModel(Model, FeatureInt):
                     )
                     / M
                 )
-            loss_feat = self.get_loss(y_train.values.squeeze(), pred.values)
+            loss_feat = self.get_loss(y_train.to_numpy(), pred.values)
             g.loc[i_f, "g_value"] = np.mean(loss_feat - loss_values) / (np.std(loss_feat - loss_values) + 1e-7)
             x_train_tmp.loc[:, feat] = x_train.loc[:, feat].copy()
 
@@ -230,12 +251,8 @@ class DEnsembleModel(Model, FeatureInt):
     def retrieve_loss_curve(self, model, df_train, features):
         if self.base_model == "gbm":
             num_trees = model.num_trees()
-            x_train, y_train = df_train["feature"].loc[:, features], df_train["label"]
-            # Lightgbm need 1D array as its label
-            if y_train.values.ndim == 2 and y_train.values.shape[1] == 1:
-                y_train = np.squeeze(y_train.values)
-            else:
-                raise ValueError("LightGBM doesn't support multi-label training")
+            x_train = df_train["feature"].loc[:, features]
+            y_train = prepare_tree_target(df_train["label"], self.target_mode).to_numpy()
 
             N = x_train.shape[0]
             loss_curve = pd.DataFrame(np.zeros((N, num_trees)))

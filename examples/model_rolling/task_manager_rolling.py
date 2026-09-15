@@ -24,7 +24,7 @@ from quant_master.tests.config import CSI100_RECORD_LGB_TASK_CONFIG, CSI100_RECO
 class RollingTaskExample:
     def __init__(
         self,
-        provider_uri="~/.quant_master/quant_master_data/cn_data",
+        provider_uri="~/.quant_master/quant_master_data/tdx_cn_data",
         region=REG_CN,
         task_url="mongodb://10.0.0.4:27017/",
         task_db_name="rolling_db",

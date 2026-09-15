@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 ```bash
 # parse instruments, using in quant_master/instruments.
-python future_trading_date_collector.py --quant_master_dir ~/.quant_master/quant_master_data/cn_data --freq day
+python future_trading_date_collector.py --quant_master_dir ~/.quant_master/quant_master_data/tdx_cn_data --freq day
 ```
 
 ## Parameters

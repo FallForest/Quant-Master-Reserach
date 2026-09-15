@@ -24,7 +24,7 @@ from quant_master.contrib.strategy import TopkDropoutStrategy
 class OnlineSimulationExample:
     def __init__(
         self,
-        provider_uri="~/.quant_master/quant_master_data/cn_data",
+        provider_uri="~/.quant_master/quant_master_data/tdx_cn_data",
         region="cn",
         exp_name="rolling_exp",
         task_url="mongodb://10.0.0.4:27017/",  # not necessary when using TrainerR or DelayTrainerR
@@ -40,7 +40,7 @@ class OnlineSimulationExample:
         Init OnlineManagerExample.
 
         Args:
-            provider_uri (str, optional): the provider uri. Defaults to "~/.quant_master/quant_master_data/cn_data".
+            provider_uri (str, optional): the provider uri. Defaults to "~/.quant_master/quant_master_data/tdx_cn_data".
             region (str, optional): the stock region. Defaults to "cn".
             exp_name (str, optional): the experiment name. Defaults to "rolling_exp".
             task_url (str, optional): your MongoDB url. Defaults to "mongodb://10.0.0.4:27017/".

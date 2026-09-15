@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Function
-from quant_master.contrib.model.pytorch_utils import count_parameters
+from quant_master.contrib.model.pytorch_utils import count_parameters, deepcopy_state_dict
 from quant_master.data.dataset import DatasetH
 from quant_master.data.dataset.handler import DataHandlerLP
 from quant_master.log import get_module_logger
@@ -285,7 +285,7 @@ class ADARNN(Model):
                 best_score = valid_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.model.state_dict()
+                best_param = deepcopy_state_dict(self.model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

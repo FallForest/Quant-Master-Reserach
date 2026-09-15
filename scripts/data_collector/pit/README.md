@@ -36,5 +36,5 @@ python collector.py normalize_data --interval quarterly --source_dir ~/.quant_ma
 
 ```bash
 cd quant_master/scripts
-python dump_pit.py dump --data_path ~/.quant_master/stock_data/source/pit_normalized --quant_master_dir ~/.quant_master/quant_master_data/cn_data --interval quarterly
+python dump_pit.py dump --data_path ~/.quant_master/stock_data/source/pit_normalized --quant_master_dir ~/.quant_master/quant_master_data/tdx_cn_data --interval quarterly
 ```

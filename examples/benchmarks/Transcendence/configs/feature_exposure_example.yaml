@@ -1,0 +1,20 @@
+# Add this block to a TranscendenceAlpha dataset handler's kwargs.
+# Every referenced index must be present in the configured local data provider.
+handler:
+    class: TranscendenceAlpha
+    module_path: quant_master.contrib.data.transcendence_handler
+    kwargs:
+        instruments: csi300
+        benchmark: SH000300
+        # Broad-market index exposures.  Each emits excess-return and beta
+        # features for every requested window.
+        index_exposures:
+            - SH000300
+            - SH000905
+        # Stable factor label -> locally available industry index instrument.
+        # These are industry-index exposure proxies only: they DO NOT provide
+        # per-stock, point-in-time industry membership or a classification.
+        industry_exposures:
+            bank: SH000905
+            technology: SZ399006
+        exposure_windows: [20, 60]

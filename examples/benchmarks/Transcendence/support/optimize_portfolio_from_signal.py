@@ -237,7 +237,7 @@ def _run_one_scan(
         strategy=strategy_cfg,
         executor=executor_cfg,
         benchmark=backtest_cfg.get("benchmark", "SH000300"),
-        account=backtest_cfg.get("account", 100000000),
+        account=backtest_cfg.get("account", 10583.43),
         exchange_kwargs=exchange_kwargs,
         pos_type=backtest_cfg.get("pos_type", "Position"),
     )

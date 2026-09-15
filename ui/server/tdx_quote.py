@@ -12,6 +12,43 @@ import urllib.request
 _log = logging.getLogger(__name__)
 
 
+def _probe_host(api):
+    """探针：确认这台服务器真的会返回行情数据。
+
+    部分 TDX 服务器能建立连接、也能返回股票列表，但对行情/日线请求一律返回空，
+    只凭 connect() 成功无法区分二者。用一次最小的日线请求判断。
+    """
+    try:
+        return bool(api.get_security_bars(9, 0, "000001", 0, 1))
+    except Exception:
+        return False
+
+
+def connect_first_working(hosts, time_out=2):
+    """按顺序连接并校验，返回第一个真正能吐数据的 api；全部不可用返回 None。"""
+    from pytdx.hq import TdxHq_API
+
+    for ip, port in hosts:
+        try:
+            api = TdxHq_API()
+            # pytdx 连接失败时 connect() 返回 False 而非抛异常。
+            if not api.connect(ip, port, time_out=time_out):
+                _log.warning("TDX 连接失败: %s:%s", ip, port)
+                continue
+        except Exception:
+            continue
+        if not _probe_host(api):
+            _log.warning("TDX 主机无数据响应，跳过: %s:%s", ip, port)
+            try:
+                api.disconnect()
+            except Exception:
+                pass
+            continue
+        _log.info("TDX 持久连接已建立: %s:%s", ip, port)
+        return api
+    return None
+
+
 class TDXQuote:
     TDX_HOSTS = [
         ("120.76.1.198", 7709),
@@ -20,16 +57,27 @@ class TDXQuote:
         ("1.202.143.37", 7709),
     ]
 
+    # 通达信服务器会主动断开长时间空闲的连接（通常 60s 左右）。
+    # 若继续复用这条已被服务端断开的 socket，pytdx 会静默返回 None，
+    # 导致实时行情/分钟线取不到数据且不触发重连。据此定期重建连接。
+    STALE_IDLE_SECONDS = 30
+
     def __init__(self):
         self._api = None
         self._lock = threading.Lock()
         self._call_lock = threading.Lock()  # 串行化所有 TDX 调用，防止 TCP 响应交叉
         self._last_connect_attempt = 0
         self._connect_cooldown = 2  # 连接失败冷却秒数
+        self._last_used = 0.0  # 最近一次成功使用（实际 TDX 调用）的时间
 
     def _get_api(self):
-        """获取持久连接，不存在则创建。线程安全。"""
+        """获取持久连接，不存在/已空闲过久则重新创建。线程安全。"""
         if self._api is not None:
+            # 上次实际使用距今过久——服务端可能已断开该连接，主动重建以防复用死 socket
+            if time.time() - self._last_used > self.STALE_IDLE_SECONDS:
+                _log.info("TDX 连接空闲超过 %ds，重建持久连接", self.STALE_IDLE_SECONDS)
+                self._invalidate()
+                return self._connect_fresh()
             return self._api
         # 冷却期内不重连（避免短时间内反复尝试连接）
         if time.time() - self._last_connect_attempt < self._connect_cooldown:
@@ -42,18 +90,13 @@ class TDXQuote:
             if self._api is not None:
                 return self._api
             self._last_connect_attempt = time.time()
-            from pytdx.hq import TdxHq_API
-            for ip, port in self.TDX_HOSTS:
-                try:
-                    api = TdxHq_API()
-                    api.connect(ip, port, time_out=2)
-                    self._api = api
-                    _log.info("TDX 持久连接已建立: %s:%s", ip, port)
-                    return api
-                except Exception:
-                    continue
-            _log.warning("TDX 连接失败，%ds 后可重试", self._connect_cooldown)
-            return None
+            api = connect_first_working(self.TDX_HOSTS, time_out=2)
+            if api is None:
+                _log.warning("TDX 连接失败，%ds 后可重试", self._connect_cooldown)
+                return None
+            self._api = api
+            self._last_used = time.time()
+            return api
 
     def _invalidate(self):
         """标记连接失效，下次调用时自动重连。"""
@@ -82,7 +125,9 @@ class TDXQuote:
             return default
         for attempt in range(3):
             try:
-                return fn(api)
+                result = fn(api)
+                self._last_used = time.time()
+                return result
             except Exception:
                 self._invalidate()
                 api = self._connect_fresh()
@@ -203,6 +248,42 @@ class TDXQuote:
         missing = [sym for sym in symbols if self._normalize_symbol_key(sym) not in result]
         if missing:
             result.update(self._fetch_eastmoney_quotes(missing))
+        return result
+
+    def fetch_instruments(self):
+        """Discover the current A-share universe and names from TDX.
+
+        The sync pipeline consumes this provider-level method instead of
+        knowing pytdx pagination or connection details.
+        """
+        def _do_fetch(api):
+            result = {}
+            for market in (0, 1):
+                count = int(api.get_security_count(market) or 0)
+                for start in range(0, count, 1000):
+                    rows = api.get_security_list(market, start) or []
+                    for row in rows:
+                        code = str(row.get("code") or "")
+                        if len(code) != 6 or not code.isdigit():
+                            continue
+                        if market == 1 and code.startswith("6"):
+                            prefix = "SH"
+                        elif market == 0 and code.startswith(("0", "3")) and not code.startswith("39"):
+                            prefix = "SZ"
+                        elif market == 0 and code.startswith(("4", "8")):
+                            prefix = "BJ"
+                        else:
+                            continue
+                        result[prefix + code] = {
+                            "code": code,
+                            "name": str(row.get("name") or "").strip(),
+                        }
+            return result
+
+        with self._call_lock:
+            result = self._retry(_do_fetch, {})
+        if not result:
+            raise ConnectionError("TDX returned no A-share instruments")
         return result
 
     def get_quote(self, symbol):

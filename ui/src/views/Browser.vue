@@ -40,6 +40,7 @@ const lastUpdateDate = ref('--')
 const sortField = ref('')
 const sortAsc = ref(false)
 const syncing = ref(false)
+const cacheRefreshing = ref(false)
 const syncError = ref('')
 const syncProgress = ref(null)
 const activeListMode = ref('all')
@@ -59,6 +60,11 @@ const baseStocks = computed(() => {
 
 let pagePollingStarted = false
 let keydownBound = false
+let syncPollTimer = null
+let syncPollActive = false
+let syncPollInFlight = false
+let syncDataReloaded = false
+let previousCacheRefreshing = false
 
 const filtered = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -213,8 +219,14 @@ async function loadStocks() {
       lastUpdateDate.value = statusData.lastUpdate
     }
     syncing.value = statusData?.syncing || false
+    cacheRefreshing.value = Boolean(statusData?.cacheRefresh?.running || stockData?.cacheRefreshing)
     syncError.value = statusData?.syncError || ''
-    syncProgress.value = statusData?.syncProgress || null
+    syncProgress.value = statusData?.syncProgress || (
+      cacheRefreshing.value
+        ? { phase: 'cache', total: 0, done: 0, label: '行情已同步，正在更新股票摘要...' }
+        : null
+    )
+    if (syncing.value || cacheRefreshing.value) startSyncPolling()
   } catch {
     loadError.value = true
   } finally {
@@ -224,7 +236,11 @@ async function loadStocks() {
 
 async function triggerSync() {
   syncing.value = true
+  cacheRefreshing.value = false
+  syncDataReloaded = false
+  previousCacheRefreshing = false
   syncError.value = ''
+  syncProgress.value = { phase: 'starting', total: 0, done: 0, label: '正在启动同步...' }
   try {
     const resp = await api('/api/pipeline/trigger', { method: 'POST' })
     if (!resp?.ok) {
@@ -232,24 +248,81 @@ async function triggerSync() {
       syncing.value = false
       return
     }
-
-    const poll = setInterval(async () => {
-      const status = await api('/api/pipeline/status')
-      if (!status?.syncing) {
-        clearInterval(poll)
-        syncing.value = false
-        syncProgress.value = null
-        if (status?.syncError) syncError.value = status.syncError
-        if (status?.lastUpdate) lastUpdateDate.value = status.lastUpdate
-        loadStocks()
-      } else {
-        syncProgress.value = status?.syncProgress || null
-      }
-    }, 3000)
+    startSyncPolling()
   } catch {
     syncing.value = false
     syncError.value = '同步请求失败'
   }
+}
+
+function stopSyncPolling() {
+  syncPollActive = false
+  if (syncPollTimer !== null) {
+    clearTimeout(syncPollTimer)
+    syncPollTimer = null
+  }
+}
+
+function scheduleSyncPoll() {
+  if (!syncPollActive || syncPollTimer !== null) return
+  syncPollTimer = setTimeout(() => {
+    syncPollTimer = null
+    pollSyncStatus()
+  }, 1000)
+}
+
+async function pollSyncStatus() {
+  if (!syncPollActive || syncPollInFlight) return
+  syncPollInFlight = true
+  try {
+    const status = await api('/api/pipeline/status')
+    if (status?._httpStatus || (!status || (status.error && status.syncing == null))) {
+      stopSyncPolling()
+      syncing.value = false
+      syncError.value = status?.error || '同步状态查询失败'
+      return
+    }
+
+    const wasCacheRefreshing = previousCacheRefreshing
+    syncing.value = Boolean(status.syncing)
+    cacheRefreshing.value = Boolean(status.cacheRefresh?.running)
+    previousCacheRefreshing = cacheRefreshing.value
+    syncProgress.value = status.syncProgress || (
+      cacheRefreshing.value
+        ? { phase: 'cache', total: 0, done: 0, label: '行情已同步，正在更新股票摘要...' }
+        : syncProgress.value
+    )
+    if (status.syncing) return
+
+    // Market files are ready as soon as the sync worker finishes. Refresh the
+    // table immediately, then keep polling only for the derived cache.
+    if (!syncDataReloaded) {
+      syncDataReloaded = true
+      if (status.lastUpdate) lastUpdateDate.value = status.lastUpdate
+      await loadStocks()
+    }
+
+    // The first table load can still see the previous cache snapshot. Replace
+    // it once the atomic cache file is ready.
+    if (wasCacheRefreshing && !cacheRefreshing.value) {
+      await loadStocks()
+    }
+
+    if (cacheRefreshing.value) return
+
+    stopSyncPolling()
+    syncProgress.value = null
+    syncError.value = status.syncError || ''
+  } finally {
+    syncPollInFlight = false
+    scheduleSyncPoll()
+  }
+}
+
+function startSyncPolling() {
+  if (syncPollActive) return
+  syncPollActive = true
+  pollSyncStatus()
 }
 
 function bindKeydown() {
@@ -315,17 +388,20 @@ onActivated(() => {
   watchlistStore.load()
   startPagePolling()
   bindKeydown()
+  if (syncing.value || cacheRefreshing.value) startSyncPolling()
 })
 
 onDeactivated(() => {
   stopPagePolling()
   unbindKeydown()
+  stopSyncPolling()
 })
 
 onUnmounted(() => {
   stopPagePolling()
   closeDetail()
   unbindKeydown()
+  stopSyncPolling()
 })
 
 function handleKeydown(event) {
@@ -421,22 +497,22 @@ function sortIndicator(field) {
       </span>
       <span class="text-xs text-slate-400">数据截至 {{ lastUpdateDate }}</span>
       <button
-        :aria-label="syncing ? '同步中' : '同步数据'"
+        :aria-label="syncing || cacheRefreshing ? '同步中' : '同步数据'"
         :class="[
           'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg cursor-pointer transition-all duration-200',
-          syncing ? 'bg-surface-2 text-slate-400 cursor-not-allowed' : 'bg-brand-50 text-brand-600 hover:bg-brand-100',
+          syncing || cacheRefreshing ? 'bg-surface-2 text-slate-400 cursor-not-allowed' : 'bg-brand-50 text-brand-600 hover:bg-brand-100',
         ]"
-        :disabled="syncing"
+        :disabled="syncing || cacheRefreshing"
         @click="triggerSync"
       >
-        <svg v-if="syncing" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <svg v-if="syncing || cacheRefreshing" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
         <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
         </svg>
-        {{ syncing ? '同步中...' : '同步数据' }}
+        {{ syncing ? '行情同步中...' : (cacheRefreshing ? '更新股票摘要...' : '同步数据') }}
       </button>
       <span v-if="syncError" class="text-xs text-red-500">{{ syncError }}</span>
       <span v-else-if="watchlistStore.error" class="text-xs text-red-500">{{ watchlistStore.error }}</span>
@@ -449,17 +525,19 @@ function sortIndicator(field) {
     </div>
 
     <!-- 同步进度条 -->
-    <div v-if="syncing && syncProgress" class="flex-shrink-0 bg-amber-50 border-b border-amber-100 px-5 py-2 flex items-center gap-3 text-xs">
+    <div v-if="(syncing || cacheRefreshing) && syncProgress" class="flex-shrink-0 bg-amber-50 border-b border-amber-100 px-5 py-2 flex items-center gap-3 text-xs">
       <svg class="w-3.5 h-3.5 animate-spin text-amber-500" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
       </svg>
       <span class="text-amber-700">{{ syncProgress.label || '数据同步中...' }}</span>
-      <div v-if="syncProgress.total > 0" class="flex-1 max-w-[200px] bg-amber-200 rounded-full h-1.5">
+      <div class="flex-1 max-w-[200px] bg-amber-200 rounded-full h-1.5 overflow-hidden">
         <div
+          v-if="syncProgress.total > 0"
           class="bg-amber-500 rounded-full h-1.5 transition-all duration-500"
-          :style="{ width: (syncProgress.done / syncProgress.total * 100) + '%' }"
+          :style="{ width: Math.min(100, syncProgress.done / syncProgress.total * 100) + '%' }"
         ></div>
+        <div v-else class="bg-amber-400 rounded-full h-1.5 w-full animate-pulse"></div>
       </div>
       <span v-if="syncProgress.total > 0" class="text-amber-600 font-mono tabular-nums">{{ syncProgress.done }}/{{ syncProgress.total }}</span>
     </div>

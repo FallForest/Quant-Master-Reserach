@@ -173,7 +173,7 @@ class TestStorage(TestAutoData):
             print(feature.data.empty)
 
 
-def test_feature_storage_short_read_reports_corruption_type(tmp_path):
+def test_feature_storage_slice_clips_to_available_tail(tmp_path):
     provider = tmp_path / "provider"
     feature_dir = provider / "features" / "sz000157"
     feature_dir.mkdir(parents=True)
@@ -185,10 +185,7 @@ def test_feature_storage_short_read_reports_corruption_type(tmp_path):
 
     C["mount_path"] = {"day": None}
     feature = FeatureStorage(instrument="SZ000157", field="high", freq="day", provider_uri={"day": str(provider)})
-    with pytest.raises(ValueError) as exc_info:
-        feature[0:3]
+    result = feature[0:3]
 
-    message = str(exc_info.value)
-    assert "Corrupt feature storage slice" in message
-    assert "corruption_type=right_tail_gap" in message
-    assert "missing_bytes=4" in message
+    assert result.index.tolist() == [0, 1]
+    assert result.tolist() == [1.0, 2.0]

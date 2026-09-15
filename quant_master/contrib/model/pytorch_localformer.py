@@ -20,6 +20,7 @@ import torch.optim as optim
 from ...model.base import Model
 from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
+from .pytorch_utils import deepcopy_state_dict
 from torch.nn.modules.container import ModuleList
 
 # qrun examples/benchmarks/Localformer/workflow_config_localformer_Alpha360.yaml ”
@@ -193,7 +194,7 @@ class LocalformerModel(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = step
-                best_param = self.model.state_dict()
+                best_param = deepcopy_state_dict(self.model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:

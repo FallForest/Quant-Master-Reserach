@@ -52,12 +52,12 @@
             if interval==5min, quant_master_data_1d_dir cannot be None, normalize 5min needs to use 1d data;
             ```
                 # quant_master_data_1d can be obtained like this:
-                python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/cn_data --interval 1d --region cn --version v3
+                python scripts/get_data.py quant_master_data --target_dir ~/.quant_master/quant_master_data/tdx_cn_data --interval 1d --region cn --version v3
             ```
       - examples:
         ```bash
         # normalize 5min cn
-        python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/cn_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --normalize_dir ~/.quant_master/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
+        python collector.py normalize_data --quant_master_data_1d_dir ~/.quant_master/quant_master_data/tdx_cn_data --source_dir ~/.quant_master/stock_data/source/hs300_5min_original --normalize_dir ~/.quant_master/stock_data/source/hs300_5min_nor --region HS300 --interval 5min
         ```
   3. dump data: `python scripts/dump_bin.py dump_all`
     

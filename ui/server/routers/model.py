@@ -98,6 +98,25 @@ def model_stock_prediction(alias: str, instrument: str, svc: ModelService = Depe
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+@router.get("/{alias}/custom/{instrument}")
+def model_custom_stock_prediction(
+    alias: str,
+    instrument: str,
+    date: Optional[str] = Query(None),
+    svc: ModelService = Depends(_service),
+):
+    """对模型股票池外的个股进行评分（如不在 CSI300 中的股票）。"""
+    try:
+        return svc.predict_custom_stock(alias, instrument, date=date)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except (ValueError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        logger.exception("custom_stock_prediction error for %s/%s", alias, instrument)
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
 @router.get("/{alias}/report")
 def model_report(alias: str, svc: ModelService = Depends(_service)):
     try:

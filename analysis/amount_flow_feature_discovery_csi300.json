@@ -1,0 +1,489 @@
+{
+  "market": "csi300",
+  "train": [
+    "2016-01-01",
+    "2020-12-31"
+  ],
+  "valid": [
+    "2021-01-01",
+    "2023-12-31"
+  ],
+  "selection_policy": "same Rank IC sign; rank by min(abs(train Rank IC), abs(valid Rank IC))",
+  "redundancy_policy": {
+    "min_stable_rank_ic": 0.005,
+    "max_abs_rank_corr": 0.8
+  },
+  "recommended_features": [
+    {
+      "feature": "AF_RANGE_VOL20",
+      "stable_rank_ic": 0.02177648957380185,
+      "direction": "negative",
+      "closest_selected_feature": null,
+      "closest_selected_rank_corr": 0.0
+    },
+    {
+      "feature": "AF_AMOUNT_REL60",
+      "stable_rank_ic": 0.013950041733934259,
+      "direction": "negative",
+      "closest_selected_feature": "AF_RANGE_VOL20",
+      "closest_selected_rank_corr": 0.17648782131204002
+    },
+    {
+      "feature": "AF_OVERNIGHT_INTRADAY_SPREAD",
+      "stable_rank_ic": 0.013592243860461685,
+      "direction": "positive",
+      "closest_selected_feature": "AF_AMOUNT_REL60",
+      "closest_selected_rank_corr": -0.11345034723708652
+    },
+    {
+      "feature": "AF_RET_AMOUNT_CORR60",
+      "stable_rank_ic": 0.012808077643158536,
+      "direction": "negative",
+      "closest_selected_feature": "AF_RANGE_VOL20",
+      "closest_selected_rank_corr": 0.14261559182864297
+    },
+    {
+      "feature": "AF_SIGNED_AMOUNT20",
+      "stable_rank_ic": 0.011605364380565624,
+      "direction": "negative",
+      "closest_selected_feature": "AF_AMOUNT_REL60",
+      "closest_selected_rank_corr": 0.32506584523771287
+    },
+    {
+      "feature": "AF_RET_AMOUNT_CORR20",
+      "stable_rank_ic": 0.011024857932343621,
+      "direction": "negative",
+      "closest_selected_feature": "AF_SIGNED_AMOUNT20",
+      "closest_selected_rank_corr": 0.5457991001660909
+    },
+    {
+      "feature": "AF_SIGNED_AMOUNT5",
+      "stable_rank_ic": 0.009291204093055316,
+      "direction": "negative",
+      "closest_selected_feature": "AF_SIGNED_AMOUNT20",
+      "closest_selected_rank_corr": 0.44767370346555585
+    },
+    {
+      "feature": "AF_RET_AMOUNT_CORR10",
+      "stable_rank_ic": 0.007493290027215714,
+      "direction": "negative",
+      "closest_selected_feature": "AF_RET_AMOUNT_CORR20",
+      "closest_selected_rank_corr": 0.5974047668557599
+    },
+    {
+      "feature": "AF_AMOUNT_MOM20",
+      "stable_rank_ic": 0.007402413514683105,
+      "direction": "negative",
+      "closest_selected_feature": "AF_AMOUNT_REL60",
+      "closest_selected_rank_corr": 0.7228512663134883
+    },
+    {
+      "feature": "AF_AMOUNT_MOM5",
+      "stable_rank_ic": 0.00521770843174362,
+      "direction": "negative",
+      "closest_selected_feature": "AF_AMOUNT_REL60",
+      "closest_selected_rank_corr": 0.5432956479935034
+    }
+  ],
+  "features": [
+    {
+      "feature": "AF_RANGE_VOL20",
+      "same_sign": true,
+      "stable_rank_ic": 0.02177648957380185,
+      "train": {
+        "coverage": 0.9829624997924955,
+        "days": 1218,
+        "ic": 0.006722128867974091,
+        "rank_ic": -0.02177648957380185,
+        "rank_ic_ir": -1.6836164535722449
+      },
+      "valid": {
+        "coverage": 0.9992155194820538,
+        "days": 727,
+        "ic": 0.007273363666377545,
+        "rank_ic": -0.031507272992892195,
+        "rank_ic_ir": -2.551825986933532
+      }
+    },
+    {
+      "feature": "AF_AMOUNT_REL60",
+      "same_sign": true,
+      "stable_rank_ic": 0.013950041733934259,
+      "train": {
+        "coverage": 0.9743911818901168,
+        "days": 1218,
+        "ic": -0.006250634294600137,
+        "rank_ic": -0.01953049250077138,
+        "rank_ic_ir": -1.9710561377960534
+      },
+      "valid": {
+        "coverage": 0.9983979584603389,
+        "days": 727,
+        "ic": 0.002762899562410983,
+        "rank_ic": -0.013950041733934259,
+        "rank_ic_ir": -1.4053513509336493
+      }
+    },
+    {
+      "feature": "AF_OVERNIGHT_INTRADAY_SPREAD",
+      "same_sign": true,
+      "stable_rank_ic": 0.013592243860461685,
+      "train": {
+        "coverage": 0.9732900248452017,
+        "days": 1218,
+        "ic": 0.01564727647457692,
+        "rank_ic": 0.019209458018953036,
+        "rank_ic_ir": 1.9671370630496041
+      },
+      "valid": {
+        "coverage": 0.9981049597126722,
+        "days": 727,
+        "ic": 0.00796362462208151,
+        "rank_ic": 0.013592243860461685,
+        "rank_ic_ir": 1.280042201393558
+      }
+    },
+    {
+      "feature": "AF_RET_AMOUNT_CORR60",
+      "same_sign": true,
+      "stable_rank_ic": 0.012808077643158536,
+      "train": {
+        "coverage": 0.9906678323806573,
+        "days": 1218,
+        "ic": -0.0026303285903483483,
+        "rank_ic": -0.012808077643158536,
+        "rank_ic_ir": -1.4718036526669702
+      },
+      "valid": {
+        "coverage": 0.9991210037570001,
+        "days": 727,
+        "ic": -0.011791071933463366,
+        "rank_ic": -0.02053291971470515,
+        "rank_ic_ir": -2.4133500595489394
+      }
+    },
+    {
+      "feature": "AF_AMOUNT_Z60",
+      "same_sign": true,
+      "stable_rank_ic": 0.01203110393396741,
+      "train": {
+        "coverage": 0.9741864441480973,
+        "days": 1218,
+        "ic": -0.003974215528536203,
+        "rank_ic": -0.022320005392639678,
+        "rank_ic_ir": -2.340242367928558
+      },
+      "valid": {
+        "coverage": 0.998303442735285,
+        "days": 727,
+        "ic": 0.0018790237498394092,
+        "rank_ic": -0.01203110393396741,
+        "rank_ic_ir": -1.2239851103309076
+      }
+    },
+    {
+      "feature": "AF_SIGNED_AMOUNT20",
+      "same_sign": true,
+      "stable_rank_ic": 0.011605364380565624,
+      "train": {
+        "coverage": 0.983228105511872,
+        "days": 1218,
+        "ic": 0.0019186280212739335,
+        "rank_ic": -0.01607726894858077,
+        "rank_ic_ir": -1.7067176893255551
+      },
+      "valid": {
+        "coverage": 0.9992155194820538,
+        "days": 727,
+        "ic": 0.0011319324505476977,
+        "rank_ic": -0.011605364380565624,
+        "rank_ic_ir": -0.9924744661756731
+      }
+    },
+    {
+      "feature": "AF_RET_AMOUNT_CORR20",
+      "same_sign": true,
+      "stable_rank_ic": 0.011024857932343621,
+      "train": {
+        "coverage": 0.9826387928220054,
+        "days": 1218,
+        "ic": 0.0007137329761880095,
+        "rank_ic": -0.011024857932343621,
+        "rank_ic_ir": -1.2779372805348541
+      },
+      "valid": {
+        "coverage": 0.9991210037570001,
+        "days": 727,
+        "ic": -0.003158582901272836,
+        "rank_ic": -0.01568363738153035,
+        "rank_ic_ir": -1.657674780318665
+      }
+    },
+    {
+      "feature": "AF_SIGNED_AMOUNT5",
+      "same_sign": true,
+      "stable_rank_ic": 0.009291204093055316,
+      "train": {
+        "coverage": 0.9770140383689595,
+        "days": 1218,
+        "ic": -0.006686778711049715,
+        "rank_ic": -0.02392735416046419,
+        "rank_ic_ir": -2.7094688256528934
+      },
+      "valid": {
+        "coverage": 0.9987193119255217,
+        "days": 727,
+        "ic": -0.0008056754888184091,
+        "rank_ic": -0.009291204093055316,
+        "rank_ic_ir": -0.920580926219527
+      }
+    },
+    {
+      "feature": "AF_RET_AMOUNT_CORR10",
+      "same_sign": true,
+      "stable_rank_ic": 0.007493290027215714,
+      "train": {
+        "coverage": 0.9790005478117962,
+        "days": 1218,
+        "ic": 0.00044348131467774016,
+        "rank_ic": -0.009976591139645377,
+        "rank_ic_ir": -1.1743930304875847
+      },
+      "valid": {
+        "coverage": 0.9989083433756292,
+        "days": 727,
+        "ic": 0.0006900969452305235,
+        "rank_ic": -0.007493290027215714,
+        "rank_ic_ir": -0.8225099458150376
+      }
+    },
+    {
+      "feature": "AF_AMOUNT_MOM20",
+      "same_sign": true,
+      "stable_rank_ic": 0.007402413514683105,
+      "train": {
+        "coverage": 0.9639578572258589,
+        "days": 1218,
+        "ic": -0.0057476943800630655,
+        "rank_ic": -0.019776857443351697,
+        "rank_ic_ir": -2.18507122133649
+      },
+      "valid": {
+        "coverage": 0.9955294062049573,
+        "days": 727,
+        "ic": 0.002721075546132096,
+        "rank_ic": -0.007402413514683105,
+        "rank_ic_ir": -0.7985530069139514
+      }
+    },
+    {
+      "feature": "AF_AMOUNT_Z20",
+      "same_sign": true,
+      "stable_rank_ic": 0.0057506261746775806,
+      "train": {
+        "coverage": 0.9740868420033312,
+        "days": 1218,
+        "ic": -0.004415641371647735,
+        "rank_ic": -0.018590904794710414,
+        "rank_ic_ir": -2.121010755081057
+      },
+      "valid": {
+        "coverage": 0.998303442735285,
+        "days": 727,
+        "ic": 0.002139106451317184,
+        "rank_ic": -0.0057506261746775806,
+        "rank_ic_ir": -0.7166095507978372
+      }
+    },
+    {
+      "feature": "AF_AMOUNT_MOM5",
+      "same_sign": true,
+      "stable_rank_ic": 0.00521770843174362,
+      "train": {
+        "coverage": 0.9700169876991351,
+        "days": 1218,
+        "ic": -0.004817802205924124,
+        "rank_ic": -0.016027744573421196,
+        "rank_ic_ir": -1.942208520252083
+      },
+      "valid": {
+        "coverage": 0.9973157534084733,
+        "days": 727,
+        "ic": 0.002096398894349497,
+        "rank_ic": -0.00521770843174362,
+        "rank_ic_ir": -0.6811276765656308
+      }
+    },
+    {
+      "feature": "AF_AMOUNT_REL20",
+      "same_sign": true,
+      "stable_rank_ic": 0.005029471918693152,
+      "train": {
+        "coverage": 0.9743911818901168,
+        "days": 1218,
+        "ic": -0.003821123210167023,
+        "rank_ic": -0.014938630238165737,
+        "rank_ic_ir": -1.6712503599546287
+      },
+      "valid": {
+        "coverage": 0.9983979584603389,
+        "days": 727,
+        "ic": 0.00478550247524319,
+        "rank_ic": -0.005029471918693152,
+        "rank_ic_ir": -0.6184414725491392
+      }
+    },
+    {
+      "feature": "AF_CLOSE_VWAP_DEV",
+      "same_sign": true,
+      "stable_rank_ic": 0.004647120535356232,
+      "train": {
+        "coverage": 0.9743911818901168,
+        "days": 1218,
+        "ic": -0.012528042698524852,
+        "rank_ic": -0.018283495415163067,
+        "rank_ic_ir": -1.7969642181618826
+      },
+      "valid": {
+        "coverage": 0.9983979584603389,
+        "days": 727,
+        "ic": -0.00598148004031825,
+        "rank_ic": -0.004647120535356232,
+        "rank_ic_ir": -0.43504016989675093
+      }
+    },
+    {
+      "feature": "AF_OVERNIGHT_RET",
+      "same_sign": true,
+      "stable_rank_ic": 0.003517169289079684,
+      "train": {
+        "coverage": 0.9732900248452017,
+        "days": 1218,
+        "ic": 0.023374251644421272,
+        "rank_ic": 0.009220625149902203,
+        "rank_ic_ir": 1.1421971603430752
+      },
+      "valid": {
+        "coverage": 0.9981049597126722,
+        "days": 727,
+        "ic": 0.007372927631648918,
+        "rank_ic": 0.003517169289079684,
+        "rank_ic_ir": 0.4596152909036085
+      }
+    },
+    {
+      "feature": "AF_AMIHUD5",
+      "same_sign": true,
+      "stable_rank_ic": 0.0031591015238232015,
+      "train": {
+        "coverage": 0.9770140383689595,
+        "days": 1218,
+        "ic": 0.018942615666549506,
+        "rank_ic": 0.0031591015238232015,
+        "rank_ic_ir": 0.3338238891720733
+      },
+      "valid": {
+        "coverage": 0.9987193119255217,
+        "days": 727,
+        "ic": 0.022988882742681023,
+        "rank_ic": 0.01922807483659834,
+        "rank_ic_ir": 2.539778327920184
+      }
+    },
+    {
+      "feature": "AF_AMOUNT_REL5",
+      "same_sign": true,
+      "stable_rank_ic": 0.00204563775918653,
+      "train": {
+        "coverage": 0.9743911818901168,
+        "days": 1218,
+        "ic": -0.001485188566415023,
+        "rank_ic": -0.01143135566944637,
+        "rank_ic_ir": -1.4250926646160982
+      },
+      "valid": {
+        "coverage": 0.9983979584603389,
+        "days": 727,
+        "ic": 0.0021170611180442475,
+        "rank_ic": -0.00204563775918653,
+        "rank_ic_ir": -0.2728391742636906
+      }
+    },
+    {
+      "feature": "AF_ABSRET_AMOUNT_CORR20",
+      "same_sign": true,
+      "stable_rank_ic": 0.0007762684584076724,
+      "train": {
+        "coverage": 0.9826387928220054,
+        "days": 1218,
+        "ic": -0.006048533497336137,
+        "rank_ic": -0.004327218080387254,
+        "rank_ic_ir": -0.6663518203072664
+      },
+      "valid": {
+        "coverage": 0.9991210037570001,
+        "days": 727,
+        "ic": -0.004395503556164244,
+        "rank_ic": -0.0007762684584076724,
+        "rank_ic_ir": -0.12844985521782823
+      }
+    },
+    {
+      "feature": "AF_AMIHUD20",
+      "same_sign": false,
+      "stable_rank_ic": 0.0,
+      "train": {
+        "coverage": 0.983228105511872,
+        "days": 1218,
+        "ic": 0.014162986005380272,
+        "rank_ic": -0.003885926630661781,
+        "rank_ic_ir": -0.40494672238143936
+      },
+      "valid": {
+        "coverage": 0.9992155194820538,
+        "days": 727,
+        "ic": 0.025595530626457832,
+        "rank_ic": 0.018810057414179304,
+        "rank_ic_ir": 2.5010594586131334
+      }
+    },
+    {
+      "feature": "AF_AMIHUD60",
+      "same_sign": false,
+      "stable_rank_ic": 0.0,
+      "train": {
+        "coverage": 0.9910468738760174,
+        "days": 1218,
+        "ic": 0.01523168271507292,
+        "rank_ic": -0.008342017340270779,
+        "rank_ic_ir": -0.8698072816388418
+      },
+      "valid": {
+        "coverage": 0.9992155194820538,
+        "days": 727,
+        "ic": 0.022807834805115664,
+        "rank_ic": 0.01560828042871542,
+        "rank_ic_ir": 2.0747718182276285
+      }
+    },
+    {
+      "feature": "AF_VOL_REGIME5_20",
+      "same_sign": false,
+      "stable_rank_ic": 0.0,
+      "train": {
+        "coverage": 0.9754176373264571,
+        "days": 1218,
+        "ic": 0.008429053231701759,
+        "rank_ic": 0.0061896824761346,
+        "rank_ic_ir": 0.8257815656788307
+      },
+      "valid": {
+        "coverage": 0.9984074100328442,
+        "days": 727,
+        "ic": 0.00039849507366973694,
+        "rank_ic": -0.0029748969748425065,
+        "rank_ic_ir": -0.4129027083441717
+      }
+    }
+  ]
+}

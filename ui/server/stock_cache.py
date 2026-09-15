@@ -14,11 +14,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 _log = logging.getLogger(__name__)
 
-# 并行构建缓存的线程数，匹配 sync.py 的 NUM_WORKERS
+# Cache construction has its own I/O-oriented worker pool and is independent
+# from the market-data fetch pool.
 _NUM_WORKERS = min(16, (os.cpu_count() or 1) * 2)
 
 # 内存缓存（进程级）
-_cache: dict = {"stocks": None, "ts": 0.0}
+_cache: dict = {"stocks": None, "instrumentCount": None, "ts": 0.0}
 CACHE_TTL = 900  # 秒(15分钟)，大幅降低重复文件 I/O，数据同步完成后会自动重建缓存
 
 
@@ -103,18 +104,28 @@ def build_stock_summary(data) -> list[dict] | None:
     cache_dir = _cache_dir()
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file = cache_dir / "latest.json"
-    payload = {"stocks": result, "count": len(result), "builtAt": time.time()}
-    cache_file.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    payload = {
+        "stocks": result,
+        "count": len(result),
+        "instrumentCount": len(instruments),
+        "builtAt": time.time(),
+    }
+    # Readers may continue serving the previous snapshot while this large
+    # payload is being built. Replace it atomically once complete.
+    temp_file = cache_file.with_name(cache_file.name + ".tmp")
+    temp_file.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    os.replace(temp_file, cache_file)
 
     # 刷新内存缓存
     _cache["stocks"] = result
+    _cache["instrumentCount"] = len(instruments)
     _cache["ts"] = time.time()
 
     _log.info("Stock summary cache file written: %s", cache_file)
     return result
 
 
-def load_stock_summary() -> list[dict] | None:
+def load_stock_summary(expected_count: int | None = None) -> list[dict] | None:
     """返回缓存的股票摘要列表。
 
     优先级：内存 → 文件。文件不存在或无效时返回 None，
@@ -124,7 +135,11 @@ def load_stock_summary() -> list[dict] | None:
 
     # 1) 内存命中且未过期
     if _cache["stocks"] is not None and (now - _cache["ts"]) < CACHE_TTL:
-        return _cache["stocks"]
+        if expected_count is None or _cache.get("instrumentCount") == expected_count:
+            return _cache["stocks"]
+        _cache["stocks"] = None
+        _cache["instrumentCount"] = None
+        _cache["ts"] = 0.0
 
     # 2) 从文件加载
     cache_file = _cache_file()
@@ -132,7 +147,11 @@ def load_stock_summary() -> list[dict] | None:
         try:
             raw = json.loads(cache_file.read_text(encoding="utf-8"))
             stocks = raw.get("stocks", [])
+            instrument_count = raw.get("instrumentCount", raw.get("count", len(stocks)))
+            if expected_count is not None and instrument_count != expected_count:
+                return None
             _cache["stocks"] = stocks
+            _cache["instrumentCount"] = instrument_count
             _cache["ts"] = now
             return stocks
         except Exception:
@@ -144,4 +163,6 @@ def load_stock_summary() -> list[dict] | None:
 
 def invalidate_cache() -> None:
     """使内存缓存失效，下次请求重新读取文件。"""
+    _cache["stocks"] = None
+    _cache["instrumentCount"] = None
     _cache["ts"] = 0.0

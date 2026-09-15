@@ -19,8 +19,7 @@ from .config import CORS_ORIGINS, DIST_DIR
 from .datadir import DEFAULT_DATA_DIR, create_data_dir, get_effective_data_dir
 from .model_service import ModelService
 from .routers import browser, execution, model, pipeline, position, strategy
-from .stock_cache import build_stock_summary
-from .sync import auto_sync_daily, schedule_daily_sync
+from .sync import schedule_daily_sync, start_auto_sync_daily, start_cache_refresh
 from .tdx_quote import TDXQuote
 
 _log = logging.getLogger(__name__)
@@ -69,14 +68,15 @@ async def lifespan(fastapi_app: FastAPI):
     fastapi_app.state.tdx_quote = app.tdx_quote
     fastapi_app.state.model_service = app.model_service
 
-    # 启动时同步构建股票摘要缓存，保证第一个 /browser/stocks 请求即可命中缓存
-    _log.info("Building stock summary cache...")
-    build_stock_summary(app.data)
-    _log.info("Stock summary cache ready")
-
     # 后台同步
+    sync_started = False
     if datetime.now().hour >= 15:
-        threading.Thread(target=auto_sync_daily, args=(None, app.data), daemon=True).start()
+        sync_started = start_auto_sync_daily(None, app.data)
+    # 股票摘要是派生缓存，后台预热，避免阻塞 API 首屏和实时行情连接。
+    # 若行情同步已启动，则由同步任务在完成后触发，避免并发读写 bin 文件。
+    if not sync_started:
+        _log.info("Starting background stock summary cache refresh...")
+        start_cache_refresh(app.data)
     threading.Thread(target=schedule_daily_sync, args=(None, app.data), daemon=True).start()
 
     _write_runtime_pid()

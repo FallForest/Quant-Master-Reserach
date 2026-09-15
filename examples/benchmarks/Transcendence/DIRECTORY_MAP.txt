@@ -1,10 +1,10 @@
 Transcendence directory map
 ===========================
 
-Why this directory is larger than Transformer:
-- Transformer is a mostly single-family benchmark with a few configs at root.
-- Transcendence currently acts as a research workbench for model, strategy, gate, replay, and audit flows.
-- Root still contains thin compatibility entry scripts plus a small set of high-signal result references.
+Purpose:
+- Transcendence is a research workbench for model, strategy, gate, replay, and audit flows.
+- Keep reusable source, reproducible workflow configs, tests, and a small curated evidence set here.
+- Store generated runs in MLflow or another external artifact store, not beside source files.
 
 Active source and configs kept at root:
 - *.py research entry scripts
@@ -19,29 +19,29 @@ Root script role split:
 Subdirectories:
 - support/ helper scripts and supporting research utilities
 - strategy/ strategy-layer experiments
-- model/ model-layer runners and model-specific generated configs/summaries
-- configs/ older generated run configs plus organized workflow configs
-- configs/workflows/regime_horizon/de_only/ long-tail de_only variants
-- configs/workflows/regime_horizon/variants/ other regime-horizon variants
-- configs/workflows/transcendence/ factor / hybrid / metalabel / validation-selected workflows
-- configs/workflows/deep/ deep-model workflow configs
-- configs/workflows/ensemble/ ensemble workflow configs
+- model/ model-layer implementations and reproducible runners
+- configs/ organized, reusable workflow configs
+- configs/workflows/regime_horizon/variants/ compatibility workflows still referenced by tests or live scripts
+- configs/workflows/transcendence/ retained CPU/GPU ensemble workflows with active test coverage
+- configs/workflows/ensemble/ canonical ensemble workflows
 - reports/curated/ preserved high-value leaderboard / gate / round-summary references
-- archive/root_runs/ historical root-level timestamped outputs moved out of the main entry area
-- archive/runs/ archived run folders
-- archive/logs/ archived logs
 
 Current high-signal references:
-- workflow_config_regime_horizon_de_only_rank_preserving_cost_exec_Alpha158_2026_csi300.yaml
-- workflow_config_regime_horizon_cost_ensemble_Alpha158Alpha360_2026_csi300.yaml
+- MLFLOW_RETENTION.txt
+- model/run_purged_oof_stacking.py
 - reports/curated/regime_switch_stability_reverify_gate_ready_summary_7406e470_20260527T093714Z.json
 - reports/curated/portfolio_innov_ext_i10_summary_7406e470_20260519T122816Z.json
-- archive/root_runs/wf_portfolio_small_v23_summary_7406e470_20260528T090224Z.json
 
-Notes:
-- Root-level timestamped outputs are archival evidence, not primary entry points.
-- Most experimental workflow YAMLs were moved under configs/workflows/ to reduce root clutter.
-- Root keeps only the small set of configs still directly hard-referenced by code paths.
+Retention policy:
+- Keep a workflow when active source, tests, or production scripts reference it, or when it is the canonical reproducible config for a retained model direction.
+- Keep model code when it provides a tested reusable capability or backs a retained workflow.
+- Keep only curated reports that support a current benchmark or gate decision.
+- Do not commit timestamped run configs, smoke-test outputs, caches, logs, or raw MLflow artifacts.
+- Treat MLFLOW_RETENTION.txt as the allowlist for local MLflow cleanup.
+- Remove failed directions once a stronger retained approach supersedes them and no stable consumer remains.
+
+Compatibility notes:
+- Root keeps the small set of configs still directly hard-referenced by code paths.
 - Many root-level *.py files are intentionally thin wrappers that forward to support/ implementations for compatibility with old commands and archived run records.
 - Read-mostly benchmark result references were moved into reports/curated/ to keep the root focused on runnable entry points.
 - Root wrappers are intentionally preserved because historical summaries and snapshot metadata still reference `examples/benchmarks/Transcendence/*.py` command paths.

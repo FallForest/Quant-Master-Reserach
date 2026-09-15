@@ -30,7 +30,7 @@ def load_positions_file() -> dict:
     if path.exists():
         data = json.loads(path.read_text(encoding="utf-8"))
     else:
-        data = {"cash": 1000000.0, "positions": {}, "date": None, "total_assets": 1000000.0}
+        data = {"cash": 10583.43, "positions": {}, "date": None, "total_assets": 10583.43}
 
     capital_amount = data.get("capital_amount")
     if capital_amount is None:

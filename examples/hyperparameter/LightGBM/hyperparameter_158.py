@@ -35,7 +35,7 @@ def objective(trial):
 
 
 if __name__ == "__main__":
-    provider_uri = "~/.quant_master/quant_master_data/cn_data"
+    provider_uri = "~/.quant_master/quant_master_data/tdx_cn_data"
     GetData().quant_master_data(target_dir=provider_uri, region=REG_CN, exists_skip=True)
     quant_master.init(provider_uri=provider_uri, region="cn")
 

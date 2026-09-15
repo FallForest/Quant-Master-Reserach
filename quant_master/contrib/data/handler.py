@@ -58,23 +58,26 @@ class Alpha360(DataHandlerLP):
         fit_end_time=None,
         filter_pipe=None,
         inst_processors=None,
+        data_loader=None,
         **kwargs,
     ):
         infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
         learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
 
-        data_loader = {
-            "class": "QuantMasterDataLoader",
-            "kwargs": {
-                "config": {
-                    "feature": Alpha360DL.get_feature_config(),
-                    "label": kwargs.pop("label", self.get_label_config()),
+        label = kwargs.pop("label", self.get_label_config())
+        if data_loader is None:
+            data_loader = {
+                "class": "QuantMasterDataLoader",
+                "kwargs": {
+                    "config": {
+                        "feature": self.get_feature_config(),
+                        "label": label,
+                    },
+                    "filter_pipe": filter_pipe,
+                    "freq": freq,
+                    "inst_processors": inst_processors,
                 },
-                "filter_pipe": filter_pipe,
-                "freq": freq,
-                "inst_processors": inst_processors,
-            },
-        }
+            }
 
         super().__init__(
             instruments=instruments,
@@ -88,6 +91,9 @@ class Alpha360(DataHandlerLP):
 
     def get_label_config(self):
         return ["Ref($close, -2)/Ref($close, -1) - 1"], ["LABEL0"]
+
+    def get_feature_config(self):
+        return Alpha360DL.get_feature_config()
 
 
 class Alpha360vwap(Alpha360):
@@ -109,23 +115,26 @@ class Alpha158(DataHandlerLP):
         process_type=DataHandlerLP.PTYPE_A,
         filter_pipe=None,
         inst_processors=None,
+        data_loader=None,
         **kwargs,
     ):
         infer_processors = check_transform_proc(infer_processors, fit_start_time, fit_end_time)
         learn_processors = check_transform_proc(learn_processors, fit_start_time, fit_end_time)
 
-        data_loader = {
-            "class": "QuantMasterDataLoader",
-            "kwargs": {
-                "config": {
-                    "feature": self.get_feature_config(),
-                    "label": kwargs.pop("label", self.get_label_config()),
+        label = kwargs.pop("label", self.get_label_config())
+        if data_loader is None:
+            data_loader = {
+                "class": "QuantMasterDataLoader",
+                "kwargs": {
+                    "config": {
+                        "feature": self.get_feature_config(),
+                        "label": label,
+                    },
+                    "filter_pipe": filter_pipe,
+                    "freq": freq,
+                    "inst_processors": inst_processors,
                 },
-                "filter_pipe": filter_pipe,
-                "freq": freq,
-                "inst_processors": inst_processors,
-            },
-        }
+            }
         super().__init__(
             instruments=instruments,
             start_time=start_time,
@@ -155,3 +164,71 @@ class Alpha158(DataHandlerLP):
 class Alpha158vwap(Alpha158):
     def get_label_config(self):
         return ["Ref($vwap, -2)/Ref($vwap, -1) - 1"], ["LABEL0"]
+
+
+class Alpha158USLead(Alpha158):
+    """Alpha158 extended with US market lead-lag features.
+
+    Uses ChangeInstrument operator to load US index data (e.g., S&P 500)
+    as cross-sectional features. US market closes at 4AM Beijing time,
+    so previous day's US return is a legitimate non-forward-looking feature
+    for predicting A-share returns.
+    """
+
+    def __init__(self, us_index="GSPC", **kwargs):
+        self.us_index = us_index
+        super().__init__(**kwargs)
+
+    def get_feature_config(self):
+        fields, names = Alpha158DL.get_feature_config(
+            {
+                "kbar": {},
+                "price": {
+                    "windows": [0],
+                    "feature": ["OPEN", "HIGH", "LOW", "VWAP"],
+                },
+                "rolling": {},
+            }
+        )
+        idx = self.us_index
+
+        # Previous day US return (core lead-lag signal)
+        fields.append(f"ChangeInstrument('{idx}', $close/Ref($close, 1)-1)")
+        names.append("US_RET1")
+
+        # 5-day US momentum
+        fields.append(f"ChangeInstrument('{idx}', $close/Ref($close, 5)-1)")
+        names.append("US_MOM5")
+
+        # 20-day US momentum
+        fields.append(f"ChangeInstrument('{idx}', $close/Ref($close, 20)-1)")
+        names.append("US_MOM20")
+
+        # US 20-day realized volatility
+        fields.append(f"ChangeInstrument('{idx}', Std($close/Ref($close,1)-1, 20))")
+        names.append("US_RVOL20")
+
+        # US 5-day mean return (smoothed signal)
+        fields.append(f"ChangeInstrument('{idx}', Mean($close/Ref($close,1)-1, 5))")
+        names.append("US_MARET5")
+
+        # US RSI-like indicator (10-day)
+        fields.append(
+            f"ChangeInstrument('{idx}', "
+            f"Sum(Greater($close-Ref($close,1),0),10)"
+            f"/(Sum(Abs($close-Ref($close,1)),10)+1e-12))"
+        )
+        names.append("US_RSI10")
+
+        # US 10-day momentum acceleration
+        fields.append(
+            f"ChangeInstrument('{idx}', "
+            f"($close/Ref($close,5)-1)-($close/Ref($close,10)-1))"
+        )
+        names.append("US_ACCEL_5_10")
+
+        # US trend strength (slope normalized by price)
+        fields.append(f"ChangeInstrument('{idx}', Slope($close, 10)/$close)")
+        names.append("US_BETA10")
+
+        return fields, names

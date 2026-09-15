@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import copy
@@ -638,7 +638,7 @@ def _run_backtest_eval(
         strategy=strategy,
         executor=executor_cfg,
         benchmark=backtest_cfg.get("benchmark", "SH000300"),
-        account=backtest_cfg.get("account", 100000000),
+        account=backtest_cfg.get("account", 10583.43),
         exchange_kwargs=exch,
         pos_type=backtest_cfg.get("pos_type", "Position"),
     )

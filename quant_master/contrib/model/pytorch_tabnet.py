@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
-from typing import Text, Union
+from typing import Optional, Text, Union
 from ...utils import get_or_create_path
 from ...log import get_module_logger
 
@@ -15,7 +15,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.autograd import Function
 
-from .pytorch_utils import count_parameters
+from .pytorch_utils import count_parameters, deepcopy_state_dict
 from ...model.base import Model
 from ...data.dataset import DatasetH
 from ...data.dataset.handler import DataHandlerLP
@@ -24,7 +24,7 @@ from ...data.dataset.handler import DataHandlerLP
 class TabnetModel(Model):
     def __init__(
         self,
-        d_feat=158,
+        d_feat: Optional[int] = None,
         out_dim=64,
         final_out_dim=1,
         batch_size=4096,
@@ -56,7 +56,7 @@ class TabnetModel(Model):
         ps: probability to generate the bernoulli mask
         """
         # set hyper-parameters.
-        self.d_feat = d_feat
+        self.d_feat = None if d_feat is None else int(d_feat)
         self.out_dim = out_dim
         self.final_out_dim = final_out_dim
         self.lr = lr
@@ -74,6 +74,15 @@ class TabnetModel(Model):
         self.early_stop = early_stop
         self.pretrain = pretrain
         self.pretrain_file = get_or_create_path(pretrain_file)
+        self._network_kwargs = {
+            "n_d": n_d,
+            "n_a": n_a,
+            "n_shared": n_shared,
+            "n_ind": n_ind,
+            "n_steps": n_steps,
+            "relax": relax,
+            "vbs": vbs,
+        }
         self.logger.info(
             "TabNet:"
             "\nbatch_size : {}"
@@ -85,24 +94,61 @@ class TabnetModel(Model):
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
 
-        self.tabnet_model = TabNet(inp_dim=self.d_feat, out_dim=self.out_dim, vbs=vbs, relax=relax).to(self.device)
-        self.tabnet_decoder = TabNet_Decoder(self.out_dim, self.d_feat, n_shared, n_ind, vbs, n_steps).to(self.device)
+        self.tabnet_model = None
+        self.tabnet_decoder = None
+        self.pretrain_optimizer = None
+        self.train_optimizer = None
+        if self.d_feat is not None:
+            self._build_network(self.d_feat)
+
+    def _build_network(self, d_feat: int) -> None:
+        d_feat = int(d_feat)
+        if d_feat <= 0:
+            raise ValueError("d_feat must be positive.")
+        self.d_feat = d_feat
+        vbs = self._network_kwargs["vbs"]
+        self.tabnet_model = TabNet(
+            inp_dim=self.d_feat,
+            out_dim=self.out_dim,
+            n_d=self._network_kwargs["n_d"],
+            n_a=self._network_kwargs["n_a"],
+            n_shared=self._network_kwargs["n_shared"],
+            n_ind=self._network_kwargs["n_ind"],
+            n_steps=self._network_kwargs["n_steps"],
+            vbs=vbs,
+            relax=self._network_kwargs["relax"],
+        ).to(self.device)
+        self.tabnet_decoder = TabNet_Decoder(
+            self.out_dim,
+            self.d_feat,
+            self._network_kwargs["n_shared"],
+            self._network_kwargs["n_ind"],
+            vbs,
+            self._network_kwargs["n_steps"],
+        ).to(self.device)
         self.logger.info("model:\n{:}\n{:}".format(self.tabnet_model, self.tabnet_decoder))
         self.logger.info("model size: {:.4f} MB".format(count_parameters([self.tabnet_model, self.tabnet_decoder])))
 
-        if optimizer.lower() == "adam":
+        if self.optimizer == "adam":
             self.pretrain_optimizer = optim.Adam(
                 list(self.tabnet_model.parameters()) + list(self.tabnet_decoder.parameters()), lr=self.lr
             )
             self.train_optimizer = optim.Adam(self.tabnet_model.parameters(), lr=self.lr)
 
-        elif optimizer.lower() == "gd":
+        elif self.optimizer == "gd":
             self.pretrain_optimizer = optim.SGD(
                 list(self.tabnet_model.parameters()) + list(self.tabnet_decoder.parameters()), lr=self.lr
             )
             self.train_optimizer = optim.SGD(self.tabnet_model.parameters(), lr=self.lr)
         else:
-            raise NotImplementedError("optimizer {} is not supported!".format(optimizer))
+            raise NotImplementedError("optimizer {} is not supported!".format(self.optimizer))
+
+    def _ensure_feature_dim(self, feature_width: int) -> None:
+        feature_width = int(feature_width)
+        if self.d_feat is None:
+            self._build_network(feature_width)
+        elif feature_width != self.d_feat:
+            raise ValueError(f"d_feat={self.d_feat} does not match feature width={feature_width}.")
 
     @property
     def use_gpu(self):
@@ -122,6 +168,8 @@ class TabnetModel(Model):
 
         x_train = df_train["feature"]
         x_valid = df_valid["feature"]
+        self._ensure_feature_dim(x_train.shape[1])
+        self._ensure_feature_dim(x_valid.shape[1])
 
         # Early stop setup
         stop_steps = 0
@@ -153,6 +201,16 @@ class TabnetModel(Model):
         evals_result=dict(),
         save_path=None,
     ):
+        df_train, df_valid = dataset.prepare(
+            ["train", "valid"],
+            col_set=["feature", "label"],
+            data_key=DataHandlerLP.DK_L,
+        )
+        if df_train.empty or df_valid.empty:
+            raise ValueError("Empty data from dataset, please check your dataset config.")
+        self._ensure_feature_dim(df_train["feature"].shape[1])
+        self._ensure_feature_dim(df_valid["feature"].shape[1])
+
         if self.pretrain:
             # there is a  pretrained model, load the model
             self.logger.info("Pretrain...")
@@ -162,13 +220,6 @@ class TabnetModel(Model):
 
         # adding one more linear layer to fit the final output dimension
         self.tabnet_model = FinetuneModel(self.out_dim, self.final_out_dim, self.tabnet_model).to(self.device)
-        df_train, df_valid = dataset.prepare(
-            ["train", "valid"],
-            col_set=["feature", "label"],
-            data_key=DataHandlerLP.DK_L,
-        )
-        if df_train.empty or df_valid.empty:
-            raise ValueError("Empty data from dataset, please check your dataset config.")
         df_train.fillna(df_train.mean(), inplace=True)
         x_train, y_train = df_train["feature"], df_train["label"]
         x_valid, y_valid = df_valid["feature"], df_valid["label"]
@@ -199,7 +250,7 @@ class TabnetModel(Model):
                 best_score = val_score
                 stop_steps = 0
                 best_epoch = epoch_idx
-                best_param = self.tabnet_model.state_dict()
+                best_param = deepcopy_state_dict(self.tabnet_model)
             else:
                 stop_steps += 1
                 if stop_steps >= self.early_stop:
@@ -218,6 +269,7 @@ class TabnetModel(Model):
             raise ValueError("model is not fitted yet!")
 
         x_test = dataset.prepare(segment, col_set="feature", data_key=DataHandlerLP.DK_I)
+        self._ensure_feature_dim(x_test.shape[1])
         index = x_test.index
         self.tabnet_model.eval()
         x_values = torch.from_numpy(x_test.values)

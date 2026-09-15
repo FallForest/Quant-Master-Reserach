@@ -60,6 +60,7 @@ mlruns_tmp/
 examples/benchmarks/Transcendence/**/*.json
 examples/benchmarks/Transcendence/**/*.csv
 examples/benchmarks/Transcendence/**/*.md
+examples/benchmarks/Transcendence/model/*_run_config_*.yaml
 examples/benchmarks/Transcendence/**/archive/
 
 # Reports

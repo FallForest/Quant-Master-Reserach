@@ -34,7 +34,7 @@ class TestGetData(unittest.TestCase):
 
     def test_0_quant_master_data(self):
         GetData().quant_master_data(
-            name="quant_master_data_simple", target_dir=QUANT_MASTER_DIR, region="cn", interval="1d", delete_old=False, exists_skip=True
+            name="quant_master_data", target_dir=QUANT_MASTER_DIR, region="cn", interval="1d", delete_old=False, exists_skip=True
         )
         df = D.features(D.instruments("csi300"), self.FIELDS)
         self.assertListEqual(list(df.columns), self.FIELDS, "get quant_master data failed")

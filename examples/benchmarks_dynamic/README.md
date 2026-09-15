@@ -8,8 +8,8 @@ The table below shows the performances of different solutions on different forec
 Here is the [crowd sourced version of quant_master data](data_collector/crowd_source/README.md): https://github.com/chenditc/investment_data/releases
 ```bash
 wget https://github.com/chenditc/investment_data/releases/latest/download/quant_master_bin.tar.gz
-mkdir -p ~/.quant_master/quant_master_data/cn_data
-tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/cn_data --strip-components=2
+mkdir -p ~/.quant_master/quant_master_data/tdx_cn_data
+tar -zxvf quant_master_bin.tar.gz -C ~/.quant_master/quant_master_data/tdx_cn_data --strip-components=2
 rm -f quant_master_bin.tar.gz
 ```
 

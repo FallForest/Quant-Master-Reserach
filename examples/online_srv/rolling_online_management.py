@@ -25,7 +25,7 @@ from quant_master.workflow.task.manage import TaskManager
 class RollingOnlineExample:
     def __init__(
         self,
-        provider_uri="~/.quant_master/quant_master_data/cn_data",
+        provider_uri="~/.quant_master/quant_master_data/tdx_cn_data",
         region="cn",
         trainer=DelayTrainerRM(),  # you can choose from TrainerR, TrainerRM, DelayTrainerR, DelayTrainerRM
         task_url="mongodb://10.0.0.4:27017/",  # not necessary when using TrainerR or DelayTrainerR

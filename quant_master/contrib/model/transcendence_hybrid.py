@@ -105,7 +105,7 @@ class TranscendenceHybridModel(Model):
         else:
             self.logger.info("Deep branch inactive: %s", deep_msg)
 
-        valid_label = self._prepare_label_series(dataset, "valid")
+        valid_label = self._prepare_label_series(dataset, "valid", data_key=DataHandlerLP.DK_R)
         valid_pred_raw = self._predict_frame(dataset, "valid")
         valid_pred, valid_label = self._align_frame_and_label(valid_pred_raw, valid_label)
         valid_pred = self._prepare_prediction_scores(valid_pred)
@@ -155,7 +155,7 @@ class TranscendenceHybridModel(Model):
         train_feature = self._prepare_feature_frame(dataset, "train")
         valid_feature = self._prepare_feature_frame(dataset, "valid")
         train_label = self._prepare_label_series(dataset, "train")
-        valid_label = self._prepare_label_series(dataset, "valid")
+        valid_label = self._prepare_label_series(dataset, "valid", data_key=DataHandlerLP.DK_L)
 
         train_base = self._blend_segment(dataset, "train")
         valid_base = self._blend_segment(dataset, "valid")
@@ -428,8 +428,21 @@ class TranscendenceHybridModel(Model):
         feature = feature.replace([np.inf, -np.inf], np.nan)
         return feature.fillna(0.0)
 
-    def _prepare_label_series(self, dataset: DatasetH, segment: Union[Text, slice]) -> pd.Series:
-        raw_label = dataset.prepare(segment, col_set=["label"], data_key=DataHandlerLP.DK_L)
+    def _prepare_label_series(
+        self,
+        dataset: DatasetH,
+        segment: Union[Text, slice],
+        data_key: str = DataHandlerLP.DK_L,
+    ) -> pd.Series:
+        try:
+            raw_label = dataset.prepare(segment, col_set=["label"], data_key=data_key)
+        except (AttributeError, KeyError, ValueError) as exc:
+            if data_key == DataHandlerLP.DK_R:
+                raise ValueError(
+                    "TranscendenceHybridModel requires raw labels for portfolio-aware validation; "
+                    "configure the data handler with drop_raw=False."
+                ) from exc
+            raise
         label_df = self._to_label_frame(raw_label)
         label_s = label_df.iloc[:, 0]
         label_s = pd.to_numeric(label_s, errors="coerce")
