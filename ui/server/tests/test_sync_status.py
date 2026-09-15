@@ -213,4 +213,8 @@ def test_missing_instrument_manifest_is_rebuilt_from_provider(tmp_path, monkeypa
 
 
 def test_missing_instrument_manifest_is_an_empty_snapshot(tmp_path):
-    assert DataDir(str(tmp_path)).get_instruments() == []
+    # 用独立子目录：autouse fixture 会把 FakeDataDir 的伪数据写进 tmp_path 本身，
+    # 直接拿 tmp_path 当 provider 读到的是那份清单，而不是"清单缺失"的情形。
+    empty_provider = tmp_path / "empty_provider"
+    empty_provider.mkdir()
+    assert DataDir(str(empty_provider)).get_instruments() == []
